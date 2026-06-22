@@ -1,14 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getWatch } from "@/lib/store";
+import { unstable_noStore as noStore } from "next/cache";
+import { getWatch, getWatches } from "@/lib/store";
 import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { formatMoney, formatDate, hostname } from "@/lib/format";
+import { IS_STATIC } from "@/lib/config";
 import StatusBadge from "@/components/StatusBadge";
 import WatchActions from "@/components/WatchActions";
 
-export const dynamic = "force-dynamic";
+// Pre-render a detail page for every watch in the static export. In dynamic
+// mode return nothing so pages render on demand and reflect edits immediately.
+export async function generateStaticParams() {
+  if (!IS_STATIC) return [];
+  const watches = await getWatches();
+  return watches.map((w) => ({ id: w.id }));
+}
 
 export default async function WatchDetailPage({ params }: { params: { id: string } }) {
+  if (!IS_STATIC) noStore();
   const watch = await getWatch(params.id);
   if (!watch) notFound();
 
@@ -18,7 +27,7 @@ export default async function WatchDetailPage({ params }: { params: { id: string
         <Link href="/" className="btn-secondary">
           ← Collection
         </Link>
-        <WatchActions id={watch.id} name={`${watch.brand} ${watch.model}`} />
+        {!IS_STATIC && <WatchActions id={watch.id} name={`${watch.brand} ${watch.model}`} />}
       </div>
 
       <div className="grid gap-6 md:grid-cols-[2fr_3fr]">

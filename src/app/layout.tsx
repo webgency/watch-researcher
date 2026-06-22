@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { IS_STATIC } from "@/lib/config";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,12 +27,21 @@ export default function RootLayout({
                 <Link href="/" className="btn-secondary">
                   Collection
                 </Link>
-                <Link href="/watch/new" className="btn-primary">
-                  + Add watch
-                </Link>
+                {!IS_STATIC && (
+                  <Link href="/watch/new" className="btn-primary">
+                    + Add watch
+                  </Link>
+                )}
               </nav>
             </div>
           </header>
+          {IS_STATIC && (
+            <div className="border-b border-amber-200 bg-amber-50">
+              <div className="mx-auto max-w-6xl px-4 py-2 text-center text-xs text-amber-800">
+                📖 Read-only published view — edit your collection locally and push to update.
+              </div>
+            </div>
+          )}
           <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
           <footer className="mx-auto max-w-6xl px-4 py-8 text-center text-xs text-slate-400">
             Watch Researcher · your personal collection, tracked in one place

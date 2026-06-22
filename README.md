@@ -62,6 +62,26 @@ You can edit `data/watches.json` by hand if you prefer, or use the in-app forms 
 
 ---
 
+## Deploying to GitHub Pages (auto-published, read-only)
+
+A GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) builds a **static, read-only** export of your collection and deploys it to GitHub Pages on every push, so you can browse, search, sort, and compare from any device:
+
+**https://webgency.github.io/watch-researcher/**
+
+How it works:
+
+- The build runs with `NEXT_PUBLIC_STATIC=true`, which switches Next.js to `output: 'export'` and adds the `/watch-researcher` base path (see `next.config.mjs`).
+- `scripts/prepare-pages.mjs` removes the server-only routes (the JSON API and the add/edit forms) — Pages can't run a server.
+- Write actions (Add / Edit / Delete) are hidden on the published site, which shows a "read-only" banner.
+
+**Editing stays local:** add or edit watches with `npm run dev`, commit `data/watches.json`, and push — the site rebuilds automatically. The first run auto-enables Pages; if your org restricts that, enable it once under **Settings → Pages → Source: GitHub Actions**.
+
+To preview the static build locally:
+
+```bash
+NEXT_PUBLIC_STATIC=true npm run build && npx serve out
+```
+
 ## Roadmap — growing the collection
 
 **Phase 2 — Price & value**
@@ -87,7 +107,7 @@ You can edit `data/watches.json` by hand if you prefer, or use the in-app forms 
 ## Notes for later
 
 - **Auto-fetching specs from links:** this would scrape the retailer page when you paste a URL. It needs open outbound network access, so it should run on your own machine (or a self-hosted deployment) rather than a locked-down sandbox. The data model already supports everything it would populate.
-- **Deploying to use on your phone:** the JSON-file store writes to disk, which works great locally and on a long-running server, but **not** on serverless hosts (e.g. Vercel) where the filesystem is read-only. To deploy, swap `src/lib/store.ts` for a database-backed implementation (SQLite/Postgres/Turso) keeping the same function signatures — everything else stays the same.
+- **Editing online (instead of read-only Pages):** the JSON-file store writes to disk, which works locally and on a long-running server but **not** on serverless/static hosts. For a fully editable online version, deploy to a server host (Render / Fly / a VPS) or swap `src/lib/store.ts` for a database (SQLite / Postgres / Turso) — the function signatures stay the same, so nothing else changes.
 
 ---
 

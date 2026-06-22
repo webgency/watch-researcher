@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Watch, WatchStatus, WATCH_STATUSES } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
+import { IS_STATIC } from "@/lib/config";
 import WatchCard from "./WatchCard";
 
 type SortKey =
@@ -102,9 +103,11 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
           <h2 className="text-lg font-semibold">No watches yet</h2>
           <p className="text-sm text-slate-500">Add your first watch to start tracking and comparing.</p>
         </div>
-        <Link href="/watch/new" className="btn-primary">
-          + Add your first watch
-        </Link>
+        {!IS_STATIC && (
+          <Link href="/watch/new" className="btn-primary">
+            + Add your first watch
+          </Link>
+        )}
       </div>
     );
   }
