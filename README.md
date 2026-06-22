@@ -1,0 +1,113 @@
+# ⌚ Watch Researcher
+
+A personal app to **track your watch wishlist, compare specs and prices side by side, and grow your collection** over time.
+
+Built with Next.js (App Router) + TypeScript + Tailwind CSS. Your collection lives in a single, version-controlled JSON file (`data/watches.json`) — no database to set up, easy to back up, and you can literally commit your wishlist.
+
+---
+
+## Quick start
+
+```bash
+npm install
+npm run dev
+# open http://localhost:3000
+```
+
+For a production build:
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## What it does today (Phase 1 — MVP)
+
+- **Collection view** — every watch as a card, with search, status filters (wishlist / owned / sold), and sorting (recently added, priority, price, brand, case size).
+- **Add / edit watches** — a full form covering basics, specifications, multiple retailer links, tags, and notes.
+- **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table. The **best value in each row is highlighted** (lowest price, larger power reserve, etc.).
+- **Per-watch detail page** — full specs, all retailer links, and notes.
+- **Dashboard stats** — total watches, wishlist count, owned count, and total wishlist value (grouped per currency).
+
+The collection comes pre-seeded with **32 watches from your wishlist**.
+
+> **Heads-up on the seeded data:** brand, model, reference number, links, and tags were taken straight from your links. Case sizes, movements, and well-known calibers (e.g. Omega 8800, Longines L888/L688, Tudor MT5450-U, Certina Powermatic 80) were pre-filled where they could be identified with confidence — **please double-check them**. **Prices were intentionally left blank** so you can enter the figure you're actually tracking. Just open any watch and hit **Edit**.
+
+---
+
+## Data model
+
+Each watch (`src/lib/types.ts`):
+
+| Field | Notes |
+| --- | --- |
+| `brand`, `model` | required |
+| `referenceNumber` | optional |
+| `status` | `wishlist` \| `owned` \| `sold` |
+| `price` | `{ amount, currency }` — the price you're tracking |
+| `links[]` | retailer links, each with optional price + `new`/`pre-owned` condition |
+| `specs` | case diameter, thickness, lug-to-lug, lug width, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
+| `tags[]` | e.g. `diver`, `GMT`, `chronograph` |
+| `priority`, `grail` | wishlist ranking + "grail" flag |
+| `notes` | free text |
+| `purchase`, `sale` | filled in as a watch moves through `owned` → `sold` |
+
+Spec fields are defined once in `src/lib/specs.ts` and drive the form, detail view, and comparison table — add a field there and it appears everywhere.
+
+### Editing data directly
+
+You can edit `data/watches.json` by hand if you prefer, or use the in-app forms (which write to the same file via the API in `src/app/api/watches`).
+
+---
+
+## Roadmap — growing the collection
+
+**Phase 2 — Price & value**
+- Price-history snapshots per watch + a target-price flag ("ping me under $X")
+- Best-price surfacing across multiple retailer links
+- Currency conversion to a single home currency
+
+**Phase 3 — Collection management**
+- Status workflow (wishlist → bought → owned → sold) with purchase/sale price & dates
+- Richer dashboard: total spent, value by brand/movement, size distribution
+- Wishlist prioritisation & budget planning ("what's next")
+- Overlap detection ("you already have a 39mm diver")
+- Service-history reminders; insurance/valuation CSV/PDF export
+
+**Phase 4 — Convenience**
+- **Link auto-fetch**: paste a URL → auto-fill specs, price, and image (see note below)
+- CSV / JSON import-export + backup
+- Mobile / PWA so you can check it in-store
+- Shareable read-only wishlist (gift hints)
+
+---
+
+## Notes for later
+
+- **Auto-fetching specs from links:** this would scrape the retailer page when you paste a URL. It needs open outbound network access, so it should run on your own machine (or a self-hosted deployment) rather than a locked-down sandbox. The data model already supports everything it would populate.
+- **Deploying to use on your phone:** the JSON-file store writes to disk, which works great locally and on a long-running server, but **not** on serverless hosts (e.g. Vercel) where the filesystem is read-only. To deploy, swap `src/lib/store.ts` for a database-backed implementation (SQLite/Postgres/Turso) keeping the same function signatures — everything else stays the same.
+
+---
+
+## Project structure
+
+```
+src/
+  app/
+    page.tsx                 # collection
+    compare/page.tsx         # side-by-side comparison
+    watch/new/page.tsx       # add
+    watch/[id]/page.tsx      # detail
+    watch/[id]/edit/page.tsx # edit
+    api/watches/...          # REST API (GET/POST/PUT/DELETE)
+  components/                # CollectionView, WatchCard, CompareTable, WatchForm, ...
+  lib/
+    types.ts                 # domain model
+    store.ts                 # JSON-file persistence
+    specs.ts                 # spec field definitions
+    format.ts                # currency / date helpers
+data/
+  watches.json               # your collection (version-controlled)
+```

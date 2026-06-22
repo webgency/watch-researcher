@@ -1,0 +1,662 @@
+[
+  {
+    "id": "w01",
+    "brand": "Omega",
+    "model": "Seamaster Diver 300M",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.omegawatches.com/en-us/watch-omega-seamaster-diver-300m-co-axial-master-chronometer-42-mm-21030422003003",
+        "retailer": "omegawatches.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 42,
+      "movement": "automatic",
+      "caliber": "Co-Axial Master Chronometer 8800",
+      "powerReserveHours": 55,
+      "waterResistanceM": 300,
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:32:00Z",
+    "referenceNumber": "210.30.42.20.03.003"
+  },
+  {
+    "id": "w02",
+    "brand": "Underd0g",
+    "model": "Mint Choc Chip (Gen 3)",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://underd0g.com/products/01mcbr",
+        "retailer": "underd0g.com"
+      }
+    ],
+    "specs": {},
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:31:00Z"
+  },
+  {
+    "id": "w03",
+    "brand": "Formex",
+    "model": "Essence 39 — Mother-of-Sky",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://formexwatch.com/watches/essence-thirtynine-automatic-chronometer-mother-of-sky/?sku=0333.1.6603.101",
+        "retailer": "formexwatch.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 39,
+      "movement": "automatic",
+      "caliber": "Sellita SW200-1 (COSC)",
+      "crystal": "Sapphire",
+      "dialColor": "Mother-of-Sky"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:30:00Z",
+    "referenceNumber": "0333.1.6603.101"
+  },
+  {
+    "id": "w04",
+    "brand": "Dennison",
+    "model": "Malachite & Green Sunray (Gold)",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://dennisonwatch.com/products/malachite-green-sunray-in-gold?variant=51048191295790",
+        "retailer": "dennisonwatch.com"
+      }
+    ],
+    "specs": {
+      "dialColor": "Malachite / green sunray"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:29:00Z"
+  },
+  {
+    "id": "w05",
+    "brand": "Certina",
+    "model": "DS-1 Big Date Powermatic 80",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.certina.com/en/watch/ds-1-big-date-powermatic-80/c0294263604100",
+        "retailer": "certina.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 41,
+      "movement": "automatic",
+      "caliber": "Powermatic 80",
+      "powerReserveHours": 80,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:28:00Z",
+    "referenceNumber": "C029.426.36.041.00"
+  },
+  {
+    "id": "w06",
+    "brand": "Christopher Ward",
+    "model": "C60 Sapphire Edge",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.christopherward.com/int/C60-Sapphire-Edge/C60-42ADA31S0KW3-B0.html",
+        "retailer": "christopherward.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 42,
+      "movement": "automatic",
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:27:00Z",
+    "referenceNumber": "C60-42ADA31S0KW3-B0"
+  },
+  {
+    "id": "w07",
+    "brand": "Echo/Neutra",
+    "model": "Rivanera",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://echoneutra.com/collections/rivanera",
+        "retailer": "echoneutra.com"
+      }
+    ],
+    "specs": {},
+    "tags": [],
+    "dateAdded": "2026-06-22T15:26:00Z",
+    "notes": "Collection link — pick the exact variant."
+  },
+  {
+    "id": "w08",
+    "brand": "Furlan Marri",
+    "model": "White Sector",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.furlanmarri.com/products/white-sector-2161-a",
+        "retailer": "furlanmarri.com"
+      }
+    ],
+    "specs": {
+      "dialColor": "White (sector)",
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:25:00Z",
+    "referenceNumber": "2161-A"
+  },
+  {
+    "id": "w09",
+    "brand": "Beaubleu",
+    "model": "Seconde Française 19.24 — Vert Impérial",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://beaubleu-paris.com/products/seconde-francaise-vert-imperial",
+        "retailer": "beaubleu-paris.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "dialColor": "Imperial green"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:24:00Z"
+  },
+  {
+    "id": "w10",
+    "brand": "Traska",
+    "model": "Chronograph — Tungsten Gray",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.traskawatch.com/products/chronograph-tungsten-gray",
+        "retailer": "traskawatch.com"
+      }
+    ],
+    "specs": {
+      "dialColor": "Tungsten gray"
+    },
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:23:00Z"
+  },
+  {
+    "id": "w11",
+    "brand": "Serica",
+    "model": "8315 GMT — Desert Red",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://serica-watches.com/en/products/8315-2-travel-chronometer",
+        "retailer": "serica-watches.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "caliber": "Soprod C125",
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "GMT"
+    ],
+    "dateAdded": "2026-06-22T15:22:00Z",
+    "referenceNumber": "8315"
+  },
+  {
+    "id": "w12",
+    "brand": "Longines",
+    "model": "HydroConquest",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.longines.com/en-us/p/watch-hydroconquest-l3-788-4-96-6",
+        "retailer": "longines.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 42,
+      "movement": "automatic",
+      "caliber": "L888",
+      "powerReserveHours": 72,
+      "waterResistanceM": 300,
+      "dialColor": "Blue",
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:21:00Z",
+    "referenceNumber": "L3.788.4.96.6"
+  },
+  {
+    "id": "w13",
+    "brand": "Longines",
+    "model": "Spirit Chronograph",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.longines.com/en-us/p/watch-longines-spirit-chronograph-l3-820-4-93-0",
+        "retailer": "longines.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 42,
+      "movement": "automatic",
+      "caliber": "L688",
+      "powerReserveHours": 60,
+      "waterResistanceM": 100,
+      "dialColor": "Sunray blue",
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:20:00Z",
+    "referenceNumber": "L3.820.4.93.0"
+  },
+  {
+    "id": "w14",
+    "brand": "Omega",
+    "model": "Seamaster Diver 300M — Blue",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.watchfinder.com/watches/omega/seamaster-diver-300m/210-32-42-20-03-001/429028",
+        "retailer": "watchfinder.com",
+        "condition": "pre-owned"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 42,
+      "movement": "automatic",
+      "caliber": "Co-Axial Master Chronometer 8800",
+      "powerReserveHours": 55,
+      "waterResistanceM": 300,
+      "dialColor": "Blue",
+      "braceletStrap": "Rubber strap",
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:19:00Z",
+    "referenceNumber": "210.32.42.20.03.001"
+  },
+  {
+    "id": "w15",
+    "brand": "Raymond Weil",
+    "model": "Freelancer GMT Worldtimer — Green",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.raymond-weil.com/en-us/products/freelancer-mens-gmt-worldtimer-green-leather-watch-41mm",
+        "retailer": "raymond-weil.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 41,
+      "movement": "automatic",
+      "dialColor": "Green",
+      "braceletStrap": "Leather",
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "GMT",
+      "worldtimer"
+    ],
+    "dateAdded": "2026-06-22T15:18:00Z"
+  },
+  {
+    "id": "w16",
+    "brand": "Tudor",
+    "model": "Black Bay 58 GMT",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.tudorwatch.com/en/watches/black-bay-58/m7939g1a0nru-0003",
+        "retailer": "tudorwatch.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 39,
+      "movement": "automatic",
+      "caliber": "MT5450-U",
+      "powerReserveHours": 65,
+      "waterResistanceM": 200,
+      "dialColor": "Black",
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "GMT",
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:17:00Z",
+    "referenceNumber": "M7939G1A0NRU-0003",
+    "notes": "Black & burgundy bezel."
+  },
+  {
+    "id": "w17",
+    "brand": "Sheffield",
+    "model": "1A SCR II — Blue",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://sheffieldwatches.com/products/1a-scr-ii-blue?variant=53248824705324",
+        "retailer": "sheffieldwatches.com"
+      }
+    ],
+    "specs": {
+      "dialColor": "Blue"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:16:00Z"
+  },
+  {
+    "id": "w18",
+    "brand": "Lorca",
+    "model": "Model No.2 Chronograph",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://lorcawatches.com/products/model-no-2-chronograph?variant=45434209108203",
+        "retailer": "lorcawatches.com"
+      }
+    ],
+    "specs": {},
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:15:00Z"
+  },
+  {
+    "id": "w19",
+    "brand": "Santurce",
+    "model": "El Submarino Azul",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://santurcecollection.store/products/el-submarino-azul",
+        "retailer": "santurcecollection.store"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "dialColor": "Blue"
+    },
+    "tags": [
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:14:00Z"
+  },
+  {
+    "id": "w20",
+    "brand": "Brew",
+    "model": "Retrograph — Espresso",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.brew-watches.com/collections/retrograph/products/retrograph-brew-rosegold-espresso-chocolate",
+        "retailer": "brew-watches.com"
+      }
+    ],
+    "specs": {
+      "dialColor": "Espresso / chocolate"
+    },
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:13:00Z"
+  },
+  {
+    "id": "w21",
+    "brand": "Laventure",
+    "model": "Automobile Chronograph",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://laventure.swiss/en/the-watches/automobile-chronograph-collection",
+        "retailer": "laventure.swiss"
+      }
+    ],
+    "specs": {},
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:12:00Z",
+    "notes": "Collection link — choose the exact reference."
+  },
+  {
+    "id": "w22",
+    "brand": "Magrette",
+    "model": "Moana Pacific Professional Titanium — Blue",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://magrette.com/shop/moana-pacific-professional-titanium-2?in=155914174544",
+        "retailer": "magrette.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "waterResistanceM": 300,
+      "dialColor": "Blue"
+    },
+    "tags": [
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:11:00Z",
+    "notes": "Titanium case."
+  },
+  {
+    "id": "w23",
+    "brand": "Massena LAB",
+    "model": "Uni-Racer — White",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://massenalab.com/products/uni-racer-white",
+        "retailer": "massenalab.com"
+      }
+    ],
+    "specs": {
+      "dialColor": "White"
+    },
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:10:00Z"
+  },
+  {
+    "id": "w24",
+    "brand": "Melbourne Watch Company",
+    "model": "Fitzroy Auto",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.melbournewatch.com.au/products/fitzroy-auto-brown",
+        "retailer": "melbournewatch.com.au"
+      }
+    ],
+    "specs": {
+      "movement": "automatic"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:09:00Z",
+    "notes": "You listed it as black; the link points to the brown variant — confirm which."
+  },
+  {
+    "id": "w25",
+    "brand": "Spinnaker",
+    "model": "Hull — Arctic Blue",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://spinnaker-watches.com/products/hull-arctic-blue-sp-5088-02",
+        "retailer": "spinnaker-watches.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "dialColor": "Arctic blue"
+    },
+    "tags": [
+      "diver"
+    ],
+    "dateAdded": "2026-06-22T15:08:00Z",
+    "referenceNumber": "SP-5088-02"
+  },
+  {
+    "id": "w26",
+    "brand": "Zelos",
+    "model": "Comet 39 — Vulcan",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://zeloswatches.com/products/comet-39-vulcan",
+        "retailer": "zeloswatches.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 39,
+      "movement": "automatic"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:07:00Z"
+  },
+  {
+    "id": "w27",
+    "brand": "William Wood",
+    "model": "Triumph — Heat Edition",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://williamwoodwatches.com/en-us/products/heatedition?variant=43831723917561",
+        "retailer": "williamwoodwatches.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:06:00Z"
+  },
+  {
+    "id": "w28",
+    "brand": "William Wood",
+    "model": "Valiant — The Red Watch",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://williamwoodwatches.com/en-us/products/theredwatch",
+        "retailer": "williamwoodwatches.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "dialColor": "Red"
+    },
+    "tags": [],
+    "dateAdded": "2026-06-22T15:05:00Z"
+  },
+  {
+    "id": "w29",
+    "brand": "Islander",
+    "model": "Melville GMT — White 'Golf Ball' Hammer Dial",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://longislandwatch.com/islander-melville-gmt-with-white-golf-ball-hammer-dial-isl-211/",
+        "retailer": "longislandwatch.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "caliber": "Seiko NH34",
+      "dialColor": "White"
+    },
+    "tags": [
+      "GMT"
+    ],
+    "dateAdded": "2026-06-22T15:04:00Z",
+    "referenceNumber": "ISL-211"
+  },
+  {
+    "id": "w30",
+    "brand": "Baltic",
+    "model": "Heures du Monde Worldtimer — Tiger Eye",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://baltic-watches.com/en/products/heures-du-monde-worldtimer-tiger-eye",
+        "retailer": "baltic-watches.com"
+      }
+    ],
+    "specs": {
+      "movement": "automatic",
+      "caliber": "Miyota 9075",
+      "dialColor": "Tiger eye"
+    },
+    "tags": [
+      "GMT",
+      "worldtimer"
+    ],
+    "dateAdded": "2026-06-22T15:03:00Z"
+  },
+  {
+    "id": "w31",
+    "brand": "Baltic",
+    "model": "Scalegraph — Classic Panda",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://baltic-watches.com/en/products/scalegraph-classic-panda",
+        "retailer": "baltic-watches.com"
+      }
+    ],
+    "specs": {
+      "dialColor": "Panda"
+    },
+    "tags": [
+      "chronograph"
+    ],
+    "dateAdded": "2026-06-22T15:02:00Z"
+  },
+  {
+    "id": "w32",
+    "brand": "Baltic",
+    "model": "Aquascaphe GMT — Orange",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://baltic-watches.com/en/products/aquascaphe-gmt-orange",
+        "retailer": "baltic-watches.com"
+      }
+    ],
+    "specs": {
+      "caseDiameterMm": 39,
+      "movement": "automatic",
+      "caliber": "Miyota 9075"
+    },
+    "tags": [
+      "diver",
+      "GMT"
+    ],
+    "dateAdded": "2026-06-22T15:01:00Z"
+  }
+]
