@@ -48,12 +48,11 @@ jobs:
       - name: Disable Jekyll processing
         run: touch out/.nojekyll
 
+      # Pages must be enabled once under Settings → Pages → Source: GitHub
+      # Actions. (The workflow token can't create the Pages site automatically
+      # in all orgs, so we don't use enablement: true here.)
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          # Turn on GitHub Pages (Actions source) automatically on first run,
-          # so no manual Settings → Pages step is needed.
-          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

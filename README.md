@@ -74,7 +74,9 @@ How it works:
 - `scripts/prepare-pages.mjs` removes the server-only routes (the JSON API and the add/edit forms) — Pages can't run a server.
 - Write actions (Add / Edit / Delete) are hidden on the published site, which shows a "read-only" banner.
 
-**Editing stays local:** add or edit watches with `npm run dev`, commit `data/watches.json`, and push — the site rebuilds automatically. The first run auto-enables Pages; if your org restricts that, enable it once under **Settings → Pages → Source: GitHub Actions**.
+**One-time setup:** enable Pages under **Settings → Pages → Source: GitHub Actions** (the workflow token can't create the Pages site automatically in all orgs).
+
+**Editing stays local:** add or edit watches with `npm run dev`, commit `data/watches.json`, and push — the site rebuilds automatically.
 
 To preview the static build locally:
 
