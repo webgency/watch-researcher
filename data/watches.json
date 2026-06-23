@@ -22,7 +22,13 @@
       "diver"
     ],
     "dateAdded": "2026-06-22T15:32:00Z",
-    "referenceNumber": "210.30.42.20.03.003"
+    "referenceNumber": "210.30.42.20.03.003",
+    "price": {
+      "amount": 7100,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:08.315Z",
+    "imageUrl": "https://www.omegawatches.com/media/catalog/product/o/m/omega-seamaster-diver-300m-co-axial-master-chronometer-42-mm-21030422003003-544926.png?w=230"
   },
   {
     "id": "w02",
@@ -39,7 +45,13 @@
     "tags": [
       "chronograph"
     ],
-    "dateAdded": "2026-06-22T15:31:00Z"
+    "dateAdded": "2026-06-22T15:31:00Z",
+    "price": {
+      "amount": 725,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:08.991Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0564/6784/9378/files/TRANS2.png?v=1756761060"
   },
   {
     "id": "w03",
@@ -61,7 +73,13 @@
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:30:00Z",
-    "referenceNumber": "0333.1.6603.101"
+    "referenceNumber": "0333.1.6603.101",
+    "price": {
+      "amount": 2230,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:09.706Z",
+    "imageUrl": "https://cdn11.bigcommerce.com/s-uok04hg6nb/images/stencil/1280x1280/products/862/4108/0333.1.6603.100_-_Formex_Essence_39_mm_Mother-of-Sky_Automatic_Chronometer_-_on_stainless_steel_bracelet__60245.1678752841.jpg?c=1"
   },
   {
     "id": "w04",
@@ -78,7 +96,13 @@
       "dialColor": "Malachite / green sunray"
     },
     "tags": [],
-    "dateAdded": "2026-06-22T15:29:00Z"
+    "dateAdded": "2026-06-22T15:29:00Z",
+    "price": {
+      "amount": 890,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:10.239Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0888/4918/7118/files/ALD-DT01-G-ELBK-R-GBKL.jpg?v=1756878544"
   },
   {
     "id": "w05",
@@ -138,7 +162,8 @@
     "specs": {},
     "tags": [],
     "dateAdded": "2026-06-22T15:26:00Z",
-    "notes": "Collection link — pick the exact variant."
+    "notes": "Collection link — pick the exact variant.",
+    "imageUrl": "https://echoneutra.com/cdn/shop/collections/Rivanera-cover.jpg?v=1763739166"
   },
   {
     "id": "w08",
@@ -157,7 +182,13 @@
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:25:00Z",
-    "referenceNumber": "2161-A"
+    "referenceNumber": "2161-A",
+    "price": {
+      "amount": 1250,
+      "currency": "CHF"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:13.919Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0558/4024/3844/files/Blue_Sector_Header_6e779320-f31c-41a5-a8d9-4ba874c03a6a.png?v=1762271062"
   },
   {
     "id": "w09",
@@ -175,7 +206,13 @@
       "dialColor": "Imperial green"
     },
     "tags": [],
-    "dateAdded": "2026-06-22T15:24:00Z"
+    "dateAdded": "2026-06-22T15:24:00Z",
+    "price": {
+      "amount": 1668,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:14.810Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0844/2573/6468/files/SF_19.24_vert_vnoir.webp?v=1715781306"
   },
   {
     "id": "w10",
@@ -194,7 +231,13 @@
     "tags": [
       "chronograph"
     ],
-    "dateAdded": "2026-06-22T15:23:00Z"
+    "dateAdded": "2026-06-22T15:23:00Z",
+    "price": {
+      "amount": 1650,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:15.289Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0643/5464/8287/files/Traska_Chronograph_tungsten_grey.jpg?v=1771687019"
   },
   {
     "id": "w11",
@@ -216,7 +259,13 @@
       "GMT"
     ],
     "dateAdded": "2026-06-22T15:22:00Z",
-    "referenceNumber": "8315"
+    "referenceNumber": "8315",
+    "price": {
+      "amount": 2441,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:16.106Z",
+    "imageUrl": "https://serica-watches.com/cdn/shop/files/8315-2-3h-expediton-packshot_web_01.jpg?v=1764169327&width=1920"
   },
   {
     "id": "w12",
@@ -242,7 +291,13 @@
       "diver"
     ],
     "dateAdded": "2026-06-22T15:21:00Z",
-    "referenceNumber": "L3.788.4.96.6"
+    "referenceNumber": "L3.788.4.96.6",
+    "price": {
+      "amount": 2200,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:16.348Z",
+    "imageUrl": "https://api.ecom.longines.com/media/catalog/product/w/a/watch-collection-hydroconquest-l3-788-4-96-6-225bb5-hero.png"
   },
   {
     "id": "w13",
@@ -268,7 +323,13 @@
       "chronograph"
     ],
     "dateAdded": "2026-06-22T15:20:00Z",
-    "referenceNumber": "L3.820.4.93.0"
+    "referenceNumber": "L3.820.4.93.0",
+    "price": {
+      "amount": 3700,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:16.575Z",
+    "imageUrl": "https://api.ecom.longines.com/media/catalog/product/w/a/watch-collection-longines-spirit-chronograph-l3-820-4-93-0-8c1449-hero.png"
   },
   {
     "id": "w14",
@@ -296,7 +357,13 @@
       "diver"
     ],
     "dateAdded": "2026-06-22T15:19:00Z",
-    "referenceNumber": "210.32.42.20.03.001"
+    "referenceNumber": "210.32.42.20.03.001",
+    "price": {
+      "amount": 4700,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:16.990Z",
+    "imageUrl": "https://www.watchfinder.com/media/catalog/product/W/a/Watch-1-Omega-SeamasterDiver300m-210_32_42_20_03_001-429028-260619-140235488.jpg"
   },
   {
     "id": "w15",
@@ -320,7 +387,13 @@
       "GMT",
       "worldtimer"
     ],
-    "dateAdded": "2026-06-22T15:18:00Z"
+    "dateAdded": "2026-06-22T15:18:00Z",
+    "price": {
+      "amount": 3495,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:17.608Z",
+    "imageUrl": "https://www.raymond-weil.com/cdn/shop/files/RW_FREELANCER_2765-SBC-52001_FRONT_WEB.png?v=1755000750&width=1920"
   },
   {
     "id": "w16",
@@ -348,7 +421,8 @@
     ],
     "dateAdded": "2026-06-22T15:17:00Z",
     "referenceNumber": "M7939G1A0NRU-0003",
-    "notes": "Black & burgundy bezel."
+    "notes": "Black & burgundy bezel.",
+    "imageUrl": "https://media.tudorwatch.com/image/upload/q_auto/f_auto/t_tdr-cover-watch/c_limit,w_1920/v1/catalogue/0yi5ee8b69yh3/upright-cb-with-drop-shadow/tudor-m7939g1a0nru-0003"
   },
   {
     "id": "w17",
@@ -365,7 +439,13 @@
       "dialColor": "Blue"
     },
     "tags": [],
-    "dateAdded": "2026-06-22T15:16:00Z"
+    "dateAdded": "2026-06-22T15:16:00Z",
+    "price": {
+      "amount": 278,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:18.160Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0771/3174/3532/files/2026-05-23_13-42-03_B_R8_S4_B.png?v=1779983994"
   },
   {
     "id": "w18",
@@ -382,7 +462,13 @@
     "tags": [
       "chronograph"
     ],
-    "dateAdded": "2026-06-22T15:15:00Z"
+    "dateAdded": "2026-06-22T15:15:00Z",
+    "price": {
+      "amount": 2750,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:18.711Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0661/9493/1947/files/Model_No.2___Chronograph_Golden_Gray.jpg?v=1726845666"
   },
   {
     "id": "w19",
@@ -402,7 +488,13 @@
     "tags": [
       "diver"
     ],
-    "dateAdded": "2026-06-22T15:14:00Z"
+    "dateAdded": "2026-06-22T15:14:00Z",
+    "price": {
+      "amount": 999,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:18.955Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0750/1375/1024/files/El_submarino_azul.png?v=1781101662"
   },
   {
     "id": "w20",
@@ -421,7 +513,13 @@
     "tags": [
       "chronograph"
     ],
-    "dateAdded": "2026-06-22T15:13:00Z"
+    "dateAdded": "2026-06-22T15:13:00Z",
+    "price": {
+      "amount": 375,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:19.223Z",
+    "imageUrl": "https://www.brew-watches.com/cdn/shop/files/BREWRETROGRAPHFRONTESPRESSODIAL-SD_450x450.jpg?v=1700672997"
   },
   {
     "id": "w21",
@@ -439,7 +537,8 @@
       "chronograph"
     ],
     "dateAdded": "2026-06-22T15:12:00Z",
-    "notes": "Collection link — choose the exact reference."
+    "notes": "Collection link — choose the exact reference.",
+    "imageUrl": "https://laventure.swiss/img/card.jpg"
   },
   {
     "id": "w22",
@@ -461,7 +560,13 @@
       "diver"
     ],
     "dateAdded": "2026-06-22T15:11:00Z",
-    "notes": "Titanium case."
+    "notes": "Titanium case.",
+    "price": {
+      "amount": 758,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:21.038Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/1833/5921/products/magrette_mpp-blue-dial-4.jpg?v=1585500305"
   },
   {
     "id": "w23",
@@ -480,7 +585,13 @@
     "tags": [
       "chronograph"
     ],
-    "dateAdded": "2026-06-22T15:10:00Z"
+    "dateAdded": "2026-06-22T15:10:00Z",
+    "price": {
+      "amount": 3495,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:21.720Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0585/2849/7851/products/Massena-LAB-Uni-Racer-White-Front-image-web-size.jpg?v=1626289939"
   },
   {
     "id": "w24",
@@ -498,7 +609,13 @@
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:09:00Z",
-    "notes": "You listed it as black; the link points to the brown variant — confirm which."
+    "notes": "You listed it as black; the link points to the brown variant — confirm which.",
+    "price": {
+      "amount": 339,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:22.352Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/2320/0875/files/WEB_FitzroyHeroBrown-Old.jpg?v=1726639356"
   },
   {
     "id": "w25",
@@ -519,7 +636,13 @@
       "diver"
     ],
     "dateAdded": "2026-06-22T15:08:00Z",
-    "referenceNumber": "SP-5088-02"
+    "referenceNumber": "SP-5088-02",
+    "price": {
+      "amount": 375,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:22.672Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0573/7569/files/SP-5088-02-Q.png?v=1717476802"
   },
   {
     "id": "w26",
@@ -537,7 +660,13 @@
       "movement": "automatic"
     },
     "tags": [],
-    "dateAdded": "2026-06-22T15:07:00Z"
+    "dateAdded": "2026-06-22T15:07:00Z",
+    "price": {
+      "amount": 1999,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:22.922Z",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0387/4989/files/5A_v2.jpg?v=1761230249"
   },
   {
     "id": "w27",
@@ -554,7 +683,13 @@
       "movement": "automatic"
     },
     "tags": [],
-    "dateAdded": "2026-06-22T15:06:00Z"
+    "dateAdded": "2026-06-22T15:06:00Z",
+    "price": {
+      "amount": 2525,
+      "currency": "GBP"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:23.771Z",
+    "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/Triumph_Red_Orange_Strap_Front.png?v=1757633137&width=1920"
   },
   {
     "id": "w28",
@@ -572,7 +707,13 @@
       "dialColor": "Red"
     },
     "tags": [],
-    "dateAdded": "2026-06-22T15:05:00Z"
+    "dateAdded": "2026-06-22T15:05:00Z",
+    "price": {
+      "amount": 820,
+      "currency": "GBP"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:24.349Z",
+    "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/ValiantRedFront-min_829eda8d-346b-4965-9158-572fdffac07a.png?v=1683571549&width=1920"
   },
   {
     "id": "w29",
@@ -594,7 +735,13 @@
       "GMT"
     ],
     "dateAdded": "2026-06-22T15:04:00Z",
-    "referenceNumber": "ISL-211"
+    "referenceNumber": "ISL-211",
+    "price": {
+      "amount": 379,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:08:24.860Z",
+    "imageUrl": "https://cdn11.bigcommerce.com/s-uzonwrhn18/images/stencil/original/products/19617/109615/ISL-211-01__09852.1750335438.jpg?c=1"
   },
   {
     "id": "w30",
@@ -616,7 +763,8 @@
       "GMT",
       "worldtimer"
     ],
-    "dateAdded": "2026-06-22T15:03:00Z"
+    "dateAdded": "2026-06-22T15:03:00Z",
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3543x2657/4b168d55e9/heure-du-monde-face-oeil-de-tigre.jpg?width=1200"
   },
   {
     "id": "w31",
@@ -635,7 +783,8 @@
     "tags": [
       "chronograph"
     ],
-    "dateAdded": "2026-06-22T15:02:00Z"
+    "dateAdded": "2026-06-22T15:02:00Z",
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x2264/e94e17980c/tricompax-panda-face.jpg?width=1200"
   },
   {
     "id": "w32",
@@ -657,6 +806,7 @@
       "diver",
       "GMT"
     ],
-    "dateAdded": "2026-06-22T15:01:00Z"
+    "dateAdded": "2026-06-22T15:01:00Z",
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x1688/75ba993562/aquascaphe-gmt-orange.jpg?width=1200"
   }
 ]
