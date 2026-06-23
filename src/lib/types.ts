@@ -53,6 +53,8 @@ export interface Watch {
   grail?: boolean;
   /** Headline price you're tracking (usually the best/target price). */
   price?: Money;
+  /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */
+  priceUpdatedAt?: string;
   links: RetailerLink[];
   imageUrl?: string;
   specs: WatchSpecs;

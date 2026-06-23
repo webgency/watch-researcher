@@ -54,6 +54,9 @@ export default async function WatchDetailPage({ params }: { params: { id: string
           </div>
 
           <p className="text-3xl font-bold">{formatMoney(watch.price)}</p>
+          {watch.priceUpdatedAt && (
+            <p className="text-xs text-slate-400">Price updated {formatDate(watch.priceUpdatedAt)}</p>
+          )}
 
           {watch.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">

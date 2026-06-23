@@ -217,7 +217,7 @@ async function main() {
 
     if (!got) { misses.push(name); console.log(`✗ miss  ${name}`); continue; }
     const did = [];
-    if (needPrice && got.price) { w.price = got.price; priceN++; did.push(`${got.price.amount} ${got.price.currency}`); }
+    if (needPrice && got.price) { w.price = got.price; w.priceUpdatedAt = new Date().toISOString(); priceN++; did.push(`${got.price.amount} ${got.price.currency}`); }
     if (needImage && got.image) { w.imageUrl = got.image; imageN++; did.push("image"); }
     if (did.length) { changed++; console.log(`✓ ${String(got.source || "?").padEnd(8)}${name.padEnd(34)} ${did.join(", ")}`); }
     else { misses.push(name); console.log(`✗ miss  ${name} (nothing usable)`); }
