@@ -124,7 +124,12 @@
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:28:00Z",
-    "referenceNumber": "C029.426.36.041.00"
+    "referenceNumber": "C029.426.36.041.00",
+    "price": {
+      "amount": 795,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
   {
     "id": "w06",
@@ -146,7 +151,12 @@
       "diver"
     ],
     "dateAdded": "2026-06-22T15:27:00Z",
-    "referenceNumber": "C60-42ADA31S0KW3-B0"
+    "referenceNumber": "C60-42ADA31S0KW3-B0",
+    "price": {
+      "amount": 1495,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
   {
     "id": "w07",
@@ -163,7 +173,12 @@
     "tags": [],
     "dateAdded": "2026-06-22T15:26:00Z",
     "notes": "Collection link — pick the exact variant.",
-    "imageUrl": "https://echoneutra.com/cdn/shop/collections/Rivanera-cover.jpg?v=1763739166"
+    "imageUrl": "https://echoneutra.com/cdn/shop/collections/Rivanera-cover.jpg?v=1763739166",
+    "price": {
+      "amount": 850,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
   {
     "id": "w08",
@@ -422,7 +437,12 @@
     "dateAdded": "2026-06-22T15:17:00Z",
     "referenceNumber": "M7939G1A0NRU-0003",
     "notes": "Black & burgundy bezel.",
-    "imageUrl": "https://media.tudorwatch.com/image/upload/q_auto/f_auto/t_tdr-cover-watch/c_limit,w_1920/v1/catalogue/0yi5ee8b69yh3/upright-cb-with-drop-shadow/tudor-m7939g1a0nru-0003"
+    "imageUrl": "https://media.tudorwatch.com/image/upload/q_auto/f_auto/t_tdr-cover-watch/c_limit,w_1920/v1/catalogue/0yi5ee8b69yh3/upright-cb-with-drop-shadow/tudor-m7939g1a0nru-0003",
+    "price": {
+      "amount": 4375,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
   {
     "id": "w17",
@@ -538,7 +558,12 @@
     ],
     "dateAdded": "2026-06-22T15:12:00Z",
     "notes": "Collection link — choose the exact reference.",
-    "imageUrl": "https://laventure.swiss/img/card.jpg"
+    "imageUrl": "https://laventure.swiss/img/card.jpg",
+    "price": {
+      "amount": 4200,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
   {
     "id": "w22",
@@ -764,7 +789,12 @@
       "worldtimer"
     ],
     "dateAdded": "2026-06-22T15:03:00Z",
-    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3543x2657/4b168d55e9/heure-du-monde-face-oeil-de-tigre.jpg?width=1200"
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3543x2657/4b168d55e9/heure-du-monde-face-oeil-de-tigre.jpg?width=1200",
+    "price": {
+      "amount": 845,
+      "currency": "EUR"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
   {
     "id": "w31",
@@ -784,7 +814,12 @@
       "chronograph"
     ],
     "dateAdded": "2026-06-22T15:02:00Z",
-    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x2264/e94e17980c/tricompax-panda-face.jpg?width=1200"
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x2264/e94e17980c/tricompax-panda-face.jpg?width=1200",
+    "price": {
+      "amount": 525,
+      "currency": "EUR"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
   {
     "id": "w32",
@@ -807,6 +842,11 @@
       "GMT"
     ],
     "dateAdded": "2026-06-22T15:01:00Z",
-    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x1688/75ba993562/aquascaphe-gmt-orange.jpg?width=1200"
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x1688/75ba993562/aquascaphe-gmt-orange.jpg?width=1200",
+    "price": {
+      "amount": 750,
+      "currency": "EUR"
+    },
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   }
 ]
