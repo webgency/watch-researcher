@@ -9,6 +9,7 @@ import { IS_STATIC } from "@/lib/config";
 import WatchCard from "./WatchCard";
 
 type SortKey =
+  | "favorite"
   | "dateAdded"
   | "priceAsc"
   | "priceDesc"
@@ -17,6 +18,7 @@ type SortKey =
   | "priority";
 
 const SORTS: { key: SortKey; label: string }[] = [
+  { key: "favorite", label: "Favorites first" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priority", label: "Priority" },
   { key: "priceAsc", label: "Price: low to high" },
@@ -29,7 +31,8 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<WatchStatus | "all">("all");
-  const [sort, setSort] = useState<SortKey>("dateAdded");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [sort, setSort] = useState<SortKey>("favorite");
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   function toggleSelect(id: string) {
@@ -41,10 +44,25 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
     });
   }
 
+  async function toggleFavorite(id: string, next: boolean) {
+    try {
+      const res = await fetch(`/api/watches/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favorite: next }),
+      });
+      if (!res.ok) throw new Error();
+      router.refresh();
+    } catch {
+      alert("Couldn't update favorite. Please try again.");
+    }
+  }
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = watches.filter((w) => {
       if (status !== "all" && w.status !== status) return false;
+      if (favoritesOnly && !w.favorite) return false;
       if (!q) return true;
       const haystack = [w.brand, w.model, w.referenceNumber, ...w.tags]
         .filter(Boolean)
@@ -54,7 +72,11 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
     });
 
     list = [...list].sort((a, b) => {
+      // Favorites always float to the top, regardless of the chosen sort.
+      if (Boolean(a.favorite) !== Boolean(b.favorite)) return a.favorite ? -1 : 1;
       switch (sort) {
+        case "favorite":
+          return b.dateAdded.localeCompare(a.dateAdded);
         case "priceAsc":
           return (a.price?.amount ?? Infinity) - (b.price?.amount ?? Infinity);
         case "priceDesc":
@@ -71,13 +93,15 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       }
     });
     return list;
-  }, [watches, query, status, sort]);
+  }, [watches, query, status, favoritesOnly, sort]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: watches.length };
     for (const s of WATCH_STATUSES) c[s] = watches.filter((w) => w.status === s).length;
     return c;
   }, [watches]);
+
+  const favoriteCount = useMemo(() => watches.filter((w) => w.favorite).length, [watches]);
 
   // Sum wishlist value per currency (avoids mixing currencies in one total).
   const wishlistValue = useMemo(() => {
@@ -104,7 +128,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
           <p className="text-sm text-slate-500">Add your first watch to start tracking and comparing.</p>
         </div>
         {!IS_STATIC && (
-          <Link href="/watch/new" className="btn-primary">
+          <Link href="/watch/quick" className="btn-primary">
             + Add your first watch
           </Link>
         )}
@@ -141,6 +165,14 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
               {s} ({counts[s] ?? 0})
             </button>
           ))}
+          <button
+            onClick={() => setFavoritesOnly((v) => !v)}
+            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+              favoritesOnly ? "bg-rose-600 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+            }`}
+          >
+            ♥ Favorites ({favoriteCount})
+          </button>
         </div>
         <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="input sm:ml-auto sm:max-w-[12rem]">
           {SORTS.map((s) => (
@@ -156,7 +188,13 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((watch) => (
-            <WatchCard key={watch.id} watch={watch} selected={selected.has(watch.id)} onToggleSelect={toggleSelect} />
+            <WatchCard
+              key={watch.id}
+              watch={watch}
+              selected={selected.has(watch.id)}
+              onToggleSelect={toggleSelect}
+              onToggleFavorite={IS_STATIC ? undefined : toggleFavorite}
+            />
           ))}
         </div>
       )}

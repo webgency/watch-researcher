@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Watch } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
@@ -13,10 +15,12 @@ export default function WatchCard({
   watch,
   selected,
   onToggleSelect,
+  onToggleFavorite,
 }: {
   watch: Watch;
   selected: boolean;
   onToggleSelect: (id: string) => void;
+  onToggleFavorite?: (id: string, next: boolean) => void;
 }) {
   const { specs } = watch;
   return (
@@ -28,11 +32,29 @@ export default function WatchCard({
         ) : (
           <span className="text-3xl font-bold text-slate-400">{initials(watch)}</span>
         )}
-        {watch.grail && (
-          <span className="absolute left-2 top-2 rounded-full bg-yellow-400/90 px-2 py-0.5 text-xs font-semibold text-yellow-950">
-            ★ Grail
-          </span>
-        )}
+        <div className="absolute left-2 top-2 flex items-center gap-1">
+          {onToggleFavorite ? (
+            <button
+              type="button"
+              onClick={() => onToggleFavorite(watch.id, !watch.favorite)}
+              aria-pressed={Boolean(watch.favorite)}
+              aria-label={watch.favorite ? "Remove from favorites" : "Add to favorites"}
+              title={watch.favorite ? "Remove from favorites" : "Add to favorites"}
+              className={`flex h-7 w-7 items-center justify-center rounded-full text-sm shadow-sm transition-colors ${
+                watch.favorite ? "bg-rose-600 text-white" : "bg-white/90 text-slate-400 hover:text-rose-600"
+              }`}
+            >
+              ♥
+            </button>
+          ) : (
+            watch.favorite && (
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-600 text-sm text-white shadow-sm">♥</span>
+            )
+          )}
+          {watch.grail && (
+            <span className="rounded-full bg-yellow-400/90 px-2 py-0.5 text-xs font-semibold text-yellow-950">★ Grail</span>
+          )}
+        </div>
         <label className="absolute right-2 top-2 flex cursor-pointer items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-medium shadow-sm">
           <input
             type="checkbox"

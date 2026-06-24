@@ -51,6 +51,8 @@ export interface Watch {
   priority?: number;
   /** Flag a dream/"grail" watch. */
   grail?: boolean;
+  /** Favorited — pinned to the top of the collection so you can prioritize it. */
+  favorite?: boolean;
   /** Headline price you're tracking (usually the best/target price). */
   price?: Money;
   /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */

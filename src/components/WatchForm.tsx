@@ -14,6 +14,7 @@ import {
 } from "@/lib/types";
 import { SPEC_FIELDS } from "@/lib/specs";
 import { hostname } from "@/lib/format";
+import ImageDropzone from "./ImageDropzone";
 
 interface LinkRow {
   url: string;
@@ -48,6 +49,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
   const [status, setStatus] = useState<WatchStatus>(initial?.status ?? "wishlist");
   const [grail, setGrail] = useState(initial?.grail ?? false);
+  const [favorite, setFavorite] = useState(initial?.favorite ?? false);
   const [priority, setPriority] = useState(initial?.priority != null ? String(initial.priority) : "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
@@ -102,6 +104,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
       referenceNumber: referenceNumber.trim() || undefined,
       status,
       grail: grail || undefined,
+      favorite: favorite || undefined,
       priority: parseNum(priority),
       imageUrl: imageUrl.trim() || undefined,
       specs: builtSpecs,
@@ -160,10 +163,6 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
             <input className="input" value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} placeholder="210.30.42.20.03.003" />
           </div>
           <div>
-            <label className="label">Image URL</label>
-            <input className="input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…/watch.jpg" />
-          </div>
-          <div>
             <label className="label">Status</label>
             <select className="input" value={status} onChange={(e) => setStatus(e.target.value as WatchStatus)}>
               {WATCH_STATUSES.map((s) => (
@@ -190,16 +189,24 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
             <label className="label">Wishlist priority</label>
             <input className="input" inputMode="numeric" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="1 = top of the list" />
           </div>
-          <div className="flex items-end">
+          <div className="flex items-end gap-4">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={favorite} onChange={(e) => setFavorite(e.target.checked)} className="h-4 w-4 accent-rose-600" />
+              ♥ Favorite
+            </label>
             <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
               <input type="checkbox" checked={grail} onChange={(e) => setGrail(e.target.checked)} className="h-4 w-4 accent-slate-900" />
-              ★ Mark as a grail
+              ★ Grail
             </label>
           </div>
         </div>
         <div>
           <label className="label">Tags (comma-separated)</label>
           <input className="input" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="diver, GMT, blue dial" />
+        </div>
+        <div>
+          <label className="label">Image</label>
+          <ImageDropzone value={imageUrl} onChange={setImageUrl} />
         </div>
       </section>
 
