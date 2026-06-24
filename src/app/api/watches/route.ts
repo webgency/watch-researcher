@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     status: body.status ?? "wishlist",
     priority: body.priority,
     grail: body.grail,
+    favorite: body.favorite,
     price: body.price,
     links: body.links ?? [],
     imageUrl: body.imageUrl,

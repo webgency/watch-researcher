@@ -26,6 +26,9 @@ npm start
 ## What it does today (Phase 1 — MVP)
 
 - **Collection view** — every watch as a card, with search, status filters (wishlist / owned / sold), and sorting (recently added, priority, price, brand, case size).
+- **Favorites** — heart any watch right on its card to pin it to the top. There's a "♥ Favorites" filter and a "Favorites first" sort, and favorites always float above everything else regardless of the sort you pick.
+- **Quick add** — the "+ Add watch" button opens a fast form: brand, model, price, a link, and an image. Need full specs? Add them later via Edit, or jump to the "Full form".
+- **Drag-and-drop images** — no scraping required. Drop an image (or click to choose) on the add/edit form and it's auto-downscaled and saved inline with the watch in `watches.json`, so it commits and publishes with the rest of your collection. You can still paste an image URL instead.
 - **Add / edit watches** — a full form covering basics, specifications, multiple retailer links, tags, and notes.
 - **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table. The **best value in each row is highlighted** (lowest price, larger power reserve, etc.).
 - **Per-watch detail page** — full specs, all retailer links, and notes.
