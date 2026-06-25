@@ -1019,5 +1019,36 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
+  },
+  {
+    "brand": "Tissot",
+    "model": "TISSOT GENTLEMAN 38MM",
+    "status": "owned",
+    "price": {
+      "amount": 850,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://www.tissotwatches.com/en-us/T1658071109100.html",
+        "retailer": "tissotwatches.com",
+        "price": {
+          "amount": 850,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dwc5be96fe/product-pictures/d0874d32-cd20-485d-a326-81c78afd70d1_T165-807-11-091-00_shadow.png?sm=fit&sw=1680&sh=1680,gravity=center",
+    "specs": {
+      "caseDiameterMm": 38,
+      "movement": "automatic",
+      "caliber": "Powermatic 80",
+      "powerReserveHours": 80,
+      "waterResistanceM": 100,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqsu2beijgdat5",
+    "dateAdded": "2026-06-25T01:38:20.346Z"
   }
 ]
