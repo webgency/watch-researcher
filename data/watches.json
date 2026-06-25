@@ -1036,13 +1036,18 @@
     "model": "LAVENTURE TRANSATLANTIQUE II GMT STEEL / BLACK",
     "referenceNumber": "laventure-transatlantique-ii-gmt-acier-noir",
     "status": "wishlist",
+    "price": {
+      "amount": 5168,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-25T17:42:04Z",
     "links": [
       {
         "url": "https://laventure.swiss/en/the-watches/transatlantique-ii-gmt-collection/laventure-transatlantique-ii-gmt-steel-black",
         "retailer": "laventure.swiss",
         "price": {
-          "amount": 4200,
-          "currency": "CHF"
+          "amount": 5168,
+          "currency": "USD"
         }
       }
     ],
@@ -1091,16 +1096,17 @@
     "referenceNumber": "maxigraph",
     "status": "wishlist",
     "price": {
-      "amount": 5495,
+      "amount": 6762,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-06-25T17:42:04Z",
     "links": [
       {
         "url": "https://albishorn-watches.ch/en/collections/water-collection/maxigraph",
         "retailer": "albishorn-watches.ch",
         "price": {
-          "amount": 5495,
-          "currency": "CHF"
+          "amount": 6762,
+          "currency": "USD"
         }
       }
     ],
@@ -1133,8 +1139,8 @@
         "url": "https://williamwoodwatches.com/en-us/products/bronzesapphire",
         "retailer": "williamwoodwatches.com",
         "price": {
-          "amount": 920,
-          "currency": "GBP"
+          "amount": 1214,
+          "currency": "USD"
         }
       }
     ],
@@ -1150,6 +1156,124 @@
     "tags": [],
     "id": "mqsvqal3ush7w1",
     "dateAdded": "2026-06-25T02:24:58.647Z",
+    "favorite": true
+  },
+  {
+    "brand": "Mr. Eatwell",
+    "model": "SubMeloner",
+    "status": "wishlist",
+    "favorite": true,
+    "links": [
+      {
+        "url": "https://mreatwell.com/shop/submeloner",
+        "retailer": "mreatwell.com"
+      }
+    ],
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0408/7837/5065/files/2026.03.21_submeloner_jubilee_blackslate_bg.jpg?v=1774210554",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 13.6,
+      "lugWidthMm": 20,
+      "movement": "quartz",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqtspoj46282kg",
+    "dateAdded": "2026-06-25T17:48:17.392Z",
+    "price": {
+      "amount": 395,
+      "currency": "USD"
+    }
+  },
+  {
+    "brand": "Gustave st Cie",
+    "model": "ANDRÉ 24H",
+    "status": "wishlist",
+    "price": {
+      "amount": 232,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-06-25T20:14:21.884Z",
+    "links": [
+      {
+        "url": "https://gustave-et-cie.fr/en/products/andre-24h-or-et-vert?variant=48536687771995",
+        "retailer": "gustave-et-cie.fr",
+        "price": {
+          "amount": 232,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://gustave-et-cie.fr/cdn/shop/files/Andre-or-vert-marron-ecru-40.webp?v=1764945133&width=2048",
+    "specs": {
+      "movement": "quartz",
+      "waterResistanceM": 50
+    },
+    "tags": [],
+    "id": "mqtufgnahjigr6",
+    "dateAdded": "2026-06-25T18:36:19.846Z",
+    "favorite": true
+  },
+  {
+    "brand": "Out of Order Watches",
+    "model": "FORMA VENTI | AURUM NOIR",
+    "referenceNumber": "F20BLK.850",
+    "status": "wishlist",
+    "price": {
+      "amount": 910,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://outoforderwatches.com/products/forma-venti-aurum?utm_source=googleads&utm_medium=search&utm_id=paid+ads&utm_content=HG&gad_source=1&gad_campaignid=20642507036&gbraid=0AAAAABvFOdnczvWNQ-PRHtYxqny_uLWxv&gclid=EAIaIQobChMIis-ErOWilQMVU5taBR1MZjZNEAAYASAAEgIRu_D_BwE",
+        "retailer": "outoforderwatches.com",
+        "price": {
+          "amount": 910,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://outoforderwatches.com/cdn/shop/files/ooo_forma_Aurum_Noir_Frontale_-_out_of_order.png?v=1781192482&width=1920",
+    "specs": {
+      "caseThicknessMm": 10.6,
+      "lugToLugMm": 41,
+      "lugWidthMm": 22,
+      "movement": "automatic",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "complications": "GMT"
+    },
+    "tags": [],
+    "id": "mqtup7t8aaj0jh",
+    "dateAdded": "2026-06-25T18:43:54.956Z"
+  },
+  {
+    "brand": "Mr Eatwell",
+    "model": "SubLime",
+    "status": "wishlist",
+    "price": {
+      "amount": 395,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://mreatwell.com/shop/sublime",
+        "retailer": "mreatwell.com"
+      }
+    ],
+    "imageUrl": "https://mreatwell.com/_next/image?url=https%3A%2F%2Fcdn.shopify.com%2Fs%2Ffiles%2F1%2F0408%2F7837%2F5065%2Ffiles%2F2025.06.20SubLimeOverheadJubileeOnCounter_258cf200-6ef9-4e38-86b3-dc2aa91a595a.png%3Fv%3D1773428909&w=2048&q=75&dpl=dpl_AEnoZeYhMXjFcyygDcXaHQo3ntpb",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 13.6,
+      "lugWidthMm": 20,
+      "movement": "automatic",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqtxxj98g4kzid",
+    "dateAdded": "2026-06-25T20:14:21.884Z",
     "favorite": true
   }
 ]

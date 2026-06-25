@@ -83,4 +83,4 @@ export const MOVEMENT_TYPES: MovementType[] = [
   "other",
 ];
 
-export const CURRENCIES = ["USD", "EUR", "GBP", "CHF", "JPY", "AUD", "CAD", "SGD"];
+export const CURRENCIES = ["USD", "EUR", "GBP", "CHF", "JPY", "AUD", "CAD", "SGD", "SEK", "NOK", "DKK", "HKD", "NZD"];

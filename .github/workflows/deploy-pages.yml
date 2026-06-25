@@ -37,16 +37,8 @@ jobs:
           # doesn't need its bundled Chromium.
           PUPPETEER_SKIP_DOWNLOAD: "true"
 
-      - name: Remove server-only routes for the static build
-        run: node scripts/prepare-pages.mjs
-
       - name: Build static export
-        run: npm run build
-        env:
-          NEXT_PUBLIC_STATIC: "true"
-
-      - name: Disable Jekyll processing
-        run: touch out/.nojekyll
+        run: npm run build:static
 
       # Pages must be enabled once under Settings → Pages → Source: GitHub
       # Actions. (The workflow token can't create the Pages site automatically

@@ -5,8 +5,9 @@ import WatchForm from "@/components/WatchForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditWatchPage({ params }: { params: { id: string } }) {
-  const watch = await getWatch(params.id);
+export default async function EditWatchPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const watch = await getWatch(id);
   if (!watch) notFound();
 
   return (

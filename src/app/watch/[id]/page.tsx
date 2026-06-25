@@ -16,9 +16,10 @@ export async function generateStaticParams() {
   return watches.map((w) => ({ id: w.id }));
 }
 
-export default async function WatchDetailPage({ params }: { params: { id: string } }) {
+export default async function WatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!IS_STATIC) noStore();
-  const watch = await getWatch(params.id);
+  const { id } = await params;
+  const watch = await getWatch(id);
   if (!watch) notFound();
 
   return (
