@@ -756,7 +756,8 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:08:22.352Z",
-    "imageUrl": "https://cdn.shopify.com/s/files/1/2320/0875/files/WEB_FitzroyHeroBrown-Old.jpg?v=1726639356"
+    "imageUrl": "https://cdn.shopify.com/s/files/1/2320/0875/files/WEB_FitzroyHeroBrown-Old.jpg?v=1726639356",
+    "favorite": true
   },
   {
     "id": "w25",
