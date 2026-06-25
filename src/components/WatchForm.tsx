@@ -68,9 +68,74 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchUrl, setFetchUrl] = useState("");
+  const [fetching, setFetching] = useState(false);
+  const [fetchMsg, setFetchMsg] = useState<string | null>(null);
 
   function setLink(i: number, patch: Partial<LinkRow>) {
     setLinks((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+
+  // Pull brand/model/price/image/specs from a pasted URL to pre-fill the form.
+  async function autofillFromUrl() {
+    const u = fetchUrl.trim();
+    if (!/^https?:\/\/\S+$/i.test(u)) {
+      setFetchMsg("Enter a full http(s) link.");
+      return;
+    }
+    setFetching(true);
+    setFetchMsg(null);
+    try {
+      const res = await fetch("/api/watches/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: u }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Couldn't fetch that page.");
+
+      const filled: string[] = [];
+      if (data.brand) { setBrand(data.brand); filled.push("brand"); }
+      if (data.model) { setModel(data.model); filled.push("model"); }
+      if (data.referenceNumber) { setReferenceNumber(data.referenceNumber); filled.push("ref"); }
+      if (data.imageUrl) { setImageUrl(data.imageUrl); filled.push("image"); }
+      if (data.price?.amount) {
+        setPriceAmount(String(data.price.amount));
+        if (data.price.currency) setPriceCurrency(data.price.currency);
+        filled.push("price");
+      }
+      const specCount = data.specs ? Object.keys(data.specs).length : 0;
+      if (specCount) {
+        setSpecs((s) => {
+          const next = { ...s };
+          for (const [k, v] of Object.entries(data.specs as Record<string, unknown>)) next[k] = String(v);
+          return next;
+        });
+        filled.push(`${specCount} spec${specCount > 1 ? "s" : ""}`);
+      }
+      // Drop the source URL in as the first retailer link.
+      setLinks((rows) => {
+        if (rows.some((r) => r.url.trim() === u)) return rows;
+        const row: LinkRow = {
+          url: u,
+          retailer: data.retailer || hostname(u),
+          priceAmount: data.price?.amount ? String(data.price.amount) : "",
+          priceCurrency: data.price?.currency || "USD",
+          condition: "",
+        };
+        return rows[0]?.url.trim() ? [...rows, row] : [row, ...rows.slice(1)];
+      });
+
+      setFetchMsg(
+        filled.length
+          ? `Filled ${filled.join(", ")}. Review everything below, then save.`
+          : "Couldn't find much on that page — fill it in manually."
+      );
+    } catch (err) {
+      setFetchMsg(err instanceof Error ? err.message : "Couldn't fetch that page.");
+    } finally {
+      setFetching(false);
+    }
   }
 
   function buildPayload(): WatchInput {
@@ -145,6 +210,34 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {!isEdit && (
+        <section className="card space-y-3 p-5">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Autofill from a link</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Paste a product/retailer URL and we’ll try to fill the brand, price, image, and specs from the page. Edit anything below before saving.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className="input"
+              value={fetchUrl}
+              onChange={(e) => setFetchUrl(e.target.value)}
+              placeholder="https://retailer.com/product"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  autofillFromUrl();
+                }
+              }}
+            />
+            <button type="button" className="btn-secondary whitespace-nowrap" onClick={autofillFromUrl} disabled={fetching}>
+              {fetching ? "Fetching…" : "Fetch details"}
+            </button>
+          </div>
+          {fetchMsg && <p className="text-xs text-slate-600">{fetchMsg}</p>}
+        </section>
+      )}
       <section className="card space-y-4 p-5">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Basics</h2>
         <div className="grid gap-4 sm:grid-cols-2">
