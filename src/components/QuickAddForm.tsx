@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CURRENCIES, RetailerLink, Watch, WatchInput, WatchStatus, WATCH_STATUSES } from "@/lib/types";
+import { CURRENCIES, RetailerLink, Watch, WatchInput, WatchSpecs, WatchStatus, WATCH_STATUSES } from "@/lib/types";
 import { hostname } from "@/lib/format";
 import ImageDropzone from "./ImageDropzone";
 
@@ -23,6 +23,53 @@ export default function QuickAddForm() {
   const [favorite, setFavorite] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [referenceNumber, setReferenceNumber] = useState("");
+  const [scrapedSpecs, setScrapedSpecs] = useState<WatchSpecs>({});
+  const [fetching, setFetching] = useState(false);
+  const [fetchMsg, setFetchMsg] = useState<string | null>(null);
+
+  // Paste a URL -> pre-fill the visible fields and capture specs for the payload.
+  async function fetchFromUrl() {
+    const u = url.trim();
+    if (!/^https?:\/\/\S+$/i.test(u)) {
+      setFetchMsg("Enter a full http(s) link first.");
+      return;
+    }
+    setFetching(true);
+    setFetchMsg(null);
+    try {
+      const res = await fetch("/api/watches/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: u }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Couldn't fetch that page.");
+
+      const filled: string[] = [];
+      if (data.brand) { setBrand(data.brand); filled.push("brand"); }
+      if (data.model) { setModel(data.model); filled.push("model"); }
+      if (data.price?.amount) {
+        setPriceAmount(String(data.price.amount));
+        if (data.price.currency) setPriceCurrency(data.price.currency);
+        filled.push("price");
+      }
+      if (data.imageUrl) { setImageUrl(data.imageUrl); filled.push("image"); }
+      if (data.referenceNumber) setReferenceNumber(data.referenceNumber);
+      const specCount = data.specs ? Object.keys(data.specs).length : 0;
+      if (specCount) { setScrapedSpecs(data.specs); filled.push(`${specCount} spec${specCount > 1 ? "s" : ""}`); }
+
+      setFetchMsg(
+        filled.length
+          ? `Filled ${filled.join(", ")}.${specCount ? " Specs are saved — open the watch and Edit to review them." : ""}`
+          : "Couldn't find much on that page — fill it in manually, or use the full form."
+      );
+    } catch (err) {
+      setFetchMsg(err instanceof Error ? err.message : "Couldn't fetch that page.");
+    } finally {
+      setFetching(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,10 +95,11 @@ export default function QuickAddForm() {
     const payload: WatchInput = {
       brand: brand.trim(),
       model: model.trim(),
+      referenceNumber: referenceNumber.trim() || undefined,
       status,
       favorite: favorite || undefined,
       imageUrl: imageUrl || undefined,
-      specs: {},
+      specs: scrapedSpecs,
       tags: [],
       links,
       ...(hasPrice ? { price: { amount, currency: priceCurrency } } : {}),
@@ -109,8 +157,26 @@ export default function QuickAddForm() {
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="label">Link (optional)</label>
-            <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://retailer.com/product" />
+            <label className="label">Link</label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                className="input"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://retailer.com/product"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    fetchFromUrl();
+                  }
+                }}
+              />
+              <button type="button" className="btn-secondary whitespace-nowrap" onClick={fetchFromUrl} disabled={fetching}>
+                {fetching ? "Fetching…" : "Fetch details"}
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">Paste a product URL and fetch to auto-fill brand, price, image, and specs.</p>
+            {fetchMsg && <p className="mt-1 text-xs text-slate-600">{fetchMsg}</p>}
           </div>
         </div>
 

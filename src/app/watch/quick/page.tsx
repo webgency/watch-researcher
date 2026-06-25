@@ -9,7 +9,7 @@ export default function QuickAddPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Quick add</h1>
-          <p className="text-sm text-slate-500">Just the basics and an image — add specs later by editing the watch.</p>
+          <p className="text-sm text-slate-500">Paste a link and Fetch to auto-fill, or just enter the basics — review specs later by editing.</p>
         </div>
         <div className="flex gap-2">
           <Link href="/watch/new" className="btn-secondary">
