@@ -41,7 +41,20 @@
         "retailer": "underd0g.com"
       }
     ],
-    "specs": {},
+    "specs": {
+      "caseDiameterMm": 38.5,
+      "caseThicknessMm": 12.9,
+      "lugToLugMm": 44.5,
+      "lugWidthMm": 20,
+      "movement": "manual",
+      "caliber": "Seagull ST-1901B",
+      "powerReserveHours": 50,
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "dialColor": "Mint green",
+      "braceletStrap": "Italian leather (quick-release)",
+      "complications": "Chronograph, tachymeter"
+    },
     "tags": [
       "chronograph"
     ],
@@ -69,7 +82,8 @@
       "movement": "automatic",
       "caliber": "Sellita SW200-1 (COSC)",
       "crystal": "Sapphire",
-      "dialColor": "Mother-of-Sky"
+      "dialColor": "Mother-of-Sky",
+      "waterResistanceM": 100
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:30:00Z",
@@ -93,7 +107,15 @@
       }
     ],
     "specs": {
-      "dialColor": "Malachite / green sunray"
+      "dialColor": "Malachite / green sunray",
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 6.1,
+      "movement": "quartz",
+      "caliber": "Ronda 1032 (dual movement)",
+      "waterResistanceM": 30,
+      "crystal": "Sapphire",
+      "braceletStrap": "Leather",
+      "complications": "Dual time zone"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:29:00Z",
@@ -145,7 +167,13 @@
     "specs": {
       "caseDiameterMm": 42,
       "movement": "automatic",
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseThicknessMm": 10.7,
+      "caliber": "Sellita SW300",
+      "powerReserveHours": 56,
+      "waterResistanceM": 300,
+      "dialColor": "White",
+      "braceletStrap": "Steel (Bader bracelet)"
     },
     "tags": [
       "diver"
@@ -193,7 +221,16 @@
     ],
     "specs": {
       "dialColor": "White (sector)",
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseDiameterMm": 37.5,
+      "caseThicknessMm": 10.5,
+      "lugToLugMm": 46,
+      "lugWidthMm": 20,
+      "movement": "automatic",
+      "caliber": "La Joux-Perret (automatic)",
+      "powerReserveHours": 68,
+      "waterResistanceM": 50,
+      "braceletStrap": "Leather (2 straps incl.)"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:25:00Z",
@@ -218,7 +255,11 @@
     ],
     "specs": {
       "movement": "automatic",
-      "dialColor": "Imperial green"
+      "dialColor": "Imperial green",
+      "caliber": "France Ebauche FE (automatic)",
+      "powerReserveHours": 46,
+      "lugWidthMm": 20,
+      "braceletStrap": "Leather"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:24:00Z",
@@ -241,7 +282,10 @@
       }
     ],
     "specs": {
-      "dialColor": "Tungsten gray"
+      "dialColor": "Tungsten gray",
+      "crystal": "Sapphire (box)",
+      "waterResistanceM": 75,
+      "complications": "Chronograph, tachymeter"
     },
     "tags": [
       "chronograph"
@@ -268,7 +312,13 @@
     "specs": {
       "movement": "automatic",
       "caliber": "Soprod C125",
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 12.3,
+      "lugToLugMm": 46.5,
+      "lugWidthMm": 20,
+      "waterResistanceM": 200,
+      "complications": "GMT"
     },
     "tags": [
       "GMT"
@@ -397,7 +447,11 @@
       "movement": "automatic",
       "dialColor": "Green",
       "braceletStrap": "Leather",
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseThicknessMm": 9.7,
+      "caliber": "RW3230",
+      "powerReserveHours": 56,
+      "complications": "GMT worldtimer (24 zones)"
     },
     "tags": [
       "GMT",
@@ -457,7 +511,16 @@
       }
     ],
     "specs": {
-      "dialColor": "Blue"
+      "dialColor": "Blue",
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 13,
+      "lugToLugMm": 48,
+      "lugWidthMm": 20,
+      "movement": "automatic",
+      "caliber": "Seiko NH35",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire (AR)",
+      "braceletStrap": "FKM rubber (Tropic style)"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:16:00Z",
@@ -480,7 +543,18 @@
         "retailer": "lorcawatches.com"
       }
     ],
-    "specs": {},
+    "specs": {
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 11.6,
+      "lugToLugMm": 46,
+      "lugWidthMm": 20,
+      "movement": "manual",
+      "caliber": "Sellita SW510-M",
+      "powerReserveHours": 63,
+      "waterResistanceM": 100,
+      "crystal": "Sapphire (double-domed, inner AR)",
+      "complications": "Chronograph"
+    },
     "tags": [
       "chronograph"
     ],
@@ -505,7 +579,12 @@
     ],
     "specs": {
       "movement": "automatic",
-      "dialColor": "Blue"
+      "dialColor": "Blue",
+      "caseDiameterMm": 41.5,
+      "caliber": "Sellita SW200",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire (AR)",
+      "braceletStrap": "Steel bracelet + rubber strap"
     },
     "tags": [
       "diver"
@@ -530,7 +609,16 @@
       }
     ],
     "specs": {
-      "dialColor": "Espresso / chocolate"
+      "dialColor": "Espresso / chocolate",
+      "caseDiameterMm": 38,
+      "caseThicknessMm": 10.4,
+      "lugWidthMm": 22,
+      "movement": "quartz",
+      "caliber": "Meca-quartz",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "braceletStrap": "Brown leather (quick-release)",
+      "complications": "Chronograph"
     },
     "tags": [
       "chronograph"
@@ -580,8 +668,16 @@
     ],
     "specs": {
       "movement": "automatic",
-      "waterResistanceM": 300,
-      "dialColor": "Blue"
+      "waterResistanceM": 500,
+      "dialColor": "Blue",
+      "caliber": "Sellita SW200-1",
+      "powerReserveHours": 38,
+      "caseDiameterMm": 44,
+      "caseThicknessMm": 15.3,
+      "lugToLugMm": 53,
+      "lugWidthMm": 24,
+      "crystal": "Sapphire (double-domed, AR)",
+      "braceletStrap": "ZULU nylon strap"
     },
     "tags": [
       "diver"
@@ -607,7 +703,16 @@
       }
     ],
     "specs": {
-      "dialColor": "White"
+      "dialColor": "White",
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 9,
+      "movement": "manual",
+      "caliber": "Sellita SW510 BH M",
+      "powerReserveHours": 58,
+      "waterResistanceM": 50,
+      "crystal": "Acrylic (domed)",
+      "braceletStrap": "Leather",
+      "complications": "Chronograph"
     },
     "tags": [
       "chronograph"
@@ -632,7 +737,16 @@
       }
     ],
     "specs": {
-      "movement": "automatic"
+      "movement": "automatic",
+      "caseDiameterMm": 44,
+      "caseThicknessMm": 13,
+      "caliber": "Seiko NH35",
+      "powerReserveHours": 40,
+      "crystal": "Sapphire (domed)",
+      "waterResistanceM": 100,
+      "lugWidthMm": 22,
+      "dialColor": "Black",
+      "braceletStrap": "Brown leather"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:09:00Z",
@@ -684,7 +798,15 @@
     ],
     "specs": {
       "caseDiameterMm": 39,
-      "movement": "automatic"
+      "movement": "manual",
+      "caliber": "Peseux 7001 (reworked)",
+      "caseThicknessMm": 9.4,
+      "lugToLugMm": 45,
+      "lugWidthMm": 20,
+      "waterResistanceM": 50,
+      "crystal": "Sapphire (box)",
+      "braceletStrap": "Steel bracelet",
+      "dialColor": "Tiger eye / forged carbon"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:07:00Z",
@@ -707,7 +829,15 @@
       }
     ],
     "specs": {
-      "movement": "automatic"
+      "movement": "manual",
+      "caseDiameterMm": 41,
+      "caseThicknessMm": 16,
+      "lugToLugMm": 49.5,
+      "lugWidthMm": 20,
+      "caliber": "Sellita SW510",
+      "powerReserveHours": 48,
+      "braceletStrap": "Upcycled fire-hose strap",
+      "complications": "Chronograph"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:06:00Z",
@@ -731,7 +861,15 @@
     ],
     "specs": {
       "movement": "automatic",
-      "dialColor": "Red"
+      "dialColor": "Red",
+      "caseDiameterMm": 41,
+      "caseThicknessMm": 15,
+      "lugToLugMm": 49,
+      "lugWidthMm": 20,
+      "caliber": "Seiko NH35",
+      "powerReserveHours": 41,
+      "crystal": "Sapphire (double-domed)",
+      "braceletStrap": "Upcycled fire-hose strap"
     },
     "tags": [],
     "dateAdded": "2026-06-22T15:05:00Z",
@@ -757,7 +895,8 @@
     "specs": {
       "movement": "automatic",
       "caliber": "Seiko NH34",
-      "dialColor": "White"
+      "dialColor": "White",
+      "complications": "GMT"
     },
     "tags": [
       "GMT"
@@ -784,15 +923,23 @@
     ],
     "specs": {
       "movement": "automatic",
-      "caliber": "Miyota 9075",
-      "dialColor": "Tiger eye"
+      "caliber": "Soprod C125 GMT",
+      "dialColor": "Tiger eye",
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 11.3,
+      "lugToLugMm": 45,
+      "lugWidthMm": 20,
+      "powerReserveHours": 42,
+      "waterResistanceM": 100,
+      "crystal": "Sapphire (double-dome)",
+      "complications": "GMT worldtimer"
     },
     "tags": [
       "GMT",
       "worldtimer"
     ],
     "dateAdded": "2026-06-22T15:03:00Z",
-    "imageUrl": "https://cdn.baltic-watches.com/f/73554/3543x2657/4b168d55e9/heure-du-monde-face-oeil-de-tigre.jpg?width=1200",
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/2657x3543/7e7a1975c8/heure-du-monde-closeup-face-oeil-de-tigre.jpg?width=1920",
     "price": {
       "amount": 845,
       "currency": "EUR"
@@ -812,7 +959,18 @@
       }
     ],
     "specs": {
-      "dialColor": "Panda"
+      "dialColor": "Panda",
+      "caseDiameterMm": 39.5,
+      "caseThicknessMm": 13.5,
+      "lugToLugMm": 47,
+      "lugWidthMm": 20,
+      "movement": "manual",
+      "caliber": "Sellita SW510-M",
+      "powerReserveHours": 63,
+      "waterResistanceM": 50,
+      "crystal": "Sapphire (double-dome)",
+      "braceletStrap": "Steel bracelet",
+      "complications": "Chronograph"
     },
     "tags": [
       "chronograph"
@@ -839,7 +997,15 @@
     "specs": {
       "caseDiameterMm": 39,
       "movement": "automatic",
-      "caliber": "Miyota 9075"
+      "caliber": "Soprod C125 GMT",
+      "caseThicknessMm": 13,
+      "lugToLugMm": 47,
+      "lugWidthMm": 20,
+      "powerReserveHours": 42,
+      "waterResistanceM": 100,
+      "crystal": "Sapphire (double-dome)",
+      "dialColor": "Black",
+      "complications": "GMT"
     },
     "tags": [
       "diver",
