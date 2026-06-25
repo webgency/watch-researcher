@@ -32,7 +32,7 @@ export default function WatchCard({
         aria-label={`${watch.brand} ${watch.model}`}
         className="absolute inset-0 z-10"
       />
-      <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+      <div className="relative flex h-64 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
         {watch.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={watch.imageUrl} alt={`${watch.brand} ${watch.model}`} className="h-full w-full object-cover" />
