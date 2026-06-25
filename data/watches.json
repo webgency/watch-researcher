@@ -236,8 +236,8 @@
     "dateAdded": "2026-06-22T15:25:00Z",
     "referenceNumber": "2161-A",
     "price": {
-      "amount": 1250,
-      "currency": "CHF"
+      "amount": 1538,
+      "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:08:13.919Z",
     "imageUrl": "https://cdn.shopify.com/s/files/1/0558/4024/3844/files/Blue_Sector_Header_6e779320-f31c-41a5-a8d9-4ba874c03a6a.png?v=1762271062"
@@ -842,8 +842,8 @@
     "tags": [],
     "dateAdded": "2026-06-22T15:06:00Z",
     "price": {
-      "amount": 2525,
-      "currency": "GBP"
+      "amount": 3324,
+      "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:08:23.771Z",
     "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/Triumph_Red_Orange_Strap_Front.png?v=1757633137&width=1920"
@@ -874,8 +874,8 @@
     "tags": [],
     "dateAdded": "2026-06-22T15:05:00Z",
     "price": {
-      "amount": 820,
-      "currency": "GBP"
+      "amount": 1079,
+      "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:08:24.349Z",
     "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/ValiantRedFront-min_829eda8d-346b-4965-9158-572fdffac07a.png?v=1683571549&width=1920",
@@ -941,8 +941,8 @@
     "dateAdded": "2026-06-22T15:03:00Z",
     "imageUrl": "https://cdn.baltic-watches.com/f/73554/2657x3543/7e7a1975c8/heure-du-monde-closeup-face-oeil-de-tigre.jpg?width=1920",
     "price": {
-      "amount": 845,
-      "currency": "EUR"
+      "amount": 959,
+      "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:23:35.877Z",
     "favorite": true
@@ -978,8 +978,8 @@
     "dateAdded": "2026-06-22T15:02:00Z",
     "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x2264/e94e17980c/tricompax-panda-face.jpg?width=1200",
     "price": {
-      "amount": 525,
-      "currency": "EUR"
+      "amount": 596,
+      "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   },
@@ -1014,8 +1014,8 @@
     "dateAdded": "2026-06-22T15:01:00Z",
     "imageUrl": "https://cdn.baltic-watches.com/f/73554/3000x1688/75ba993562/aquascaphe-gmt-orange.jpg?width=1200",
     "price": {
-      "amount": 750,
-      "currency": "EUR"
+      "amount": 851,
+      "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
   }
