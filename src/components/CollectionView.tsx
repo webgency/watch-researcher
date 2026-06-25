@@ -117,7 +117,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
           <p className="text-sm text-slate-500">Add your first watch to start tracking and comparing.</p>
         </div>
         {!IS_STATIC && (
-          <Link href="/watch/quick" className="btn-primary">
+          <Link href="/watch/new" className="btn-primary">
             + Add your first watch
           </Link>
         )}

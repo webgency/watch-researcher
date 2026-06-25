@@ -28,7 +28,7 @@ export default function RootLayout({
                   Collection
                 </Link>
                 {!IS_STATIC && (
-                  <Link href="/watch/quick" className="btn-primary">
+                  <Link href="/watch/new" className="btn-primary">
                     + Add watch
                   </Link>
                 )}

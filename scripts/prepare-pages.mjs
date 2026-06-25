@@ -9,7 +9,6 @@ import { rm } from "node:fs/promises";
 const serverOnlyRoutes = [
   "src/app/api",
   "src/app/watch/new",
-  "src/app/watch/quick",
   "src/app/watch/[id]/edit",
 ];
 
