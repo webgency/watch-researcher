@@ -48,7 +48,6 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   const [model, setModel] = useState(initial?.model ?? "");
   const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
   const [status, setStatus] = useState<WatchStatus>(initial?.status ?? "wishlist");
-  const [grail, setGrail] = useState(initial?.grail ?? false);
   const [favorite, setFavorite] = useState(initial?.favorite ?? false);
   const [priority, setPriority] = useState(initial?.priority != null ? String(initial.priority) : "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
@@ -103,7 +102,6 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
       model: model.trim(),
       referenceNumber: referenceNumber.trim() || undefined,
       status,
-      grail: grail || undefined,
       favorite: favorite || undefined,
       priority: parseNum(priority),
       imageUrl: imageUrl.trim() || undefined,
@@ -189,14 +187,10 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
             <label className="label">Wishlist priority</label>
             <input className="input" inputMode="numeric" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="1 = top of the list" />
           </div>
-          <div className="flex items-end gap-4">
+          <div className="flex items-end">
             <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
               <input type="checkbox" checked={favorite} onChange={(e) => setFavorite(e.target.checked)} className="h-4 w-4 accent-rose-600" />
               ♥ Favorite
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-              <input type="checkbox" checked={grail} onChange={(e) => setGrail(e.target.checked)} className="h-4 w-4 accent-slate-900" />
-              ★ Grail
             </label>
           </div>
         </div>

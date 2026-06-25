@@ -49,8 +49,6 @@ export interface Watch {
   status: WatchStatus;
   /** Wishlist ranking — lower number = higher priority. */
   priority?: number;
-  /** Flag a dream/"grail" watch. */
-  grail?: boolean;
   /** Favorited — pinned to the top of the collection so you can prioritize it. */
   favorite?: boolean;
   /** Headline price you're tracking (usually the best/target price). */

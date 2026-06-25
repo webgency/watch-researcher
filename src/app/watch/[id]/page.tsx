@@ -48,9 +48,6 @@ export default async function WatchDetailPage({ params }: { params: { id: string
               {watch.favorite && (
                 <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white">♥ Favorite</span>
               )}
-              {watch.grail && (
-                <span className="rounded-full bg-yellow-400/90 px-2 py-0.5 text-xs font-semibold text-yellow-950">★ Grail</span>
-              )}
               <StatusBadge status={watch.status} />
             </div>
             {watch.referenceNumber && <p className="text-sm text-slate-500">Ref. {watch.referenceNumber}</p>}

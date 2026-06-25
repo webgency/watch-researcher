@@ -62,9 +62,6 @@ export default function WatchCard({
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-600 text-sm text-white shadow-sm">♥</span>
             )
           )}
-          {watch.grail && (
-            <span className="rounded-full bg-yellow-400/90 px-2 py-0.5 text-xs font-semibold text-yellow-950">★ Grail</span>
-          )}
         </div>
         <label className="absolute right-2 top-2 z-20 flex cursor-pointer items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-medium shadow-sm">
           <input
