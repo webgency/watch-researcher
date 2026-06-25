@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Watch, WatchStatus, WATCH_STATUSES } from "@/lib/types";
-import { formatMoney } from "@/lib/format";
 import { IS_STATIC } from "@/lib/config";
 import WatchCard from "./WatchCard";
 
@@ -103,16 +102,6 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
 
   const favoriteCount = useMemo(() => watches.filter((w) => w.favorite).length, [watches]);
 
-  // Sum wishlist value per currency (avoids mixing currencies in one total).
-  const wishlistValue = useMemo(() => {
-    const totals: Record<string, number> = {};
-    for (const w of watches) {
-      if (w.status !== "wishlist" || !w.price) continue;
-      totals[w.price.currency] = (totals[w.price.currency] ?? 0) + w.price.amount;
-    }
-    return Object.entries(totals).map(([currency, amount]) => formatMoney({ amount, currency }));
-  }, [watches]);
-
   function startCompare() {
     if (selected.size < 2) return;
     const ids = filtered.filter((w) => selected.has(w.id)).map((w) => w.id);
@@ -138,11 +127,10 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-3 gap-3">
         <Stat label="Total" value={String(counts.all)} />
-        <Stat label="Wishlist" value={String(counts.wishlist)} />
+        <Stat label="Favorites" value={String(favoriteCount)} />
         <Stat label="Owned" value={String(counts.owned)} />
-        <Stat label="Wishlist value" value={wishlistValue.length ? wishlistValue.join(" · ") : "—"} />
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -154,7 +142,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
           className="input sm:max-w-xs"
         />
         <div className="flex flex-wrap gap-2">
-          {(["all", ...WATCH_STATUSES] as const).map((s) => (
+          {(["all", "owned", "sold"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatus(s)}

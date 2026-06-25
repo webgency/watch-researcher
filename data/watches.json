@@ -378,7 +378,8 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:08:16.990Z",
-    "imageUrl": "https://www.watchfinder.com/media/catalog/product/W/a/Watch-1-Omega-SeamasterDiver300m-210_32_42_20_03_001-429028-260619-140235488.jpg"
+    "imageUrl": "https://www.watchfinder.com/media/catalog/product/W/a/Watch-1-Omega-SeamasterDiver300m-210_32_42_20_03_001-429028-260619-140235488.jpg",
+    "favorite": true
   },
   {
     "id": "w15",
@@ -465,7 +466,8 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:08:18.160Z",
-    "imageUrl": "https://cdn.shopify.com/s/files/1/0771/3174/3532/files/2026-05-23_13-42-03_B_R8_S4_B.png?v=1779983994"
+    "imageUrl": "https://cdn.shopify.com/s/files/1/0771/3174/3532/files/2026-05-23_13-42-03_B_R8_S4_B.png?v=1779983994",
+    "favorite": true
   },
   {
     "id": "w18",
@@ -738,7 +740,8 @@
       "currency": "GBP"
     },
     "priceUpdatedAt": "2026-06-23T03:08:24.349Z",
-    "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/ValiantRedFront-min_829eda8d-346b-4965-9158-572fdffac07a.png?v=1683571549&width=1920"
+    "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/ValiantRedFront-min_829eda8d-346b-4965-9158-572fdffac07a.png?v=1683571549&width=1920",
+    "favorite": true
   },
   {
     "id": "w29",
@@ -794,7 +797,8 @@
       "amount": 845,
       "currency": "EUR"
     },
-    "priceUpdatedAt": "2026-06-23T03:23:35.877Z"
+    "priceUpdatedAt": "2026-06-23T03:23:35.877Z",
+    "favorite": true
   },
   {
     "id": "w31",

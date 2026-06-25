@@ -24,7 +24,14 @@ export default function WatchCard({
 }) {
   const { specs } = watch;
   return (
-    <div className={`card overflow-hidden transition-shadow hover:shadow-md ${selected ? "ring-2 ring-slate-900" : ""}`}>
+    <div className={`card group relative overflow-hidden transition-shadow hover:shadow-md ${selected ? "ring-2 ring-slate-900" : ""}`}>
+      {/* Stretched overlay link: the whole card navigates to the detail page.
+          Interactive controls (favorite, Compare) sit above it via z-index. */}
+      <Link
+        href={`/watch/${watch.id}`}
+        aria-label={`${watch.brand} ${watch.model}`}
+        className="absolute inset-0 z-10"
+      />
       <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
         {watch.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -32,11 +39,15 @@ export default function WatchCard({
         ) : (
           <span className="text-3xl font-bold text-slate-400">{initials(watch)}</span>
         )}
-        <div className="absolute left-2 top-2 flex items-center gap-1">
+        <div className="absolute left-2 top-2 z-20 flex items-center gap-1">
           {onToggleFavorite ? (
             <button
               type="button"
-              onClick={() => onToggleFavorite(watch.id, !watch.favorite)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleFavorite(watch.id, !watch.favorite);
+              }}
               aria-pressed={Boolean(watch.favorite)}
               aria-label={watch.favorite ? "Remove from favorites" : "Add to favorites"}
               title={watch.favorite ? "Remove from favorites" : "Add to favorites"}
@@ -55,7 +66,7 @@ export default function WatchCard({
             <span className="rounded-full bg-yellow-400/90 px-2 py-0.5 text-xs font-semibold text-yellow-950">★ Grail</span>
           )}
         </div>
-        <label className="absolute right-2 top-2 flex cursor-pointer items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-medium shadow-sm">
+        <label className="absolute right-2 top-2 z-20 flex cursor-pointer items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-medium shadow-sm">
           <input
             type="checkbox"
             checked={selected}
@@ -69,9 +80,7 @@ export default function WatchCard({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{watch.brand}</p>
-            <Link href={`/watch/${watch.id}`} className="block truncate font-semibold hover:underline">
-              {watch.model}
-            </Link>
+            <p className="truncate font-semibold group-hover:underline">{watch.model}</p>
             {watch.referenceNumber && (
               <p className="truncate text-xs text-slate-400">Ref. {watch.referenceNumber}</p>
             )}
