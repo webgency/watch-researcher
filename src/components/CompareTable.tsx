@@ -24,12 +24,20 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full min-w-[640px] table-fixed border-collapse text-sm">
+        {/* Fixed layout + equal-width <col>s so every watch column is the same
+            width regardless of content. First col is the row-label column. */}
+        <colgroup>
+          <col className="w-32 sm:w-40" />
+          {watches.map((w) => (
+            <col key={w.id} />
+          ))}
+        </colgroup>
         <thead>
           <tr>
             <th className="sticky left-0 z-10 bg-slate-50 p-3 text-left align-bottom" />
             {watches.map((w) => (
-              <th key={w.id} className="min-w-[12rem] border-b border-slate-200 p-3 text-left align-bottom">
+              <th key={w.id} className="border-b border-slate-200 p-3 text-left align-bottom">
                 <div className="flex h-24 items-center justify-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-200">
                   {w.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
