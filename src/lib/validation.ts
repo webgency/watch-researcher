@@ -10,6 +10,8 @@ import {
   WatchSpecs,
   WatchStatus,
   WATCH_STATUSES,
+  WishlistTier,
+  WISHLIST_TIERS,
 } from "./types";
 
 type RecordValue = Record<string, unknown>;
@@ -46,15 +48,6 @@ function cleanRequiredString(value: unknown, path: string, errors: string[]): st
   const cleaned = cleanOptionalString(value, path, errors);
   if (!cleaned) errors.push(`${path} is required`);
   return cleaned;
-}
-
-function cleanBoolean(value: unknown, path: string, errors: string[]): boolean | undefined {
-  if (value === undefined || value === null) return undefined;
-  if (typeof value !== "boolean") {
-    errors.push(`${path} must be a boolean`);
-    return undefined;
-  }
-  return value;
 }
 
 function cleanPositiveNumber(value: unknown, path: string, errors: string[]): number | undefined {
@@ -103,14 +96,13 @@ function cleanStatus(value: unknown, required: boolean, errors: string[]): Watch
   return value as WatchStatus;
 }
 
-function cleanPriority(value: unknown, errors: string[]): number | undefined {
+function cleanWishlistTier(value: unknown, errors: string[]): WishlistTier | undefined {
   if (value === undefined || value === null || value === "") return undefined;
-  const priority = cleanPositiveNumber(value, "priority", errors);
-  if (priority !== undefined && !Number.isInteger(priority)) {
-    errors.push("priority must be a whole number");
+  if (typeof value !== "string" || !WISHLIST_TIERS.includes(value as WishlistTier)) {
+    errors.push(`wishlistTier must be one of ${WISHLIST_TIERS.join(", ")}`);
     return undefined;
   }
-  return priority;
+  return value as WishlistTier;
 }
 
 function cleanCondition(value: unknown, path: string, errors: string[]): Condition | undefined {
@@ -260,8 +252,7 @@ function normalizeWatchShape(
 
   assignIfPresent(output, body, "referenceNumber", cleanOptionalString(body.referenceNumber, "referenceNumber", errors));
   assignIfPresent(output, body, "status", cleanStatus(body.status, !partial, errors));
-  assignIfPresent(output, body, "priority", cleanPriority(body.priority, errors));
-  assignIfPresent(output, body, "favorite", cleanBoolean(body.favorite, "favorite", errors));
+  assignIfPresent(output, body, "wishlistTier", cleanWishlistTier(body.wishlistTier, errors));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
   assignIfPresent(output, body, "links", cleanLinks(body.links, !partial, errors));
@@ -291,6 +282,7 @@ export function validateWatchCollection(value: unknown): Watch[] {
 
   const errors: string[] = [];
   const ids = new Set<string>();
+  const watches: Watch[] = [];
 
   value.forEach((item, index) => {
     const path = `watches[${index}]`;
@@ -305,14 +297,20 @@ export function validateWatchCollection(value: unknown): Watch[] {
       ids.add(id);
     }
 
-    cleanDateString(item.dateAdded, `${path}.dateAdded`, errors);
+    const dateAdded = cleanDateString(item.dateAdded, `${path}.dateAdded`, errors);
     const result = normalizeWatchInput(item);
-    if (!result.ok) errors.push(...result.errors.map((error) => `${path}.${error}`));
+    if (!result.ok) {
+      errors.push(...result.errors.map((error) => `${path}.${error}`));
+      return;
+    }
+    if (id && dateAdded) {
+      watches.push({ ...result.data, id, dateAdded });
+    }
   });
 
   if (errors.length) {
     throw new DataValidationError("Watch data is invalid.", errors);
   }
 
-  return value as Watch[];
+  return watches;
 }

@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 
 const STATUSES = new Set(["wishlist", "owned", "sold"]);
+const WISHLIST_TIERS = new Set(["next-purchase", "must-have", "love-it", "interested", "maybe-later", "pass"]);
 const MOVEMENTS = new Set(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"]);
 const CONDITIONS = new Set(["new", "pre-owned"]);
 const CURRENCIES = new Set(["USD", "EUR", "GBP", "CHF", "JPY", "AUD", "CAD", "SGD", "SEK", "NOK", "DKK", "HKD", "NZD"]);
@@ -42,12 +43,6 @@ function checkDate(value, path, errors, { required = false } = {}) {
   }
   if (typeof value !== "string" || Number.isNaN(new Date(value).getTime())) {
     errors.push(`${path} must be a valid date string`);
-  }
-}
-
-function checkBoolean(value, path, errors) {
-  if (value !== undefined && value !== null && typeof value !== "boolean") {
-    errors.push(`${path} must be a boolean`);
   }
 }
 
@@ -151,8 +146,9 @@ if (!Array.isArray(watches)) {
     checkString(watch.model, `${path}.model`, errors, { required: true });
     checkString(watch.referenceNumber, `${path}.referenceNumber`, errors);
     if (!STATUSES.has(watch.status)) errors.push(`${path}.status must be wishlist, owned, or sold`);
-    checkPositiveNumber(watch.priority, `${path}.priority`, errors, { integer: true });
-    checkBoolean(watch.favorite, `${path}.favorite`, errors);
+    if (watch.wishlistTier !== undefined && !WISHLIST_TIERS.has(watch.wishlistTier)) {
+      errors.push(`${path}.wishlistTier must be one of ${Array.from(WISHLIST_TIERS).join(", ")}`);
+    }
     checkMoney(watch.price, `${path}.price`, errors);
     checkDate(watch.priceUpdatedAt, `${path}.priceUpdatedAt`, errors);
     checkLinks(watch.links, `${path}.links`, errors);

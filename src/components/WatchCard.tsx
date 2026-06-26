@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Watch } from "@/lib/types";
+import { Watch, WishlistTier, WISHLIST_TIERS, WISHLIST_TIER_LABELS } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
+import WishlistTierBadge from "./WishlistTierBadge";
 
 function initials(watch: Watch): string {
   const a = watch.brand?.trim()?.[0] ?? "?";
@@ -15,18 +16,18 @@ export default function WatchCard({
   watch,
   selected,
   onToggleSelect,
-  onToggleFavorite,
+  onChangeWishlistTier,
 }: {
   watch: Watch;
   selected: boolean;
   onToggleSelect: (id: string) => void;
-  onToggleFavorite?: (id: string, next: boolean) => void;
+  onChangeWishlistTier?: (id: string, next: WishlistTier | "") => void;
 }) {
   const { specs } = watch;
   return (
     <div className={`card group relative overflow-hidden transition-shadow hover:shadow-md ${selected ? "ring-2 ring-slate-900" : ""}`}>
       {/* Stretched overlay link: the whole card navigates to the detail page.
-          Interactive controls (favorite, Compare) sit above it via z-index. */}
+          Interactive controls sit above it via z-index. */}
       <Link
         href={`/watch/${watch.id}`}
         aria-label={`${watch.brand} ${watch.model}`}
@@ -39,30 +40,6 @@ export default function WatchCard({
         ) : (
           <span className="text-3xl font-bold text-slate-400">{initials(watch)}</span>
         )}
-        <div className="absolute left-2 top-2 z-20 flex items-center gap-1">
-          {onToggleFavorite ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onToggleFavorite(watch.id, !watch.favorite);
-              }}
-              aria-pressed={Boolean(watch.favorite)}
-              aria-label={watch.favorite ? "Remove from favorites" : "Add to favorites"}
-              title={watch.favorite ? "Remove from favorites" : "Add to favorites"}
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-sm shadow-sm transition-colors ${
-                watch.favorite ? "bg-rose-600 text-white" : "bg-white/90 text-slate-400 hover:text-rose-600"
-              }`}
-            >
-              ♥
-            </button>
-          ) : (
-            watch.favorite && (
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-600 text-sm text-white shadow-sm">♥</span>
-            )
-          )}
-        </div>
         <label className="absolute right-2 top-2 z-20 flex cursor-pointer items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-medium shadow-sm">
           <input
             type="checkbox"
@@ -82,7 +59,10 @@ export default function WatchCard({
               <p className="truncate text-xs text-slate-400">Ref. {watch.referenceNumber}</p>
             )}
           </div>
-          <StatusBadge status={watch.status} />
+          <div className="flex flex-shrink-0 flex-wrap justify-end gap-1">
+            <WishlistTierBadge tier={watch.wishlistTier} />
+            <StatusBadge status={watch.status} />
+          </div>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-lg font-bold">{formatMoney(watch.price)}</span>
@@ -90,6 +70,26 @@ export default function WatchCard({
             {[specs.caseDiameterMm ? `${specs.caseDiameterMm}mm` : null, specs.movement].filter(Boolean).join(" · ")}
           </span>
         </div>
+        {onChangeWishlistTier && (
+          <select
+            value={watch.wishlistTier ?? ""}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onChangeWishlistTier(watch.id, e.target.value as WishlistTier | "");
+            }}
+            aria-label={`Set desirability for ${watch.brand} ${watch.model}`}
+            className="input relative z-20 h-8 py-1 text-xs"
+          >
+            <option value="">Set desirability</option>
+            {WISHLIST_TIERS.map((tier) => (
+              <option key={tier} value={tier}>
+                {WISHLIST_TIER_LABELS[tier]}
+              </option>
+            ))}
+          </select>
+        )}
         {watch.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-1">
             {watch.tags.slice(0, 4).map((tag) => (

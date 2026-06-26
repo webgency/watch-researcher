@@ -2,6 +2,14 @@
 
 export type WatchStatus = "wishlist" | "owned" | "sold";
 
+export type WishlistTier =
+  | "next-purchase"
+  | "must-have"
+  | "love-it"
+  | "interested"
+  | "maybe-later"
+  | "pass";
+
 export type MovementType =
   | "automatic"
   | "manual"
@@ -47,10 +55,8 @@ export interface Watch {
   model: string;
   referenceNumber?: string;
   status: WatchStatus;
-  /** Wishlist ranking — lower number = higher priority. */
-  priority?: number;
-  /** Favorited — pinned to the top of the collection so you can prioritize it. */
-  favorite?: boolean;
+  /** Personal desirability bucket for wishlist planning. */
+  wishlistTier?: WishlistTier;
   /** Headline price you're tracking (usually the best/target price). */
   price?: Money;
   /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */
@@ -72,6 +78,24 @@ export interface Watch {
 export type WatchInput = Omit<Watch, "id" | "dateAdded">;
 
 export const WATCH_STATUSES: WatchStatus[] = ["wishlist", "owned", "sold"];
+
+export const WISHLIST_TIERS: WishlistTier[] = [
+  "next-purchase",
+  "must-have",
+  "love-it",
+  "interested",
+  "maybe-later",
+  "pass",
+];
+
+export const WISHLIST_TIER_LABELS: Record<WishlistTier, string> = {
+  "next-purchase": "Next purchase",
+  "must-have": "Must have",
+  "love-it": "Love it",
+  interested: "Interested",
+  "maybe-later": "Maybe later",
+  pass: "Pass",
+};
 
 export const MOVEMENT_TYPES: MovementType[] = [
   "automatic",

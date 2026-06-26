@@ -25,12 +25,12 @@ npm start
 
 ## What it does today (Phase 1 — MVP)
 
-- **Collection view** — every watch as a card, with search, status/favorites filters, and sorting (favorites, recently added, priority, price, brand, case size).
-- **Favorites** — heart a watch on its card to keep it pinned above the rest.
+- **Collection view** — every watch as a card, with search, status/desirability filters, and sorting (desirability, recently added, price, brand, case size).
+- **Wishlist tiers** — categorize each watch as Next purchase, Must have, Love it, Interested, Maybe later, or Pass.
 - **Add / edit watches** — one full form covering basics, URL autofill, specifications, image, multiple retailer links, tags, and notes.
 - **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table. The **best value in each row is highlighted** (lowest price, larger power reserve, etc.).
 - **Per-watch detail page** — full specs, all retailer links, and notes.
-- **Dashboard stats** — total watches, favorite count, and owned count.
+- **Dashboard stats** — total watches, next-purchase count, must-have count, and owned count.
 
 The collection comes pre-seeded with **36 watches from your wishlist**.
 
@@ -51,7 +51,7 @@ Each watch (`src/lib/types.ts`):
 | `links[]` | retailer links, each with optional price + `new`/`pre-owned` condition |
 | `specs` | case diameter, thickness, lug-to-lug, lug width, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
 | `tags[]` | e.g. `diver`, `GMT`, `chronograph` |
-| `priority`, `favorite` | wishlist ranking + favorite flag |
+| `wishlistTier` | desirability bucket: next purchase, must have, love it, interested, maybe later, or pass |
 | `notes` | free text |
 | `purchase`, `sale` | filled in as a watch moves through `owned` → `sold` |
 
@@ -101,7 +101,7 @@ npm run build:static && npx serve out
 **Phase 3 — Collection management**
 - Status workflow (wishlist → bought → owned → sold) with purchase/sale price & dates
 - Richer dashboard: total spent, value by brand/movement, size distribution
-- Wishlist prioritisation & budget planning ("what's next")
+- Wishlist tier insights & budget planning ("what's next")
 - Overlap detection ("you already have a 39mm diver")
 - Service-history reminders; insurance/valuation CSV/PDF export
 

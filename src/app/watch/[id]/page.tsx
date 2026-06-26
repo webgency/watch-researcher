@@ -6,6 +6,7 @@ import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { formatMoney, formatDate, hostname } from "@/lib/format";
 import { IS_STATIC } from "@/lib/config";
 import StatusBadge from "@/components/StatusBadge";
+import WishlistTierBadge from "@/components/WishlistTierBadge";
 import WatchActions from "@/components/WatchActions";
 
 // Pre-render a detail page for every watch in the static export. In dynamic
@@ -46,9 +47,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">{watch.brand}</p>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight">{watch.model}</h1>
-              {watch.favorite && (
-                <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white">♥ Favorite</span>
-              )}
+              <WishlistTierBadge tier={watch.wishlistTier} />
               <StatusBadge status={watch.status} />
             </div>
             {watch.referenceNumber && <p className="text-sm text-slate-500">Ref. {watch.referenceNumber}</p>}

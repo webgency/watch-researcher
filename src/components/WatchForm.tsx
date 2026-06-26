@@ -11,6 +11,9 @@ import {
   WatchSpecs,
   WatchStatus,
   WATCH_STATUSES,
+  WishlistTier,
+  WISHLIST_TIERS,
+  WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { SPEC_FIELDS } from "@/lib/specs";
 import { hostname } from "@/lib/format";
@@ -62,8 +65,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   const [model, setModel] = useState(initial?.model ?? "");
   const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
   const [status, setStatus] = useState<WatchStatus>(initial?.status ?? "wishlist");
-  const [favorite, setFavorite] = useState(initial?.favorite ?? false);
-  const [priority, setPriority] = useState(initial?.priority != null ? String(initial.priority) : "");
+  const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial?.wishlistTier ?? "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
@@ -194,8 +196,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
       model: model.trim(),
       referenceNumber: referenceNumber.trim() || undefined,
       status,
-      favorite: favorite || undefined,
-      priority: parseNum(priority),
+      wishlistTier: wishlistTier || undefined,
       imageUrl: imageUrl.trim() || undefined,
       specs: builtSpecs,
       tags: tags
@@ -291,6 +292,17 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
             </select>
           </div>
           <div>
+            <label className="label">Desirability</label>
+            <select className="input" value={wishlistTier} onChange={(e) => setWishlistTier(e.target.value as WishlistTier | "")}>
+              <option value="">No tier</option>
+              {WISHLIST_TIERS.map((tier) => (
+                <option key={tier} value={tier}>
+                  {WISHLIST_TIER_LABELS[tier]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <label className="label">Target / tracked price</label>
             <div className="flex gap-2">
               <input className="input" inputMode="decimal" value={priceAmount} onChange={(e) => setPriceAmount(e.target.value)} placeholder="5600" />
@@ -302,16 +314,6 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
                 ))}
               </select>
             </div>
-          </div>
-          <div>
-            <label className="label">Wishlist priority</label>
-            <input className="input" inputMode="numeric" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="1 = top of the list" />
-          </div>
-          <div className="flex items-end">
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-              <input type="checkbox" checked={favorite} onChange={(e) => setFavorite(e.target.checked)} className="h-4 w-4 accent-rose-600" />
-              ♥ Favorite
-            </label>
           </div>
         </div>
         <div>

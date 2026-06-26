@@ -3,6 +3,7 @@ import { Watch } from "@/lib/types";
 import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
+import WishlistTierBadge from "./WishlistTierBadge";
 
 /** Indexes of the "best" cells in a row, for highlighting. */
 function bestIndexes(values: (number | undefined)[], prefer: "higher" | "lower"): Set<number> {
@@ -52,7 +53,8 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
                 <Link href={`/watch/${w.id}`} className="font-semibold hover:underline">
                   {w.model}
                 </Link>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <WishlistTierBadge tier={w.wishlistTier} />
                   <StatusBadge status={w.status} />
                 </div>
               </th>
@@ -64,6 +66,14 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
             {watches.map((w, i) => (
               <Cell key={w.id} highlight={priceBest.has(i)}>
                 <span className="font-semibold">{formatMoney(w.price)}</span>
+              </Cell>
+            ))}
+          </Row>
+          <Row label="Desirability" sticky>
+            {watches.map((w) => (
+              <Cell key={w.id}>
+                <WishlistTierBadge tier={w.wishlistTier} />
+                {!w.wishlistTier && "—"}
               </Cell>
             ))}
           </Row>
