@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+# Publishes a read-only static export of the collection.
+# Runs on push to main or the working branch, or via a manual run. Once the PR
+# is merged you can drop the feature branch and deploy from main only.
+on:
+  push:
+    branches: [main, claude/epic-sagan-reqnic]
+  workflow_dispatch:
+
+# Permissions required by the GitHub Pages deployment.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; cancel superseded runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          # Puppeteer is only used locally (screenshots); the Pages build
+          # doesn't need its bundled Chromium.
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+
+      - name: Build static export
+        run: npm run build:static
+
+      # Pages must be enabled once under Settings → Pages → Source: GitHub
+      # Actions. (The workflow token can't create the Pages site automatically
+      # in all orgs, so we don't use enablement: true here.)
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

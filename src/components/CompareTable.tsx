@@ -3,6 +3,7 @@ import { Watch } from "@/lib/types";
 import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
+import WishlistTierBadge from "./WishlistTierBadge";
 
 /** Indexes of the "best" cells in a row, for highlighting. */
 function bestIndexes(values: (number | undefined)[], prefer: "higher" | "lower"): Set<number> {
@@ -24,12 +25,20 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full min-w-[640px] table-fixed border-collapse text-sm">
+        {/* Fixed layout + equal-width <col>s so every watch column is the same
+            width regardless of content. First col is the row-label column. */}
+        <colgroup>
+          <col className="w-32 sm:w-40" />
+          {watches.map((w) => (
+            <col key={w.id} />
+          ))}
+        </colgroup>
         <thead>
           <tr>
             <th className="sticky left-0 z-10 bg-slate-50 p-3 text-left align-bottom" />
             {watches.map((w) => (
-              <th key={w.id} className="min-w-[12rem] border-b border-slate-200 p-3 text-left align-bottom">
+              <th key={w.id} className="border-b border-slate-200 p-3 text-left align-bottom">
                 <div className="flex h-24 items-center justify-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-200">
                   {w.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -44,7 +53,8 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
                 <Link href={`/watch/${w.id}`} className="font-semibold hover:underline">
                   {w.model}
                 </Link>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <WishlistTierBadge tier={w.wishlistTier} />
                   <StatusBadge status={w.status} />
                 </div>
               </th>
@@ -56,6 +66,14 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
             {watches.map((w, i) => (
               <Cell key={w.id} highlight={priceBest.has(i)}>
                 <span className="font-semibold">{formatMoney(w.price)}</span>
+              </Cell>
+            ))}
+          </Row>
+          <Row label="Desirability" sticky>
+            {watches.map((w) => (
+              <Cell key={w.id}>
+                <WishlistTierBadge tier={w.wishlistTier} />
+                {!w.wishlistTier && "—"}
               </Cell>
             ))}
           </Row>

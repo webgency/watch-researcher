@@ -1,9 +1,12 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { getWatches } from "@/lib/store";
+import { IS_STATIC } from "@/lib/config";
 import CollectionView from "@/components/CollectionView";
 
-export const dynamic = "force-dynamic";
-
 export default async function HomePage() {
+  // Stay dynamic locally so edits show immediately; allow static prerender for
+  // the GitHub Pages export.
+  if (!IS_STATIC) noStore();
   const watches = await getWatches();
   return (
     <div className="space-y-6">

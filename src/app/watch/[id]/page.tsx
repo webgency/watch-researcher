@@ -1,15 +1,26 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getWatch } from "@/lib/store";
+import { unstable_noStore as noStore } from "next/cache";
+import { getWatch, getWatches } from "@/lib/store";
 import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { formatMoney, formatDate, hostname } from "@/lib/format";
+import { IS_STATIC } from "@/lib/config";
 import StatusBadge from "@/components/StatusBadge";
+import WishlistTierBadge from "@/components/WishlistTierBadge";
 import WatchActions from "@/components/WatchActions";
 
-export const dynamic = "force-dynamic";
+// Pre-render a detail page for every watch in the static export. In dynamic
+// mode return nothing so pages render on demand and reflect edits immediately.
+export async function generateStaticParams() {
+  if (!IS_STATIC) return [];
+  const watches = await getWatches();
+  return watches.map((w) => ({ id: w.id }));
+}
 
-export default async function WatchDetailPage({ params }: { params: { id: string } }) {
-  const watch = await getWatch(params.id);
+export default async function WatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  if (!IS_STATIC) noStore();
+  const { id } = await params;
+  const watch = await getWatch(id);
   if (!watch) notFound();
 
   return (
@@ -18,7 +29,7 @@ export default async function WatchDetailPage({ params }: { params: { id: string
         <Link href="/" className="btn-secondary">
           ← Collection
         </Link>
-        <WatchActions id={watch.id} name={`${watch.brand} ${watch.model}`} />
+        {!IS_STATIC && <WatchActions id={watch.id} name={`${watch.brand} ${watch.model}`} />}
       </div>
 
       <div className="grid gap-6 md:grid-cols-[2fr_3fr]">
@@ -36,15 +47,16 @@ export default async function WatchDetailPage({ params }: { params: { id: string
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">{watch.brand}</p>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight">{watch.model}</h1>
-              {watch.grail && (
-                <span className="rounded-full bg-yellow-400/90 px-2 py-0.5 text-xs font-semibold text-yellow-950">★ Grail</span>
-              )}
+              <WishlistTierBadge tier={watch.wishlistTier} />
               <StatusBadge status={watch.status} />
             </div>
             {watch.referenceNumber && <p className="text-sm text-slate-500">Ref. {watch.referenceNumber}</p>}
           </div>
 
           <p className="text-3xl font-bold">{formatMoney(watch.price)}</p>
+          {watch.priceUpdatedAt && (
+            <p className="text-xs text-slate-400">Price updated {formatDate(watch.priceUpdatedAt)}</p>
+          )}
 
           {watch.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">

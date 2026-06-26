@@ -7,6 +7,9 @@ const STYLES: Record<WatchStatus, string> = {
 };
 
 export default function StatusBadge({ status }: { status: WatchStatus }) {
+  // The whole app is a wishlist, so a "wishlist" badge is just noise — only
+  // surface a badge once a watch is actually owned or sold.
+  if (status === "wishlist") return null;
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${STYLES[status]}`}

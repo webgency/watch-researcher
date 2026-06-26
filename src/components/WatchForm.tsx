@@ -11,9 +11,13 @@ import {
   WatchSpecs,
   WatchStatus,
   WATCH_STATUSES,
+  WishlistTier,
+  WISHLIST_TIERS,
+  WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { SPEC_FIELDS } from "@/lib/specs";
 import { hostname } from "@/lib/format";
+import ImageDropzone from "./ImageDropzone";
 
 interface LinkRow {
   url: string;
@@ -39,6 +43,20 @@ function parseNum(value: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function payloadJson(payload: WatchInput): string {
+  return JSON.stringify(payload, (_key, value) => (value === undefined ? null : value));
+}
+
+interface AutofillResult {
+  brand?: string;
+  model?: string;
+  referenceNumber?: string;
+  price?: { amount?: number; currency?: string };
+  imageUrl?: string;
+  specs?: Record<string, unknown>;
+  retailer?: string;
+}
+
 export default function WatchForm({ initial }: { initial?: Watch }) {
   const router = useRouter();
   const isEdit = Boolean(initial);
@@ -47,8 +65,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   const [model, setModel] = useState(initial?.model ?? "");
   const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
   const [status, setStatus] = useState<WatchStatus>(initial?.status ?? "wishlist");
-  const [grail, setGrail] = useState(initial?.grail ?? false);
-  const [priority, setPriority] = useState(initial?.priority != null ? String(initial.priority) : "");
+  const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial?.wishlistTier ?? "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
@@ -67,9 +84,87 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchUrl, setFetchUrl] = useState("");
+  const [fetching, setFetching] = useState(false);
+  const [fetchMsg, setFetchMsg] = useState<string | null>(null);
 
   function setLink(i: number, patch: Partial<LinkRow>) {
     setLinks((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+
+  async function autofillFromUrl() {
+    const url = fetchUrl.trim();
+    if (!/^https?:\/\/\S+$/i.test(url)) {
+      setFetchMsg("Enter a full http(s) link.");
+      return;
+    }
+
+    setFetching(true);
+    setFetchMsg(null);
+    try {
+      const res = await fetch("/api/watches/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = (await res.json()) as AutofillResult & { error?: string };
+      if (!res.ok) throw new Error(data.error || "Couldn't fetch that page.");
+
+      const filled: string[] = [];
+      if (data.brand) {
+        setBrand(data.brand);
+        filled.push("brand");
+      }
+      if (data.model) {
+        setModel(data.model);
+        filled.push("model");
+      }
+      if (data.referenceNumber) {
+        setReferenceNumber(data.referenceNumber);
+        filled.push("ref");
+      }
+      if (data.imageUrl) {
+        setImageUrl(data.imageUrl);
+        filled.push("image");
+      }
+      if (data.price?.amount) {
+        setPriceAmount(String(data.price.amount));
+        if (data.price.currency) setPriceCurrency(data.price.currency);
+        filled.push("price");
+      }
+
+      const specCount = data.specs ? Object.keys(data.specs).length : 0;
+      if (specCount) {
+        setSpecs((current) => {
+          const next = { ...current };
+          for (const [key, value] of Object.entries(data.specs ?? {})) next[key] = String(value);
+          return next;
+        });
+        filled.push(`${specCount} spec${specCount > 1 ? "s" : ""}`);
+      }
+
+      setLinks((rows) => {
+        if (rows.some((row) => row.url.trim() === url)) return rows;
+        const row: LinkRow = {
+          url,
+          retailer: data.retailer || hostname(url),
+          priceAmount: data.price?.amount ? String(data.price.amount) : "",
+          priceCurrency: data.price?.currency || "USD",
+          condition: "",
+        };
+        return rows[0]?.url.trim() ? [...rows, row] : [row, ...rows.slice(1)];
+      });
+
+      setFetchMsg(
+        filled.length
+          ? `Filled ${filled.join(", ")}. Review everything below, then save.`
+          : "Couldn't find much on that page. Fill it in manually."
+      );
+    } catch (err) {
+      setFetchMsg(err instanceof Error ? err.message : "Couldn't fetch that page.");
+    } finally {
+      setFetching(false);
+    }
   }
 
   function buildPayload(): WatchInput {
@@ -101,8 +196,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
       model: model.trim(),
       referenceNumber: referenceNumber.trim() || undefined,
       status,
-      grail: grail || undefined,
-      priority: parseNum(priority),
+      wishlistTier: wishlistTier || undefined,
       imageUrl: imageUrl.trim() || undefined,
       specs: builtSpecs,
       tags: tags
@@ -130,7 +224,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
       const res = await fetch(isEdit ? `/api/watches/${initial!.id}` : "/api/watches", {
         method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: payloadJson(payload),
       });
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       const saved = (await res.json()) as Watch;
@@ -144,6 +238,34 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {!isEdit && (
+        <section className="card space-y-3 p-5">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Autofill from a link</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Paste a product or retailer URL and we&apos;ll try to fill the brand, price, image, and specs from the page.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className="input"
+              value={fetchUrl}
+              onChange={(e) => setFetchUrl(e.target.value)}
+              placeholder="https://retailer.com/product"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  autofillFromUrl();
+                }
+              }}
+            />
+            <button type="button" className="btn-secondary whitespace-nowrap" onClick={autofillFromUrl} disabled={fetching}>
+              {fetching ? "Fetching..." : "Fetch details"}
+            </button>
+          </div>
+          {fetchMsg && <p className="text-xs text-slate-600">{fetchMsg}</p>}
+        </section>
+      )}
       <section className="card space-y-4 p-5">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Basics</h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -160,15 +282,22 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
             <input className="input" value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} placeholder="210.30.42.20.03.003" />
           </div>
           <div>
-            <label className="label">Image URL</label>
-            <input className="input" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…/watch.jpg" />
-          </div>
-          <div>
             <label className="label">Status</label>
             <select className="input" value={status} onChange={(e) => setStatus(e.target.value as WatchStatus)}>
               {WATCH_STATUSES.map((s) => (
                 <option key={s} value={s} className="capitalize">
                   {s}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">Desirability</label>
+            <select className="input" value={wishlistTier} onChange={(e) => setWishlistTier(e.target.value as WishlistTier | "")}>
+              <option value="">No tier</option>
+              {WISHLIST_TIERS.map((tier) => (
+                <option key={tier} value={tier}>
+                  {WISHLIST_TIER_LABELS[tier]}
                 </option>
               ))}
             </select>
@@ -186,20 +315,14 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
               </select>
             </div>
           </div>
-          <div>
-            <label className="label">Wishlist priority</label>
-            <input className="input" inputMode="numeric" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="1 = top of the list" />
-          </div>
-          <div className="flex items-end">
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-              <input type="checkbox" checked={grail} onChange={(e) => setGrail(e.target.checked)} className="h-4 w-4 accent-slate-900" />
-              ★ Mark as a grail
-            </label>
-          </div>
         </div>
         <div>
           <label className="label">Tags (comma-separated)</label>
           <input className="input" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="diver, GMT, blue dial" />
+        </div>
+        <div>
+          <label className="label">Image</label>
+          <ImageDropzone value={imageUrl} onChange={setImageUrl} />
         </div>
       </section>
 
