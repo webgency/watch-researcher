@@ -1,10 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import type { WatchScoreSummary } from "@/lib/scoring";
 import { Watch, WishlistTier, WISHLIST_TIERS, WISHLIST_TIER_LABELS } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
 import WishlistTierBadge from "./WishlistTierBadge";
+
+const QUADRANT_LABELS: Record<string, string> = {
+  buy: "Buy",
+  aspirational: "Aspirational",
+  sensible: "Sensible",
+  skip: "Skip",
+};
+
+const QUADRANT_CLASSES: Record<string, string> = {
+  buy: "bg-emerald-50 text-emerald-700",
+  aspirational: "bg-amber-50 text-amber-700",
+  sensible: "bg-sky-50 text-sky-700",
+  skip: "bg-slate-100 text-slate-600",
+};
 
 function initials(watch: Watch): string {
   const a = watch.brand?.trim()?.[0] ?? "?";
@@ -15,11 +30,13 @@ function initials(watch: Watch): string {
 export default function WatchCard({
   watch,
   selected,
+  scoreSummary,
   onToggleSelect,
   onChangeWishlistTier,
 }: {
   watch: Watch;
   selected: boolean;
+  scoreSummary?: WatchScoreSummary;
   onToggleSelect: (id: string) => void;
   onChangeWishlistTier?: (id: string, next: WishlistTier | "") => void;
 }) {
@@ -70,6 +87,7 @@ export default function WatchCard({
             {[specs.caseDiameterMm ? `${specs.caseDiameterMm}mm` : null, specs.movement].filter(Boolean).join(" · ")}
           </span>
         </div>
+        {scoreSummary && <ScoreSummary summary={scoreSummary} />}
         {onChangeWishlistTier && (
           <select
             value={watch.wishlistTier ?? ""}
@@ -100,6 +118,31 @@ export default function WatchCard({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function ScoreSummary({ summary }: { summary: WatchScoreSummary }) {
+  const roundedValue = summary.valueScore === null ? null : Math.round(summary.valueScore);
+  const roundedDesire = Math.round(summary.desirabilityScore);
+  const quadrantClass = summary.quadrant ? QUADRANT_CLASSES[summary.quadrant] : "bg-slate-100 text-slate-600";
+
+  return (
+    <div className="flex flex-wrap gap-1 text-xs">
+      <span
+        title="Value rank among priced wishlist watches"
+        className="rounded-full bg-slate-900 px-2 py-1 font-medium text-white"
+      >
+        {summary.valueRank ? `Value #${summary.valueRank} · ${roundedValue}` : "Value unrated"}
+      </span>
+      <span title="Calculated desire score" className="rounded-full bg-slate-100 px-2 py-1 font-medium text-slate-600">
+        Desire {roundedDesire}
+      </span>
+      {summary.quadrant && (
+        <span className={`rounded-full px-2 py-1 font-medium ${quadrantClass}`}>
+          {QUADRANT_LABELS[summary.quadrant]}
+        </span>
+      )}
     </div>
   );
 }

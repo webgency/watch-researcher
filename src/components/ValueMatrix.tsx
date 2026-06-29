@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { formatMoney } from "@/lib/format";
 import {
+  compareValueScores,
   computeWatchScores,
   DataCompleteness,
   MIN_MEDIAN_THRESHOLD_COUNT,
   Quadrant,
+  valueRankings,
   WatchScore,
 } from "@/lib/scoring";
 import { BrandCatalog, Watch } from "@/lib/types";
@@ -60,7 +62,8 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
   const { scores, thresholds, thresholdMethod } = computeWatchScores(wishlist, brands, (message) => {
     if (!warnings.includes(message)) warnings.push(message);
   });
-  const rated = scores.filter(isRated).sort((a, b) => b.desirabilityScore - a.desirabilityScore || b.valueScore - a.valueScore);
+  const valueRanks = valueRankings(scores);
+  const rated = scores.filter(isRated).sort(compareValueScores);
   const unrated = scores.filter((score) => score.valueScore === null);
   const grouped = Object.fromEntries(QUADRANTS.map((quadrant) => [quadrant, rated.filter((score) => score.quadrant === quadrant)])) as Record<
     Quadrant,
@@ -139,7 +142,7 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
                 Desire score
               </text>
 
-              {rated.map((score, index) => (
+              {rated.map((score) => (
                 <g key={score.watch.id}>
                   <circle
                     cx={xFor(score.valueScore)}
@@ -150,10 +153,10 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
                     stroke="#ffffff"
                     strokeWidth="2"
                   >
-                    <title>{`${score.watch.brand} ${score.watch.model}: value ${formatScore(score.valueScore)}, desire score ${formatScore(score.desirabilityScore)}`}</title>
+                    <title>{`${score.watch.brand} ${score.watch.model}: value rank #${valueRanks.get(score.watch.id)}, value ${formatScore(score.valueScore)}, desire score ${formatScore(score.desirabilityScore)}`}</title>
                   </circle>
                   <text x={xFor(score.valueScore) + 10} y={yFor(score.desirabilityScore) + 4} className="fill-slate-700 text-[10px]">
-                    {index + 1}
+                    {valueRanks.get(score.watch.id)}
                   </text>
                 </g>
               ))}
@@ -174,7 +177,7 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
               </div>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{grouped[quadrant].length}</span>
             </div>
-            <WatchScoreList scores={grouped[quadrant]} />
+            <WatchScoreList scores={grouped[quadrant]} valueRanks={valueRanks} />
           </section>
         ))}
       </div>
@@ -188,14 +191,14 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
             </div>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{unrated.length}</span>
           </div>
-          <WatchScoreList scores={unrated} />
+          <WatchScoreList scores={unrated} valueRanks={valueRanks} />
         </section>
       )}
     </div>
   );
 }
 
-function WatchScoreList({ scores }: { scores: WatchScore[] }) {
+function WatchScoreList({ scores, valueRanks }: { scores: WatchScore[]; valueRanks: Map<string, number> }) {
   if (scores.length === 0) return <p className="rounded-lg bg-slate-50 px-3 py-3 text-sm text-slate-500">No watches in this quadrant.</p>;
 
   return (
@@ -210,7 +213,7 @@ function WatchScoreList({ scores }: { scores: WatchScore[] }) {
             <p className="text-xs text-slate-500">{formatMoney(score.watch.price)}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <ScorePill label="Value" value={score.valueScore} />
+            <ScorePill label={valueRanks.get(score.watch.id) ? `Value #${valueRanks.get(score.watch.id)}` : "Value"} value={score.valueScore} />
             <ScorePill label="Desire score" value={score.desirabilityScore} />
             <DataCompletenessBadge completeness={score.dataCompleteness} />
           </div>

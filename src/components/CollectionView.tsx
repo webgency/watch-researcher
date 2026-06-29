@@ -12,11 +12,13 @@ import {
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { IS_STATIC } from "@/lib/config";
+import type { WatchScoreSummary } from "@/lib/scoring";
 import { useCollectionSearch } from "./CollectionSearchContext";
 import WatchCard from "./WatchCard";
 
 type SortKey =
   | "wishlistTier"
+  | "valueScore"
   | "dateAdded"
   | "priceAsc"
   | "priceDesc"
@@ -25,6 +27,7 @@ type SortKey =
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "wishlistTier", label: "Wishlist priority" },
+  { key: "valueScore", label: "Value score" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },
   { key: "priceDesc", label: "Price: high to low" },
@@ -38,7 +41,13 @@ function tierRank(tier?: WishlistTier): number {
   return index === -1 ? Infinity : index;
 }
 
-export default function CollectionView({ watches }: { watches: Watch[] }) {
+export default function CollectionView({
+  watches,
+  scoreSummaries = {},
+}: {
+  watches: Watch[];
+  scoreSummaries?: Record<string, WatchScoreSummary>;
+}) {
   const router = useRouter();
   const { query } = useCollectionSearch();
   const [status, setStatus] = useState<WatchStatus | "all">("all");
@@ -80,6 +89,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
         w.model,
         w.referenceNumber,
         w.wishlistTier ? WISHLIST_TIER_LABELS[w.wishlistTier] : null,
+        scoreSummaries[w.id]?.quadrant,
         ...w.tags,
       ]
         .filter(Boolean)
@@ -92,6 +102,12 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       switch (sort) {
         case "wishlistTier":
           return tierRank(a.wishlistTier) - tierRank(b.wishlistTier) || b.dateAdded.localeCompare(a.dateAdded);
+        case "valueScore":
+          return (
+            (scoreSummaries[b.id]?.valueScore ?? -Infinity) - (scoreSummaries[a.id]?.valueScore ?? -Infinity) ||
+            (scoreSummaries[b.id]?.desirabilityScore ?? -Infinity) - (scoreSummaries[a.id]?.desirabilityScore ?? -Infinity) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
         case "priceAsc":
           return (a.price?.amount ?? Infinity) - (b.price?.amount ?? Infinity);
         case "priceDesc":
@@ -106,7 +122,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       }
     });
     return list;
-  }, [watches, query, status, wishlistTier, sort]);
+  }, [watches, query, status, wishlistTier, sort, scoreSummaries]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: watches.length };
@@ -198,6 +214,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
               key={watch.id}
               watch={watch}
               selected={selected.has(watch.id)}
+              scoreSummary={scoreSummaries[watch.id]}
               onToggleSelect={toggleSelect}
               onChangeWishlistTier={IS_STATIC ? undefined : changeWishlistTier}
             />

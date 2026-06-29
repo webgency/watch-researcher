@@ -584,6 +584,7 @@
     "model": "Retrograph — Espresso",
     "status": "wishlist",
     "wishlistTier": "must-have",
+    "designUniqueness": 5,
     "price": {
       "amount": 375,
       "currency": "USD"
@@ -612,8 +613,7 @@
       "chronograph"
     ],
     "id": "w20",
-    "dateAdded": "2026-06-22T15:13:00Z",
-    "designUniqueness": 5
+    "dateAdded": "2026-06-22T15:13:00Z"
   },
   {
     "brand": "Magrette",
@@ -1153,6 +1153,7 @@
     "model": "SubMeloner",
     "status": "wishlist",
     "wishlistTier": "must-have",
+    "designUniqueness": 4,
     "price": {
       "amount": 395,
       "currency": "USD"
@@ -1645,5 +1646,68 @@
     "tags": [],
     "id": "mqy0st4lie7fpb",
     "dateAdded": "2026-06-28T16:45:44.949Z"
+  },
+  {
+    "brand": "True North",
+    "model": "Heritage Chrono",
+    "status": "wishlist",
+    "wishlistTier": "interested",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 299,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://www.truenorthcollections.com/heritage-chronograph/heritage-chrono/heritage-chrono-red-blue-bezel-sold-out",
+        "retailer": "truenorthcollections.com",
+        "price": {
+          "amount": 299,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://image6.photobiz.com/8933/15_20251201091128_11126879_xlarge.png",
+    "specs": {
+      "caseDiameterMm": 37
+    },
+    "tags": [],
+    "id": "mqzciq3z036pvx",
+    "dateAdded": "2026-06-29T15:01:36.047Z"
+  },
+  {
+    "brand": "Venezianico",
+    "model": "Arsenale Calendario - 6221580C",
+    "referenceNumber": "6221580C",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 4,
+    "price": {
+      "amount": 1400,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://us.venezianico.com/products/arsenale-calendario-6221580c",
+        "retailer": "us.venezianico.com",
+        "price": {
+          "amount": 1400,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://us.venezianico.com/cdn/shop/files/PackshotArsenaleCalendariobluluna.png?v=1776418888",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 9.6,
+      "lugToLugMm": 44,
+      "movement": "automatic",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "complications": "GMT"
+    },
+    "tags": [],
+    "id": "mqzd7f4jh8pv3l",
+    "dateAdded": "2026-06-29T15:20:48.211Z"
   }
 ]

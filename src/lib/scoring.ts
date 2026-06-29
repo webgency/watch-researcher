@@ -26,6 +26,14 @@ export interface WatchScore {
   dataCompleteness: DataCompleteness;
 }
 
+export interface WatchScoreSummary {
+  valueScore: number | null;
+  desirabilityScore: number;
+  quadrant: Quadrant | null;
+  dataCompleteness: DataCompleteness;
+  valueRank: number | null;
+}
+
 // Tuning knob: neutral fill used for missing optional spec inputs.
 export const NEUTRAL_QUALITY = 0.5;
 
@@ -242,6 +250,39 @@ export function computeWatchScores(
       quadrant: assignQuadrant(score.valueScore, score.desirabilityScore, thresholds),
     })),
   };
+}
+
+export function valueRankings(scores: WatchScore[]): Map<string, number> {
+  return new Map(
+    scores
+      .filter((score): score is WatchScore & { valueScore: number } => score.valueScore !== null)
+      .sort(compareValueScores)
+      .map((score, index) => [score.watch.id, index + 1])
+  );
+}
+
+export function watchScoreSummaries(scores: WatchScore[]): Record<string, WatchScoreSummary> {
+  const ranks = valueRankings(scores);
+  return Object.fromEntries(
+    scores.map((score) => [
+      score.watch.id,
+      {
+        valueScore: score.valueScore,
+        desirabilityScore: score.desirabilityScore,
+        quadrant: score.quadrant,
+        dataCompleteness: score.dataCompleteness,
+        valueRank: ranks.get(score.watch.id) ?? null,
+      },
+    ])
+  );
+}
+
+export function compareValueScores(a: WatchScore & { valueScore: number }, b: WatchScore & { valueScore: number }): number {
+  return (
+    b.valueScore - a.valueScore ||
+    b.desirabilityScore - a.desirabilityScore ||
+    `${a.watch.brand} ${a.watch.model}`.localeCompare(`${b.watch.brand} ${b.watch.model}`)
+  );
 }
 
 function normalizePeerNumber(value: number | undefined, peerValues: Array<number | undefined>): number {
