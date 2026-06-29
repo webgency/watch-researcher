@@ -43,6 +43,13 @@ function parseNum(value: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function resolveBrandReputation(brand: string, brandReputations: Record<string, number>): number | undefined {
+  const normalized = brand.trim().toLowerCase();
+  if (!normalized) return undefined;
+  const match = Object.entries(brandReputations).find(([name]) => name.trim().toLowerCase() === normalized);
+  return match?.[1];
+}
+
 function payloadJson(payload: WatchInput): string {
   return JSON.stringify(payload, (_key, value) => (value === undefined ? null : value));
 }
@@ -57,7 +64,13 @@ interface AutofillResult {
   retailer?: string;
 }
 
-export default function WatchForm({ initial }: { initial?: Watch }) {
+export default function WatchForm({
+  initial,
+  brandReputations = {},
+}: {
+  initial?: Watch;
+  brandReputations?: Record<string, number>;
+}) {
   const router = useRouter();
   const isEdit = Boolean(initial);
 
@@ -66,6 +79,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
   const [status, setStatus] = useState<WatchStatus>(initial?.status ?? "wishlist");
   const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial?.wishlistTier ?? "");
+  const [designUniqueness, setDesignUniqueness] = useState(initial?.designUniqueness != null ? String(initial.designUniqueness) : "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
@@ -87,6 +101,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
   const [fetchUrl, setFetchUrl] = useState("");
   const [fetching, setFetching] = useState(false);
   const [fetchMsg, setFetchMsg] = useState<string | null>(null);
+  const resolvedBrandReputation = resolveBrandReputation(brand, brandReputations);
 
   function setLink(i: number, patch: Partial<LinkRow>) {
     setLinks((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
@@ -191,12 +206,14 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
         return link;
       });
 
+    const design = parseNum(designUniqueness);
     const payload: WatchInput = {
       brand: brand.trim(),
       model: model.trim(),
       referenceNumber: referenceNumber.trim() || undefined,
       status,
       wishlistTier: wishlistTier || undefined,
+      designUniqueness: design,
       imageUrl: imageUrl.trim() || undefined,
       specs: builtSpecs,
       tags: tags
@@ -292,7 +309,7 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
             </select>
           </div>
           <div>
-            <label className="label">Desirability</label>
+            <label className="label">Wishlist priority</label>
             <select className="input" value={wishlistTier} onChange={(e) => setWishlistTier(e.target.value as WishlistTier | "")}>
               <option value="">No tier</option>
               {WISHLIST_TIERS.map((tier) => (
@@ -301,6 +318,23 @@ export default function WatchForm({ initial }: { initial?: Watch }) {
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="label">Design uniqueness</label>
+            <select className="input" value={designUniqueness} onChange={(e) => setDesignUniqueness(e.target.value)}>
+              <option value="">No rating</option>
+              {[1, 2, 3, 4, 5].map((rating) => (
+                <option key={rating} value={rating}>
+                  {rating}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">Brand reputation</label>
+            <div className="input flex h-[2.625rem] items-center bg-slate-50 text-slate-600">
+              {brand.trim() ? `${resolvedBrandReputation ?? 3} / 5${resolvedBrandReputation === undefined ? " neutral" : ""}` : "—"}
+            </div>
           </div>
           <div>
             <label className="label">Target / tracked price</label>

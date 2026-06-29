@@ -79,10 +79,10 @@ export default function WatchCard({
               e.stopPropagation();
               onChangeWishlistTier(watch.id, e.target.value as WishlistTier | "");
             }}
-            aria-label={`Set desirability for ${watch.brand} ${watch.model}`}
+            aria-label={`Set wishlist priority for ${watch.brand} ${watch.model}`}
             className="input relative z-20 h-8 py-1 text-xs"
           >
-            <option value="">Set desirability</option>
+            <option value="">Set priority</option>
             {WISHLIST_TIERS.map((tier) => (
               <option key={tier} value={tier}>
                 {WISHLIST_TIER_LABELS[tier]}

@@ -24,7 +24,7 @@ type SortKey =
   | "caseSize";
 
 const SORTS: { key: SortKey; label: string }[] = [
-  { key: "wishlistTier", label: "Desirability" },
+  { key: "wishlistTier", label: "Wishlist priority" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },
   { key: "priceDesc", label: "Price: high to low" },
@@ -65,7 +65,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       if (!res.ok) throw new Error();
       router.refresh();
     } catch {
-      alert("Couldn't update desirability. Please try again.");
+      alert("Couldn't update wishlist priority. Please try again.");
     }
   }
 
@@ -173,7 +173,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
           onChange={(e) => setWishlistTier(e.target.value as WishlistTier | "all")}
           className="input sm:max-w-[13rem]"
         >
-          <option value="all">All desirability</option>
+          <option value="all">All priorities</option>
           {WISHLIST_TIERS.map((tier) => (
             <option key={tier} value={tier}>
               {WISHLIST_TIER_LABELS[tier]} ({wishlistTierCounts[tier]})

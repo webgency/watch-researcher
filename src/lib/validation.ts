@@ -1,6 +1,6 @@
 import { SPEC_FIELDS } from "./specs";
 import {
-  CURRENCIES,
+  BrandCatalog,
   Condition,
   Money,
   MOVEMENT_TYPES,
@@ -60,14 +60,30 @@ function cleanPositiveNumber(value: unknown, path: string, errors: string[]): nu
   return number;
 }
 
+function cleanIntegerRange(
+  value: unknown,
+  path: string,
+  errors: string[],
+  min: number,
+  max: number
+): number | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    errors.push(`${path} must be a whole number from ${min} to ${max}`);
+    return undefined;
+  }
+  return number;
+}
+
 function cleanCurrency(value: unknown, path: string, errors: string[]): string | undefined {
   if (typeof value !== "string" || !value.trim()) {
     errors.push(`${path} is required`);
     return undefined;
   }
   const currency = value.trim().toUpperCase();
-  if (!CURRENCIES.includes(currency)) {
-    errors.push(`${path} must be one of ${CURRENCIES.join(", ")}`);
+  if (!/^[A-Z]{3}$/.test(currency)) {
+    errors.push(`${path} must be a 3-letter currency code`);
     return undefined;
   }
   return currency;
@@ -253,6 +269,7 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "referenceNumber", cleanOptionalString(body.referenceNumber, "referenceNumber", errors));
   assignIfPresent(output, body, "status", cleanStatus(body.status, !partial, errors));
   assignIfPresent(output, body, "wishlistTier", cleanWishlistTier(body.wishlistTier, errors));
+  assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
   assignIfPresent(output, body, "links", cleanLinks(body.links, !partial, errors));
@@ -313,4 +330,33 @@ export function validateWatchCollection(value: unknown): Watch[] {
   }
 
   return watches;
+}
+
+export function validateBrandCatalog(value: unknown): BrandCatalog {
+  if (!isRecord(value)) {
+    throw new DataValidationError("Brand data must be an object.", ["data/brands.json must contain an object"]);
+  }
+
+  const errors: string[] = [];
+  const brands: BrandCatalog = {};
+
+  for (const [brand, info] of Object.entries(value)) {
+    const path = `brands.${brand}`;
+    if (!brand.trim()) {
+      errors.push(`${path} brand name is required`);
+      continue;
+    }
+    if (!isRecord(info)) {
+      errors.push(`${path} must be an object`);
+      continue;
+    }
+    const reputationTier = cleanIntegerRange(info.reputationTier, `${path}.reputationTier`, errors, 1, 5);
+    if (reputationTier !== undefined) brands[brand] = { reputationTier };
+  }
+
+  if (errors.length) {
+    throw new DataValidationError("Brand data is invalid.", errors);
+  }
+
+  return brands;
 }

@@ -17,6 +17,7 @@ export const SPEC_FIELDS: SpecField[] = [
   { key: "caseThicknessMm", label: "Thickness", unit: "mm", type: "number", prefer: "lower" },
   { key: "lugToLugMm", label: "Lug-to-lug", unit: "mm", type: "number" },
   { key: "lugWidthMm", label: "Lug width", unit: "mm", type: "number" },
+  { key: "caseMaterial", label: "Case material", type: "text" },
   { key: "movement", label: "Movement", type: "select", options: MOVEMENT_TYPES },
   { key: "caliber", label: "Caliber", type: "text" },
   { key: "powerReserveHours", label: "Power reserve", unit: "h", type: "number", prefer: "higher" },

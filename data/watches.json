@@ -612,7 +612,8 @@
       "chronograph"
     ],
     "id": "w20",
-    "dateAdded": "2026-06-22T15:13:00Z"
+    "dateAdded": "2026-06-22T15:13:00Z",
+    "designUniqueness": 5
   },
   {
     "brand": "Magrette",
@@ -690,7 +691,7 @@
     "brand": "Melbourne Watch Company",
     "model": "Fitzroy Auto",
     "status": "owned",
-    "wishlistTier": "must-have",
+    "wishlistTier": "love-it",
     "price": {
       "amount": 339,
       "currency": "USD"
@@ -1213,7 +1214,8 @@
     "brand": "Mr Eatwell",
     "model": "SubLime",
     "status": "wishlist",
-    "wishlistTier": "next-purchase",
+    "wishlistTier": "love-it",
+    "designUniqueness": 4,
     "price": {
       "amount": 395,
       "currency": "USD"
@@ -1482,6 +1484,7 @@
     "referenceNumber": "4521546",
     "status": "wishlist",
     "wishlistTier": "love-it",
+    "designUniqueness": 5,
     "price": {
       "amount": 1495,
       "currency": "USD"
