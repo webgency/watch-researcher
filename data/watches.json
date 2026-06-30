@@ -920,7 +920,7 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "price": {
-      "amount": 596,
+      "amount": 1875.3,
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:23:35.877Z",
@@ -1121,6 +1121,7 @@
     "model": "Bronze Sapphire",
     "status": "wishlist",
     "wishlistTier": "must-have",
+    "designUniqueness": 4,
     "price": {
       "amount": 1214,
       "currency": "USD"
@@ -1300,7 +1301,8 @@
       "caseDiameterMm": 38,
       "caseThicknessMm": 13.75,
       "lugWidthMm": 20,
-      "movement": "quartz",
+      "caseMaterial": "Stainless Steel 316",
+      "movement": "manual",
       "waterResistanceM": 100,
       "crystal": "Sapphire",
       "complications": "Chronograph, GMT"
@@ -1420,6 +1422,7 @@
     "referenceNumber": "sm90011-gnv",
     "status": "wishlist",
     "wishlistTier": "love-it",
+    "designUniqueness": 2,
     "price": {
       "amount": 889,
       "currency": "USD"
@@ -1439,7 +1442,8 @@
       "caseThicknessMm": 12.45,
       "lugToLugMm": 45.5,
       "lugWidthMm": 20,
-      "movement": "manual",
+      "caseMaterial": "316L stainless steel",
+      "movement": "automatic",
       "waterResistanceM": 200,
       "crystal": "Sapphire"
     },
@@ -1505,9 +1509,11 @@
       "caseDiameterMm": 42,
       "caseThicknessMm": 12.5,
       "lugToLugMm": 49,
+      "caseMaterial": "316L Stainless Steel",
       "movement": "automatic",
       "waterResistanceM": 200,
       "crystal": "Sapphire",
+      "braceletStrap": "Rubber band, Made in Italy",
       "complications": "GMT"
     },
     "tags": [],
@@ -1521,8 +1527,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "price": {
-      "amount": 258000,
-      "currency": "JPY"
+      "amount": 1594.7,
+      "currency": "USD"
     },
     "links": [
       {
@@ -1538,7 +1544,9 @@
     "specs": {
       "caseDiameterMm": 40,
       "caseThicknessMm": 13.5,
+      "caseMaterial": "SUS316L / Silver Polish",
       "movement": "automatic",
+      "powerReserveHours": 45,
       "waterResistanceM": 100,
       "crystal": "Sapphire",
       "complications": "Chronograph"
@@ -1571,14 +1579,19 @@
     "specs": {
       "caseDiameterMm": 40.5,
       "caseThicknessMm": 12,
-      "movement": "quartz",
+      "caseMaterial": "CuSn8 Bronze",
+      "movement": "automatic",
+      "caliber": "Miyota 9015",
       "waterResistanceM": 200,
       "crystal": "Sapphire",
+      "dialColor": "Gradient blue with embossed spiral sunray pattern",
+      "braceletStrap": "Blue FKM rubber strap with quick release spring bars and CuSn8 bronze buckle",
       "complications": "GMT"
     },
     "tags": [],
     "id": "mqy05hsfxu6ewm",
-    "dateAdded": "2026-06-28T16:27:37.167Z"
+    "dateAdded": "2026-06-28T16:27:37.167Z",
+    "designUniqueness": 4
   },
   {
     "brand": "Serica Watches",
@@ -1709,5 +1722,113 @@
     "tags": [],
     "id": "mqzd7f4jh8pv3l",
     "dateAdded": "2026-06-29T15:20:48.211Z"
+  },
+  {
+    "brand": "Baltic",
+    "model": "Hermétique Tourer Bronze Green- Baltic Watches",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 550,
+      "currency": "EUR"
+    },
+    "links": [
+      {
+        "url": "https://baltic-watches.com/en/products/hermetique-tourer-bronze-green",
+        "retailer": "baltic-watches.com",
+        "price": {
+          "amount": 600,
+          "currency": "EUR"
+        }
+      }
+    ],
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/2433x3041/57b5a3a3fe/hermetique-tourer-green-2.jpg?width=1920",
+    "specs": {
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 10.8,
+      "lugToLugMm": 46,
+      "lugWidthMm": 20,
+      "caseMaterial": "CuAl8 bronze",
+      "movement": "automatic",
+      "caliber": "9039",
+      "powerReserveHours": 42,
+      "waterResistanceM": 150,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqzf7gp3vx1tw8",
+    "dateAdded": "2026-06-29T16:16:49.479Z"
+  },
+  {
+    "brand": "FREDERIQUE CONSTANT",
+    "model": "Classics Moneta Moonphase Watch FC-206B3S5",
+    "status": "wishlist",
+    "price": {
+      "amount": 1595,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://us.frederiqueconstant.com/product/FC-206B3S5.html",
+        "retailer": "us.frederiqueconstant.com",
+        "price": {
+          "amount": 1595,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://citizenwatch.widen.net/content/3p7jmzjnny/webp/Moneta+Moonphase.webp?u=41zuoe&width=700&height=1091&quality=80&crop=true&keep=c&color=FFFFFF",
+    "specs": {
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 7.65,
+      "lugWidthMm": 18,
+      "caseMaterial": "Stainless steel",
+      "movement": "quartz",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "complications": "Moon phase"
+    },
+    "tags": [],
+    "id": "mqzfdci0yaegr5",
+    "dateAdded": "2026-06-29T16:21:23.976Z"
+  },
+  {
+    "brand": "Venezianico",
+    "model": "Nereide GMT 39 - 3521511S",
+    "referenceNumber": "3521511S",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 1150,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://us.venezianico.com/products/nereide-gmt-39-3521511s",
+        "retailer": "us.venezianico.com",
+        "price": {
+          "amount": 1150,
+          "currency": "USD"
+        },
+        "condition": "new"
+      }
+    ],
+    "imageUrl": "https://us.venezianico.com/cdn/shop/files/NereideGMT39BLU.png?v=1775137685",
+    "specs": {
+      "caseDiameterMm": 45.5,
+      "caseThicknessMm": 11.9,
+      "lugToLugMm": 45.5,
+      "caseMaterial": "316L Stainless Steel",
+      "movement": "automatic",
+      "caliber": "Automatic Cal. Miyota 9075 GMT",
+      "waterResistanceM": 100,
+      "crystal": "Sapphire",
+      "complications": "GMT"
+    },
+    "tags": [],
+    "id": "mr029cjx2djdu2",
+    "dateAdded": "2026-06-30T03:02:08.589Z"
   }
 ]
