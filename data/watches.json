@@ -127,7 +127,7 @@
     "model": "C60 Sapphire Edge",
     "referenceNumber": "C60-42ADA31S0KW3-B0",
     "status": "wishlist",
-    "wishlistTier": "maybe-later",
+    "wishlistTier": "pass",
     "price": {
       "amount": 1495,
       "currency": "USD"
@@ -584,6 +584,7 @@
     "model": "Retrograph — Espresso",
     "status": "wishlist",
     "wishlistTier": "must-have",
+    "designUniqueness": 5,
     "price": {
       "amount": 375,
       "currency": "USD"
@@ -690,7 +691,7 @@
     "brand": "Melbourne Watch Company",
     "model": "Fitzroy Auto",
     "status": "owned",
-    "wishlistTier": "must-have",
+    "wishlistTier": "love-it",
     "price": {
       "amount": 339,
       "currency": "USD"
@@ -919,7 +920,7 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "price": {
-      "amount": 596,
+      "amount": 1875.3,
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-06-23T03:23:35.877Z",
@@ -1058,7 +1059,7 @@
     "brand": "Trafford Watch Co",
     "model": "Touring GMT",
     "status": "wishlist",
-    "wishlistTier": "interested",
+    "wishlistTier": "maybe-later",
     "links": [
       {
         "url": "https://www.traffordwatchco.com/products/touring-gmt-lefty",
@@ -1120,6 +1121,7 @@
     "model": "Bronze Sapphire",
     "status": "wishlist",
     "wishlistTier": "must-have",
+    "designUniqueness": 4,
     "price": {
       "amount": 1214,
       "currency": "USD"
@@ -1152,6 +1154,7 @@
     "model": "SubMeloner",
     "status": "wishlist",
     "wishlistTier": "must-have",
+    "designUniqueness": 4,
     "price": {
       "amount": 395,
       "currency": "USD"
@@ -1174,35 +1177,6 @@
     "tags": [],
     "id": "mqtspoj46282kg",
     "dateAdded": "2026-06-25T17:48:17.392Z"
-  },
-  {
-    "brand": "Gustave st Cie",
-    "model": "ANDRÉ 24H",
-    "status": "wishlist",
-    "wishlistTier": "must-have",
-    "price": {
-      "amount": 232,
-      "currency": "USD"
-    },
-    "priceUpdatedAt": "2026-06-25T20:14:21.884Z",
-    "links": [
-      {
-        "url": "https://gustave-et-cie.fr/en/products/andre-24h-or-et-vert?variant=48536687771995",
-        "retailer": "gustave-et-cie.fr",
-        "price": {
-          "amount": 232,
-          "currency": "USD"
-        }
-      }
-    ],
-    "imageUrl": "https://gustave-et-cie.fr/cdn/shop/files/Andre-or-vert-marron-ecru-40.webp?v=1764945133&width=2048",
-    "specs": {
-      "movement": "quartz",
-      "waterResistanceM": 50
-    },
-    "tags": [],
-    "id": "mqtufgnahjigr6",
-    "dateAdded": "2026-06-25T18:36:19.846Z"
   },
   {
     "brand": "Out of Order Watches",
@@ -1242,7 +1216,8 @@
     "brand": "Mr Eatwell",
     "model": "SubLime",
     "status": "wishlist",
-    "wishlistTier": "next-purchase",
+    "wishlistTier": "love-it",
+    "designUniqueness": 4,
     "price": {
       "amount": 395,
       "currency": "USD"
@@ -1326,7 +1301,8 @@
       "caseDiameterMm": 38,
       "caseThicknessMm": 13.75,
       "lugWidthMm": 20,
-      "movement": "quartz",
+      "caseMaterial": "Stainless Steel 316",
+      "movement": "manual",
       "waterResistanceM": 100,
       "crystal": "Sapphire",
       "complications": "Chronograph, GMT"
@@ -1439,5 +1415,420 @@
     "tags": [],
     "id": "mqvcnaioumgl16",
     "dateAdded": "2026-06-26T19:54:04.416Z"
+  },
+  {
+    "brand": "Kuoe Kyoto",
+    "model": "SOMBRERO 90-011",
+    "referenceNumber": "sm90011-gnv",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 2,
+    "price": {
+      "amount": 889,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://www.kuoe-en.com/product-page/sm90011-gnv",
+        "retailer": "kuoe-en.com",
+        "price": {
+          "amount": 889,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://static.wixstatic.com/media/0820ab_9ab36cb39a6e4065ac6b673f9b1d2f60~mv2.png/v1/fill/w_996,h_996,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/0820ab_9ab36cb39a6e4065ac6b673f9b1d2f60~mv2.png",
+    "specs": {
+      "caseThicknessMm": 12.45,
+      "lugToLugMm": 45.5,
+      "lugWidthMm": 20,
+      "caseMaterial": "316L stainless steel",
+      "movement": "automatic",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqxyuhhhkdzs92",
+    "dateAdded": "2026-06-28T15:51:03.941Z"
+  },
+  {
+    "brand": "OLTO-8 WATCHES",
+    "model": "OLTO-8 Chrono Gate Glacier Blue",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "price": {
+      "amount": 589,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://olto-8.com/collections/chrono-gate/products/olto-8-chrono-gate-glacier-blue",
+        "retailer": "olto-8.com",
+        "price": {
+          "amount": 589,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://olto-8.com/cdn/shop/files/20251212-113438_1024x1024.jpg?v=1771142927",
+    "specs": {
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 14,
+      "lugWidthMm": 18,
+      "movement": "automatic",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqxzyep4fkag8s",
+    "dateAdded": "2026-06-28T16:22:06.568Z"
+  },
+  {
+    "brand": "Venezianico",
+    "model": "Nereide Corallo - 4521546",
+    "referenceNumber": "4521546",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 5,
+    "price": {
+      "amount": 1495,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://us.venezianico.com/products/nereide-corallo-4521546",
+        "retailer": "us.venezianico.com",
+        "price": {
+          "amount": 1495,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://us.venezianico.com/cdn/shop/files/1_3b6e106b-fea3-4ff9-9408-e43fb5494aee.png?v=1744730988",
+    "specs": {
+      "caseDiameterMm": 42,
+      "caseThicknessMm": 12.5,
+      "lugToLugMm": 49,
+      "caseMaterial": "316L Stainless Steel",
+      "movement": "automatic",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire",
+      "braceletStrap": "Rubber band, Made in Italy",
+      "complications": "GMT"
+    },
+    "tags": [],
+    "id": "mqxzzmf7e5kge7",
+    "dateAdded": "2026-06-28T16:23:03.235Z"
+  },
+  {
+    "brand": "Knot",
+    "model": "ATC-40SVJRBL",
+    "referenceNumber": "atc-40svjrbl",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "price": {
+      "amount": 1594.7,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://en.knot-designs.com/products/atc-40svjrbl",
+        "retailer": "en.knot-designs.com",
+        "price": {
+          "amount": 258000,
+          "currency": "JPY"
+        }
+      }
+    ],
+    "imageUrl": "https://en.knot-designs.com/cdn/shop/files/ATC-40SVJRBL-R_01.webp?v=1779845955&width=1920",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 13.5,
+      "caseMaterial": "SUS316L / Silver Polish",
+      "movement": "automatic",
+      "powerReserveHours": 45,
+      "waterResistanceM": 100,
+      "crystal": "Sapphire",
+      "complications": "Chronograph"
+    },
+    "tags": [],
+    "id": "mqy02y75unsn7m",
+    "dateAdded": "2026-06-28T16:25:38.465Z"
+  },
+  {
+    "brand": "Phoibos",
+    "model": "Argo Bronze 200M Automatic Diver Watch PY057B Spiral Sunray Blue",
+    "referenceNumber": "PY057B",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "price": {
+      "amount": 499,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://phoiboswatch.com/products/phoibos-argo-bronze-200m-automatic-diver-watch-py057b-spiral-sunray-blue.html",
+        "retailer": "phoiboswatch.com",
+        "price": {
+          "amount": 499,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://cdn11.bigcommerce.com/s-i3bu0g146r/images/stencil/1280x1280/products/448/3839/PY057B_1__04223.1738913513.jpg?c=2",
+    "specs": {
+      "caseDiameterMm": 40.5,
+      "caseThicknessMm": 12,
+      "caseMaterial": "CuSn8 Bronze",
+      "movement": "automatic",
+      "caliber": "Miyota 9015",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire",
+      "dialColor": "Gradient blue with embossed spiral sunray pattern",
+      "braceletStrap": "Blue FKM rubber strap with quick release spring bars and CuSn8 bronze buckle",
+      "complications": "GMT"
+    },
+    "tags": [],
+    "id": "mqy05hsfxu6ewm",
+    "dateAdded": "2026-06-28T16:27:37.167Z",
+    "designUniqueness": 4
+  },
+  {
+    "brand": "Serica Watches",
+    "model": "Ref. 5303-2",
+    "referenceNumber": "5303-WHITE-COSC-3H-STD",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "price": {
+      "amount": 1848,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://serica-watches.com/en/products/5303-2-diving-chronometer",
+        "retailer": "serica-watches.com",
+        "price": {
+          "amount": 1848,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://serica-watches.com/cdn/shop/files/5303-white-3h-packshot-01.jpg?v=1754553586&width=1920",
+    "specs": {
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 12.2,
+      "movement": "automatic",
+      "caliber": "M100",
+      "powerReserveHours": 42,
+      "waterResistanceM": 300,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqy0pgjuv702im",
+    "dateAdded": "2026-06-28T16:43:08.682Z"
+  },
+  {
+    "brand": "Straum",
+    "model": "Jan Mayen Titanium Aurora Sky",
+    "referenceNumber": "WATCH-JANMAYEN-CPL-02-TI5-AURORASKY-39-RUBBER-BLACK",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "price": {
+      "amount": 2500,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://straum.co/products/jan-mayen-titanium-aurora-sky",
+        "retailer": "straum.co",
+        "price": {
+          "amount": 2500,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://straum.co/cdn/shop/files/WATCH-JANMAYEN-CPL-02-TI5-AURORASKY-39-RUBBER-BLACK.webp?v=1775045210&width=1434",
+    "specs": {
+      "caseDiameterMm": 38.7,
+      "caseThicknessMm": 11.5,
+      "lugWidthMm": 18,
+      "movement": "manual",
+      "waterResistanceM": 100,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqy0st4lie7fpb",
+    "dateAdded": "2026-06-28T16:45:44.949Z"
+  },
+  {
+    "brand": "True North",
+    "model": "Heritage Chrono",
+    "status": "wishlist",
+    "wishlistTier": "interested",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 299,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://www.truenorthcollections.com/heritage-chronograph/heritage-chrono/heritage-chrono-red-blue-bezel-sold-out",
+        "retailer": "truenorthcollections.com",
+        "price": {
+          "amount": 299,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://image6.photobiz.com/8933/15_20251201091128_11126879_xlarge.png",
+    "specs": {
+      "caseDiameterMm": 37
+    },
+    "tags": [],
+    "id": "mqzciq3z036pvx",
+    "dateAdded": "2026-06-29T15:01:36.047Z"
+  },
+  {
+    "brand": "Venezianico",
+    "model": "Arsenale Calendario - 6221580C",
+    "referenceNumber": "6221580C",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 4,
+    "price": {
+      "amount": 1400,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://us.venezianico.com/products/arsenale-calendario-6221580c",
+        "retailer": "us.venezianico.com",
+        "price": {
+          "amount": 1400,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://us.venezianico.com/cdn/shop/files/PackshotArsenaleCalendariobluluna.png?v=1776418888",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 9.6,
+      "lugToLugMm": 44,
+      "movement": "automatic",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "complications": "GMT"
+    },
+    "tags": [],
+    "id": "mqzd7f4jh8pv3l",
+    "dateAdded": "2026-06-29T15:20:48.211Z"
+  },
+  {
+    "brand": "Baltic",
+    "model": "Hermétique Tourer Bronze Green- Baltic Watches",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 550,
+      "currency": "EUR"
+    },
+    "links": [
+      {
+        "url": "https://baltic-watches.com/en/products/hermetique-tourer-bronze-green",
+        "retailer": "baltic-watches.com",
+        "price": {
+          "amount": 600,
+          "currency": "EUR"
+        }
+      }
+    ],
+    "imageUrl": "https://cdn.baltic-watches.com/f/73554/2433x3041/57b5a3a3fe/hermetique-tourer-green-2.jpg?width=1920",
+    "specs": {
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 10.8,
+      "lugToLugMm": 46,
+      "lugWidthMm": 20,
+      "caseMaterial": "CuAl8 bronze",
+      "movement": "automatic",
+      "caliber": "9039",
+      "powerReserveHours": 42,
+      "waterResistanceM": 150,
+      "crystal": "Sapphire"
+    },
+    "tags": [],
+    "id": "mqzf7gp3vx1tw8",
+    "dateAdded": "2026-06-29T16:16:49.479Z"
+  },
+  {
+    "brand": "FREDERIQUE CONSTANT",
+    "model": "Classics Moneta Moonphase Watch FC-206B3S5",
+    "status": "wishlist",
+    "price": {
+      "amount": 1595,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://us.frederiqueconstant.com/product/FC-206B3S5.html",
+        "retailer": "us.frederiqueconstant.com",
+        "price": {
+          "amount": 1595,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://citizenwatch.widen.net/content/3p7jmzjnny/webp/Moneta+Moonphase.webp?u=41zuoe&width=700&height=1091&quality=80&crop=true&keep=c&color=FFFFFF",
+    "specs": {
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 7.65,
+      "lugWidthMm": 18,
+      "caseMaterial": "Stainless steel",
+      "movement": "quartz",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "complications": "Moon phase"
+    },
+    "tags": [],
+    "id": "mqzfdci0yaegr5",
+    "dateAdded": "2026-06-29T16:21:23.976Z"
+  },
+  {
+    "brand": "Venezianico",
+    "model": "Nereide GMT 39 - 3521511S",
+    "referenceNumber": "3521511S",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 1150,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://us.venezianico.com/products/nereide-gmt-39-3521511s",
+        "retailer": "us.venezianico.com",
+        "price": {
+          "amount": 1150,
+          "currency": "USD"
+        },
+        "condition": "new"
+      }
+    ],
+    "imageUrl": "https://us.venezianico.com/cdn/shop/files/NereideGMT39BLU.png?v=1775137685",
+    "specs": {
+      "caseDiameterMm": 45.5,
+      "caseThicknessMm": 11.9,
+      "lugToLugMm": 45.5,
+      "caseMaterial": "316L Stainless Steel",
+      "movement": "automatic",
+      "caliber": "Automatic Cal. Miyota 9075 GMT",
+      "waterResistanceM": 100,
+      "crystal": "Sapphire",
+      "complications": "GMT"
+    },
+    "tags": [],
+    "id": "mr029cjx2djdu2",
+    "dateAdded": "2026-06-30T03:02:08.589Z"
   }
 ]

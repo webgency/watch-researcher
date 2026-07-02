@@ -69,7 +69,7 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
               </Cell>
             ))}
           </Row>
-          <Row label="Desirability" sticky>
+          <Row label="Wishlist priority" sticky>
             {watches.map((w) => (
               <Cell key={w.id}>
                 <WishlistTierBadge tier={w.wishlistTier} />

@@ -12,11 +12,13 @@ import {
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { IS_STATIC } from "@/lib/config";
+import type { WatchScoreSummary } from "@/lib/scoring";
 import { useCollectionSearch } from "./CollectionSearchContext";
 import WatchCard from "./WatchCard";
 
 type SortKey =
   | "wishlistTier"
+  | "valueScore"
   | "dateAdded"
   | "priceAsc"
   | "priceDesc"
@@ -24,7 +26,8 @@ type SortKey =
   | "caseSize";
 
 const SORTS: { key: SortKey; label: string }[] = [
-  { key: "wishlistTier", label: "Desirability" },
+  { key: "wishlistTier", label: "Wishlist priority" },
+  { key: "valueScore", label: "Value score" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },
   { key: "priceDesc", label: "Price: high to low" },
@@ -38,13 +41,25 @@ function tierRank(tier?: WishlistTier): number {
   return index === -1 ? Infinity : index;
 }
 
-export default function CollectionView({ watches }: { watches: Watch[] }) {
+export default function CollectionView({
+  watches,
+  scoreSummaries = {},
+}: {
+  watches: Watch[];
+  scoreSummaries?: Record<string, WatchScoreSummary>;
+}) {
   const router = useRouter();
   const { query } = useCollectionSearch();
   const [status, setStatus] = useState<WatchStatus | "all">("all");
-  const [wishlistTier, setWishlistTier] = useState<WishlistTier | "all">("all");
+  const [wishlistTiers, setWishlistTiers] = useState<WishlistTier[]>([]);
   const [sort, setSort] = useState<SortKey>("wishlistTier");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const selectedTierSet = useMemo(() => new Set(wishlistTiers), [wishlistTiers]);
+  const priorityLabel = useMemo(() => {
+    if (wishlistTiers.length === 0 || wishlistTiers.length === WISHLIST_TIERS.length) return "All priorities";
+    if (wishlistTiers.length === 1) return WISHLIST_TIER_LABELS[wishlistTiers[0]];
+    return `${wishlistTiers.length} priorities`;
+  }, [wishlistTiers]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -65,21 +80,26 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       if (!res.ok) throw new Error();
       router.refresh();
     } catch {
-      alert("Couldn't update desirability. Please try again.");
+      alert("Couldn't update wishlist priority. Please try again.");
     }
+  }
+
+  function toggleWishlistTier(tier: WishlistTier) {
+    setWishlistTiers((current) => (current.includes(tier) ? current.filter((item) => item !== tier) : [...current, tier]));
   }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = watches.filter((w) => {
       if (status !== "all" && w.status !== status) return false;
-      if (wishlistTier !== "all" && w.wishlistTier !== wishlistTier) return false;
+      if (selectedTierSet.size > 0 && (!w.wishlistTier || !selectedTierSet.has(w.wishlistTier))) return false;
       if (!q) return true;
       const haystack = [
         w.brand,
         w.model,
         w.referenceNumber,
         w.wishlistTier ? WISHLIST_TIER_LABELS[w.wishlistTier] : null,
+        scoreSummaries[w.id]?.quadrant,
         ...w.tags,
       ]
         .filter(Boolean)
@@ -92,6 +112,12 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       switch (sort) {
         case "wishlistTier":
           return tierRank(a.wishlistTier) - tierRank(b.wishlistTier) || b.dateAdded.localeCompare(a.dateAdded);
+        case "valueScore":
+          return (
+            (scoreSummaries[b.id]?.valueScore ?? -Infinity) - (scoreSummaries[a.id]?.valueScore ?? -Infinity) ||
+            (scoreSummaries[b.id]?.desirabilityScore ?? -Infinity) - (scoreSummaries[a.id]?.desirabilityScore ?? -Infinity) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
         case "priceAsc":
           return (a.price?.amount ?? Infinity) - (b.price?.amount ?? Infinity);
         case "priceDesc":
@@ -106,7 +132,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       }
     });
     return list;
-  }, [watches, query, status, wishlistTier, sort]);
+  }, [watches, query, status, selectedTierSet, sort, scoreSummaries]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: watches.length };
@@ -168,18 +194,36 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
             </button>
           ))}
         </div>
-        <select
-          value={wishlistTier}
-          onChange={(e) => setWishlistTier(e.target.value as WishlistTier | "all")}
-          className="input sm:max-w-[13rem]"
-        >
-          <option value="all">All desirability</option>
-          {WISHLIST_TIERS.map((tier) => (
-            <option key={tier} value={tier}>
-              {WISHLIST_TIER_LABELS[tier]} ({wishlistTierCounts[tier]})
-            </option>
-          ))}
-        </select>
+        <details className="relative sm:w-56">
+          <summary className="input flex h-[2.375rem] cursor-pointer list-none items-center justify-between gap-2 py-1.5 [&::-webkit-details-marker]:hidden">
+            <span className="truncate">{priorityLabel}</span>
+            <span aria-hidden className="text-slate-400">▾</span>
+          </summary>
+          <div className="absolute z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-lg">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Priority</span>
+              <button type="button" className="text-xs font-medium text-slate-500 hover:text-slate-900" onClick={() => setWishlistTiers([])}>
+                Clear
+              </button>
+            </div>
+            <div className="space-y-1">
+              {WISHLIST_TIERS.map((tier) => (
+                <label key={tier} className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-slate-50">
+                  <span className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedTierSet.has(tier)}
+                      onChange={() => toggleWishlistTier(tier)}
+                      className="h-4 w-4 accent-slate-900"
+                    />
+                    <span>{WISHLIST_TIER_LABELS[tier]}</span>
+                  </span>
+                  <span className="text-xs text-slate-400">{wishlistTierCounts[tier]}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </details>
         <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="input sm:ml-auto sm:max-w-[12rem]">
           {SORTS.map((s) => (
             <option key={s.key} value={s.key}>
@@ -198,6 +242,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
               key={watch.id}
               watch={watch}
               selected={selected.has(watch.id)}
+              scoreSummary={scoreSummaries[watch.id]}
               onToggleSelect={toggleSelect}
               onChangeWishlistTier={IS_STATIC ? undefined : changeWishlistTier}
             />

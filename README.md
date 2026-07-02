@@ -25,7 +25,7 @@ npm start
 
 ## What it does today (Phase 1 — MVP)
 
-- **Collection view** — every watch as a card, with search, status/desirability filters, and sorting (desirability, recently added, price, brand, case size).
+- **Collection view** — every watch as a card, with search, status/priority filters, and sorting (wishlist priority, recently added, price, brand, case size).
 - **Wishlist tiers** — categorize each watch as Next purchase, Must have, Love it, Interested, Maybe later, or Pass.
 - **Add / edit watches** — one full form covering basics, URL autofill, specifications, image, multiple retailer links, tags, and notes.
 - **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table. The **best value in each row is highlighted** (lowest price, larger power reserve, etc.).
@@ -51,7 +51,7 @@ Each watch (`src/lib/types.ts`):
 | `links[]` | retailer links, each with optional price + `new`/`pre-owned` condition |
 | `specs` | case diameter, thickness, lug-to-lug, lug width, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
 | `tags[]` | e.g. `diver`, `GMT`, `chronograph` |
-| `wishlistTier` | desirability bucket: next purchase, must have, love it, interested, maybe later, or pass |
+| `wishlistTier` | wishlist priority bucket: next purchase, must have, love it, interested, maybe later, or pass |
 | `notes` | free text |
 | `purchase`, `sale` | filled in as a watch moves through `owned` → `sold` |
 

@@ -39,6 +39,7 @@ export interface WatchSpecs {
   caseThicknessMm?: number;
   lugToLugMm?: number;
   lugWidthMm?: number;
+  caseMaterial?: string;
   movement?: MovementType;
   caliber?: string;
   powerReserveHours?: number;
@@ -55,8 +56,10 @@ export interface Watch {
   model: string;
   referenceNumber?: string;
   status: WatchStatus;
-  /** Personal desirability bucket for wishlist planning. */
+  /** Personal wishlist priority bucket for planning. */
   wishlistTier?: WishlistTier;
+  /** User-rated visual/design distinctiveness, 1-5. */
+  designUniqueness?: number;
   /** Headline price you're tracking (usually the best/target price). */
   price?: Money;
   /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */
@@ -76,6 +79,12 @@ export interface Watch {
 
 /** Shape accepted when creating a watch (id + dateAdded are assigned by the store). */
 export type WatchInput = Omit<Watch, "id" | "dateAdded">;
+
+export interface BrandInfo {
+  reputationTier: number;
+}
+
+export type BrandCatalog = Record<string, BrandInfo>;
 
 export const WATCH_STATUSES: WatchStatus[] = ["wishlist", "owned", "sold"];
 

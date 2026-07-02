@@ -2,18 +2,20 @@
 import { readFile } from "node:fs/promises";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
+const BRANDS_URL = new URL("../data/brands.json", import.meta.url);
 
 const STATUSES = new Set(["wishlist", "owned", "sold"]);
 const WISHLIST_TIERS = new Set(["next-purchase", "must-have", "love-it", "interested", "maybe-later", "pass"]);
 const MOVEMENTS = new Set(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"]);
 const CONDITIONS = new Set(["new", "pre-owned"]);
-const CURRENCIES = new Set(["USD", "EUR", "GBP", "CHF", "JPY", "AUD", "CAD", "SGD", "SEK", "NOK", "DKK", "HKD", "NZD"]);
+const CURRENCY_TO_USD = new Set(["USD", "EUR", "GBP", "CHF", "JPY"]);
 
 const SPEC_TYPES = {
   caseDiameterMm: "number",
   caseThicknessMm: "number",
   lugToLugMm: "number",
   lugWidthMm: "number",
+  caseMaterial: "string",
   movement: "movement",
   caliber: "string",
   powerReserveHours: "number",
@@ -58,6 +60,16 @@ function checkPositiveNumber(value, path, errors, { required = false, integer = 
   if (integer && !Number.isInteger(value)) errors.push(`${path} must be a whole number`);
 }
 
+function checkIntegerRange(value, path, errors, { required = false, min = 1, max = 5 } = {}) {
+  if (value === undefined || value === null || value === "") {
+    if (required) errors.push(`${path} is required`);
+    return;
+  }
+  if (typeof value !== "number" || !Number.isInteger(value) || value < min || value > max) {
+    errors.push(`${path} must be a whole number from ${min} to ${max}`);
+  }
+}
+
 function checkMoney(value, path, errors) {
   if (value === undefined || value === null) return;
   if (!isRecord(value)) {
@@ -65,8 +77,10 @@ function checkMoney(value, path, errors) {
     return;
   }
   checkPositiveNumber(value.amount, `${path}.amount`, errors, { required: true });
-  if (typeof value.currency !== "string" || !CURRENCIES.has(value.currency)) {
-    errors.push(`${path}.currency must be one of ${Array.from(CURRENCIES).join(", ")}`);
+  if (typeof value.currency !== "string" || !/^[A-Z]{3}$/.test(value.currency)) {
+    errors.push(`${path}.currency must be a 3-letter currency code`);
+  } else if (!CURRENCY_TO_USD.has(value.currency)) {
+    warnings.push(`${path}.currency ${value.currency} is not in the known currency list; scoring will use its fallback rate.`);
   }
 }
 
@@ -123,9 +137,27 @@ function checkTransaction(value, path, errors) {
   checkDate(value.date, `${path}.date`, errors);
 }
 
-const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
 const errors = [];
+const warnings = [];
 const ids = new Set();
+const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
+const brands = JSON.parse(await readFile(BRANDS_URL, "utf8"));
+const normalizedBrandNames = new Set();
+
+if (!isRecord(brands)) {
+  errors.push("data/brands.json must contain an object");
+} else {
+  for (const [brand, info] of Object.entries(brands)) {
+    const path = `brands.${brand}`;
+    if (!brand.trim()) errors.push(`${path} brand name is required`);
+    normalizedBrandNames.add(brand.trim().toLowerCase());
+    if (!isRecord(info)) {
+      errors.push(`${path} must be an object`);
+      continue;
+    }
+    checkIntegerRange(info.reputationTier, `${path}.reputationTier`, errors, { required: true });
+  }
+}
 
 if (!Array.isArray(watches)) {
   errors.push("data/watches.json must contain an array");
@@ -149,6 +181,7 @@ if (!Array.isArray(watches)) {
     if (watch.wishlistTier !== undefined && !WISHLIST_TIERS.has(watch.wishlistTier)) {
       errors.push(`${path}.wishlistTier must be one of ${Array.from(WISHLIST_TIERS).join(", ")}`);
     }
+    checkIntegerRange(watch.designUniqueness, `${path}.designUniqueness`, errors);
     checkMoney(watch.price, `${path}.price`, errors);
     checkDate(watch.priceUpdatedAt, `${path}.priceUpdatedAt`, errors);
     checkLinks(watch.links, `${path}.links`, errors);
@@ -159,7 +192,17 @@ if (!Array.isArray(watches)) {
     checkDate(watch.dateAdded, `${path}.dateAdded`, errors, { required: true });
     checkTransaction(watch.purchase, `${path}.purchase`, errors);
     checkTransaction(watch.sale, `${path}.sale`, errors);
+
+    const normalizedBrand = typeof watch.brand === "string" ? watch.brand.trim().toLowerCase() : "";
+    if (normalizedBrand && !normalizedBrandNames.has(normalizedBrand)) {
+      warnings.push(`${path}.brand ${watch.brand} is not present in data/brands.json; desirability scoring will use neutral reputation.`);
+    }
   });
+}
+
+if (warnings.length) {
+  console.warn(`Watch data validation completed with ${warnings.length} warning${warnings.length === 1 ? "" : "s"}:`);
+  for (const warning of warnings) console.warn(`- ${warning}`);
 }
 
 if (errors.length) {
