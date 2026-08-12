@@ -1,9 +1,13 @@
 import { SPEC_FIELDS } from "./specs";
 import {
+  Availability,
+  AVAILABILITY_STATES,
   BrandCatalog,
   Condition,
+  Friction,
   Money,
   MOVEMENT_TYPES,
+  QualityFlags,
   RetailerLink,
   Watch,
   WatchInput,
@@ -58,6 +62,25 @@ function cleanPositiveNumber(value: unknown, path: string, errors: string[]): nu
     return undefined;
   }
   return number;
+}
+
+function cleanNonNegativeNumber(value: unknown, path: string, errors: string[]): number | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(number) || number < 0) {
+    errors.push(`${path} must be a non-negative number`);
+    return undefined;
+  }
+  return number;
+}
+
+function cleanBoolean(value: unknown, path: string, errors: string[]): boolean | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "boolean") {
+    errors.push(`${path} must be a boolean`);
+    return undefined;
+  }
+  return value;
 }
 
 function cleanIntegerRange(
@@ -190,6 +213,85 @@ function cleanSpecs(value: unknown, required: boolean, errors: string[]): WatchS
   return specs;
 }
 
+function cleanQualityFlags(value: unknown, errors: string[]): QualityFlags | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!isRecord(value)) {
+    errors.push("qualityFlags must be an object");
+    return undefined;
+  }
+
+  const flags: QualityFlags = {};
+  const numbers: Array<{ key: "regulatedPositions" | "accuracySpecSpd" | "hardenedCoatingHv" | "antimagneticAm" | "arLayers"; integer?: boolean }> = [
+    { key: "regulatedPositions", integer: true },
+    { key: "accuracySpecSpd" },
+    { key: "hardenedCoatingHv" },
+    { key: "antimagneticAm" },
+    { key: "arLayers", integer: true },
+  ];
+  for (const { key, integer } of numbers) {
+    const cleaned = cleanNonNegativeNumber(value[key], `qualityFlags.${key}`, errors);
+    if (cleaned === undefined) continue;
+    if (integer && !Number.isInteger(cleaned)) {
+      errors.push(`qualityFlags.${key} must be a whole number`);
+      continue;
+    }
+    flags[key] = cleaned;
+  }
+
+  const booleans = [
+    "sapphireBezelInsert",
+    "drilledLugs",
+    "microAdjustClasp",
+    "quickRelease",
+    "braceletIncluded",
+  ] as const;
+  for (const key of booleans) {
+    const cleaned = cleanBoolean(value[key], `qualityFlags.${key}`, errors);
+    if (cleaned !== undefined) flags[key] = cleaned;
+  }
+
+  return flags;
+}
+
+function cleanFriction(value: unknown, errors: string[]): Friction | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!isRecord(value)) {
+    errors.push("friction must be an object");
+    return undefined;
+  }
+
+  const availability = value.availability;
+  if (typeof availability !== "string" || !AVAILABILITY_STATES.includes(availability as Availability)) {
+    errors.push(`friction.availability must be one of ${AVAILABILITY_STATES.join(", ")}`);
+  }
+  const brandLiquidity = cleanIntegerRange(value.brandLiquidity, "friction.brandLiquidity", errors, 1, 5);
+  if (brandLiquidity === undefined) {
+    errors.push("friction.brandLiquidity is required");
+  }
+  const expectedShipDate = cleanDateString(value.expectedShipDate, "friction.expectedShipDate", errors);
+  const braceletUpchargeUsd = cleanNonNegativeNumber(
+    value.braceletUpchargeUsd,
+    "friction.braceletUpchargeUsd",
+    errors
+  );
+
+  if (
+    typeof availability !== "string" ||
+    !AVAILABILITY_STATES.includes(availability as Availability) ||
+    brandLiquidity === undefined
+  ) {
+    return undefined;
+  }
+
+  const friction: Friction = {
+    availability: availability as Availability,
+    brandLiquidity: brandLiquidity as Friction["brandLiquidity"],
+  };
+  if (expectedShipDate) friction.expectedShipDate = expectedShipDate;
+  if (braceletUpchargeUsd !== undefined) friction.braceletUpchargeUsd = braceletUpchargeUsd;
+  return friction;
+}
+
 function cleanTags(value: unknown, required: boolean, errors: string[]): string[] | undefined {
   if (value === undefined || value === null) return required ? [] : undefined;
   if (!Array.isArray(value)) {
@@ -272,6 +374,9 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
+  assignIfPresent(output, body, "landedPrice", cleanMoney(body.landedPrice, "landedPrice", errors));
+  assignIfPresent(output, body, "qualityFlags", cleanQualityFlags(body.qualityFlags, errors));
+  assignIfPresent(output, body, "friction", cleanFriction(body.friction, errors));
   assignIfPresent(output, body, "links", cleanLinks(body.links, !partial, errors));
   assignIfPresent(output, body, "imageUrl", cleanOptionalString(body.imageUrl, "imageUrl", errors));
   assignIfPresent(output, body, "specs", cleanSpecs(body.specs, !partial, errors));
