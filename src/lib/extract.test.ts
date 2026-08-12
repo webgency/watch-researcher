@@ -82,8 +82,12 @@ describe("sanitizeSpecs", () => {
     expect(sanitizeSpecs(specs)).toEqual(specs);
   });
 
-  it("drops a lug-to-lug smaller than the diameter", () => {
+  it("drops a lug-to-lug far smaller than the diameter", () => {
     expect(sanitizeSpecs({ caseDiameterMm: 42, lugToLugMm: 30 }).lugToLugMm).toBeUndefined();
+  });
+
+  it("keeps a lug-to-lug slightly under the diameter (cushion cases like the Dennison ALD)", () => {
+    expect(sanitizeSpecs({ caseDiameterMm: 37, lugToLugMm: 35.6 }).lugToLugMm).toBe(35.6);
   });
 });
 

@@ -100,7 +100,9 @@ function sanitizeSpecs(specs) {
     delete s.caseDiameterMm;
   }
   if (s.lugToLugMm !== undefined) {
-    const tooSmall = s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm;
+    // Cushion and rectangular cases can measure slightly less lug-to-lug than
+    // across, so only a value well under the diameter indicates a swap.
+    const tooSmall = s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm * 0.85;
     if (!inRange(s.lugToLugMm, 20, 70) || tooSmall) delete s.lugToLugMm;
   }
   if (s.lugWidthMm !== undefined && !inRange(s.lugWidthMm, 8, 30)) delete s.lugWidthMm;
@@ -174,7 +176,12 @@ async function structure(researchText) {
     system:
       "Convert the research notes into structured fields. Only include values the notes " +
       "state with a source; anything marked 'not found', estimated, or ambiguous is null. " +
-      "Water resistance in ATM/bar converts to meters (x10); power reserve in days to hours.",
+      "Water resistance in ATM/bar converts to meters (x10); power reserve in days to hours. " +
+      "antimagneticAm is in A/m: convert gauss or oersted ratings by multiplying by 80 " +
+      "(e.g. 15,000 gauss = 1,200,000 A/m); an unquantified 'antimagnetic' claim (ISO 764) " +
+      "is 4800 A/m. accuracySpecSpd is the worst-case daily deviation in seconds as a " +
+      "positive number (COSC -4/+6 = 6; METAS 0/+5 = 5). A quartz watch's battery life " +
+      "is not a power reserve — leave powerReserveHours null.",
     messages: [{ role: "user", content: researchText }],
     output_config: { format: zodOutputFormat(BackfillSchema) },
   });

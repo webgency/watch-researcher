@@ -76,7 +76,8 @@ const EXTRACTION_SYSTEM = `You extract watch specifications from product-page te
 
 Rules:
 - Only report what the text explicitly states. Return null for anything not stated — never guess, infer typical values, or fill in from general knowledge of the brand or model.
-- Convert units: water resistance given in ATM or bar becomes meters (1 ATM/bar = 10m); power reserve given in days becomes hours.
+- Convert units: water resistance given in ATM or bar becomes meters (1 ATM/bar = 10m); power reserve given in days becomes hours; antimagneticAm is in A/m, so a rating in gauss or oersted is multiplied by 80 (15,000 gauss = 1,200,000 A/m) and an unquantified "antimagnetic" claim (ISO 764) is 4800 A/m.
+- accuracySpecSpd is the worst-case daily deviation in seconds as a positive number (COSC -4/+6 = 6; METAS 0/+5 = 5). A quartz watch's battery life is not a power reserve — leave powerReserveHours null.
 - caliber is the movement's name/number as stated (e.g. "Sellita SW200-1", "Miyota 9015"), without surrounding marketing prose.
 - tags: include a category only when the page clearly identifies the watch as that type (a rotating dive bezel + 200m WR marks a diver; chronograph pushers/subdials a chronograph; a 24h/second-timezone hand a GMT; "worldtimer" only for true worldtimer complications). A plain time-only watch with no sport features is "dress".
 - qualityFlags booleans: true only when explicitly stated; null when unmentioned. braceletIncluded means a metal bracelet ships with the watch at the listed price.
@@ -113,7 +114,10 @@ export function sanitizeSpecs(specs: WatchSpecs): WatchSpecs {
     delete s.caseDiameterMm;
   }
   if (s.lugToLugMm !== undefined) {
-    const tooSmall = s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm;
+    // Cushion and rectangular cases can measure slightly less lug-to-lug than
+    // across (e.g. Dennison ALD: 37mm wide, 35.6mm lug-to-lug), so only a
+    // value well under the diameter indicates a swap or misread.
+    const tooSmall = s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm * 0.85;
     if (!inRange(s.lugToLugMm, 20, 70) || tooSmall) delete s.lugToLugMm;
   }
   if (s.lugWidthMm !== undefined && !inRange(s.lugWidthMm, 8, 30)) delete s.lugWidthMm;
