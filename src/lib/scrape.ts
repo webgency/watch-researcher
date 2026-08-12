@@ -1,12 +1,15 @@
 // Best-effort scraper that turns a retailer/product URL into a partial watch.
 // Used by the /api/scrape route to pre-fill the add form. Pulls price/image/
 // brand/model from structured data (Shopify JSON, JSON-LD, OpenGraph) and the
-// remaining specs from the page text. Whatever it can't find, the user fills in.
+// remaining details from the page text — via the Claude API when
+// ANTHROPIC_API_KEY is configured (see extract.ts), else the legacy regex
+// extractor. Whatever it can't find, the user fills in.
 //
 // Runs server-side only (needs open outbound network). Never throws on a bad
 // page — it just returns whatever it managed to extract.
 
-import { Money, MovementType, WatchInput, WatchSpecs } from "./types";
+import { extractWatchDetails } from "./extract";
+import { Friction, Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
 
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
@@ -18,8 +21,14 @@ const SYMBOL_TO_ISO: Record<string, string> = {
 };
 
 export type ScrapeResult = Partial<
-  Pick<WatchInput, "brand" | "model" | "referenceNumber" | "price" | "imageUrl" | "specs">
-> & { retailer?: string; foundNothing?: boolean };
+  Pick<WatchInput, "brand" | "model" | "referenceNumber" | "price" | "imageUrl" | "specs" | "tags">
+> & {
+  retailer?: string;
+  foundNothing?: boolean;
+  qualityFlags?: QualityFlags;
+  /** brandLiquidity is a user judgment call, so scraped friction is partial. */
+  friction?: Partial<Friction>;
+};
 
 async function fetchText(url: string, json = false) {
   const ctrl = new AbortController();
@@ -278,9 +287,23 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
   if (image) out.imageUrl = image;
 
   const specText = `${shop?.bodyHtml ? stripText(shop.bodyHtml) : ""} ${html ? stripText(html) : ""}`.trim();
-  const specs = extractSpecs(specText);
-  if (Object.keys(specs).length) out.specs = specs;
+  const extracted = await extractWatchDetails(specText);
+  if (extracted) {
+    // Structured data (JSON-LD/Shopify/OG) wins for identity fields; the model
+    // fills whatever those missed.
+    if (!out.brand && extracted.brand) out.brand = extracted.brand;
+    if (!out.model && extracted.model) out.model = extracted.model;
+    if (!out.referenceNumber && extracted.referenceNumber) out.referenceNumber = extracted.referenceNumber;
+    if (Object.keys(extracted.specs).length) out.specs = extracted.specs;
+    if (extracted.tags.length) out.tags = extracted.tags;
+    if (extracted.qualityFlags) out.qualityFlags = extracted.qualityFlags;
+    if (extracted.friction) out.friction = extracted.friction;
+  } else {
+    const specs = extractSpecs(specText);
+    if (Object.keys(specs).length) out.specs = specs;
+  }
 
-  out.foundNothing = !out.brand && !out.model && !out.price && !out.imageUrl && !out.specs;
+  out.foundNothing =
+    !out.brand && !out.model && !out.price && !out.imageUrl && !out.specs && !out.tags;
   return out;
 }

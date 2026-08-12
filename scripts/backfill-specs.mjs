@@ -1,0 +1,259 @@
+#!/usr/bin/env node
+// Backfill missing specs, tags, and quality flags in data/watches.json using
+// the Claude API with web search. For each watch with gaps, Claude researches
+// the model across the web (brand site, reviews, spec databases), then a
+// second structured-output call turns the findings into typed fields.
+//
+// Conservative by design: only fills fields that are currently missing, never
+// overwrites existing data, and drops physically implausible readings. Fields
+// the research couldn't verify stay missing — no guessed values.
+//
+// friction (availability, upcharges) is deliberately NOT backfilled: web
+// results go stale too fast, and brandLiquidity is a personal judgment call.
+//
+// Requires ANTHROPIC_API_KEY. Run from a terminal with real network access.
+//
+// Usage:
+//   node scripts/backfill-specs.mjs              # research + write all watches with gaps
+//   node scripts/backfill-specs.mjs --dry        # research + report, write nothing
+//   node scripts/backfill-specs.mjs --limit=5    # only the first N watches with gaps
+//   node scripts/backfill-specs.mjs --id=w01     # only this watch id (repeatable)
+//   node scripts/backfill-specs.mjs --verbose    # show research summaries
+
+import { readFile, writeFile } from "node:fs/promises";
+import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import { z } from "zod";
+
+const DATA_URL = new URL("../data/watches.json", import.meta.url);
+
+const args = process.argv.slice(2);
+const DRY = args.includes("--dry");
+const VERBOSE = args.includes("--verbose");
+const ONLY = args.filter((a) => a.startsWith("--id=")).map((a) => a.slice(5));
+const LIMIT = Number(args.find((a) => a.startsWith("--limit="))?.slice(8) ?? Infinity);
+
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.error("ANTHROPIC_API_KEY is not set. Export it and re-run.");
+  process.exit(1);
+}
+
+const client = new Anthropic();
+const MODEL = "claude-opus-5";
+
+// Keep in sync with src/lib/extract.ts (scripts are plain JS and can't import
+// the TypeScript module).
+const NUMBER_SPECS = [
+  ["caseDiameterMm", "case diameter in mm"],
+  ["caseThicknessMm", "case thickness in mm"],
+  ["lugToLugMm", "lug-to-lug in mm"],
+  ["lugWidthMm", "lug width in mm"],
+  ["powerReserveHours", "power reserve in hours"],
+  ["waterResistanceM", "water resistance in meters"],
+];
+const TEXT_SPECS = [
+  ["caseMaterial", "case material"],
+  ["movement", "movement type (automatic/manual/quartz/spring-drive/solar/kinetic)"],
+  ["caliber", "movement caliber name/number"],
+  ["crystal", "crystal material"],
+];
+
+const BackfillSchema = z.object({
+  specs: z.object({
+    caseDiameterMm: z.number().nullable(),
+    caseThicknessMm: z.number().nullable(),
+    lugToLugMm: z.number().nullable(),
+    lugWidthMm: z.number().nullable(),
+    caseMaterial: z.string().nullable(),
+    movement: z
+      .enum(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"])
+      .nullable(),
+    caliber: z.string().nullable(),
+    powerReserveHours: z.number().nullable(),
+    waterResistanceM: z.number().nullable(),
+    crystal: z.string().nullable(),
+  }),
+  tags: z.array(z.enum(["diver", "chronograph", "GMT", "dress", "worldtimer"])),
+  qualityFlags: z.object({
+    regulatedPositions: z.number().nullable(),
+    accuracySpecSpd: z.number().nullable(),
+    hardenedCoatingHv: z.number().nullable(),
+    antimagneticAm: z.number().nullable(),
+    sapphireBezelInsert: z.boolean().nullable(),
+    drilledLugs: z.boolean().nullable(),
+    microAdjustClasp: z.boolean().nullable(),
+    quickRelease: z.boolean().nullable(),
+    braceletIncluded: z.boolean().nullable(),
+    arLayers: z.number().nullable(),
+  }),
+});
+
+const inRange = (n, min, max) => Number.isFinite(n) && n >= min && n <= max;
+
+// Same plausibility rules as sanitizeSpecs in src/lib/extract.ts.
+function sanitizeSpecs(specs) {
+  const s = { ...specs };
+  if (s.caseDiameterMm !== undefined && !inRange(s.caseDiameterMm, 16, 60)) delete s.caseDiameterMm;
+  if (s.caseThicknessMm !== undefined && !inRange(s.caseThicknessMm, 3, 25)) delete s.caseThicknessMm;
+  if (s.caseThicknessMm !== undefined && s.caseDiameterMm !== undefined && s.caseThicknessMm >= s.caseDiameterMm) {
+    delete s.caseThicknessMm;
+    delete s.caseDiameterMm;
+  }
+  if (s.lugToLugMm !== undefined) {
+    const tooSmall = s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm;
+    if (!inRange(s.lugToLugMm, 20, 70) || tooSmall) delete s.lugToLugMm;
+  }
+  if (s.lugWidthMm !== undefined && !inRange(s.lugWidthMm, 8, 30)) delete s.lugWidthMm;
+  if (s.waterResistanceM !== undefined && !inRange(s.waterResistanceM, 10, 2000)) delete s.waterResistanceM;
+  if (s.powerReserveHours !== undefined && !inRange(s.powerReserveHours, 24, 400)) delete s.powerReserveHours;
+  return s;
+}
+
+function missingFields(watch) {
+  const specs = watch.specs ?? {};
+  const missing = [];
+  for (const [key, label] of [...NUMBER_SPECS, ...TEXT_SPECS]) {
+    if (specs[key] === undefined || specs[key] === null || specs[key] === "") missing.push(label);
+  }
+  if (!(watch.tags ?? []).length) missing.push("category (diver/chronograph/GMT/worldtimer/dress)");
+  if (!watch.qualityFlags || !Object.keys(watch.qualityFlags).length) {
+    missing.push(
+      "quality details: regulation, accuracy spec, hardened coating (HV), antimagnetic rating, sapphire bezel insert, drilled lugs, micro-adjust clasp, quick-release, bracelet included, AR coating layers"
+    );
+  }
+  return missing;
+}
+
+function describeWatch(watch) {
+  const lines = [
+    `Brand: ${watch.brand}`,
+    `Model: ${watch.model}`,
+  ];
+  if (watch.referenceNumber) lines.push(`Reference: ${watch.referenceNumber}`);
+  if (watch.price) lines.push(`Approx. price: ${watch.price.amount} ${watch.price.currency}`);
+  const urls = (watch.links ?? []).map((l) => l.url).slice(0, 2);
+  if (urls.length) lines.push(`Product page(s): ${urls.join(" , ")}`);
+  const known = Object.entries(watch.specs ?? {})
+    .map(([k, v]) => `${k}=${v}`)
+    .join(", ");
+  if (known) lines.push(`Already known (for identification only): ${known}`);
+  return lines.join("\n");
+}
+
+async function research(watch, missing) {
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: 8192,
+    tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 5 }],
+    system:
+      "You research watch specifications. Use web search to find the manufacturer's " +
+      "specs for the exact watch given (verify you have the right model and variant — " +
+      "the reference number and price help disambiguate). Prefer the brand's own site, " +
+      "then reputable reviews and spec databases. Report only what sources actually " +
+      "state, with the source for each figure. For anything you cannot verify, say " +
+      "'not found' explicitly — do not estimate.",
+    messages: [
+      {
+        role: "user",
+        content:
+          `${describeWatch(watch)}\n\nFind and report these missing details:\n- ${missing.join("\n- ")}`,
+      },
+    ],
+  });
+
+  return response.content
+    .filter((block) => block.type === "text")
+    .map((block) => block.text)
+    .join("\n");
+}
+
+async function structure(researchText) {
+  const response = await client.messages.parse({
+    model: MODEL,
+    max_tokens: 4096,
+    system:
+      "Convert the research notes into structured fields. Only include values the notes " +
+      "state with a source; anything marked 'not found', estimated, or ambiguous is null. " +
+      "Water resistance in ATM/bar converts to meters (x10); power reserve in days to hours.",
+    messages: [{ role: "user", content: researchText }],
+    output_config: { format: zodOutputFormat(BackfillSchema) },
+  });
+  return response.parsed_output;
+}
+
+// Fill only fields that are currently absent. Returns the list of fields set.
+function merge(watch, result) {
+  const filled = [];
+  const specs = { ...(watch.specs ?? {}) };
+  const candidate = sanitizeSpecs(
+    Object.fromEntries(Object.entries(result.specs).filter(([, v]) => v !== null && v !== ""))
+  );
+  for (const [key, value] of Object.entries(candidate)) {
+    if (specs[key] === undefined || specs[key] === null || specs[key] === "") {
+      specs[key] = value;
+      filled.push(`specs.${key}=${value}`);
+    }
+  }
+  watch.specs = specs;
+
+  if (!(watch.tags ?? []).length && result.tags.length) {
+    watch.tags = Array.from(new Set(result.tags));
+    filled.push(`tags=${watch.tags.join(",")}`);
+  }
+
+  const flags = { ...(watch.qualityFlags ?? {}) };
+  for (const [key, value] of Object.entries(result.qualityFlags)) {
+    if (value === null) continue;
+    if (typeof value === "number" && (!Number.isFinite(value) || value < 0)) continue;
+    if (flags[key] === undefined) {
+      flags[key] = value;
+      filled.push(`qualityFlags.${key}=${value}`);
+    }
+  }
+  if (Object.keys(flags).length) watch.qualityFlags = flags;
+
+  return filled;
+}
+
+const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
+
+let queue = watches
+  .map((watch) => ({ watch, missing: missingFields(watch) }))
+  .filter(({ watch, missing }) => missing.length && (!ONLY.length || ONLY.includes(watch.id)));
+queue = queue.slice(0, LIMIT);
+
+console.log(`${queue.length} watch(es) with gaps${DRY ? " (dry run)" : ""}\n`);
+
+let totalFilled = 0;
+let failures = 0;
+const usage = { input: 0, output: 0 };
+
+for (const { watch, missing } of queue) {
+  const label = `${watch.id} ${watch.brand} ${watch.model}`;
+  try {
+    const notes = await research(watch, missing);
+    if (VERBOSE) console.log(`--- research: ${label}\n${notes}\n---`);
+    const result = await structure(notes);
+    if (!result) {
+      failures++;
+      console.log(`✗ ${label}: no structured output`);
+      continue;
+    }
+    const filled = merge(watch, result);
+    totalFilled += filled.length;
+    console.log(filled.length ? `✓ ${label}\n    ${filled.join("\n    ")}` : `- ${label}: nothing new verified`);
+  } catch (error) {
+    failures++;
+    console.log(`✗ ${label}: ${error?.message ?? error}`);
+  }
+}
+
+console.log(`\nFilled ${totalFilled} field(s) across ${queue.length} watch(es); ${failures} failure(s).`);
+
+if (!DRY && totalFilled > 0) {
+  await writeFile(DATA_URL, JSON.stringify(watches, null, 2) + "\n");
+  console.log(`Wrote ${DATA_URL.pathname}`);
+  console.log("Run `npm run validate:data` to confirm the file is still valid.");
+} else if (DRY) {
+  console.log("Dry run — nothing written.");
+}
