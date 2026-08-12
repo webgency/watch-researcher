@@ -58,7 +58,10 @@ const TEXT_SPECS = [
   ["crystal", "crystal material"],
 ];
 
-const BackfillSchema = z.object({
+// Structured outputs reject schemas with more than 16 union-typed (nullable)
+// parameters, so specs (10 nullables) and quality flags (10 nullables) are
+// parsed in two separate calls and merged.
+const SpecsSchema = z.object({
   specs: z.object({
     caseDiameterMm: z.number().nullable(),
     caseThicknessMm: z.number().nullable(),
@@ -73,6 +76,9 @@ const BackfillSchema = z.object({
     waterResistanceM: z.number().nullable(),
     crystal: z.string().nullable(),
   }),
+});
+
+const TagsFlagsSchema = z.object({
   tags: z.array(z.enum(["diver", "chronograph", "GMT", "dress", "worldtimer"])),
   qualityFlags: z.object({
     regulatedPositions: z.number().nullable(),
@@ -169,23 +175,30 @@ async function research(watch, missing) {
     .join("\n");
 }
 
+const STRUCTURE_SYSTEM =
+  "Convert the research notes into structured fields. Only include values the notes " +
+  "state with a source; anything marked 'not found', estimated, or ambiguous is null. " +
+  "Water resistance in ATM/bar converts to meters (x10); power reserve in days to hours. " +
+  "antimagneticAm is in A/m: convert gauss or oersted ratings by multiplying by 80 " +
+  "(e.g. 15,000 gauss = 1,200,000 A/m); an unquantified 'antimagnetic' claim (ISO 764) " +
+  "is 4800 A/m. accuracySpecSpd is the worst-case daily deviation in seconds as a " +
+  "positive number (COSC -4/+6 = 6; METAS 0/+5 = 5). A quartz watch's battery life " +
+  "is not a power reserve — leave powerReserveHours null.";
+
 async function structure(researchText) {
-  const response = await client.messages.parse({
-    model: MODEL,
-    max_tokens: 4096,
-    system:
-      "Convert the research notes into structured fields. Only include values the notes " +
-      "state with a source; anything marked 'not found', estimated, or ambiguous is null. " +
-      "Water resistance in ATM/bar converts to meters (x10); power reserve in days to hours. " +
-      "antimagneticAm is in A/m: convert gauss or oersted ratings by multiplying by 80 " +
-      "(e.g. 15,000 gauss = 1,200,000 A/m); an unquantified 'antimagnetic' claim (ISO 764) " +
-      "is 4800 A/m. accuracySpecSpd is the worst-case daily deviation in seconds as a " +
-      "positive number (COSC -4/+6 = 6; METAS 0/+5 = 5). A quartz watch's battery life " +
-      "is not a power reserve — leave powerReserveHours null.",
-    messages: [{ role: "user", content: researchText }],
-    output_config: { format: zodOutputFormat(BackfillSchema) },
-  });
-  return response.parsed_output;
+  const [specsResponse, flagsResponse] = await Promise.all(
+    [SpecsSchema, TagsFlagsSchema].map((schema) =>
+      client.messages.parse({
+        model: MODEL,
+        max_tokens: 4096,
+        system: STRUCTURE_SYSTEM,
+        messages: [{ role: "user", content: researchText }],
+        output_config: { format: zodOutputFormat(schema) },
+      })
+    )
+  );
+  if (!specsResponse.parsed_output || !flagsResponse.parsed_output) return null;
+  return { ...specsResponse.parsed_output, ...flagsResponse.parsed_output };
 }
 
 // Fill only fields that are currently absent. Returns the list of fields set.
