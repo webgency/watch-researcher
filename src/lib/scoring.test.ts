@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  assignQuadrant,
   caliberTier,
+  computeDesignScore,
   computeStanding,
+  computeThresholds,
   deriveCategory,
   derivePeerGroup,
   percentile,
@@ -284,5 +287,63 @@ describe("percentile", () => {
 
   it("ranks within pools of six or more", () => {
     expect(percentile(0.5, [0.1, 0.2, 0.3, 0.4, 0.5, 0.9])).toBe(0.8);
+  });
+});
+
+describe("computeDesignScore", () => {
+  it("maps the 1-5 rank onto 0-100", () => {
+    expect(computeDesignScore(makeWatch({ designUniqueness: 1 }))).toBe(0);
+    expect(computeDesignScore(makeWatch({ designUniqueness: 3 }))).toBe(50);
+    expect(computeDesignScore(makeWatch({ designUniqueness: 5 }))).toBe(100);
+  });
+
+  it("returns null for an unranked watch instead of a neutral middle", () => {
+    // The whole point of the axis: an unranked watch carries no design
+    // opinion, so it must not land on the median line as if it did.
+    expect(computeDesignScore(makeWatch())).toBeNull();
+    expect(computeDesignScore(makeWatch({ designUniqueness: 0 }))).toBeNull();
+    expect(computeDesignScore(makeWatch({ designUniqueness: 6 }))).toBeNull();
+    expect(computeDesignScore(makeWatch({ designUniqueness: 3.5 }))).toBeNull();
+  });
+
+  it("ignores the wishlist tier, which used to drive most of this axis", () => {
+    const passed = makeWatch({ wishlistTier: "pass", designUniqueness: 5 });
+    const mustHave = makeWatch({ wishlistTier: "must-have", designUniqueness: 5 });
+    expect(computeDesignScore(passed)).toBe(computeDesignScore(mustHave));
+  });
+});
+
+describe("quadrants with an unranked design axis", () => {
+  it("assigns no quadrant when either axis is missing", () => {
+    const thresholds = { value: 50, design: 50 };
+    expect(assignQuadrant(80, null, thresholds)).toBeNull();
+    expect(assignQuadrant(null, 80, thresholds)).toBeNull();
+    expect(assignQuadrant(80, 80, thresholds)).toBe("buy");
+    expect(assignQuadrant(20, 80, thresholds)).toBe("aspirational");
+    expect(assignQuadrant(80, 20, thresholds)).toBe("sensible");
+    expect(assignQuadrant(20, 20, thresholds)).toBe("skip");
+  });
+
+  it("takes each axis median from the watches scored on that axis", () => {
+    // Four priced watches, only some of them ranked for design. The design
+    // median must come from the ranked ones alone, not be dragged by nulls.
+    const { thresholds, method } = computeThresholds([
+      { valueScore: 10, designScore: 100 },
+      { valueScore: 20, designScore: 100 },
+      { valueScore: 30, designScore: null },
+      { valueScore: 40, designScore: null },
+    ]);
+    expect(method).toBe("fixed");
+    expect(thresholds.design).toBe(50);
+
+    const full = computeThresholds([
+      { valueScore: 10, designScore: 0 },
+      { valueScore: 20, designScore: 25 },
+      { valueScore: 30, designScore: 75 },
+      { valueScore: 40, designScore: 100 },
+    ]);
+    expect(full.method).toBe("median");
+    expect(full.thresholds.value).toBe(25);
+    expect(full.thresholds.design).toBe(50);
   });
 });

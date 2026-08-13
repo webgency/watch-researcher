@@ -1,5 +1,4 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { getBrands } from "@/lib/brands";
 import { getWatches } from "@/lib/store";
 import { computeStanding, computeWatchScores, watchScoreSummaries, type Standing } from "@/lib/scoring";
 import { IS_STATIC } from "@/lib/config";
@@ -9,11 +8,8 @@ export default async function HomePage() {
   // Stay dynamic locally so edits show immediately; allow static prerender for
   // the GitHub Pages export.
   if (!IS_STATIC) noStore();
-  const [watches, brands] = await Promise.all([getWatches(), getBrands()]);
-  const wishlistScores = computeWatchScores(
-    watches.filter((watch) => watch.status === "wishlist"),
-    brands
-  );
+  const watches = await getWatches();
+  const wishlistScores = computeWatchScores(watches.filter((watch) => watch.status === "wishlist"));
   // Peer bands are drawn from the whole collection, not just the wishlist, so
   // an owned watch still counts as a peer for anything priced alongside it.
   const standings: Record<string, Standing> = Object.fromEntries(

@@ -9,34 +9,34 @@ import {
   valueRankings,
   WatchScore,
 } from "@/lib/scoring";
-import { BrandCatalog, Watch } from "@/lib/types";
+import { Watch } from "@/lib/types";
 
-type RatedWatchScore = WatchScore & { valueScore: number; quadrant: Quadrant };
+type RatedWatchScore = WatchScore & { valueScore: number; designScore: number; quadrant: Quadrant };
 
 const QUADRANTS: Quadrant[] = ["buy", "aspirational", "sensible", "skip"];
 
 const QUADRANT_META: Record<Quadrant, { label: string; shortLabel: string; color: string; fill: string }> = {
   buy: {
     label: "Buy",
-    shortLabel: "High value / high desire",
+    shortLabel: "High value / high design",
     color: "text-emerald-700",
     fill: "#d1fae5",
   },
   aspirational: {
     label: "Aspirational",
-    shortLabel: "Low value / high desire",
+    shortLabel: "Low value / high design",
     color: "text-amber-700",
     fill: "#fef3c7",
   },
   sensible: {
     label: "Sensible",
-    shortLabel: "High value / low desire",
+    shortLabel: "High value / low design",
     color: "text-sky-700",
     fill: "#e0f2fe",
   },
   skip: {
     label: "Skip",
-    shortLabel: "Low value / low desire",
+    shortLabel: "Low value / low design",
     color: "text-slate-600",
     fill: "#f1f5f9",
   },
@@ -56,15 +56,18 @@ const plotHeight = CHART.height - CHART.top - CHART.bottom;
 const plotRight = CHART.left + plotWidth;
 const plotBottom = CHART.top + plotHeight;
 
-export default function ValueMatrix({ watches, brands }: { watches: Watch[]; brands: BrandCatalog }) {
+export default function ValueMatrix({ watches }: { watches: Watch[] }) {
   const wishlist = watches.filter((watch) => watch.status === "wishlist");
   const warnings: string[] = [];
-  const { scores, thresholds, thresholdMethod } = computeWatchScores(wishlist, brands, (message) => {
+  const { scores, thresholds, thresholdMethod } = computeWatchScores(wishlist, (message) => {
     if (!warnings.includes(message)) warnings.push(message);
   });
   const valueRanks = valueRankings(scores);
   const rated = scores.filter(isRated).sort(compareValueScores);
-  const unrated = scores.filter((score) => score.valueScore === null);
+  // Two separate reasons a watch cannot be placed, kept apart so each list
+  // names the one thing that would fix it.
+  const unpriced = scores.filter((score) => score.valueScore === null);
+  const unranked = scores.filter((score) => score.valueScore !== null && score.designScore === null);
   const grouped = Object.fromEntries(QUADRANTS.map((quadrant) => [quadrant, rated.filter((score) => score.quadrant === quadrant)])) as Record<
     Quadrant,
     RatedWatchScore[]
@@ -77,18 +80,19 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
           <div>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Value matrix</h2>
             <p className="mt-1 text-sm text-slate-500">
-              {rated.length} priced wishlist watch{rated.length === 1 ? "" : "es"} plotted.
+              {rated.length} of {wishlist.length} wishlist watch{wishlist.length === 1 ? "" : "es"} plotted — a watch
+              needs both a price and a design rank.
             </p>
           </div>
           <div className="text-left text-xs text-slate-500 sm:text-right">
             <p>Value split {formatScore(thresholds.value)}</p>
-            <p>Desire score split {formatScore(thresholds.desirability)}</p>
+            <p>Design split {formatScore(thresholds.design)}</p>
           </div>
         </div>
 
         {thresholdMethod === "fixed" && (
           <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            Fewer than {MIN_MEDIAN_THRESHOLD_COUNT} priced watches are rated, so this view uses a fixed 50/50 split.
+            Fewer than {MIN_MEDIAN_THRESHOLD_COUNT} watches are scored on an axis, so this view uses a fixed 50/50 split.
           </p>
         )}
 
@@ -101,12 +105,12 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
         )}
 
         {rated.length === 0 ? (
-          <p className="py-12 text-center text-sm text-slate-500">Add tracked prices to wishlist watches to populate the matrix.</p>
+          <p className="py-12 text-center text-sm text-slate-500">Add a tracked price and a design rank to wishlist watches to populate the matrix.</p>
         ) : (
           <div className="overflow-x-auto">
-            <svg role="img" aria-label="Value and desire score quadrant chart" viewBox={`0 0 ${CHART.width} ${CHART.height}`} className="w-full min-w-[640px]">
+            <svg role="img" aria-label="Value and design quadrant chart" viewBox={`0 0 ${CHART.width} ${CHART.height}`} className="w-full min-w-[640px]">
               <rect x={CHART.left} y={CHART.top} width={plotWidth} height={plotHeight} fill="#ffffff" />
-              {quadrantRects(thresholds.value, thresholds.desirability).map((rect) => (
+              {quadrantRects(thresholds.value, thresholds.design).map((rect) => (
                 <g key={rect.quadrant}>
                   <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill={QUADRANT_META[rect.quadrant].fill} opacity="0.65" />
                   <text x={rect.x + 14} y={rect.y + 24} className="fill-slate-700 text-[13px] font-semibold">
@@ -132,30 +136,30 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
               ))}
 
               <line x1={xFor(thresholds.value)} x2={xFor(thresholds.value)} y1={CHART.top} y2={plotBottom} stroke="#334155" strokeWidth="2" />
-              <line x1={CHART.left} x2={plotRight} y1={yFor(thresholds.desirability)} y2={yFor(thresholds.desirability)} stroke="#334155" strokeWidth="2" />
+              <line x1={CHART.left} x2={plotRight} y1={yFor(thresholds.design)} y2={yFor(thresholds.design)} stroke="#334155" strokeWidth="2" />
               <rect x={CHART.left} y={CHART.top} width={plotWidth} height={plotHeight} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
 
               <text x={(CHART.left + plotRight) / 2} y={CHART.height - 18} textAnchor="middle" className="fill-slate-700 text-[12px] font-semibold">
                 Value
               </text>
               <text x="20" y={(CHART.top + plotBottom) / 2} textAnchor="middle" transform={`rotate(-90 20 ${(CHART.top + plotBottom) / 2})`} className="fill-slate-700 text-[12px] font-semibold">
-                Desire score
+                Design
               </text>
 
               {rated.map((score) => (
                 <g key={score.watch.id}>
                   <circle
                     cx={xFor(score.valueScore)}
-                    cy={yFor(score.desirabilityScore)}
+                    cy={yFor(score.designScore)}
                     r="7"
                     fill="#0f172a"
                     opacity="0.9"
                     stroke="#ffffff"
                     strokeWidth="2"
                   >
-                    <title>{`${score.watch.brand} ${score.watch.model}: value rank #${valueRanks.get(score.watch.id)}, value ${formatScore(score.valueScore)}, desire score ${formatScore(score.desirabilityScore)}`}</title>
+                    <title>{`${score.watch.brand} ${score.watch.model}: value rank #${valueRanks.get(score.watch.id)}, value ${formatScore(score.valueScore)}, design ${formatScore(score.designScore)}`}</title>
                   </circle>
-                  <text x={xFor(score.valueScore) + 10} y={yFor(score.desirabilityScore) + 4} className="fill-slate-700 text-[10px]">
+                  <text x={xFor(score.valueScore) + 10} y={yFor(score.designScore) + 4} className="fill-slate-700 text-[10px]">
                     {valueRanks.get(score.watch.id)}
                   </text>
                 </g>
@@ -182,16 +186,34 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
         ))}
       </div>
 
-      {unrated.length > 0 && (
+      {unranked.length > 0 && (
+        <section className="card p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Not ranked for design</h3>
+              <p className="text-xs text-slate-500">
+                Priced, but off the chart until you rank them. They are not plotted at the midpoint — an unranked
+                watch carries no design opinion, and parking it on the median line would invent one.
+              </p>
+            </div>
+            <Link href="/design" className="btn-primary flex-shrink-0 whitespace-nowrap py-1.5 text-xs">
+              Rank {unranked.length} →
+            </Link>
+          </div>
+          <WatchScoreList scores={unranked} valueRanks={valueRanks} />
+        </section>
+      )}
+
+      {unpriced.length > 0 && (
         <section className="card p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Unrated value</h3>
               <p className="text-xs text-slate-500">Wishlist watches without a tracked price.</p>
             </div>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{unrated.length}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{unpriced.length}</span>
           </div>
-          <WatchScoreList scores={unrated} valueRanks={valueRanks} />
+          <WatchScoreList scores={unpriced} valueRanks={valueRanks} />
         </section>
       )}
     </div>
@@ -214,7 +236,7 @@ function WatchScoreList({ scores, valueRanks }: { scores: WatchScore[]; valueRan
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <ScorePill label={valueRanks.get(score.watch.id) ? `Value #${valueRanks.get(score.watch.id)}` : "Value"} value={score.valueScore} />
-            <ScorePill label="Desire score" value={score.desirabilityScore} />
+            <ScorePill label="Design" value={score.designScore} />
             <DataCompletenessBadge completeness={score.dataCompleteness} />
           </div>
         </li>
@@ -244,7 +266,7 @@ function DataCompletenessBadge({ completeness }: { completeness: DataCompletenes
 }
 
 function isRated(score: WatchScore): score is RatedWatchScore {
-  return score.valueScore !== null && score.quadrant !== null;
+  return score.valueScore !== null && score.designScore !== null && score.quadrant !== null;
 }
 
 function xFor(score: number): number {
@@ -255,9 +277,9 @@ function yFor(score: number): number {
   return plotBottom - (score / 100) * plotHeight;
 }
 
-function quadrantRects(valueThreshold: number, desirabilityThreshold: number) {
+function quadrantRects(valueThreshold: number, designThreshold: number) {
   const thresholdX = xFor(valueThreshold);
-  const thresholdY = yFor(desirabilityThreshold);
+  const thresholdY = yFor(designThreshold);
   return [
     { quadrant: "aspirational" as const, x: CHART.left, y: CHART.top, width: thresholdX - CHART.left, height: thresholdY - CHART.top },
     { quadrant: "buy" as const, x: thresholdX, y: CHART.top, width: plotRight - thresholdX, height: thresholdY - CHART.top },

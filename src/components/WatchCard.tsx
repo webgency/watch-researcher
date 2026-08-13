@@ -91,7 +91,7 @@ export default function WatchCard({
           </span>
         </div>
         {standing && <BandStanding standing={standing} />}
-        {scoreSummary && <ScoreSummary summary={scoreSummary} />}
+        {scoreSummary && <ScoreSummary summary={scoreSummary} designRank={watch.designUniqueness} />}
         {onChangeWishlistTier && (
           <select
             value={watch.wishlistTier ?? ""}
@@ -204,9 +204,8 @@ function MiniMeter({ label, value, par }: { label: string; value?: number; par?:
   );
 }
 
-function ScoreSummary({ summary }: { summary: WatchScoreSummary }) {
+function ScoreSummary({ summary, designRank }: { summary: WatchScoreSummary; designRank?: number }) {
   const roundedValue = summary.valueScore === null ? null : Math.round(summary.valueScore);
-  const roundedDesire = Math.round(summary.desirabilityScore);
   const quadrantClass = summary.quadrant ? QUADRANT_CLASSES[summary.quadrant] : "bg-slate-100 text-slate-600";
 
   return (
@@ -217,8 +216,14 @@ function ScoreSummary({ summary }: { summary: WatchScoreSummary }) {
       >
         {summary.valueRank ? `Value #${summary.valueRank} · ${roundedValue}` : "Value unrated"}
       </span>
-      <span title="Calculated desire score" className="rounded-full bg-slate-100 px-2 py-1 font-medium text-slate-600">
-        Desire {roundedDesire}
+      {/* Shows your 1-5 rank, not the rescaled score — the rank is what you set. */}
+      <span
+        title={designRank ? "Your design rank" : "Not ranked for design yet"}
+        className={`rounded-full px-2 py-1 font-medium ${
+          designRank ? "bg-slate-100 text-slate-600" : "bg-white text-slate-400 ring-1 ring-inset ring-slate-200"
+        }`}
+      >
+        {designRank ? `Design ${designRank}/5` : "Design unranked"}
       </span>
       {summary.quadrant && (
         <span className={`rounded-full px-2 py-1 font-medium ${quadrantClass}`}>

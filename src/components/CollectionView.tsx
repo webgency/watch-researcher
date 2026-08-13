@@ -20,6 +20,7 @@ import WatchCard from "./WatchCard";
 type SortKey =
   | "wishlistTier"
   | "valueScore"
+  | "design"
   | "bandValue"
   | "bandQuality"
   | "dateAdded"
@@ -31,6 +32,7 @@ type SortKey =
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "wishlistTier", label: "Wishlist priority" },
   { key: "valueScore", label: "Value score" },
+  { key: "design", label: "Design rank" },
   { key: "bandValue", label: "Band value" },
   { key: "bandQuality", label: "Band quality" },
   { key: "dateAdded", label: "Recently added" },
@@ -139,7 +141,12 @@ export default function CollectionView({
         case "valueScore":
           return (
             (scoreSummaries[b.id]?.valueScore ?? -Infinity) - (scoreSummaries[a.id]?.valueScore ?? -Infinity) ||
-            (scoreSummaries[b.id]?.desirabilityScore ?? -Infinity) - (scoreSummaries[a.id]?.desirabilityScore ?? -Infinity) ||
+            (scoreSummaries[b.id]?.designScore ?? -Infinity) - (scoreSummaries[a.id]?.designScore ?? -Infinity) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
+        case "design":
+          return (
+            (scoreSummaries[b.id]?.designScore ?? -Infinity) - (scoreSummaries[a.id]?.designScore ?? -Infinity) ||
             b.dateAdded.localeCompare(a.dateAdded)
           );
         // Unrated watches sort last rather than as a zero — there is no
