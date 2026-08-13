@@ -119,6 +119,11 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["soprod c125", 0.68],
   ["l888", 0.65],
   ["sw300", 0.65],
+  // Sellita's GMT caliber, a 2893 derivative — the same architecture family as
+  // the 2892-derived SW300, so it sits alongside it. COSC versions are not
+  // rated higher here: certification is regulation, which scoreDimensions
+  // already rewards separately through regulatedPositions.
+  ["sw330", 0.65],
   ["la joux-perret", 0.65],
   ["miyota 9075", 0.62],
   ["powermatic 80", 0.60],

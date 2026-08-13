@@ -62,6 +62,15 @@ describe("scoreDimensions", () => {
     expect(caliberTier(undefined)).toBeUndefined();
   });
 
+  it("matches a base caliber through a brand's own designation", () => {
+    // Brands rename the movements they buy, so the tier has to survive the
+    // house name wrapped around the base caliber.
+    expect(caliberTier("Laventure Caliber 3 (Sellita SW330-2)")).toBe(0.65);
+    expect(caliberTier("Sellita SW330-2")).toBe(0.65);
+    // SW330 must not be picked up by the SW300 pattern, or vice versa.
+    expect(caliberTier("Sellita SW300-1")).toBe(0.65);
+  });
+
   it("propagates a missing thickness as no wearability score, not a bad one", () => {
     const watch = makeWatch({ specs: { caseDiameterMm: 40 } });
     expect(scoreDimensions(watch).wearability).toBeUndefined();
