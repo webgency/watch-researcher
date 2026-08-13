@@ -37,14 +37,8 @@ function makeExtraction(overrides: Partial<Extraction> = {}): Extraction {
       arLayers: null,
       ...overrides.qualityFlags,
     },
-    friction: {
-      availability: null,
-      expectedShipDate: null,
-      braceletUpchargeUsd: null,
-      ...overrides.friction,
-    },
     ...Object.fromEntries(
-      Object.entries(overrides).filter(([key]) => !["specs", "qualityFlags", "friction"].includes(key))
+      Object.entries(overrides).filter(([key]) => !["specs", "qualityFlags"].includes(key))
     ),
   };
 }
@@ -97,7 +91,6 @@ describe("toExtractedDetails", () => {
     expect(details.specs).toEqual({});
     expect(details.tags).toEqual([]);
     expect(details.qualityFlags).toBeUndefined();
-    expect(details.friction).toBeUndefined();
     expect(details.brand).toBeUndefined();
   });
 
@@ -115,29 +108,6 @@ describe("toExtractedDetails", () => {
     expect(details.specs.caseDiameterMm).toBe(36.5);
     expect(details.tags).toEqual(["diver"]);
     expect(details.qualityFlags).toEqual({ braceletIncluded: true, arLayers: 3 });
-  });
-
-  it("only includes friction when availability is known, and never brandLiquidity", () => {
-    const none = toExtractedDetails(
-      makeExtraction({ friction: { braceletUpchargeUsd: 189 } as never })
-    );
-    expect(none.friction).toBeUndefined();
-
-    const preorder = toExtractedDetails(
-      makeExtraction({
-        friction: {
-          availability: "pre-order",
-          expectedShipDate: "2026-11-01",
-          braceletUpchargeUsd: 189,
-        } as never,
-      })
-    );
-    expect(preorder.friction).toEqual({
-      availability: "pre-order",
-      expectedShipDate: "2026-11-01",
-      braceletUpchargeUsd: 189,
-    });
-    expect(preorder.friction && "brandLiquidity" in preorder.friction).toBe(false);
   });
 
   it("sanitizes implausible extracted dimensions", () => {

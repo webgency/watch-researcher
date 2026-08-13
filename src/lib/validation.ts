@@ -1,10 +1,7 @@
 import { SPEC_FIELDS } from "./specs";
 import {
-  Availability,
-  AVAILABILITY_STATES,
   BrandCatalog,
   Condition,
-  Friction,
   Money,
   MOVEMENT_TYPES,
   QualityFlags,
@@ -253,45 +250,6 @@ function cleanQualityFlags(value: unknown, errors: string[]): QualityFlags | und
   return flags;
 }
 
-function cleanFriction(value: unknown, errors: string[]): Friction | undefined {
-  if (value === undefined || value === null) return undefined;
-  if (!isRecord(value)) {
-    errors.push("friction must be an object");
-    return undefined;
-  }
-
-  const availability = value.availability;
-  if (typeof availability !== "string" || !AVAILABILITY_STATES.includes(availability as Availability)) {
-    errors.push(`friction.availability must be one of ${AVAILABILITY_STATES.join(", ")}`);
-  }
-  const brandLiquidity = cleanIntegerRange(value.brandLiquidity, "friction.brandLiquidity", errors, 1, 5);
-  if (brandLiquidity === undefined) {
-    errors.push("friction.brandLiquidity is required");
-  }
-  const expectedShipDate = cleanDateString(value.expectedShipDate, "friction.expectedShipDate", errors);
-  const braceletUpchargeUsd = cleanNonNegativeNumber(
-    value.braceletUpchargeUsd,
-    "friction.braceletUpchargeUsd",
-    errors
-  );
-
-  if (
-    typeof availability !== "string" ||
-    !AVAILABILITY_STATES.includes(availability as Availability) ||
-    brandLiquidity === undefined
-  ) {
-    return undefined;
-  }
-
-  const friction: Friction = {
-    availability: availability as Availability,
-    brandLiquidity: brandLiquidity as Friction["brandLiquidity"],
-  };
-  if (expectedShipDate) friction.expectedShipDate = expectedShipDate;
-  if (braceletUpchargeUsd !== undefined) friction.braceletUpchargeUsd = braceletUpchargeUsd;
-  return friction;
-}
-
 function cleanTags(value: unknown, required: boolean, errors: string[]): string[] | undefined {
   if (value === undefined || value === null) return required ? [] : undefined;
   if (!Array.isArray(value)) {
@@ -374,9 +332,7 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
-  assignIfPresent(output, body, "landedPrice", cleanMoney(body.landedPrice, "landedPrice", errors));
   assignIfPresent(output, body, "qualityFlags", cleanQualityFlags(body.qualityFlags, errors));
-  assignIfPresent(output, body, "friction", cleanFriction(body.friction, errors));
   assignIfPresent(output, body, "links", cleanLinks(body.links, !partial, errors));
   assignIfPresent(output, body, "imageUrl", cleanOptionalString(body.imageUrl, "imageUrl", errors));
   assignIfPresent(output, body, "specs", cleanSpecs(body.specs, !partial, errors));

@@ -9,7 +9,7 @@
 // page — it just returns whatever it managed to extract.
 
 import { extractWatchDetails } from "./extract";
-import { Friction, Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
+import { Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
 
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
@@ -26,8 +26,6 @@ export type ScrapeResult = Partial<
   retailer?: string;
   foundNothing?: boolean;
   qualityFlags?: QualityFlags;
-  /** brandLiquidity is a user judgment call, so scraped friction is partial. */
-  friction?: Partial<Friction>;
 };
 
 async function fetchText(url: string, json = false) {
@@ -297,8 +295,7 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
     if (Object.keys(extracted.specs).length) out.specs = extracted.specs;
     if (extracted.tags.length) out.tags = extracted.tags;
     if (extracted.qualityFlags) out.qualityFlags = extracted.qualityFlags;
-    if (extracted.friction) out.friction = extracted.friction;
-  } else {
+    } else {
     const specs = extractSpecs(specText);
     if (Object.keys(specs).length) out.specs = specs;
   }

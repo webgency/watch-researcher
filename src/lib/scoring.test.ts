@@ -145,12 +145,8 @@ describe("category and peer group derivation", () => {
     expect(group.members.map((member) => member.id)).toEqual([gmt.id, sameBand.id]);
   });
 
-  it("prefers landedPrice over list price for banding", () => {
-    const watch = makeWatch({
-      tags: ["diver"],
-      price: { amount: 950, currency: "USD" },
-      landedPrice: { amount: 1150, currency: "USD" },
-    });
+  it("bands on the tracked price", () => {
+    const watch = makeWatch({ tags: ["diver"], price: { amount: 1150, currency: "USD" } });
     expect(derivePeerGroup(watch, [watch]).band?.id).toBe("1000-2000");
   });
 });
@@ -209,41 +205,6 @@ describe("computeStanding", () => {
     expect(a.unrated).toContain("movement");
     // Composite over the same rated dimensions -> identical score.
     expect(a.qualityScore).toBe(b.qualityScore);
-  });
-
-  it("never folds friction into any numeric score", () => {
-    const base = {
-      tags: ["diver"],
-      price: { amount: 800, currency: "USD" },
-      specs: {
-        caliber: "Seiko NH35",
-        caseDiameterMm: 40,
-        caseThicknessMm: 12,
-        waterResistanceM: 200,
-        crystal: "Sapphire",
-      },
-    };
-    const clean = makeWatch(base);
-    const troubled = makeWatch({
-      ...base,
-      friction: {
-        availability: "pre-order",
-        expectedShipDate: "2026-11-01",
-        braceletUpchargeUsd: 189,
-        brandLiquidity: 1,
-      },
-    });
-
-    const cleanStanding = computeStanding(clean, [clean]);
-    const troubledStanding = computeStanding(troubled, [troubled]);
-    expect(troubledStanding.qualityScore).toBe(cleanStanding.qualityScore);
-    expect(troubledStanding.valueScore).toBe(cleanStanding.valueScore);
-    expect(cleanStanding.frictions).toEqual([]);
-    expect(troubledStanding.frictions).toEqual([
-      "pre-order, ships 2026-11-01",
-      "bracelet +$189",
-      "thin secondary market",
-    ]);
   });
 
   it("reports beats and trails against the band rubric", () => {

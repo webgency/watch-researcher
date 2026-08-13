@@ -198,18 +198,6 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
             </p>
           )}
 
-          {standing.frictions.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {standing.frictions.map((friction) => (
-                <span
-                  key={friction}
-                  className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-200"
-                >
-                  {friction}
-                </span>
-              ))}
-            </div>
-          )}
         </>
       )}
     </section>

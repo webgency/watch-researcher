@@ -6,15 +6,13 @@
 // - Anything the page doesn't explicitly state comes back null and is dropped —
 //   the model is instructed never to guess, and sanity checks reject readings
 //   that are physically implausible (the regex path's known failure mode).
-// - Friction is extracted without brandLiquidity (a user judgment call), so it
-//   is exposed as a Partial<Friction>.
 //
 // Runs server-side only. Requires ANTHROPIC_API_KEY; returns null without it.
 
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
-import { Friction, MOVEMENT_TYPES, QualityFlags, WatchSpecs } from "./types";
+import { MOVEMENT_TYPES, QualityFlags, WatchSpecs } from "./types";
 
 export const EXTRACTION_MODEL = "claude-opus-5";
 
@@ -53,11 +51,6 @@ const ExtractionSchema = z.object({
     braceletIncluded: z.boolean().nullable(),
     arLayers: z.number().nullable(),
   }),
-  friction: z.object({
-    availability: z.enum(["in-stock", "pre-order", "sold-out", "discontinued"]).nullable(),
-    expectedShipDate: z.string().nullable(),
-    braceletUpchargeUsd: z.number().nullable(),
-  }),
 });
 
 export type Extraction = z.infer<typeof ExtractionSchema>;
@@ -69,7 +62,6 @@ export interface ExtractedDetails {
   specs: WatchSpecs;
   tags: string[];
   qualityFlags?: QualityFlags;
-  friction?: Partial<Friction>;
 }
 
 const EXTRACTION_SYSTEM = `You extract watch specifications from product-page text.
@@ -81,7 +73,6 @@ Rules:
 - caliber is the movement's name/number as stated (e.g. "Sellita SW200-1", "Miyota 9015"), without surrounding marketing prose.
 - tags: include a category only when the page clearly identifies the watch as that type (a rotating dive bezel + 200m WR marks a diver; chronograph pushers/subdials a chronograph; a 24h/second-timezone hand a GMT; "worldtimer" only for true worldtimer complications). A plain time-only watch with no sport features is "dress".
 - qualityFlags booleans: true only when explicitly stated; null when unmentioned. braceletIncluded means a metal bracelet ships with the watch at the listed price.
-- friction.availability: "pre-order" only when the page says so; "in-stock" when it clearly offers immediate purchase; null when unclear. braceletUpchargeUsd is the extra cost to choose a bracelet over the stock strap, in USD, only if shown in USD.
 - Ignore specs that belong to other products (related items, cross-sells) — only the primary product on the page.`;
 
 let cachedClient: Anthropic | null = null;
@@ -151,14 +142,6 @@ export function toExtractedDetails(raw: Extraction): ExtractedDetails {
     (qualityFlags as Record<string, unknown>)[key] = value;
   }
 
-  const friction: Partial<Friction> = {};
-  if (raw.friction.availability) friction.availability = raw.friction.availability;
-  const shipDate = cleanString(raw.friction.expectedShipDate);
-  if (shipDate) friction.expectedShipDate = shipDate;
-  if (raw.friction.braceletUpchargeUsd !== null && raw.friction.braceletUpchargeUsd > 0) {
-    friction.braceletUpchargeUsd = raw.friction.braceletUpchargeUsd;
-  }
-
   const out: ExtractedDetails = {
     specs: sanitizeSpecs(specs),
     tags: Array.from(new Set(raw.tags)),
@@ -170,7 +153,6 @@ export function toExtractedDetails(raw: Extraction): ExtractedDetails {
   if (model) out.model = model;
   if (referenceNumber) out.referenceNumber = referenceNumber;
   if (Object.keys(qualityFlags).length) out.qualityFlags = qualityFlags;
-  if (friction.availability) out.friction = friction;
   return out;
 }
 

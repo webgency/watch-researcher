@@ -235,8 +235,7 @@ function median(values: number[]): number {
 //
 // Five dimensions scored 0-1 against the fixed rubrics in ./rubrics.ts.
 // A dimension with missing source data is undefined, never a fabricated
-// mid value, and is excluded from the composite. Friction flags are surfaced
-// as text and never enter any numeric score.
+// mid value, and is excluded from the composite.
 // ---------------------------------------------------------------------------
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
@@ -293,9 +292,9 @@ export function deriveCategory(watch: Watch): RubricCategory {
   return "dress";
 }
 
-/** All-in USD price used for banding: landedPrice when present, else price. */
-export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => void): number | undefined {
-  const money = watch.landedPrice ?? watch.price;
+/** USD price used for banding. */
+export function priceUsd(watch: Watch, onWarning?: (message: string) => void): number | undefined {
+  const money = watch.price;
   return money ? normalizePriceToUsd(money, onWarning) : undefined;
 }
 
@@ -457,12 +456,12 @@ const CATEGORY_PLURAL: Record<RubricCategory, string> = {
 /** Peer group = same rubric category + same price band. Unpriced watches group together. */
 export function derivePeerGroup(watch: Watch, allWatches: Watch[]): PeerGroup {
   const category = deriveCategory(watch);
-  const usd = landedPriceUsd(watch);
+  const usd = priceUsd(watch);
   const band = usd !== undefined ? priceBandFor(usd) : undefined;
 
   const members = allWatches.filter((candidate) => {
     if (deriveCategory(candidate) !== category) return false;
-    const candidateUsd = landedPriceUsd(candidate);
+    const candidateUsd = priceUsd(candidate);
     if (band === undefined) return candidateUsd === undefined;
     return candidateUsd !== undefined && priceBandFor(candidateUsd).id === band.id;
   });
@@ -515,8 +514,6 @@ export interface Standing {
   beats: Dimension[];
   /** Dimensions below the band's rubric reference. */
   trails: Dimension[];
-  /** Human-readable friction chips. Never numeric, never part of any score. */
-  frictions: string[];
 }
 
 function compositeQuality(raw: Partial<Record<Dimension, number>>): number | undefined {
@@ -526,31 +523,6 @@ function compositeQuality(raw: Partial<Record<Dimension, number>>): number | und
   });
   if (rated.length === 0) return undefined;
   return rated.reduce((sum, value) => sum + value, 0) / rated.length;
-}
-
-function frictionChips(watch: Watch): string[] {
-  const friction = watch.friction;
-  if (!friction) return [];
-
-  const chips: string[] = [];
-  if (friction.availability === "pre-order") {
-    chips.push(
-      friction.expectedShipDate
-        ? `pre-order, ships ${friction.expectedShipDate}`
-        : "pre-order"
-    );
-  } else if (friction.availability === "sold-out") {
-    chips.push("sold out");
-  } else if (friction.availability === "discontinued") {
-    chips.push("discontinued");
-  }
-  if (friction.braceletUpchargeUsd) {
-    chips.push(`bracelet +$${friction.braceletUpchargeUsd}`);
-  }
-  if (friction.brandLiquidity <= 2) {
-    chips.push("thin secondary market");
-  }
-  return chips;
 }
 
 /**
@@ -565,7 +537,7 @@ export function computeStanding(
 ): Standing {
   const peerGroup = derivePeerGroup(watch, allWatches);
   const raw = scoreDimensions(watch);
-  const usd = landedPriceUsd(watch, onWarning);
+  const usd = priceUsd(watch, onWarning);
   const band = peerGroup.band;
   const rubric: RubricReference | undefined = band
     ? rubricFor(peerGroup.category, band.id)
@@ -626,6 +598,5 @@ export function computeStanding(
     qualityPercentile,
     beats,
     trails,
-    frictions: frictionChips(watch),
   };
 }

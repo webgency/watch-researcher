@@ -8,9 +8,6 @@
 // overwrites existing data, and drops physically implausible readings. Fields
 // the research couldn't verify stay missing — no guessed values.
 //
-// friction (availability, upcharges) is deliberately NOT backfilled: web
-// results go stale too fast, and brandLiquidity is a personal judgment call.
-//
 // Requires ANTHROPIC_API_KEY. Run from a terminal with real network access.
 //
 // Usage:
