@@ -64,17 +64,37 @@ describe("scoreDimensions", () => {
     expect(scoreDimensions(watch).wearability).toBeUndefined();
   });
 
-  it("scores caseCraft and bracelet only once qualityFlags exist", () => {
+  it("leaves caseCraft and bracelet unrated when nothing evidences them", () => {
     const bare = makeWatch();
     expect(scoreDimensions(bare).caseCraft).toBeUndefined();
     expect(scoreDimensions(bare).bracelet).toBeUndefined();
+  });
 
-    const flagged = makeWatch({
+  it("rates the bracelet only for a watch that ships on one", () => {
+    const onBracelet = makeWatch({
       qualityFlags: { braceletIncluded: true, microAdjustClasp: true, quickRelease: true },
     });
-    const raw = scoreDimensions(flagged);
-    expect(raw.bracelet).toBe(1);
-    expect(raw.caseCraft).toBeCloseTo(0.35);
+    expect(scoreDimensions(onBracelet).bracelet).toBe(1);
+
+    // A strap watch has no bracelet to rate. Scoring it 0 here would surface as
+    // "trails on bracelet" when the dimension simply does not apply.
+    const onStrap = makeWatch({
+      qualityFlags: { braceletIncluded: false, quickRelease: true },
+    });
+    expect(scoreDimensions(onStrap).bracelet).toBeUndefined();
+  });
+
+  it("needs more than one recorded flag before rating caseCraft", () => {
+    // The single most common record in the collection: a lone negative that
+    // says nothing about finishing.
+    const loneNegative = makeWatch({ qualityFlags: { sapphireBezelInsert: false } });
+    expect(scoreDimensions(loneNegative).caseCraft).toBeUndefined();
+
+    // Two recorded flags mean finishing was actually surveyed.
+    const surveyed = makeWatch({
+      qualityFlags: { sapphireBezelInsert: false, drilledLugs: true },
+    });
+    expect(scoreDimensions(surveyed).caseCraft).toBeCloseTo(0.45);
   });
 
   it("judges water resistance against the category expectation, not raw maximums", () => {

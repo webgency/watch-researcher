@@ -1,4 +1,4 @@
-import { BrandCatalog, Money, MovementType, Watch, WishlistTier } from "./types";
+import { BrandCatalog, Money, MovementType, QualityFlags, Watch, WishlistTier } from "./types";
 import {
   CATEGORY_EXPECTATION,
   Dimension,
@@ -392,13 +392,40 @@ export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => vo
   return money ? normalizePriceToUsd(money, onWarning) : undefined;
 }
 
+/** Flags that carry caseCraft signal. */
+const CASE_CRAFT_FLAGS = [
+  "hardenedCoatingHv",
+  "sapphireBezelInsert",
+  "drilledLugs",
+  "arLayers",
+] as const satisfies readonly (keyof QualityFlags)[];
+
+/**
+ * How many caseCraft flags must have been recorded before the dimension is
+ * rated. A lone `sapphireBezelInsert: false` is the single most common record
+ * in the collection and says nothing about finishing — a dress watch has no
+ * bezel to put an insert in. Requiring two recorded flags means "finishing was
+ * actually surveyed" rather than "the extractor emitted one default".
+ */
+const CASE_CRAFT_MIN_FLAGS = 2;
+
+function recordedCount(flags: QualityFlags, keys: readonly (keyof QualityFlags)[]): number {
+  return keys.filter((key) => flags[key] !== undefined).length;
+}
+
 /**
  * Raw dimension scores against fixed anchors. Any dimension lacking source
  * data returns undefined, not a number:
  * - movement needs a recognized caliber
  * - wearability needs both diameter and thickness
- * - caseCraft and bracelet need qualityFlags to have been recorded at all
+ * - caseCraft needs at least CASE_CRAFT_MIN_FLAGS of its flags recorded
+ * - bracelet needs a bracelet: a watch sold on a strap has no bracelet to rate
  * - durability needs a water-resistance rating
+ *
+ * Absence is never scored as zero. A dimension that cannot be evidenced comes
+ * back undefined so callers render it "unrated"; `computeStanding` composites
+ * and compares only the dimensions actually rated, so a partially-rated watch
+ * is still judged like-for-like against the rubric.
  */
 export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>> {
   const s = watch.specs ?? {};
@@ -422,7 +449,7 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
     out.wearability = clamp01((0.36 - ratio) / 0.10);
   }
 
-  if (Object.keys(f).length > 0) {
+  if (recordedCount(f, CASE_CRAFT_FLAGS) >= CASE_CRAFT_MIN_FLAGS) {
     out.caseCraft = clamp01(
       0.35 +
         (f.hardenedCoatingHv ? 0.2 : 0) +
@@ -430,10 +457,14 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
         (f.drilledLugs ? 0.1 : 0) +
         (Math.min(f.arLayers ?? 0, 8) / 8) * 0.2
     );
+  }
+
+  // Only rate the bracelet of a watch that actually ships on one. Scoring a
+  // strap watch here would read as "trails on bracelet" when the real answer
+  // is that the dimension does not apply.
+  if (f.braceletIncluded === true) {
     out.bracelet = clamp01(
-      (f.braceletIncluded ? 0.4 : 0) +
-        (f.microAdjustClasp ? 0.35 : 0) +
-        (f.quickRelease ? 0.25 : 0)
+      0.4 + (f.microAdjustClasp ? 0.35 : 0) + (f.quickRelease ? 0.25 : 0)
     );
   }
 
