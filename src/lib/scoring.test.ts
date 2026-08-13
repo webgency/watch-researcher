@@ -92,9 +92,26 @@ describe("scoreDimensions", () => {
     expect(raw.bracelet).toBeUndefined();
   });
 
-  it("keeps an explicit braceletIncluded: false as a real zero, not unrated", () => {
+  it("leaves bracelet unrated for a watch sold on a strap", () => {
     const watch = makeWatch({ qualityFlags: { braceletIncluded: false } });
-    expect(scoreDimensions(watch).bracelet).toBe(0);
+    expect(scoreDimensions(watch).bracelet).toBeUndefined();
+  });
+
+  it("still rates bracelet when one is included", () => {
+    const watch = makeWatch({ qualityFlags: { braceletIncluded: true, quickRelease: true } });
+    expect(scoreDimensions(watch).bracelet).toBeCloseTo(0.65);
+  });
+
+  it("excludes an unrated bracelet from the composite rather than scoring it 0", () => {
+    const strap = makeWatch({
+      specs: { caliber: "NH35", waterResistanceM: 200, crystal: "Sapphire" },
+      qualityFlags: { braceletIncluded: false, drilledLugs: true },
+      tags: ["diver"],
+      price: { amount: 400, currency: "USD" },
+    });
+    const standing = computeStanding(strap, [strap]);
+    expect(standing.unrated).toContain("bracelet");
+    expect(standing.dimensions.bracelet).toBeUndefined();
   });
 
   it("judges water resistance against the category expectation, not raw maximums", () => {
