@@ -409,6 +409,12 @@ const CASE_CRAFT_FLAGS = [
  */
 const CASE_CRAFT_MIN_FLAGS = 2;
 
+/** The clasp hardware that separates one bracelet from another. */
+const BRACELET_HARDWARE_FLAGS = [
+  "microAdjustClasp",
+  "quickRelease",
+] as const satisfies readonly (keyof QualityFlags)[];
+
 function recordedCount(flags: QualityFlags, keys: readonly (keyof QualityFlags)[]): number {
   return keys.filter((key) => flags[key] !== undefined).length;
 }
@@ -459,10 +465,12 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
     );
   }
 
-  // Only rate the bracelet of a watch that actually ships on one. Scoring a
-  // strap watch here would read as "trails on bracelet" when the real answer
-  // is that the dimension does not apply.
-  if (f.braceletIncluded === true) {
+  // Only rate the bracelet of a watch that actually ships on one, and only once
+  // the clasp hardware has been surveyed. Scoring a strap watch here would read
+  // as "trails on bracelet" when the dimension does not apply; scoring a bare
+  // `braceletIncluded: true` would put every unsurveyed bracelet at 0.40,
+  // below every rubric reference, on no evidence at all.
+  if (f.braceletIncluded === true && recordedCount(f, BRACELET_HARDWARE_FLAGS) > 0) {
     out.bracelet = clamp01(
       0.4 + (f.microAdjustClasp ? 0.35 : 0) + (f.quickRelease ? 0.25 : 0)
     );
@@ -477,6 +485,50 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
   }
 
   return out;
+}
+
+export const DIMENSION_LABELS: Record<Dimension, string> = {
+  movement: "Movement",
+  caseCraft: "Case craft",
+  wearability: "Wearability",
+  durability: "Durability",
+  bracelet: "Bracelet",
+};
+
+/** What each dimension is judging, for a UI tooltip or caption. */
+export const DIMENSION_BLURBS: Record<Dimension, string> = {
+  movement: "Caliber tier, plus regulation and power reserve.",
+  caseCraft: "Finishing and case hardware: coatings, bezel insert, drilled lugs, AR layers.",
+  wearability: "Thickness relative to diameter — how the case sits on a wrist.",
+  durability: "Water resistance against what the category needs, plus crystal and antimagnetism.",
+  bracelet: "Bracelet hardware: micro-adjust clasp and quick-release.",
+};
+
+/**
+ * Why a dimension came back unrated, phrased for display. Keeps the UI honest
+ * about which input is missing instead of showing a bare dash.
+ */
+export function unratedReason(watch: Watch, dimension: Dimension): string {
+  const s = watch.specs ?? {};
+  const f = watch.qualityFlags ?? {};
+  switch (dimension) {
+    case "movement":
+      return s.caliber ? `Caliber "${s.caliber}" not in the tier table` : "No caliber recorded";
+    case "wearability":
+      if (s.caseThicknessMm === undefined && s.caseDiameterMm === undefined)
+        return "No case dimensions recorded";
+      return s.caseThicknessMm === undefined ? "No case thickness recorded" : "No case diameter recorded";
+    case "caseCraft":
+      return recordedCount(f, CASE_CRAFT_FLAGS) === 0
+        ? "No finishing details recorded"
+        : "Only one finishing detail recorded";
+    case "bracelet":
+      if (f.braceletIncluded === false) return "Ships on a strap — no bracelet to rate";
+      if (f.braceletIncluded === undefined) return "Not recorded whether it ships on a bracelet";
+      return "No clasp hardware recorded";
+    case "durability":
+      return "No water resistance recorded";
+  }
 }
 
 export interface PeerGroup {
@@ -533,7 +585,17 @@ export const VALUE_PRICE_TILT = 0.3;
 export interface Standing {
   peerLabel: string;
   peerCount: number;
-  dimensions: Partial<Record<Dimension, { raw: number; rubricBand: string }>>;
+  dimensions: Partial<
+    Record<
+      Dimension,
+      {
+        raw: number;
+        rubricBand: string;
+        /** Par for this dimension in the band. Absent when the watch is unpriced. */
+        reference?: number;
+      }
+    >
+  >;
   /** Dimensions with missing source data — display "unrated", never 0. */
   unrated: Dimension[];
   /** Composite of rated dimensions only. Undefined when nothing is rated. */
@@ -604,7 +666,11 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   for (const dimension of DIMENSIONS) {
     const value = raw[dimension];
     if (value === undefined) continue;
-    dimensions[dimension] = { raw: value, rubricBand: band?.id ?? "unbanded" };
+    dimensions[dimension] = {
+      raw: value,
+      rubricBand: band?.id ?? "unbanded",
+      reference: rubric?.[dimension],
+    };
     if (rubric) {
       if (value > rubric[dimension] + RUBRIC_TOLERANCE) beats.push(dimension);
       else if (value < rubric[dimension] - RUBRIC_TOLERANCE) trails.push(dimension);

@@ -84,6 +84,19 @@ describe("scoreDimensions", () => {
     expect(scoreDimensions(onStrap).bracelet).toBeUndefined();
   });
 
+  it("needs clasp hardware before rating a bracelet it knows nothing else about", () => {
+    // A bare braceletIncluded would otherwise score 0.40 — below every rubric
+    // reference — purely because the clasp was never surveyed.
+    const unsurveyed = makeWatch({ qualityFlags: { braceletIncluded: true } });
+    expect(scoreDimensions(unsurveyed).bracelet).toBeUndefined();
+
+    // An explicit negative is evidence, so it rates.
+    const surveyed = makeWatch({
+      qualityFlags: { braceletIncluded: true, microAdjustClasp: false, quickRelease: false },
+    });
+    expect(scoreDimensions(surveyed).bracelet).toBeCloseTo(0.4);
+  });
+
   it("needs more than one recorded flag before rating caseCraft", () => {
     // The single most common record in the collection: a lone negative that
     // says nothing about finishing.

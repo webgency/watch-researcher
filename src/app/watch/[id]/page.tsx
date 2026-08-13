@@ -2,12 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { getWatch, getWatches } from "@/lib/store";
-import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
+import { SPEC_GROUPS, formatSpecValue } from "@/lib/specs";
 import { formatMoney, formatDate, hostname } from "@/lib/format";
+import { computeStanding } from "@/lib/scoring";
 import { IS_STATIC } from "@/lib/config";
 import StatusBadge from "@/components/StatusBadge";
 import WishlistTierBadge from "@/components/WishlistTierBadge";
 import WatchActions from "@/components/WatchActions";
+import StandingPanel from "@/components/StandingPanel";
 
 // Pre-render a detail page for every watch in the static export. In dynamic
 // mode return nothing so pages render on demand and reflect edits immediately.
@@ -20,8 +22,10 @@ export async function generateStaticParams() {
 export default async function WatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!IS_STATIC) noStore();
   const { id } = await params;
-  const watch = await getWatch(id);
+  const [watch, allWatches] = await Promise.all([getWatch(id), getWatches()]);
   if (!watch) notFound();
+
+  const standing = computeStanding(watch, allWatches);
 
   return (
     <div className="space-y-6">
@@ -72,16 +76,40 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
+      <StandingPanel watch={watch} standing={standing} />
+
       <section className="card p-5">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Specifications</h2>
-        <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-          {SPEC_FIELDS.map((f) => (
-            <div key={String(f.key)} className="flex justify-between gap-4 border-b border-slate-100 pb-2">
-              <dt className="text-sm text-slate-500">{f.label}</dt>
-              <dd className="text-sm font-medium capitalize">{formatSpecValue(f, watch.specs[f.key])}</dd>
+        <div className="grid gap-x-8 gap-y-5 sm:grid-cols-3">
+          {SPEC_GROUPS.map((group) => (
+            <div key={group.title}>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                {group.title}
+              </h3>
+              <dl className="space-y-2">
+                {group.fields.map((f) => {
+                  const value = watch.specs[f.key];
+                  const missing = value === undefined || value === null || value === "";
+                  return (
+                    <div
+                      key={String(f.key)}
+                      className="flex justify-between gap-4 border-b border-slate-100 pb-2"
+                    >
+                      <dt className="text-sm text-slate-500">{f.label}</dt>
+                      <dd
+                        className={`text-right text-sm ${
+                          missing ? "text-slate-300" : "font-medium"
+                        } ${f.type === "select" ? "capitalize" : ""}`}
+                      >
+                        {formatSpecValue(f, value)}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
             </div>
           ))}
-        </dl>
+        </div>
       </section>
 
       {watch.links.length > 0 && (
