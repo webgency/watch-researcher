@@ -50,6 +50,52 @@ export interface WatchSpecs {
   complications?: string;
 }
 
+/**
+ * Verifiable finishing/engineering details that feed the caseCraft, bracelet,
+ * and movement dimensions. All optional: absence means "not recorded", and the
+ * scoring engine treats it as unknown, never as a zero.
+ */
+export interface QualityFlags {
+  /** Number of positions the movement is regulated in. 0 or absent = unregulated. */
+  regulatedPositions?: number;
+  /** Manufacturer accuracy spec in seconds/day, e.g. 12 for +/-12s/d. */
+  accuracySpecSpd?: number;
+  /** Surface hardening in Vickers, e.g. 1000. */
+  hardenedCoatingHv?: number;
+  /** Antimagnetic rating in A/m, e.g. 25000. */
+  antimagneticAm?: number;
+  sapphireBezelInsert?: boolean;
+  drilledLugs?: boolean;
+  microAdjustClasp?: boolean;
+  quickRelease?: boolean;
+  braceletIncluded?: boolean;
+  /** Anti-reflective coating layer count. */
+  arLayers?: number;
+}
+
+export type Availability = "in-stock" | "pre-order" | "sold-out" | "discontinued";
+
+export const AVAILABILITY_STATES: Availability[] = [
+  "in-stock",
+  "pre-order",
+  "sold-out",
+  "discontinued",
+];
+
+/**
+ * Non-spec factors that gate a purchase decision. Rendered as chips and used
+ * to caveat verdicts; NEVER folded into any numeric score.
+ */
+export interface Friction {
+  availability: Availability;
+  /** ISO date, for pre-orders. */
+  expectedShipDate?: string;
+  /** Extra cost to get the bracelet instead of the stock strap. */
+  braceletUpchargeUsd?: number;
+  /** 5 = established secondary market, 1 = effectively unsellable. */
+  brandLiquidity: 1 | 2 | 3 | 4 | 5;
+}
+
 export interface Watch {
   id: string;
   brand: string;
@@ -64,6 +110,13 @@ export interface Watch {
   price?: Money;
   /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */
   priceUpdatedAt?: string;
+  /**
+   * All-in cost of the configuration actually being considered: base price plus
+   * bracelet/strap delta, shipping, and duty. Falls back to `price` when absent.
+   */
+  landedPrice?: Money;
+  qualityFlags?: QualityFlags;
+  friction?: Friction;
   links: RetailerLink[];
   imageUrl?: string;
   specs: WatchSpecs;

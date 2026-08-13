@@ -23,13 +23,22 @@
       "caliber": "Co-Axial Master Chronometer 8800",
       "powerReserveHours": 55,
       "waterResistanceM": 300,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseThicknessMm": 13.7,
+      "lugToLugMm": 50,
+      "lugWidthMm": 20,
+      "caseMaterial": "Stainless steel (316L)"
     },
     "tags": [
       "diver"
     ],
     "id": "w01",
-    "dateAdded": "2026-06-22T15:32:00Z"
+    "dateAdded": "2026-06-22T15:32:00Z",
+    "qualityFlags": {
+      "antimagneticAm": 1200000,
+      "sapphireBezelInsert": false,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Formex",
@@ -55,11 +64,23 @@
       "caliber": "Sellita SW200-1 (COSC)",
       "waterResistanceM": 100,
       "crystal": "Sapphire",
-      "dialColor": "Mother-of-Sky"
+      "dialColor": "Mother-of-Sky",
+      "caseThicknessMm": 10,
+      "lugToLugMm": 45,
+      "lugWidthMm": 20,
+      "caseMaterial": "316L stainless steel"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "w03",
-    "dateAdded": "2026-06-22T15:30:00Z"
+    "dateAdded": "2026-06-22T15:30:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 6,
+      "microAdjustClasp": true,
+      "quickRelease": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Dennison",
@@ -87,11 +108,19 @@
       "crystal": "Sapphire",
       "dialColor": "Malachite / green sunray",
       "braceletStrap": "Leather",
-      "complications": "Dual time zone"
+      "complications": "Dual time zone",
+      "lugWidthMm": 20,
+      "caseMaterial": "Stainless steel with gold-tone PVD coating"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "w04",
-    "dateAdded": "2026-06-22T15:29:00Z"
+    "dateAdded": "2026-06-22T15:29:00Z",
+    "qualityFlags": {
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Certina",
@@ -116,11 +145,20 @@
       "movement": "automatic",
       "caliber": "Powermatic 80",
       "powerReserveHours": 80,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "lugToLugMm": 48.5,
+      "caseMaterial": "Matte gold PVD-coated 316L stainless steel",
+      "waterResistanceM": 100
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "w05",
-    "dateAdded": "2026-06-22T15:28:00Z"
+    "dateAdded": "2026-06-22T15:28:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Christopher Ward",
@@ -149,13 +187,21 @@
       "waterResistanceM": 300,
       "crystal": "Sapphire",
       "dialColor": "White",
-      "braceletStrap": "Steel (Bader bracelet)"
+      "braceletStrap": "Steel (Bader bracelet)",
+      "lugToLugMm": 49.32,
+      "lugWidthMm": 22,
+      "caseMaterial": "316L stainless steel"
     },
     "tags": [
       "diver"
     ],
     "id": "w06",
-    "dateAdded": "2026-06-22T15:27:00Z"
+    "dateAdded": "2026-06-22T15:27:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 20,
+      "sapphireBezelInsert": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Echo/Neutra",
@@ -174,11 +220,26 @@
       }
     ],
     "imageUrl": "https://echoneutra.com/cdn/shop/collections/Rivanera-cover.jpg?v=1763739166",
-    "specs": {},
-    "tags": [],
+    "specs": {
+      "caseThicknessMm": 5.5,
+      "lugToLugMm": 40,
+      "lugWidthMm": 20,
+      "caseMaterial": "Grade 5 titanium (Ti-6Al-4V), sandblasted with polished edges",
+      "movement": "manual",
+      "caliber": "ETA (Peseux) 7001, elaboré grade",
+      "powerReserveHours": 42,
+      "waterResistanceM": 30,
+      "crystal": "Flat sapphire (with sapphire display caseback)"
+    },
+    "tags": [
+      "dress"
+    ],
     "notes": "Collection link — pick the exact variant.",
     "id": "w07",
-    "dateAdded": "2026-06-22T15:26:00Z"
+    "dateAdded": "2026-06-22T15:26:00Z",
+    "qualityFlags": {
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Furlan Marri",
@@ -209,11 +270,19 @@
       "waterResistanceM": 50,
       "crystal": "Sapphire",
       "dialColor": "White (sector)",
-      "braceletStrap": "Leather (2 straps incl.)"
+      "braceletStrap": "Leather (2 straps incl.)",
+      "caseMaterial": "316L stainless steel"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "w08",
-    "dateAdded": "2026-06-22T15:25:00Z"
+    "dateAdded": "2026-06-22T15:25:00Z",
+    "qualityFlags": {
+      "microAdjustClasp": false,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Beaubleu",
@@ -238,11 +307,25 @@
       "caliber": "France Ebauche FE (automatic)",
       "powerReserveHours": 46,
       "dialColor": "Imperial green",
-      "braceletStrap": "Leather"
+      "braceletStrap": "Leather",
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 10.2,
+      "lugToLugMm": 45,
+      "caseMaterial": "316L stainless steel",
+      "waterResistanceM": 50,
+      "crystal": "Curved/double-domed sapphire"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "w09",
-    "dateAdded": "2026-06-22T15:24:00Z"
+    "dateAdded": "2026-06-22T15:24:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 9,
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Traska",
@@ -265,13 +348,30 @@
       "waterResistanceM": 75,
       "crystal": "Sapphire (box)",
       "dialColor": "Tungsten gray",
-      "complications": "Chronograph, tachymeter"
+      "complications": "Chronograph, tachymeter",
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 13.75,
+      "lugToLugMm": 46.5,
+      "lugWidthMm": 21,
+      "caseMaterial": "316L stainless steel with proprietary hardening treatment (1,200 HV)",
+      "movement": "automatic",
+      "caliber": "Seiko/TMI NE86",
+      "powerReserveHours": 45
     },
     "tags": [
       "chronograph"
     ],
     "id": "w10",
-    "dateAdded": "2026-06-22T15:23:00Z"
+    "dateAdded": "2026-06-22T15:23:00Z",
+    "qualityFlags": {
+      "regulatedPositions": 4,
+      "accuracySpecSpd": 20,
+      "hardenedCoatingHv": 1200,
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": true,
+      "quickRelease": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Serica",
@@ -300,13 +400,18 @@
       "caliber": "Soprod C125",
       "waterResistanceM": 200,
       "crystal": "Sapphire",
-      "complications": "GMT"
+      "complications": "GMT",
+      "caseMaterial": "316L stainless steel",
+      "powerReserveHours": 40
     },
     "tags": [
       "GMT"
     ],
     "id": "w11",
-    "dateAdded": "2026-06-22T15:22:00Z"
+    "dateAdded": "2026-06-22T15:22:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false
+    }
   },
   {
     "brand": "Longines",
@@ -333,13 +438,23 @@
       "powerReserveHours": 72,
       "waterResistanceM": 300,
       "crystal": "Sapphire",
-      "dialColor": "Blue"
+      "dialColor": "Blue",
+      "caseThicknessMm": 11.7,
+      "lugToLugMm": 51.2,
+      "lugWidthMm": 21,
+      "caseMaterial": "Stainless steel (brushed with polished accents), ceramic bezel insert"
     },
     "tags": [
       "diver"
     ],
     "id": "w12",
-    "dateAdded": "2026-06-22T15:21:00Z"
+    "dateAdded": "2026-06-22T15:21:00Z",
+    "qualityFlags": {
+      "antimagneticAm": 4800,
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Longines",
@@ -366,13 +481,18 @@
       "powerReserveHours": 60,
       "waterResistanceM": 100,
       "crystal": "Sapphire",
-      "dialColor": "Sunray blue"
+      "dialColor": "Sunray blue",
+      "lugWidthMm": 22,
+      "caseMaterial": "Stainless steel"
     },
     "tags": [
       "chronograph"
     ],
     "id": "w13",
-    "dateAdded": "2026-06-22T15:20:00Z"
+    "dateAdded": "2026-06-22T15:20:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false
+    }
   },
   {
     "brand": "Omega",
@@ -401,13 +521,20 @@
       "waterResistanceM": 300,
       "crystal": "Sapphire",
       "dialColor": "Blue",
-      "braceletStrap": "Rubber strap"
+      "braceletStrap": "Rubber strap",
+      "caseMaterial": "Stainless steel"
     },
     "tags": [
       "diver"
     ],
     "id": "w14",
-    "dateAdded": "2026-06-22T15:19:00Z"
+    "dateAdded": "2026-06-22T15:19:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 5,
+      "antimagneticAm": 1200000,
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Raymond Weil",
@@ -435,14 +562,21 @@
       "crystal": "Sapphire",
       "dialColor": "Green",
       "braceletStrap": "Leather",
-      "complications": "GMT worldtimer (24 zones)"
+      "complications": "GMT worldtimer (24 zones)",
+      "lugWidthMm": 21,
+      "caseMaterial": "316L stainless steel case with bronze bezel and bronze crowns",
+      "waterResistanceM": 100
     },
     "tags": [
       "GMT",
       "worldtimer"
     ],
     "id": "w15",
-    "dateAdded": "2026-06-22T15:18:00Z"
+    "dateAdded": "2026-06-22T15:18:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Tudor",
@@ -469,7 +603,11 @@
       "powerReserveHours": 65,
       "waterResistanceM": 200,
       "crystal": "Sapphire",
-      "dialColor": "Black"
+      "dialColor": "Black",
+      "caseThicknessMm": 12.8,
+      "lugToLugMm": 47.8,
+      "lugWidthMm": 20,
+      "caseMaterial": "Stainless steel, polished and satin finishes"
     },
     "tags": [
       "GMT",
@@ -477,7 +615,14 @@
     ],
     "notes": "Black & burgundy bezel.",
     "id": "w16",
-    "dateAdded": "2026-06-22T15:17:00Z"
+    "dateAdded": "2026-06-22T15:17:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 5,
+      "antimagneticAm": 1200000,
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Sheffield",
@@ -506,11 +651,18 @@
       "waterResistanceM": 200,
       "crystal": "Sapphire (AR)",
       "dialColor": "Blue",
-      "braceletStrap": "FKM rubber (Tropic style)"
+      "braceletStrap": "FKM rubber (Tropic style)",
+      "caseMaterial": "Bead-blasted 316L stainless steel"
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "w17",
-    "dateAdded": "2026-06-22T15:16:00Z"
+    "dateAdded": "2026-06-22T15:16:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 40,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Lorca",
@@ -539,13 +691,21 @@
       "powerReserveHours": 63,
       "waterResistanceM": 100,
       "crystal": "Sapphire (double-domed, inner AR)",
-      "complications": "Chronograph"
+      "complications": "Chronograph",
+      "caseMaterial": "316L stainless steel"
     },
     "tags": [
       "chronograph"
     ],
     "id": "w18",
-    "dateAdded": "2026-06-22T15:15:00Z"
+    "dateAdded": "2026-06-22T15:15:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 5,
+      "sapphireBezelInsert": false,
+      "drilledLugs": true,
+      "microAdjustClasp": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Santurce",
@@ -571,7 +731,8 @@
       "waterResistanceM": 200,
       "crystal": "Sapphire (AR)",
       "dialColor": "Blue",
-      "braceletStrap": "Steel bracelet + rubber strap"
+      "braceletStrap": "Steel bracelet + rubber strap",
+      "powerReserveHours": 38
     },
     "tags": [
       "diver"
@@ -607,13 +768,18 @@
       "crystal": "Sapphire",
       "dialColor": "Espresso / chocolate",
       "braceletStrap": "Brown leather (quick-release)",
-      "complications": "Chronograph"
+      "complications": "Chronograph",
+      "lugToLugMm": 41.5,
+      "caseMaterial": "Rose gold PVD plated stainless steel 316L"
     },
     "tags": [
       "chronograph"
     ],
     "id": "w20",
-    "dateAdded": "2026-06-22T15:13:00Z"
+    "dateAdded": "2026-06-22T15:13:00Z",
+    "qualityFlags": {
+      "quickRelease": true
+    }
   },
   {
     "brand": "Magrette",
@@ -643,14 +809,19 @@
       "waterResistanceM": 500,
       "crystal": "Sapphire (double-domed, AR)",
       "dialColor": "Blue",
-      "braceletStrap": "ZULU nylon strap"
+      "braceletStrap": "ZULU nylon strap",
+      "caseMaterial": "Grade 5 titanium"
     },
     "tags": [
       "diver"
     ],
     "notes": "Titanium case.",
     "id": "w22",
-    "dateAdded": "2026-06-22T15:11:00Z"
+    "dateAdded": "2026-06-22T15:11:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Massena LAB",
@@ -679,13 +850,20 @@
       "crystal": "Acrylic (domed)",
       "dialColor": "White",
       "braceletStrap": "Leather",
-      "complications": "Chronograph"
+      "complications": "Chronograph",
+      "lugToLugMm": 46,
+      "lugWidthMm": 20,
+      "caseMaterial": "Stainless steel 316L"
     },
     "tags": [
       "chronograph"
     ],
     "id": "w23",
-    "dateAdded": "2026-06-22T15:10:00Z"
+    "dateAdded": "2026-06-22T15:10:00Z",
+    "qualityFlags": {
+      "microAdjustClasp": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Melbourne Watch Company",
@@ -714,12 +892,21 @@
       "waterResistanceM": 100,
       "crystal": "Sapphire (domed)",
       "dialColor": "Brown",
-      "braceletStrap": "Steel"
+      "braceletStrap": "Steel",
+      "lugToLugMm": 49.4,
+      "caseMaterial": "316L stainless steel"
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "notes": "brown variant",
     "id": "w24",
-    "dateAdded": "2026-06-22T15:09:00Z"
+    "dateAdded": "2026-06-22T15:09:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "drilledLugs": false,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Spinnaker",
@@ -741,13 +928,26 @@
     "imageUrl": "https://cdn.shopify.com/s/files/1/0573/7569/files/SP-5088-02-Q.png?v=1717476802",
     "specs": {
       "movement": "automatic",
-      "dialColor": "Arctic blue"
+      "dialColor": "Arctic blue",
+      "caseDiameterMm": 42,
+      "caseThicknessMm": 14,
+      "lugWidthMm": 22,
+      "caseMaterial": "316L stainless steel",
+      "caliber": "Seiko/TMI NH35 (NH35A)",
+      "powerReserveHours": 41,
+      "waterResistanceM": 300,
+      "crystal": "Sapphire"
     },
     "tags": [
       "diver"
     ],
     "id": "w25",
-    "dateAdded": "2026-06-22T15:08:00Z"
+    "dateAdded": "2026-06-22T15:08:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Zelos",
@@ -776,11 +976,19 @@
       "waterResistanceM": 50,
       "crystal": "Sapphire (box)",
       "dialColor": "Tiger eye / forged carbon",
-      "braceletStrap": "Steel bracelet"
+      "braceletStrap": "Steel bracelet",
+      "caseMaterial": "316L stainless steel, brushed and polished surfaces",
+      "powerReserveHours": 42
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "w26",
-    "dateAdded": "2026-06-22T15:07:00Z"
+    "dateAdded": "2026-06-22T15:07:00Z",
+    "qualityFlags": {
+      "microAdjustClasp": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "William Wood",
@@ -808,11 +1016,21 @@
       "caliber": "Sellita SW510",
       "powerReserveHours": 48,
       "braceletStrap": "Upcycled fire-hose strap",
-      "complications": "Chronograph"
+      "complications": "Chronograph",
+      "caseMaterial": "316L stainless steel, brushed finish",
+      "waterResistanceM": 100,
+      "crystal": "Sapphire crystal, medium blue tint, with anti-reflective coating"
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "w27",
-    "dateAdded": "2026-06-22T15:06:00Z"
+    "dateAdded": "2026-06-22T15:06:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "William Wood",
@@ -841,11 +1059,21 @@
       "powerReserveHours": 41,
       "crystal": "Sapphire (double-domed)",
       "dialColor": "Red",
-      "braceletStrap": "Upcycled fire-hose strap"
+      "braceletStrap": "Upcycled fire-hose strap",
+      "caseMaterial": "316L stainless steel, brushed sides and lugs",
+      "waterResistanceM": 100
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "w28",
-    "dateAdded": "2026-06-22T15:05:00Z"
+    "dateAdded": "2026-06-22T15:05:00Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 40,
+      "sapphireBezelInsert": false,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Islander",
@@ -869,13 +1097,25 @@
       "movement": "automatic",
       "caliber": "Seiko NH34",
       "dialColor": "White",
-      "complications": "GMT"
+      "complications": "GMT",
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 13,
+      "lugToLugMm": 47.5,
+      "lugWidthMm": 20,
+      "caseMaterial": "Stainless steel, brushed and polished",
+      "powerReserveHours": 40,
+      "waterResistanceM": 100,
+      "crystal": "Domed sapphire with inner AR coating"
     },
     "tags": [
       "GMT"
     ],
     "id": "w29",
-    "dateAdded": "2026-06-22T15:04:00Z"
+    "dateAdded": "2026-06-22T15:04:00Z",
+    "qualityFlags": {
+      "microAdjustClasp": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Baltic",
@@ -905,14 +1145,21 @@
       "waterResistanceM": 100,
       "crystal": "Sapphire (double-dome)",
       "dialColor": "Tiger eye",
-      "complications": "GMT worldtimer"
+      "complications": "GMT worldtimer",
+      "caseMaterial": "Stainless steel 316L"
     },
     "tags": [
       "GMT",
       "worldtimer"
     ],
     "id": "w30",
-    "dateAdded": "2026-06-22T15:03:00Z"
+    "dateAdded": "2026-06-22T15:03:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "drilledLugs": true,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Baltic",
@@ -943,13 +1190,20 @@
       "crystal": "Sapphire (double-dome)",
       "dialColor": "Panda",
       "braceletStrap": "Steel bracelet",
-      "complications": "Chronograph"
+      "complications": "Chronograph",
+      "caseMaterial": "Stainless steel 316L"
     },
     "tags": [
       "chronograph"
     ],
     "id": "w31",
-    "dateAdded": "2026-06-22T15:02:00Z"
+    "dateAdded": "2026-06-22T15:02:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": true,
+      "quickRelease": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Baltic",
@@ -979,14 +1233,21 @@
       "waterResistanceM": 100,
       "crystal": "Sapphire (double-dome)",
       "dialColor": "Black",
-      "complications": "GMT"
+      "complications": "GMT",
+      "caseMaterial": "316L stainless steel, fully brushed"
     },
     "tags": [
       "diver",
       "GMT"
     ],
     "id": "w32",
-    "dateAdded": "2026-06-22T15:01:00Z"
+    "dateAdded": "2026-06-22T15:01:00Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": true,
+      "drilledLugs": true,
+      "microAdjustClasp": true,
+      "quickRelease": true
+    }
   },
   {
     "brand": "Tissot",
@@ -1014,11 +1275,24 @@
       "caliber": "Powermatic 80",
       "powerReserveHours": 80,
       "waterResistanceM": 100,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseThicknessMm": 11.53,
+      "lugToLugMm": 45.7,
+      "lugWidthMm": 18,
+      "caseMaterial": "316L stainless steel"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "mqsu2beijgdat5",
-    "dateAdded": "2026-06-25T01:38:20.346Z"
+    "dateAdded": "2026-06-25T01:38:20.346Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": false,
+      "quickRelease": true,
+      "braceletIncluded": true,
+      "arLayers": 1
+    }
   },
   {
     "brand": "Laventure Watches",
@@ -1049,11 +1323,21 @@
       "caliber": "3 produced by Sellita based on",
       "powerReserveHours": 56,
       "crystal": "Sapphire",
-      "complications": "GMT"
+      "complications": "GMT",
+      "caseMaterial": "316L stainless steel, polished and satin-brushed",
+      "waterResistanceM": 200
     },
-    "tags": [],
+    "tags": [
+      "GMT"
+    ],
     "id": "mqsv1pt079msw4",
-    "dateAdded": "2026-06-25T02:05:51.973Z"
+    "dateAdded": "2026-06-25T02:05:51.973Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 6,
+      "sapphireBezelInsert": false,
+      "drilledLugs": true,
+      "microAdjustClasp": false
+    }
   },
   {
     "brand": "Trafford Watch Co",
@@ -1074,11 +1358,23 @@
       "movement": "automatic",
       "waterResistanceM": 100,
       "crystal": "Sapphire",
-      "complications": "GMT"
+      "complications": "GMT",
+      "lugWidthMm": 20,
+      "caseMaterial": "316L stainless steel with a hardening coating",
+      "caliber": "Miyota 9075",
+      "powerReserveHours": 42
     },
-    "tags": [],
+    "tags": [
+      "GMT"
+    ],
     "id": "mqsv75d21b7q4i",
-    "dateAdded": "2026-06-25T02:10:05.414Z"
+    "dateAdded": "2026-06-25T02:10:05.414Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 10,
+      "microAdjustClasp": true,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Albishorn",
@@ -1110,11 +1406,20 @@
       "caliber": "ALB01 A",
       "powerReserveHours": 64,
       "crystal": "Sapphire",
-      "complications": "Chronograph"
+      "complications": "Chronograph",
+      "lugToLugMm": 47.7,
+      "caseMaterial": "316L stainless steel",
+      "waterResistanceM": 100
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "mqsvdaxsdr7t5u",
-    "dateAdded": "2026-06-25T02:14:52.576Z"
+    "dateAdded": "2026-06-25T02:14:52.576Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "William Wood Watches",
@@ -1143,11 +1448,23 @@
       "lugWidthMm": 20,
       "movement": "automatic",
       "waterResistanceM": 100,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "lugToLugMm": 49,
+      "caseMaterial": "CuSn8 bronze (brushed sides and lugs); brass crown",
+      "caliber": "Seiko Group / Time Module NH35",
+      "powerReserveHours": 41
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mqsvqal3ush7w1",
-    "dateAdded": "2026-06-25T02:24:58.647Z"
+    "dateAdded": "2026-06-25T02:24:58.647Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 40,
+      "sapphireBezelInsert": false,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Mr. Eatwell",
@@ -1172,11 +1489,22 @@
       "lugWidthMm": 20,
       "movement": "automatic",
       "waterResistanceM": 200,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseMaterial": "Stainless steel (316L case, 904L bracelet)",
+      "caliber": "Seiko/TMI NH35",
+      "powerReserveHours": 41
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mqtspoj46282kg",
-    "dateAdded": "2026-06-25T17:48:17.392Z"
+    "dateAdded": "2026-06-25T17:48:17.392Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 40,
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Out of Order Watches",
@@ -1206,11 +1534,20 @@
       "movement": "automatic",
       "waterResistanceM": 50,
       "crystal": "Sapphire",
-      "complications": "GMT"
+      "complications": "GMT",
+      "caseMaterial": "316L stainless steel with polished gold PVD coating",
+      "caliber": "Seagull ST1721",
+      "powerReserveHours": 38
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "mqtup7t8aaj0jh",
-    "dateAdded": "2026-06-25T18:43:54.956Z"
+    "dateAdded": "2026-06-25T18:43:54.956Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Mr Eatwell",
@@ -1237,7 +1574,9 @@
       "waterResistanceM": 200,
       "crystal": "Sapphire"
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mqtxxj98g4kzid",
     "dateAdded": "2026-06-25T20:14:21.884Z"
   },
@@ -1270,11 +1609,18 @@
       "movement": "quartz",
       "waterResistanceM": 50,
       "crystal": "Mineral",
-      "complications": "Chronograph, Tachymeter"
+      "complications": "Chronograph, Tachymeter",
+      "caseMaterial": "316L stainless steel",
+      "caliber": "TMI VK64 Meca-Quartz"
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "mqv0hsbx08t6iv",
-    "dateAdded": "2026-06-26T14:13:52.173Z"
+    "dateAdded": "2026-06-26T14:13:52.173Z",
+    "qualityFlags": {
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Nivada Grenchen",
@@ -1305,11 +1651,17 @@
       "movement": "manual",
       "waterResistanceM": 100,
       "crystal": "Sapphire",
-      "complications": "Chronograph, GMT"
+      "complications": "Chronograph, GMT",
+      "caliber": "Sellita SW510 M BH b"
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "mqva0pezshklga",
-    "dateAdded": "2026-06-26T18:40:31.403Z"
+    "dateAdded": "2026-06-26T18:40:31.403Z",
+    "qualityFlags": {
+      "drilledLugs": true
+    }
   },
   {
     "brand": "Sơn Mài – Silver Leaf",
@@ -1340,11 +1692,19 @@
       "movement": "automatic",
       "powerReserveHours": 68,
       "waterResistanceM": 50,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseMaterial": "Recycled 316L stainless steel",
+      "caliber": "La Joux-Perret G101"
     },
     "tags": [],
     "id": "mqvayw3dxkegdt",
-    "dateAdded": "2026-06-26T19:07:06.361Z"
+    "dateAdded": "2026-06-26T19:07:06.361Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": false,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "farer-online",
@@ -1374,11 +1734,23 @@
       "movement": "manual",
       "waterResistanceM": 100,
       "crystal": "Sapphire",
-      "complications": "Chronograph, GMT, Worldtimer, Moon phase"
+      "complications": "Chronograph, GMT, Worldtimer, Moon phase",
+      "caseThicknessMm": 13.4,
+      "caseMaterial": "316L stainless steel",
+      "caliber": "Sellita SW510 M b",
+      "powerReserveHours": 63
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "mqvb5cp2lst9xl",
-    "dateAdded": "2026-06-26T19:12:07.814Z"
+    "dateAdded": "2026-06-26T19:12:07.814Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "quickRelease": true,
+      "braceletIncluded": false,
+      "arLayers": 7
+    }
   },
   {
     "brand": "Studio Underd0g",
@@ -1410,11 +1782,19 @@
       "powerReserveHours": 50,
       "waterResistanceM": 50,
       "crystal": "Sapphire",
-      "complications": "Chronograph, Tachymeter"
+      "complications": "Chronograph, Tachymeter",
+      "caseMaterial": "316L stainless steel"
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "mqvcnaioumgl16",
-    "dateAdded": "2026-06-26T19:54:04.416Z"
+    "dateAdded": "2026-06-26T19:54:04.416Z",
+    "qualityFlags": {
+      "regulatedPositions": 3,
+      "accuracySpecSpd": 15,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Kuoe Kyoto",
@@ -1445,11 +1825,22 @@
       "caseMaterial": "316L stainless steel",
       "movement": "automatic",
       "waterResistanceM": 200,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caseDiameterMm": 38,
+      "caliber": "Miyota Cal. 9039",
+      "powerReserveHours": 42
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mqxyuhhhkdzs92",
-    "dateAdded": "2026-06-28T15:51:03.941Z"
+    "dateAdded": "2026-06-28T15:51:03.941Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 30,
+      "microAdjustClasp": true,
+      "quickRelease": true,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "OLTO-8 WATCHES",
@@ -1477,11 +1868,19 @@
       "lugWidthMm": 18,
       "movement": "automatic",
       "waterResistanceM": 50,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "caliber": "OT.G102",
+      "powerReserveHours": 40
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "mqxzyep4fkag8s",
-    "dateAdded": "2026-06-28T16:22:06.568Z"
+    "dateAdded": "2026-06-28T16:22:06.568Z",
+    "qualityFlags": {
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Venezianico",
@@ -1514,11 +1913,19 @@
       "waterResistanceM": 200,
       "crystal": "Sapphire",
       "braceletStrap": "Rubber band, Made in Italy",
-      "complications": "GMT"
+      "complications": "GMT",
+      "caliber": "Sellita SW200-1",
+      "powerReserveHours": 41
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mqxzzmf7e5kge7",
-    "dateAdded": "2026-06-28T16:23:03.235Z"
+    "dateAdded": "2026-06-28T16:23:03.235Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Knot",
@@ -1549,11 +1956,19 @@
       "powerReserveHours": 45,
       "waterResistanceM": 100,
       "crystal": "Sapphire",
-      "complications": "Chronograph"
+      "complications": "Chronograph",
+      "lugWidthMm": 18,
+      "caliber": "Seiko Instruments (SII/TMI) NE88"
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "mqy02y75unsn7m",
-    "dateAdded": "2026-06-28T16:25:38.465Z"
+    "dateAdded": "2026-06-28T16:25:38.465Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 25,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Phoibos",
@@ -1586,12 +2001,22 @@
       "crystal": "Sapphire",
       "dialColor": "Gradient blue with embossed spiral sunray pattern",
       "braceletStrap": "Blue FKM rubber strap with quick release spring bars and CuSn8 bronze buckle",
-      "complications": "GMT"
+      "complications": "GMT",
+      "lugToLugMm": 48,
+      "lugWidthMm": 20
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mqy05hsfxu6ewm",
     "dateAdded": "2026-06-28T16:27:37.167Z",
-    "designUniqueness": 4
+    "designUniqueness": 4,
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "quickRelease": true,
+      "braceletIncluded": false,
+      "arLayers": 3
+    }
   },
   {
     "brand": "Serica Watches",
@@ -1621,11 +2046,22 @@
       "caliber": "M100",
       "powerReserveHours": 42,
       "waterResistanceM": 300,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "lugToLugMm": 46.5,
+      "lugWidthMm": 20,
+      "caseMaterial": "316L stainless steel, brushed with polished accents"
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mqy0pgjuv702im",
-    "dateAdded": "2026-06-28T16:43:08.682Z"
+    "dateAdded": "2026-06-28T16:43:08.682Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 6,
+      "antimagneticAm": 50000,
+      "sapphireBezelInsert": false,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Straum",
@@ -1654,11 +2090,22 @@
       "lugWidthMm": 18,
       "movement": "manual",
       "waterResistanceM": 100,
-      "crystal": "Sapphire"
+      "crystal": "Sapphire",
+      "lugToLugMm": 45.7,
+      "caseMaterial": "Grade 5 titanium",
+      "caliber": "La Joux-Perret LJP G101",
+      "powerReserveHours": 68
     },
     "tags": [],
     "id": "mqy0st4lie7fpb",
-    "dateAdded": "2026-06-28T16:45:44.949Z"
+    "dateAdded": "2026-06-28T16:45:44.949Z",
+    "qualityFlags": {
+      "regulatedPositions": 4,
+      "accuracySpecSpd": 7,
+      "microAdjustClasp": false,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "True North",
@@ -1682,11 +2129,19 @@
     ],
     "imageUrl": "https://image6.photobiz.com/8933/15_20251201091128_11126879_xlarge.png",
     "specs": {
-      "caseDiameterMm": 37
+      "caseDiameterMm": 37,
+      "caseThicknessMm": 13.8,
+      "lugToLugMm": 44,
+      "crystal": "Sapphire-coated mineral crystal (domed)"
     },
-    "tags": [],
+    "tags": [
+      "chronograph"
+    ],
     "id": "mqzciq3z036pvx",
-    "dateAdded": "2026-06-29T15:01:36.047Z"
+    "dateAdded": "2026-06-29T15:01:36.047Z",
+    "qualityFlags": {
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Venezianico",
@@ -1717,11 +2172,20 @@
       "movement": "automatic",
       "waterResistanceM": 50,
       "crystal": "Sapphire",
-      "complications": "GMT"
+      "complications": "GMT",
+      "caseMaterial": "316L stainless steel, satin finish",
+      "caliber": "Miyota 9100"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "mqzd7f4jh8pv3l",
-    "dateAdded": "2026-06-29T15:20:48.211Z"
+    "dateAdded": "2026-06-29T15:20:48.211Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 15,
+      "sapphireBezelInsert": false,
+      "braceletIncluded": true
+    }
   },
   {
     "brand": "Baltic",
@@ -1758,7 +2222,14 @@
     },
     "tags": [],
     "id": "mqzf7gp3vx1tw8",
-    "dateAdded": "2026-06-29T16:16:49.479Z"
+    "dateAdded": "2026-06-29T16:16:49.479Z",
+    "qualityFlags": {
+      "accuracySpecSpd": 30,
+      "sapphireBezelInsert": false,
+      "drilledLugs": true,
+      "quickRelease": true,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "FREDERIQUE CONSTANT",
@@ -1787,11 +2258,20 @@
       "movement": "quartz",
       "waterResistanceM": 50,
       "crystal": "Sapphire",
-      "complications": "Moon phase"
+      "complications": "Moon phase",
+      "lugToLugMm": 42,
+      "caliber": "FC-206"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "mqzfdci0yaegr5",
-    "dateAdded": "2026-06-29T16:21:23.976Z"
+    "dateAdded": "2026-06-29T16:21:23.976Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "microAdjustClasp": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Venezianico",
@@ -1825,10 +2305,17 @@
       "caliber": "Automatic Cal. Miyota 9075 GMT",
       "waterResistanceM": 100,
       "crystal": "Sapphire",
-      "complications": "GMT"
+      "complications": "GMT",
+      "powerReserveHours": 42
     },
-    "tags": [],
+    "tags": [
+      "GMT"
+    ],
     "id": "mr029cjx2djdu2",
-    "dateAdded": "2026-06-30T03:02:08.589Z"
+    "dateAdded": "2026-06-30T03:02:08.589Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": true
+    }
   }
 ]

@@ -1,4 +1,16 @@
 import { BrandCatalog, Money, MovementType, Watch, WishlistTier } from "./types";
+import {
+  CATEGORY_EXPECTATION,
+  Dimension,
+  DIMENSIONS,
+  PriceBand,
+  priceBandFor,
+  RubricCategory,
+  RubricReference,
+  rubricFor,
+} from "./rubrics";
+
+export type { Dimension } from "./rubrics";
 
 export type Quadrant = "buy" | "aspirational" | "sensible" | "skip";
 
@@ -310,4 +322,302 @@ function resolveBrandReputation(brand: string, brands: BrandCatalog): number | u
   const normalized = brand.trim().toLowerCase();
   const match = Object.entries(brands).find(([name]) => name.trim().toLowerCase() === normalized);
   return match?.[1].reputationTier;
+}
+
+// ---------------------------------------------------------------------------
+// Peer-band standing engine (Phase 1).
+//
+// Five dimensions scored 0-1 against the fixed rubrics in ./rubrics.ts.
+// A dimension with missing source data is undefined, never a fabricated
+// mid value, and is excluded from the composite. Friction flags are surfaced
+// as text and never enter any numeric score.
+// ---------------------------------------------------------------------------
+
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+
+// Caliber quality tiers, matched as substrings against the normalized caliber
+// string so catalog phrasing like "Automatic Cal. Miyota 9075 GMT" still
+// resolves. Order matters: more specific patterns first. Extend as watches are
+// added. Unknown calibers return undefined — they do NOT fall back to a mid value.
+const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
+  ["co-axial master chronometer 8800", 0.95],
+  ["mt5450", 0.80],
+  ["m100", 0.80],
+  ["sw510", 0.72],
+  ["l688", 0.72],
+  ["st-1901b", 0.70],
+  ["soprod c125", 0.68],
+  ["l888", 0.65],
+  ["sw300", 0.65],
+  ["la joux-perret", 0.65],
+  ["miyota 9075", 0.62],
+  ["powermatic 80", 0.60],
+  ["rw3230", 0.60],
+  ["peseux 7001", 0.60],
+  ["sw200-1", 0.58],
+  ["sw200", 0.55],
+  ["miyota 9015", 0.55],
+  ["miyota 9039", 0.55],
+  ["9039", 0.55],
+  ["france ebauche", 0.45],
+  ["nh38", 0.35],
+  ["nh34", 0.32],
+  ["nh35", 0.30],
+  ["meca-quartz", 0.30],
+  ["ronda 1032", 0.20],
+];
+
+/** Base movement tier for a caliber string, or undefined when unrecognized. */
+export function caliberTier(caliber: string | undefined): number | undefined {
+  const key = caliber?.toLowerCase().trim();
+  if (!key) return undefined;
+  return CALIBER_TIER_PATTERNS.find(([pattern]) => key.includes(pattern))?.[1];
+}
+
+/** First tag that maps to a rubric category; unrecognized/untagged falls back to "dress". */
+export function deriveCategory(watch: Watch): RubricCategory {
+  for (const tag of watch.tags ?? []) {
+    const normalized = tag.trim().toLowerCase();
+    if (normalized === "diver") return "diver";
+    if (normalized === "chronograph") return "chronograph";
+    if (normalized === "gmt" || normalized === "worldtimer") return "gmt";
+    if (normalized === "dress") return "dress";
+  }
+  return "dress";
+}
+
+/** All-in USD price used for banding: landedPrice when present, else price. */
+export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => void): number | undefined {
+  const money = watch.landedPrice ?? watch.price;
+  return money ? normalizePriceToUsd(money, onWarning) : undefined;
+}
+
+/**
+ * Raw dimension scores against fixed anchors. Any dimension lacking source
+ * data returns undefined, not a number:
+ * - movement needs a recognized caliber
+ * - wearability needs both diameter and thickness
+ * - caseCraft and bracelet need qualityFlags to have been recorded at all
+ * - durability needs a water-resistance rating
+ */
+export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>> {
+  const s = watch.specs ?? {};
+  const f = watch.qualityFlags ?? {};
+  const expectation = CATEGORY_EXPECTATION[deriveCategory(watch)];
+
+  const out: Partial<Record<Dimension, number>> = {};
+
+  const caliberBase = caliberTier(s.caliber);
+  if (caliberBase !== undefined) {
+    // Regulation is expensive and almost nobody at this price point does it.
+    const regBonus = f.regulatedPositions ? Math.min(0.2, f.regulatedPositions * 0.05) : 0;
+    const prBonus =
+      s.powerReserveHours !== undefined ? clamp01((s.powerReserveHours - 38) / 42) * 0.1 : 0;
+    out.movement = clamp01(caliberBase + regBonus + prBonus);
+  }
+
+  if (s.caseDiameterMm !== undefined && s.caseDiameterMm > 0 && s.caseThicknessMm !== undefined) {
+    // Thickness-to-diameter ratio: ~0.26 wears excellently, ~0.36 is chunky.
+    const ratio = s.caseThicknessMm / s.caseDiameterMm;
+    out.wearability = clamp01((0.36 - ratio) / 0.10);
+  }
+
+  if (Object.keys(f).length > 0) {
+    out.caseCraft = clamp01(
+      0.35 +
+        (f.hardenedCoatingHv ? 0.2 : 0) +
+        (f.sapphireBezelInsert ? 0.15 : 0) +
+        (f.drilledLugs ? 0.1 : 0) +
+        (Math.min(f.arLayers ?? 0, 8) / 8) * 0.2
+    );
+    out.bracelet = clamp01(
+      (f.braceletIncluded ? 0.4 : 0) +
+        (f.microAdjustClasp ? 0.35 : 0) +
+        (f.quickRelease ? 0.25 : 0)
+    );
+  }
+
+  if (s.waterResistanceM !== undefined) {
+    out.durability = clamp01(
+      0.5 * clamp01(s.waterResistanceM / expectation.wrM) +
+        0.25 * ((s.crystal ?? "").toLowerCase().includes("sapphire") ? 1 : 0) +
+        0.25 * clamp01((f.antimagneticAm ?? 0) / 25000)
+    );
+  }
+
+  return out;
+}
+
+export interface PeerGroup {
+  category: RubricCategory;
+  band?: PriceBand;
+  /** Display context, e.g. "divers, $500-1000". */
+  label: string;
+  /** Watches sharing category and band, including the subject watch. */
+  members: Watch[];
+}
+
+const CATEGORY_PLURAL: Record<RubricCategory, string> = {
+  diver: "divers",
+  chronograph: "chronographs",
+  gmt: "GMTs",
+  dress: "dress",
+};
+
+/** Peer group = same rubric category + same price band. Unpriced watches group together. */
+export function derivePeerGroup(watch: Watch, allWatches: Watch[]): PeerGroup {
+  const category = deriveCategory(watch);
+  const usd = landedPriceUsd(watch);
+  const band = usd !== undefined ? priceBandFor(usd) : undefined;
+
+  const members = allWatches.filter((candidate) => {
+    if (deriveCategory(candidate) !== category) return false;
+    const candidateUsd = landedPriceUsd(candidate);
+    if (band === undefined) return candidateUsd === undefined;
+    return candidateUsd !== undefined && priceBandFor(candidateUsd).id === band.id;
+  });
+
+  return {
+    category,
+    band,
+    label: `${CATEGORY_PLURAL[category]}, ${band ? band.label : "unpriced"}`,
+    members: members.some((member) => member.id === watch.id) ? members : [...members, watch],
+  };
+}
+
+/** Percentile within pool (0-1). Use ONLY when pool.length >= 6. */
+export function percentile(value: number, pool: number[]): number | undefined {
+  if (pool.length < 6) return undefined;
+  const below = pool.filter((p) => p < value).length;
+  return below / (pool.length - 1);
+}
+
+// Rated dimensions must diverge from the rubric reference by more than this
+// before a watch is said to beat or trail the band.
+export const RUBRIC_TOLERANCE = 0.05;
+
+// How strongly within-band price position tilts the value score.
+export const VALUE_PRICE_TILT = 0.3;
+
+export interface Standing {
+  peerLabel: string;
+  peerCount: number;
+  dimensions: Partial<Record<Dimension, { raw: number; rubricBand: string }>>;
+  /** Dimensions with missing source data — display "unrated", never 0. */
+  unrated: Dimension[];
+  /** Composite of rated dimensions only. Undefined when nothing is rated. */
+  qualityScore?: number;
+  /** Quality relative to landed price within the band. Needs a price and a rated dimension. */
+  valueScore?: number;
+  /** Rank of qualityScore within the peer group; only when the group has n >= 6. */
+  qualityPercentile?: number;
+  /** Dimensions above the band's rubric reference. */
+  beats: Dimension[];
+  /** Dimensions below the band's rubric reference. */
+  trails: Dimension[];
+  /** Human-readable friction chips. Never numeric, never part of any score. */
+  frictions: string[];
+}
+
+function compositeQuality(raw: Partial<Record<Dimension, number>>): number | undefined {
+  const rated = DIMENSIONS.flatMap((dimension) => {
+    const value = raw[dimension];
+    return value === undefined ? [] : [value];
+  });
+  if (rated.length === 0) return undefined;
+  return rated.reduce((sum, value) => sum + value, 0) / rated.length;
+}
+
+function frictionChips(watch: Watch): string[] {
+  const friction = watch.friction;
+  if (!friction) return [];
+
+  const chips: string[] = [];
+  if (friction.availability === "pre-order") {
+    chips.push(
+      friction.expectedShipDate
+        ? `pre-order, ships ${friction.expectedShipDate}`
+        : "pre-order"
+    );
+  } else if (friction.availability === "sold-out") {
+    chips.push("sold out");
+  } else if (friction.availability === "discontinued") {
+    chips.push("discontinued");
+  }
+  if (friction.braceletUpchargeUsd) {
+    chips.push(`bracelet +$${friction.braceletUpchargeUsd}`);
+  }
+  if (friction.brandLiquidity <= 2) {
+    chips.push("thin secondary market");
+  }
+  return chips;
+}
+
+/**
+ * Full peer-band standing for one watch. Scores come from the fixed rubric for
+ * the watch's category and price band; the peer group contributes only the
+ * label, the count, and (when n >= 6) a percentile.
+ */
+export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
+  const peerGroup = derivePeerGroup(watch, allWatches);
+  const raw = scoreDimensions(watch);
+  const usd = landedPriceUsd(watch);
+  const band = peerGroup.band;
+  const rubric: RubricReference | undefined = band
+    ? rubricFor(peerGroup.category, band.id)
+    : undefined;
+
+  const dimensions: Standing["dimensions"] = {};
+  const beats: Dimension[] = [];
+  const trails: Dimension[] = [];
+  for (const dimension of DIMENSIONS) {
+    const value = raw[dimension];
+    if (value === undefined) continue;
+    dimensions[dimension] = { raw: value, rubricBand: band?.id ?? "unbanded" };
+    if (rubric) {
+      if (value > rubric[dimension] + RUBRIC_TOLERANCE) beats.push(dimension);
+      else if (value < rubric[dimension] - RUBRIC_TOLERANCE) trails.push(dimension);
+    }
+  }
+
+  const qualityScore = compositeQuality(raw);
+
+  // Par quality at the band's midpoint price scores 0.5: beating the rubric on
+  // the rated dimensions raises it, sitting cheap within the band raises it.
+  // The reference composite averages only the dimensions actually rated, so a
+  // partially-rated watch is compared like-for-like.
+  let valueScore: number | undefined;
+  if (qualityScore !== undefined && rubric && band && usd !== undefined) {
+    const ratedDimensions = DIMENSIONS.filter((dimension) => raw[dimension] !== undefined);
+    const referenceQuality =
+      ratedDimensions.reduce((sum, dimension) => sum + rubric[dimension], 0) /
+      ratedDimensions.length;
+    const pricePosition = clamp01((usd - band.minUsd) / (band.maxUsd - band.minUsd));
+    valueScore = clamp01(
+      0.5 + (qualityScore - referenceQuality) - VALUE_PRICE_TILT * (pricePosition - 0.5)
+    );
+  }
+
+  // Optional peer-relative rank, only meaningful once the group is big enough.
+  let qualityPercentile: number | undefined;
+  if (qualityScore !== undefined) {
+    const pool = peerGroup.members.flatMap((member) => {
+      const memberQuality = compositeQuality(scoreDimensions(member));
+      return memberQuality === undefined ? [] : [memberQuality];
+    });
+    qualityPercentile = percentile(qualityScore, pool);
+  }
+
+  return {
+    peerLabel: peerGroup.label,
+    peerCount: peerGroup.members.length,
+    dimensions,
+    unrated: DIMENSIONS.filter((dimension) => raw[dimension] === undefined),
+    qualityScore,
+    valueScore,
+    qualityPercentile,
+    beats,
+    trails,
+    frictions: frictionChips(watch),
+  };
 }
