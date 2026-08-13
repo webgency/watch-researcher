@@ -348,6 +348,7 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["st-1901b", 0.70],
   ["soprod c125", 0.68],
   ["l888", 0.65],
+  ["sw330", 0.65],
   ["sw300", 0.65],
   ["la joux-perret", 0.65],
   ["miyota 9075", 0.62],
