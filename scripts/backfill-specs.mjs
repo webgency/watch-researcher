@@ -8,6 +8,12 @@
 // overwrites existing data, and drops physically implausible readings. Fields
 // the research couldn't verify stay missing — no guessed values.
 //
+// Gaps are detected per field, quality flags included. A definitive negative
+// (drilled lugs: no) is recorded as false and settles the field; only genuinely
+// unverifiable fields stay missing, so those watches re-queue on later runs.
+// Because most watches have only a few of the ten flags recorded, a full run
+// covers nearly the whole collection — use --limit or --id to work in batches.
+//
 // friction (availability, upcharges) is deliberately NOT backfilled: web
 // results go stale too fast, and brandLiquidity is a personal judgment call.
 //
@@ -56,6 +62,20 @@ const TEXT_SPECS = [
   ["movement", "movement type (automatic/manual/quartz/spring-drive/solar/kinetic)"],
   ["caliber", "movement caliber name/number"],
   ["crystal", "crystal material"],
+];
+// Asked for individually. The first four feed the caseCraft score, which is
+// left unrated when none of them is recorded.
+const QUALITY_FLAGS = [
+  ["hardenedCoatingHv", "surface hardening in Vickers (HV), e.g. a DLC or Cerakote figure"],
+  ["sapphireBezelInsert", "whether the bezel insert is sapphire (true/false)"],
+  ["drilledLugs", "whether the lugs are drilled through (true/false)"],
+  ["arLayers", "number of anti-reflective coating layers on the crystal"],
+  ["regulatedPositions", "number of positions the movement is regulated in"],
+  ["accuracySpecSpd", "manufacturer accuracy spec in seconds/day"],
+  ["antimagneticAm", "antimagnetic rating in A/m"],
+  ["microAdjustClasp", "whether the clasp has on-the-fly micro-adjustment (true/false)"],
+  ["quickRelease", "whether the strap or bracelet is quick-release (true/false)"],
+  ["braceletIncluded", "whether a metal bracelet is included in the box (true/false)"],
 ];
 
 // Structured outputs reject schemas with more than 16 union-typed (nullable)
@@ -124,10 +144,13 @@ function missingFields(watch) {
     if (specs[key] === undefined || specs[key] === null || specs[key] === "") missing.push(label);
   }
   if (!(watch.tags ?? []).length) missing.push("category (diver/chronograph/GMT/worldtimer/dress)");
-  if (!watch.qualityFlags || !Object.keys(watch.qualityFlags).length) {
-    missing.push(
-      "quality details: regulation, accuracy spec, hardened coating (HV), antimagnetic rating, sapphire bezel insert, drilled lugs, micro-adjust clasp, quick-release, bracelet included, AR coating layers"
-    );
+  // Per flag, not per object. Treating the whole set as done once any one flag
+  // was recorded meant the first run filled one or two and every later run
+  // skipped the watch entirely, which is why 19 watches still have none of the
+  // four caseCraft inputs.
+  const flags = watch.qualityFlags ?? {};
+  for (const [key, label] of QUALITY_FLAGS) {
+    if (flags[key] === undefined || flags[key] === null) missing.push(label);
   }
   return missing;
 }
