@@ -1,4 +1,4 @@
-import { Money, MovementType, QualityFlags, Watch } from "./types";
+import { Money, QualityFlags, Watch } from "./types";
 import {
   CATEGORY_EXPECTATION,
   Dimension,
@@ -47,12 +47,6 @@ export interface WatchScoreSummary {
   valueRank: number | null;
 }
 
-// Tuning knob: neutral fill used for missing optional spec inputs.
-export const NEUTRAL_QUALITY = 0.5;
-
-// Tuning knob: price floor before log compression.
-export const MIN_PRICE_USD = 10;
-
 // Tuning knob: fallback split for tiny collections and flat score ranges.
 export const FIXED_THRESHOLD = 50;
 
@@ -64,26 +58,6 @@ export const CURRENCY_TO_USD: Record<string, number> = {
   CHF: 1.12,
   JPY: 0.0064,
 };
-
-// Tuning knob: movement quality contribution to objective spec quality.
-export const MOVEMENT_QUALITY: Record<MovementType, number> = {
-  "spring-drive": 1.0,
-  automatic: 0.85,
-  manual: 0.8,
-  kinetic: 0.5,
-  solar: 0.45,
-  other: 0.4,
-  quartz: 0.35,
-};
-
-// Tuning knob: objective value weights. Material stays low until data is backfilled.
-export const VALUE_WEIGHTS = {
-  movement: 0.4,
-  crystal: 0.2,
-  waterResistance: 0.2,
-  powerReserve: 0.15,
-  material: 0.05,
-} as const;
 
 /** The 1-5 design rank, as a 0-100 score. */
 export const DESIGN_RANK_MIN = 1;
@@ -100,67 +74,6 @@ export function normalizePriceToUsd(money: Money, onWarning?: (message: string) 
     return money.amount;
   }
   return money.amount * rate;
-}
-
-export function crystalQuality(value?: string | null): number {
-  const normalized = value?.trim().toLowerCase() ?? "";
-  if (normalized.includes("sapphire")) return 1.0;
-  if (normalized.includes("mineral")) return 0.5;
-  if (normalized.includes("acrylic")) return 0.35;
-  return 0.4;
-}
-
-export function materialQuality(value?: string | null): number {
-  const normalized = value?.trim().toLowerCase() ?? "";
-  if (!normalized) return 0.5;
-  if (normalized.includes("titanium") || normalized.includes("ceramic") || normalized.includes("gold")) return 1.0;
-  if (normalized.includes("bronze")) return 0.8;
-  if (normalized.includes("316l") || normalized.includes("steel")) return 0.7;
-  return 0.5;
-}
-
-export function computeSpecQuality(watch: Watch, peers: Watch[]): number {
-  const movement = watch.specs.movement ? MOVEMENT_QUALITY[watch.specs.movement] ?? 0.4 : 0.4;
-  const crystal = crystalQuality(watch.specs.crystal);
-  const material = materialQuality(watch.specs.caseMaterial);
-  const waterResistance = normalizePeerNumber(
-    watch.specs.waterResistanceM,
-    peers.map((peer) => peer.specs.waterResistanceM)
-  );
-  const powerReserve = normalizePeerNumber(
-    watch.specs.powerReserveHours,
-    peers.map((peer) => peer.specs.powerReserveHours)
-  );
-
-  return (
-    movement * VALUE_WEIGHTS.movement +
-    crystal * VALUE_WEIGHTS.crystal +
-    waterResistance * VALUE_WEIGHTS.waterResistance +
-    powerReserve * VALUE_WEIGHTS.powerReserve +
-    material * VALUE_WEIGHTS.material
-  );
-}
-
-export function computeValueScore(watches: Watch[], onWarning?: (message: string) => void): Map<string, number | null> {
-  const rawScores = watches.flatMap((watch) => {
-    if (!watch.price) return [];
-    const priceUsd = normalizePriceToUsd(watch.price, onWarning);
-    const specQuality = computeSpecQuality(watch, watches);
-    const raw = specQuality / Math.log10(Math.max(priceUsd, MIN_PRICE_USD));
-    return [{ id: watch.id, raw }];
-  });
-
-  const byId = new Map<string, number | null>(watches.map((watch) => [watch.id, null]));
-  if (rawScores.length === 0) return byId;
-
-  const min = Math.min(...rawScores.map((score) => score.raw));
-  const max = Math.max(...rawScores.map((score) => score.raw));
-
-  for (const score of rawScores) {
-    byId.set(score.id, min === max ? FIXED_THRESHOLD : ((score.raw - min) / (max - min)) * 100);
-  }
-
-  return byId;
 }
 
 /**
@@ -184,19 +97,17 @@ export function computeDesignScore(watch: Watch): number | null {
   return ((rank - DESIGN_RANK_MIN) / (DESIGN_RANK_MAX - DESIGN_RANK_MIN)) * 100;
 }
 
-export function computeDataCompleteness(watch: Watch): DataCompleteness {
-  const fields = [
-    { label: "movement", present: Boolean(watch.specs.movement) },
-    { label: "crystal", present: Boolean(watch.specs.crystal) },
-    { label: "water resistance", present: watch.specs.waterResistanceM !== undefined },
-    { label: "power reserve", present: watch.specs.powerReserveHours !== undefined },
-    { label: "case material", present: Boolean(watch.specs.caseMaterial) },
-  ];
-  const missing = fields.filter((field) => !field.present).map((field) => field.label);
+/**
+ * How much of the standing is actually evidenced: the dimensions rated out of
+ * the five. This used to count the inputs to a separate spec-quality formula;
+ * once that formula went away, counting its fields would have reported the
+ * completeness of something nothing reads.
+ */
+export function computeDataCompleteness(standing: Standing): DataCompleteness {
   return {
-    present: fields.length - missing.length,
-    total: fields.length,
-    missing,
+    present: DIMENSIONS.length - standing.unrated.length,
+    total: DIMENSIONS.length,
+    missing: standing.unrated.map((dimension) => DIMENSION_LABELS[dimension].toLowerCase()),
   };
 }
 
@@ -240,17 +151,33 @@ export function assignQuadrant(
   return "skip";
 }
 
+/**
+ * Scores `watches` for the matrix and the cards. Peer bands are drawn from
+ * `allWatches`, so an owned watch still counts as a peer for anything priced
+ * alongside it even when only the wishlist is being scored.
+ *
+ * Value is the peer-band standing, rescaled to 0-100. It replaced a separate
+ * spec-quality-over-log-price score that ranked the whole collection on one
+ * axis regardless of category — that formula marked a dress watch down for its
+ * water resistance against divers, and dividing by price meant cheapness
+ * dominated. The two engines ranked this collection almost independently
+ * (Spearman rho -0.14), so keeping both meant showing two contradictory
+ * answers to the same question.
+ */
 export function computeWatchScores(
   watches: Watch[],
+  allWatches: Watch[] = watches,
   onWarning?: (message: string) => void
 ): { scores: WatchScore[]; thresholds: ScoreThresholds; thresholdMethod: ThresholdResult["method"] } {
-  const valueScores = computeValueScore(watches, onWarning);
-  const initialScores = watches.map((watch) => ({
-    watch,
-    valueScore: valueScores.get(watch.id) ?? null,
-    designScore: computeDesignScore(watch),
-    dataCompleteness: computeDataCompleteness(watch),
-  }));
+  const initialScores = watches.map((watch) => {
+    const standing = computeStanding(watch, allWatches, onWarning);
+    return {
+      watch,
+      valueScore: standing.valueScore === undefined ? null : standing.valueScore * 100,
+      designScore: computeDesignScore(watch),
+      dataCompleteness: computeDataCompleteness(standing),
+    };
+  });
   const { thresholds, method } = computeThresholds(initialScores);
 
   return {
@@ -294,16 +221,6 @@ export function compareValueScores(a: WatchScore & { valueScore: number }, b: Wa
     (b.designScore ?? -Infinity) - (a.designScore ?? -Infinity) ||
     `${a.watch.brand} ${a.watch.model}`.localeCompare(`${b.watch.brand} ${b.watch.model}`)
   );
-}
-
-function normalizePeerNumber(value: number | undefined, peerValues: Array<number | undefined>): number {
-  if (value === undefined) return NEUTRAL_QUALITY;
-  const values = peerValues.filter((peerValue): peerValue is number => Number.isFinite(peerValue));
-  if (values.length < 2) return NEUTRAL_QUALITY;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  if (min === max) return NEUTRAL_QUALITY;
-  return (value - min) / (max - min);
 }
 
 function median(values: number[]): number {
@@ -641,10 +558,14 @@ function frictionChips(watch: Watch): string[] {
  * the watch's category and price band; the peer group contributes only the
  * label, the count, and (when n >= 6) a percentile.
  */
-export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
+export function computeStanding(
+  watch: Watch,
+  allWatches: Watch[],
+  onWarning?: (message: string) => void
+): Standing {
   const peerGroup = derivePeerGroup(watch, allWatches);
   const raw = scoreDimensions(watch);
-  const usd = landedPriceUsd(watch);
+  const usd = landedPriceUsd(watch, onWarning);
   const band = peerGroup.band;
   const rubric: RubricReference | undefined = band
     ? rubricFor(peerGroup.category, band.id)

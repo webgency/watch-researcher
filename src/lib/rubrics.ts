@@ -84,35 +84,46 @@ export type RubricReference = Record<Dimension, number>;
 // - durability: divers are expected to clear their 200m bar with sapphire;
 //   dress watches only need to survive a sleeve.
 // - caseCraft/bracelet: finishing and clasp hardware expectations scale with
-//   price more than with category.
+//   price more than with category, so both are category-invariant.
+// - caseCraft is anchored to what its formula can actually express, not to an
+//   abstract 0-1 quality scale. That formula is a floor plus premium markers:
+//   0.35 means "standard finishing, no premium marker recorded", and the only
+//   way up is a hardened coating (+0.20), a sapphire bezel insert (+0.15),
+//   drilled lugs (+0.10), or AR layers (up to +0.20). Real watches land
+//   between 0.35 and 0.60. References once ran 0.40-0.80, which no watch
+//   could reach without all four markers at once, so caseCraft trailed almost
+//   everywhere and was reporting the shape of the formula rather than the
+//   quality of the watch. Par now means: nothing expected under $500, one
+//   modest marker by $1000, one solid marker by $2000, a couple by $5000, and
+//   several above it.
 export const RUBRICS: Record<RubricCategory, Record<PriceBandId, RubricReference>> = {
   diver: {
-    "under-500": { movement: 0.30, caseCraft: 0.40, wearability: 0.35, durability: 0.70, bracelet: 0.40 },
-    "500-1000": { movement: 0.45, caseCraft: 0.50, wearability: 0.40, durability: 0.80, bracelet: 0.55 },
-    "1000-2000": { movement: 0.58, caseCraft: 0.60, wearability: 0.45, durability: 0.85, bracelet: 0.65 },
-    "2000-5000": { movement: 0.68, caseCraft: 0.70, wearability: 0.50, durability: 0.90, bracelet: 0.75 },
-    "5000-plus": { movement: 0.85, caseCraft: 0.80, wearability: 0.55, durability: 0.95, bracelet: 0.85 },
+    "under-500": { movement: 0.30, caseCraft: 0.35, wearability: 0.35, durability: 0.70, bracelet: 0.40 },
+    "500-1000": { movement: 0.45, caseCraft: 0.40, wearability: 0.40, durability: 0.80, bracelet: 0.55 },
+    "1000-2000": { movement: 0.58, caseCraft: 0.45, wearability: 0.45, durability: 0.85, bracelet: 0.65 },
+    "2000-5000": { movement: 0.68, caseCraft: 0.52, wearability: 0.50, durability: 0.90, bracelet: 0.75 },
+    "5000-plus": { movement: 0.85, caseCraft: 0.60, wearability: 0.55, durability: 0.95, bracelet: 0.85 },
   },
   chronograph: {
-    "under-500": { movement: 0.28, caseCraft: 0.40, wearability: 0.40, durability: 0.45, bracelet: 0.35 },
-    "500-1000": { movement: 0.40, caseCraft: 0.50, wearability: 0.45, durability: 0.50, bracelet: 0.45 },
-    "1000-2000": { movement: 0.55, caseCraft: 0.60, wearability: 0.50, durability: 0.55, bracelet: 0.55 },
-    "2000-5000": { movement: 0.70, caseCraft: 0.70, wearability: 0.55, durability: 0.60, bracelet: 0.65 },
-    "5000-plus": { movement: 0.85, caseCraft: 0.80, wearability: 0.60, durability: 0.65, bracelet: 0.75 },
+    "under-500": { movement: 0.28, caseCraft: 0.35, wearability: 0.40, durability: 0.45, bracelet: 0.35 },
+    "500-1000": { movement: 0.40, caseCraft: 0.40, wearability: 0.45, durability: 0.50, bracelet: 0.45 },
+    "1000-2000": { movement: 0.55, caseCraft: 0.45, wearability: 0.50, durability: 0.55, bracelet: 0.55 },
+    "2000-5000": { movement: 0.70, caseCraft: 0.52, wearability: 0.55, durability: 0.60, bracelet: 0.65 },
+    "5000-plus": { movement: 0.85, caseCraft: 0.60, wearability: 0.60, durability: 0.65, bracelet: 0.75 },
   },
   gmt: {
-    "under-500": { movement: 0.32, caseCraft: 0.40, wearability: 0.40, durability: 0.55, bracelet: 0.40 },
-    "500-1000": { movement: 0.50, caseCraft: 0.50, wearability: 0.45, durability: 0.60, bracelet: 0.50 },
-    "1000-2000": { movement: 0.60, caseCraft: 0.60, wearability: 0.50, durability: 0.65, bracelet: 0.60 },
-    "2000-5000": { movement: 0.68, caseCraft: 0.70, wearability: 0.55, durability: 0.70, bracelet: 0.70 },
-    "5000-plus": { movement: 0.85, caseCraft: 0.80, wearability: 0.60, durability: 0.75, bracelet: 0.80 },
+    "under-500": { movement: 0.32, caseCraft: 0.35, wearability: 0.40, durability: 0.55, bracelet: 0.40 },
+    "500-1000": { movement: 0.50, caseCraft: 0.40, wearability: 0.45, durability: 0.60, bracelet: 0.50 },
+    "1000-2000": { movement: 0.60, caseCraft: 0.45, wearability: 0.50, durability: 0.65, bracelet: 0.60 },
+    "2000-5000": { movement: 0.68, caseCraft: 0.52, wearability: 0.55, durability: 0.70, bracelet: 0.70 },
+    "5000-plus": { movement: 0.85, caseCraft: 0.60, wearability: 0.60, durability: 0.75, bracelet: 0.80 },
   },
   dress: {
-    "under-500": { movement: 0.30, caseCraft: 0.40, wearability: 0.55, durability: 0.40, bracelet: 0.30 },
-    "500-1000": { movement: 0.45, caseCraft: 0.50, wearability: 0.60, durability: 0.45, bracelet: 0.35 },
-    "1000-2000": { movement: 0.55, caseCraft: 0.60, wearability: 0.65, durability: 0.50, bracelet: 0.40 },
-    "2000-5000": { movement: 0.65, caseCraft: 0.70, wearability: 0.70, durability: 0.55, bracelet: 0.50 },
-    "5000-plus": { movement: 0.82, caseCraft: 0.80, wearability: 0.75, durability: 0.60, bracelet: 0.60 },
+    "under-500": { movement: 0.30, caseCraft: 0.35, wearability: 0.55, durability: 0.40, bracelet: 0.30 },
+    "500-1000": { movement: 0.45, caseCraft: 0.40, wearability: 0.60, durability: 0.45, bracelet: 0.35 },
+    "1000-2000": { movement: 0.55, caseCraft: 0.45, wearability: 0.65, durability: 0.50, bracelet: 0.40 },
+    "2000-5000": { movement: 0.65, caseCraft: 0.52, wearability: 0.70, durability: 0.55, bracelet: 0.50 },
+    "5000-plus": { movement: 0.82, caseCraft: 0.60, wearability: 0.75, durability: 0.60, bracelet: 0.60 },
   },
 };
 

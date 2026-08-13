@@ -59,7 +59,7 @@ const plotBottom = CHART.top + plotHeight;
 export default function ValueMatrix({ watches }: { watches: Watch[] }) {
   const wishlist = watches.filter((watch) => watch.status === "wishlist");
   const warnings: string[] = [];
-  const { scores, thresholds, thresholdMethod } = computeWatchScores(wishlist, (message) => {
+  const { scores, thresholds, thresholdMethod } = computeWatchScores(wishlist, watches, (message) => {
     if (!warnings.includes(message)) warnings.push(message);
   });
   const valueRanks = valueRankings(scores);

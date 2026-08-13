@@ -205,16 +205,17 @@ function MiniMeter({ label, value, par }: { label: string; value?: number; par?:
 }
 
 function ScoreSummary({ summary, designRank }: { summary: WatchScoreSummary; designRank?: number }) {
-  const roundedValue = summary.valueScore === null ? null : Math.round(summary.valueScore);
   const quadrantClass = summary.quadrant ? QUADRANT_CLASSES[summary.quadrant] : "bg-slate-100 text-slate-600";
 
   return (
     <div className="flex flex-wrap gap-1 text-xs">
+      {/* Rank only — the score itself is the Value meter in the strip above,
+          and both now come from the same peer-band engine. */}
       <span
-        title="Value rank among priced wishlist watches"
+        title="Value rank across the wishlist, by standing within each watch's own band"
         className="rounded-full bg-slate-900 px-2 py-1 font-medium text-white"
       >
-        {summary.valueRank ? `Value #${summary.valueRank} · ${roundedValue}` : "Value unrated"}
+        {summary.valueRank ? `Value #${summary.valueRank}` : "Value unrated"}
       </span>
       {/* Shows your 1-5 rank, not the rescaled score — the rank is what you set. */}
       <span

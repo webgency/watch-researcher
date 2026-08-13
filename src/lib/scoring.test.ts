@@ -11,7 +11,7 @@ import {
   percentile,
   scoreDimensions,
 } from "./scoring";
-import { DIMENSIONS } from "./rubrics";
+import { DIMENSIONS, PRICE_BANDS, RUBRIC_CATEGORIES, RUBRICS } from "./rubrics";
 import type { Watch } from "./types";
 
 let nextId = 0;
@@ -345,5 +345,40 @@ describe("quadrants with an unranked design axis", () => {
     expect(full.method).toBe("median");
     expect(full.thresholds.value).toBe(25);
     expect(full.thresholds.design).toBe(50);
+  });
+});
+
+describe("caseCraft rubric anchoring", () => {
+  // caseCraft is a floor-plus-markers formula, not a free 0-1 scale: a watch
+  // with no premium marker recorded scores exactly the floor, and the markers
+  // are rare enough that real watches top out near 0.60. References outside
+  // that span describe a watch the formula cannot produce, which is how
+  // caseCraft came to trail on 49 of 53 watches.
+  const FLOOR = 0.35;
+  const REALISTIC_CEILING = 0.6;
+
+  it("keeps every caseCraft reference inside the range the formula can express", () => {
+    for (const category of RUBRIC_CATEGORIES) {
+      for (const band of PRICE_BANDS) {
+        const reference = RUBRICS[category][band.id].caseCraft;
+        expect(reference).toBeGreaterThanOrEqual(FLOOR);
+        expect(reference).toBeLessThanOrEqual(REALISTIC_CEILING);
+      }
+    }
+  });
+
+  it("puts par at the floor in the cheapest band, so a plain case is not a defect", () => {
+    const plainCase = makeWatch({
+      price: { amount: 300, currency: "USD" },
+      qualityFlags: { sapphireBezelInsert: false, drilledLugs: false },
+    });
+    expect(scoreDimensions(plainCase).caseCraft).toBeCloseTo(FLOOR);
+    expect(computeStanding(plainCase, [plainCase]).trails).not.toContain("caseCraft");
+  });
+
+  it("still expects more finishing as the price climbs", () => {
+    const references = PRICE_BANDS.map((band) => RUBRICS.diver[band.id].caseCraft);
+    const ascending = references.every((value, index) => index === 0 || value > references[index - 1]);
+    expect(ascending).toBe(true);
   });
 });

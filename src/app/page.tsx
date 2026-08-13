@@ -9,7 +9,10 @@ export default async function HomePage() {
   // the GitHub Pages export.
   if (!IS_STATIC) noStore();
   const watches = await getWatches();
-  const wishlistScores = computeWatchScores(watches.filter((watch) => watch.status === "wishlist"));
+  const wishlistScores = computeWatchScores(
+    watches.filter((watch) => watch.status === "wishlist"),
+    watches
+  );
   // Peer bands are drawn from the whole collection, not just the wishlist, so
   // an owned watch still counts as a peer for anything priced alongside it.
   const standings: Record<string, Standing> = Object.fromEntries(
