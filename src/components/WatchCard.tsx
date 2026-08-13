@@ -130,8 +130,13 @@ function StandingBlock({ summary }: { summary: StandingSummary }) {
             ? "Quality unrated"
             : `Quality ${Math.round(toDisplayScore(standing.qualityScore))}`}
         </span>
-        <span title="Calculated desire score" className="rounded-full bg-slate-100 px-2 py-1 font-medium text-slate-600">
-          Desire {Math.round(summary.desirabilityScore)}
+        <span
+          title={summary.designScore === null ? "Not yet ranked for design" : "Your design rank"}
+          className={`rounded-full px-2 py-1 font-medium ${
+            summary.designScore === null ? "bg-slate-50 text-slate-400" : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          {summary.designScore === null ? "Design unranked" : `Design ${Math.round(summary.designScore)}`}
         </span>
       </div>
 

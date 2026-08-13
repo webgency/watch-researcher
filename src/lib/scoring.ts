@@ -1,4 +1,4 @@
-import { BrandCatalog, Money, Watch, WishlistTier } from "./types";
+import { Money, Watch } from "./types";
 import {
   CATEGORY_EXPECTATION,
   Dimension,
@@ -13,23 +13,23 @@ import {
 export type { Dimension } from "./rubrics";
 
 // ---------------------------------------------------------------------------
-// Desire score and quadrant placement.
+// Design score and quadrant placement.
 //
-// The subjective half of the model: how much you want a watch, from your
-// wishlist tier, your design rating, and the brand's reputation tier. The
-// standing engine below deliberately has no view on any of this, so the two
-// are combined only at the point of display.
+// The subjective half of the model: your own read on how a watch looks. The
+// standing engine below deliberately has no view on it, so the two are
+// combined only at the point of display.
 // ---------------------------------------------------------------------------
 
 export type Quadrant = "buy" | "aspirational" | "sensible" | "skip";
 
 export interface ScoreThresholds {
   value: number;
-  desirability: number;
+  design: number;
 }
 
-// Tuning knob: neutral 1-5 ordinal used for missing subjective inputs.
-export const NEUTRAL_ORDINAL = 3;
+/** Bounds of the 1-5 design rank. */
+export const DESIGN_RANK_MIN = 1;
+export const DESIGN_RANK_MAX = 5;
 
 // Tuning knob: currency conversion rates used before scoring.
 export const CURRENCY_TO_USD: Record<string, number> = {
@@ -38,23 +38,6 @@ export const CURRENCY_TO_USD: Record<string, number> = {
   GBP: 1.27,
   CHF: 1.12,
   JPY: 0.0064,
-};
-
-// Tuning knob: subjective desirability weights.
-export const DESIRABILITY_WEIGHTS = {
-  designUniqueness: 0.4,
-  brandReputation: 0.35,
-  wishlistTier: 0.25,
-} as const;
-
-// Tuning knob: wishlist tiers mapped onto a 1-5 desirability ordinal.
-export const WISHLIST_TIER_ORDINAL: Record<WishlistTier, number> = {
-  "next-purchase": 5,
-  "must-have": 5,
-  "love-it": 4,
-  interested: 3,
-  "maybe-later": 2,
-  pass: 1,
 };
 
 export function normalizePriceToUsd(money: Money, onWarning?: (message: string) => void): number {
@@ -67,40 +50,48 @@ export function normalizePriceToUsd(money: Money, onWarning?: (message: string) 
   return money.amount * rate;
 }
 
-export function computeDesirabilityScore(watch: Watch, brandReputation?: number | null): number {
-  const designUniqueness = ordinalOrNeutral(watch.designUniqueness);
-  const brand = ordinalOrNeutral(brandReputation);
-  const wishlistTier = watch.wishlistTier ? WISHLIST_TIER_ORDINAL[watch.wishlistTier] : NEUTRAL_ORDINAL;
-  const composite =
-    designUniqueness * DESIRABILITY_WEIGHTS.designUniqueness +
-    brand * DESIRABILITY_WEIGHTS.brandReputation +
-    wishlistTier * DESIRABILITY_WEIGHTS.wishlistTier;
-
-  return ((composite - 1) / 4) * 100;
+/**
+ * Your 1-5 design rank as a 0-100 score, or null when you have not ranked it.
+ *
+ * This replaces a weighted desirability score whose three inputs did not hold
+ * up. Brand reputation was a constant — every brand in data/brands.json sits at
+ * reputationTier 3 — so its 35% contributed no variance. Wishlist tier is the
+ * judgement the matrix exists to inform, so feeding it back in at 25% made the
+ * chart partly restate its own input. Design was the only live term, and for
+ * the watches without a design rank the score collapsed to exactly five
+ * values, one per wishlist tier.
+ *
+ * Unranked returns null rather than a neutral 3: a neutral fill would park
+ * every unranked watch on the median line and read as an opinion never given.
+ */
+export function computeDesignScore(watch: Watch): number | null {
+  const rank = watch.designUniqueness;
+  if (typeof rank !== "number" || !Number.isInteger(rank)) return null;
+  if (rank < DESIGN_RANK_MIN || rank > DESIGN_RANK_MAX) return null;
+  return ((rank - DESIGN_RANK_MIN) / (DESIGN_RANK_MAX - DESIGN_RANK_MIN)) * 100;
 }
 
+/** Median of the supplied scores. Callers pass only the watches scored on that axis. */
+export function medianScore(values: number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
+
+/** A watch needs both axes to be placed; either one missing means no quadrant. */
 export function assignQuadrant(
   valueScore: number | null,
-  desirabilityScore: number,
+  designScore: number | null,
   thresholds: ScoreThresholds
 ): Quadrant | null {
-  if (valueScore === null) return null;
+  if (valueScore === null || designScore === null) return null;
   const highValue = valueScore >= thresholds.value;
-  const highDesire = desirabilityScore >= thresholds.desirability;
-  if (highValue && highDesire) return "buy";
-  if (!highValue && highDesire) return "aspirational";
-  if (highValue && !highDesire) return "sensible";
+  const highDesign = designScore >= thresholds.design;
+  if (highValue && highDesign) return "buy";
+  if (!highValue && highDesign) return "aspirational";
+  if (highValue && !highDesign) return "sensible";
   return "skip";
-}
-
-function ordinalOrNeutral(value: number | null | undefined): number {
-  return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 5 ? value : NEUTRAL_ORDINAL;
-}
-
-function resolveBrandReputation(brand: string, brands: BrandCatalog): number | undefined {
-  const normalized = brand.trim().toLowerCase();
-  const match = Object.entries(brands).find(([name]) => name.trim().toLowerCase() === normalized);
-  return match?.[1].reputationTier;
 }
 
 // ---------------------------------------------------------------------------
@@ -462,7 +453,8 @@ export function unratedReason(watch: Watch, dimension: Dimension): string {
  */
 export interface StandingSummary {
   standing: Standing;
-  desirabilityScore: number;
+  /** Your design rank as 0-100, or null when the watch is unranked. */
+  designScore: number | null;
 }
 
 /**
@@ -480,18 +472,11 @@ export const toDisplayScore = (score: number): number => score * 100;
  * pass the full collection even when only rendering a subset — a bigger pool
  * means better peer labels and more groups clearing the n >= 6 percentile bar.
  */
-export function standingSummaries(
-  watches: Watch[],
-  pool: Watch[],
-  brands: BrandCatalog
-): Record<string, StandingSummary> {
+export function standingSummaries(watches: Watch[], pool: Watch[]): Record<string, StandingSummary> {
   return Object.fromEntries(
     watches.map((watch) => [
       watch.id,
-      {
-        standing: computeStanding(watch, pool),
-        desirabilityScore: computeDesirabilityScore(watch, resolveBrandReputation(watch.brand, brands)),
-      },
+      { standing: computeStanding(watch, pool), designScore: computeDesignScore(watch) },
     ])
   );
 }

@@ -40,7 +40,7 @@ const SORTS: { key: SortKey; label: string }[] = [
 /** Sort key for an optional score. Unrated sorts last; -1 rather than -Infinity
  *  so that two unrated watches subtract to 0 and fall through to the tiebreak
  *  instead of producing NaN. */
-function rank(score: number | undefined): number {
+function rank(score: number | null | undefined): number {
   return score ?? -1;
 }
 
@@ -124,7 +124,7 @@ export default function CollectionView({
         case "valueScore":
           return (
             rank(scoreSummaries[b.id]?.standing.valueScore) - rank(scoreSummaries[a.id]?.standing.valueScore) ||
-            rank(scoreSummaries[b.id]?.desirabilityScore) - rank(scoreSummaries[a.id]?.desirabilityScore) ||
+            rank(scoreSummaries[b.id]?.designScore) - rank(scoreSummaries[a.id]?.designScore) ||
             b.dateAdded.localeCompare(a.dateAdded)
           );
         case "qualityScore":

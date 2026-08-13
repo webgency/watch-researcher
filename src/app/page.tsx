@@ -1,5 +1,4 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { getBrands } from "@/lib/brands";
 import { getWatches } from "@/lib/store";
 import { standingSummaries } from "@/lib/scoring";
 import { IS_STATIC } from "@/lib/config";
@@ -9,10 +8,10 @@ export default async function HomePage() {
   // Stay dynamic locally so edits show immediately; allow static prerender for
   // the GitHub Pages export.
   if (!IS_STATIC) noStore();
-  const [watches, brands] = await Promise.all([getWatches(), getBrands()]);
+  const watches = await getWatches();
   // Standings are objective, so every watch gets one — owned pieces included —
   // and the whole collection acts as the peer pool.
-  const summaries = standingSummaries(watches, watches, brands);
+  const summaries = standingSummaries(watches, watches);
   return (
     <div className="space-y-6">
       <div>

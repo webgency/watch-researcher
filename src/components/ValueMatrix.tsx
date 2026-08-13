@@ -3,6 +3,7 @@ import { formatMoney } from "@/lib/format";
 import {
   assignQuadrant,
   landedPriceUsd,
+  medianScore,
   PAR_SCORE,
   Quadrant,
   standingSummaries,
@@ -10,7 +11,7 @@ import {
   toDisplayScore,
 } from "@/lib/scoring";
 import { Dimension, DIMENSION_LABELS } from "@/lib/rubrics";
-import { BrandCatalog, Watch } from "@/lib/types";
+import { Watch } from "@/lib/types";
 
 interface Entry {
   watch: Watch;
@@ -25,34 +26,37 @@ const QUADRANTS: Quadrant[] = ["buy", "aspirational", "sensible", "skip"];
 const QUADRANT_META: Record<Quadrant, { label: string; shortLabel: string; color: string; fill: string }> = {
   buy: {
     label: "Buy",
-    shortLabel: "Beats its band / high desire",
+    shortLabel: "Beats its band / like the look",
     color: "text-emerald-700",
     fill: "#d1fae5",
   },
   aspirational: {
     label: "Aspirational",
-    shortLabel: "Trails its band / high desire",
+    shortLabel: "Trails its band / like the look",
     color: "text-amber-700",
     fill: "#fef3c7",
   },
   sensible: {
     label: "Sensible",
-    shortLabel: "Beats its band / low desire",
+    shortLabel: "Beats its band / lukewarm on it",
     color: "text-sky-700",
     fill: "#e0f2fe",
   },
   skip: {
     label: "Skip",
-    shortLabel: "Trails its band / low desire",
+    shortLabel: "Trails its band / lukewarm on it",
     color: "text-slate-600",
     fill: "#f1f5f9",
   },
 };
 
-// Par on both axes. The value axis is rubric-relative, so 50 is an absolute
-// reference rather than a split derived from the collection.
+// The value axis is rubric-relative, so par is an absolute reference rather
+// than a split derived from the collection. The design axis has no such
+// anchor — a 1-5 rank means only what it means relative to your other ranks —
+// so it splits at the median of the watches you have actually ranked, with the
+// scale midpoint as the fallback while too few are ranked to have one.
 const PAR_DISPLAY = toDisplayScore(PAR_SCORE);
-const DESIRE_SPLIT = 50;
+const DESIGN_SPLIT_FALLBACK = 50;
 
 const CHART = {
   width: 760,
@@ -68,7 +72,7 @@ const plotHeight = CHART.height - CHART.top - CHART.bottom;
 const plotRight = CHART.left + plotWidth;
 const plotBottom = CHART.top + plotHeight;
 
-export default function ValueMatrix({ watches, brands }: { watches: Watch[]; brands: BrandCatalog }) {
+export default function ValueMatrix({ watches }: { watches: Watch[] }) {
   const wishlist = watches.filter((watch) => watch.status === "wishlist");
 
   // computeStanding swallows currency warnings, so surface them separately.
@@ -80,33 +84,49 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
   }
 
   // Peer groups are drawn from the whole collection, not just the wishlist.
-  const summaries = standingSummaries(wishlist, watches, brands);
+  const summaries = standingSummaries(wishlist, watches);
+
+  // Taken from the watches actually ranked, so a half-ranked collection still
+  // splits sensibly instead of being dragged by watches you have no opinion on.
+  const designSplit =
+    medianScore(
+      wishlist.flatMap((watch) => {
+        const score = summaries[watch.id].designScore;
+        return score === null ? [] : [score];
+      })
+    ) ?? DESIGN_SPLIT_FALLBACK;
+  const thresholds = { value: PAR_DISPLAY, design: designSplit };
+
   const entries: Entry[] = wishlist.map((watch) => {
     const summary = summaries[watch.id];
     return {
       watch,
       summary,
-      quadrant:
-        summary.standing.valueScore === undefined
-          ? null
-          : assignQuadrant(toDisplayScore(summary.standing.valueScore), summary.desirabilityScore, {
-              value: PAR_DISPLAY,
-              desirability: DESIRE_SPLIT,
-            }),
+      quadrant: assignQuadrant(
+        summary.standing.valueScore === undefined ? null : toDisplayScore(summary.standing.valueScore),
+        summary.designScore,
+        thresholds
+      ),
     };
   });
 
   const rated = entries.filter(isRated).sort(compareEntries);
-  const unrated = entries.filter((entry) => entry.quadrant === null);
+  // Two different reasons a watch is off the chart, so each list can name the
+  // one thing that would put it on.
+  const offChart = entries.filter((entry) => entry.quadrant === null);
+  const unranked = offChart.filter((entry) => entry.summary.designScore === null);
+  const unpriced = offChart.filter(
+    (entry) => entry.summary.designScore !== null && entry.summary.standing.valueScore === undefined
+  );
   const ranks = new Map(rated.map((entry, index) => [entry.watch.id, index + 1]));
   // Rank order, so the highest-value watches get first pick of label position.
   const points = rated.map((entry, index) => ({
     id: entry.watch.id,
     x: xFor(toDisplayScore(entry.summary.standing.valueScore!)),
-    y: yFor(entry.summary.desirabilityScore),
+    y: yFor(entry.summary.designScore!),
     text: String(index + 1),
   }));
-  const rankLabels = placeRankLabels(points, quadrantHeadingBoxes());
+  const rankLabels = placeRankLabels(points, quadrantHeadingBoxes(designSplit));
   const grouped = Object.fromEntries(
     QUADRANTS.map((quadrant) => [quadrant, rated.filter((entry) => entry.quadrant === quadrant)])
   ) as Record<Quadrant, RatedEntry[]>;
@@ -123,7 +143,7 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
           </div>
           <div className="text-left text-xs text-slate-500 sm:text-right">
             <p>Value par {PAR_DISPLAY}</p>
-            <p>Desire score split {DESIRE_SPLIT}</p>
+            <p>Design split {formatScore(designSplit)}</p>
           </div>
         </div>
 
@@ -147,12 +167,12 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
           <div className="overflow-x-auto">
             <svg
               role="img"
-              aria-label="Value against desire score, split into quadrants"
+              aria-label="Value against design rank, split into quadrants"
               viewBox={`0 0 ${CHART.width} ${CHART.height}`}
               className="w-full min-w-[640px]"
             >
               <rect x={CHART.left} y={CHART.top} width={plotWidth} height={plotHeight} fill="#ffffff" />
-              {quadrantRects().map((rect) => {
+              {quadrantRects(designSplit).map((rect) => {
                 const heading = quadrantHeading(rect);
                 return (
                   <g key={rect.quadrant}>
@@ -181,14 +201,14 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
               ))}
 
               <line x1={xFor(PAR_DISPLAY)} x2={xFor(PAR_DISPLAY)} y1={CHART.top} y2={plotBottom} stroke="#334155" strokeWidth="2" />
-              <line x1={CHART.left} x2={plotRight} y1={yFor(DESIRE_SPLIT)} y2={yFor(DESIRE_SPLIT)} stroke="#334155" strokeWidth="2" />
+              <line x1={CHART.left} x2={plotRight} y1={yFor(designSplit)} y2={yFor(designSplit)} stroke="#334155" strokeWidth="2" />
               <rect x={CHART.left} y={CHART.top} width={plotWidth} height={plotHeight} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
 
               <text x={(CHART.left + plotRight) / 2} y={CHART.height - 18} textAnchor="middle" className="fill-slate-700 text-[12px] font-semibold">
                 Value vs price band
               </text>
               <text x="20" y={(CHART.top + plotBottom) / 2} textAnchor="middle" transform={`rotate(-90 20 ${(CHART.top + plotBottom) / 2})`} className="fill-slate-700 text-[12px] font-semibold">
-                Desire score
+                Design rank
               </text>
 
               {rated.map((entry) => {
@@ -200,7 +220,7 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
                       <title>
                         {`${entry.watch.brand} ${entry.watch.model}: #${ranks.get(entry.watch.id)} by value, ` +
                           `value ${formatScore(toDisplayScore(entry.summary.standing.valueScore!))}, ` +
-                          `desire ${formatScore(entry.summary.desirabilityScore)} — ${entry.summary.standing.peerLabel}`}
+                          `design ${formatScore(entry.summary.designScore!)} — ${entry.summary.standing.peerLabel}`}
                       </title>
                     </circle>
                     {label && (
@@ -233,16 +253,34 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
         ))}
       </div>
 
-      {unrated.length > 0 && (
+      {unranked.length > 0 && (
         <section className="card p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Unscored</h3>
-              <p className="text-xs text-slate-500">No tracked price, or no dimension with recorded data.</p>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Not yet ranked</h3>
+              <p className="text-xs text-slate-500">
+                These need your design rank before they can be placed.{" "}
+                <Link href="/design" className="font-medium text-blue-600 hover:underline">
+                  Rank them →
+                </Link>
+              </p>
             </div>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{unrated.length}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{unranked.length}</span>
           </div>
-          <EntryList entries={unrated} ranks={ranks} emptyLabel="Nothing unscored." />
+          <EntryList entries={unranked} ranks={ranks} emptyLabel="Everything is ranked." />
+        </section>
+      )}
+
+      {unpriced.length > 0 && (
+        <section className="card p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Unscored value</h3>
+              <p className="text-xs text-slate-500">Ranked, but with no tracked price or no dimension with recorded data.</p>
+            </div>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{unpriced.length}</span>
+          </div>
+          <EntryList entries={unpriced} ranks={ranks} emptyLabel="Nothing unscored." />
         </section>
       )}
     </div>
@@ -293,7 +331,7 @@ function EntryList({
             <div className="flex flex-shrink-0 flex-wrap items-center gap-2 text-xs">
               <ScorePill label={rank ? `Value #${rank}` : "Value"} value={standing.valueScore} scaled />
               <ScorePill label="Quality" value={standing.qualityScore} scaled />
-              <ScorePill label="Desire score" value={summary.desirabilityScore} />
+              <ScorePill label="Design" value={summary.designScore ?? undefined} />
             </div>
           </li>
         );
@@ -321,7 +359,7 @@ function isRated(entry: Entry): entry is RatedEntry {
 function compareEntries(a: RatedEntry, b: RatedEntry): number {
   return (
     b.summary.standing.valueScore! - a.summary.standing.valueScore! ||
-    b.summary.desirabilityScore - a.summary.desirabilityScore ||
+    (b.summary.designScore ?? 0) - (a.summary.designScore ?? 0) ||
     `${a.watch.brand} ${a.watch.model}`.localeCompare(`${b.watch.brand} ${b.watch.model}`)
   );
 }
@@ -402,9 +440,9 @@ function yFor(score: number): number {
   return plotBottom - (score / 100) * plotHeight;
 }
 
-function quadrantRects() {
+function quadrantRects(designSplit: number) {
   const thresholdX = xFor(PAR_DISPLAY);
-  const thresholdY = yFor(DESIRE_SPLIT);
+  const thresholdY = yFor(designSplit);
   // Headings sit in each quadrant's outer corner, away from the centre where
   // the points cluster. Anchoring all four at their top-left put the two lower
   // headings directly under the data.
@@ -424,8 +462,8 @@ function quadrantHeading(rect: ReturnType<typeof quadrantRects>[number]) {
 }
 
 /** Heading boxes, reserved so rank labels never land on them. */
-function quadrantHeadingBoxes(): Box[] {
-  return quadrantRects().map((rect) => {
+function quadrantHeadingBoxes(designSplit: number): Box[] {
+  return quadrantRects(designSplit).map((rect) => {
     const { x, titleY, subY, anchor } = quadrantHeading(rect);
     // The subtitle is the wider of the two lines.
     const width = QUADRANT_META[rect.quadrant].shortLabel.length * 6;
