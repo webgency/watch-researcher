@@ -621,3 +621,44 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
     frictions: frictionChips(watch),
   };
 }
+
+/**
+ * What the UI renders per watch: the objective peer-band standing plus the
+ * subjective desire score, which the standing engine deliberately has no view
+ * on. Plain data so it can cross the server/client boundary.
+ */
+export interface StandingSummary {
+  standing: Standing;
+  desirabilityScore: number;
+}
+
+/**
+ * Par on the 0-1 standing scales. A watch at exactly the rubric reference for
+ * its category and band scores 0.5, so the split is an absolute reference and
+ * does not move with the contents of the collection.
+ */
+export const PAR_SCORE = 0.5;
+
+/** Standing scores are 0-1; the UI shows them on the same 0-100 scale as desire. */
+export const toDisplayScore = (score: number): number => score * 100;
+
+/**
+ * Standings for `watches`, keyed by id. Peer groups are drawn from `pool`, so
+ * pass the full collection even when only rendering a subset — a bigger pool
+ * means better peer labels and more groups clearing the n >= 6 percentile bar.
+ */
+export function standingSummaries(
+  watches: Watch[],
+  pool: Watch[],
+  brands: BrandCatalog
+): Record<string, StandingSummary> {
+  return Object.fromEntries(
+    watches.map((watch) => [
+      watch.id,
+      {
+        standing: computeStanding(watch, pool),
+        desirabilityScore: computeDesirabilityScore(watch, resolveBrandReputation(watch.brand, brands)),
+      },
+    ])
+  );
+}
