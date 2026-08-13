@@ -120,9 +120,7 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
         </div>
 
         <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-          Value is scored against the fixed rubric for each watch&apos;s category and price band, so {PAR_DISPLAY} means
-          &ldquo;exactly what that money should buy&rdquo;. Dimensions without recorded data are left unrated rather than
-          filled with a mid value.
+          {`Value is scored against the fixed rubric for each watch's category and price band, so a score of ${PAR_DISPLAY} means “exactly what that money should buy”. Dimensions without recorded data are left unrated rather than filled with a mid value.`}
         </p>
 
         {warnings.length > 0 && (
