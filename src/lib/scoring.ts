@@ -301,7 +301,12 @@ export const VALUE_PRICE_TILT = 0.3;
 export interface Standing {
   peerLabel: string;
   peerCount: number;
-  dimensions: Partial<Record<Dimension, { raw: number; rubricBand: string }>>;
+  /**
+   * Per rated dimension: the score, the band it was scored against, and that
+   * band's rubric reference. `reference` is undefined only for an unbanded
+   * watch, i.e. one with no price.
+   */
+  dimensions: Partial<Record<Dimension, { raw: number; rubricBand: string; reference?: number }>>;
   /** Dimensions with missing source data — display "unrated", never 0. */
   unrated: Dimension[];
   /** Composite of rated dimensions only. Undefined when nothing is rated. */
@@ -372,7 +377,11 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   for (const dimension of DIMENSIONS) {
     const value = raw[dimension];
     if (value === undefined) continue;
-    dimensions[dimension] = { raw: value, rubricBand: band?.id ?? "unbanded" };
+    dimensions[dimension] = {
+      raw: value,
+      rubricBand: band?.id ?? "unbanded",
+      reference: rubric?.[dimension],
+    };
     if (rubric) {
       if (value > rubric[dimension] + RUBRIC_TOLERANCE) beats.push(dimension);
       else if (value < rubric[dimension] - RUBRIC_TOLERANCE) trails.push(dimension);
@@ -419,6 +428,31 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
     trails,
     frictions: frictionChips(watch),
   };
+}
+
+/**
+ * Why a dimension came back unrated, phrased for display. Keeps the UI honest
+ * about which input is missing instead of showing a bare dash. Mirrors the
+ * gates in scoreDimensions — if those change, these strings must follow.
+ */
+export function unratedReason(watch: Watch, dimension: Dimension): string {
+  const s = watch.specs ?? {};
+  const f = watch.qualityFlags ?? {};
+  switch (dimension) {
+    case "movement":
+      return s.caliber ? `Caliber "${s.caliber}" is not in the tier table` : "No caliber recorded";
+    case "wearability":
+      if (s.caseDiameterMm === undefined && s.caseThicknessMm === undefined)
+        return "No case dimensions recorded";
+      return s.caseThicknessMm === undefined ? "No case thickness recorded" : "No case diameter recorded";
+    case "caseCraft":
+      return "No finishing details recorded";
+    case "bracelet":
+      if (f.braceletIncluded === false) return "Ships on a strap — no bracelet to rate";
+      return "No bracelet hardware recorded";
+    case "durability":
+      return "No water resistance recorded";
+  }
 }
 
 /**

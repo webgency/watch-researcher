@@ -29,6 +29,15 @@ export const DIMENSION_LABELS: Record<Dimension, string> = {
   bracelet: "bracelet",
 };
 
+/** What each dimension actually reads, for tooltips and detail views. */
+export const DIMENSION_BLURBS: Record<Dimension, string> = {
+  movement: "Caliber tier, plus regulation and power reserve.",
+  caseCraft: "Finishing and case hardware: coatings, bezel insert, drilled lugs, AR layers.",
+  wearability: "Thickness relative to diameter — how the case sits on a wrist.",
+  durability: "Water resistance against what the category needs, plus crystal and antimagnetism.",
+  bracelet: "Bracelet hardware: whether one is included, micro-adjust clasp, quick-release.",
+};
+
 /** Categories the rubric knows about. Watches whose tags match none fall back to "dress". */
 export type RubricCategory = "diver" | "chronograph" | "gmt" | "dress";
 

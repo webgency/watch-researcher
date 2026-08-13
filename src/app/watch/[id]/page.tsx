@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { getWatch, getWatches } from "@/lib/store";
 import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
+import { computeStanding } from "@/lib/scoring";
 import { formatMoney, formatDate, hostname } from "@/lib/format";
 import { IS_STATIC } from "@/lib/config";
 import StatusBadge from "@/components/StatusBadge";
 import WishlistTierBadge from "@/components/WishlistTierBadge";
 import WatchActions from "@/components/WatchActions";
+import StandingPanel from "@/components/StandingPanel";
 
 // Pre-render a detail page for every watch in the static export. In dynamic
 // mode return nothing so pages render on demand and reflect edits immediately.
@@ -20,8 +22,11 @@ export async function generateStaticParams() {
 export default async function WatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!IS_STATIC) noStore();
   const { id } = await params;
-  const watch = await getWatch(id);
+  // The whole collection is the peer pool, matching the collection and value
+  // pages, so a watch's band and percentile read the same everywhere.
+  const [watch, watches] = await Promise.all([getWatch(id), getWatches()]);
   if (!watch) notFound();
+  const standing = computeStanding(watch, watches);
 
   return (
     <div className="space-y-6">
@@ -71,6 +76,8 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
           <p className="text-xs text-slate-400">Added {formatDate(watch.dateAdded)}</p>
         </div>
       </div>
+
+      <StandingPanel watch={watch} standing={standing} />
 
       <section className="card p-5">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Specifications</h2>
