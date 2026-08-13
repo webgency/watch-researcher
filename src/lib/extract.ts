@@ -15,6 +15,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { Friction, MOVEMENT_TYPES, QualityFlags, WatchSpecs } from "./types";
+import { inSpecRange, LUG_TO_LUG_MIN_RATIO } from "./spec-ranges.mjs";
 
 export const EXTRACTION_MODEL = "claude-opus-5";
 
@@ -92,17 +93,18 @@ function getClient(): Anthropic | null {
   return cachedClient;
 }
 
-const inRange = (n: number, min: number, max: number) => Number.isFinite(n) && n >= min && n <= max;
-
 /**
  * Drop physically implausible readings instead of storing them — a wrong
  * thickness scores worse than a missing one. Exported for tests and reused by
- * the backfill script's merge step.
+ * the backfill script's merge step. The bounds live in ./spec-ranges.mjs so
+ * that scripts/validate-data.mjs enforces exactly the same numbers against
+ * what is already on disk.
  */
 export function sanitizeSpecs(specs: WatchSpecs): WatchSpecs {
   const s = { ...specs };
-  if (s.caseDiameterMm !== undefined && !inRange(s.caseDiameterMm, 16, 60)) delete s.caseDiameterMm;
-  if (s.caseThicknessMm !== undefined && !inRange(s.caseThicknessMm, 3, 25)) delete s.caseThicknessMm;
+  for (const key of ["caseDiameterMm", "caseThicknessMm", "lugWidthMm", "waterResistanceM", "powerReserveHours"] as const) {
+    if (s[key] !== undefined && !inSpecRange(key, s[key])) delete s[key];
+  }
   if (
     s.caseThicknessMm !== undefined &&
     s.caseDiameterMm !== undefined &&
@@ -114,15 +116,10 @@ export function sanitizeSpecs(specs: WatchSpecs): WatchSpecs {
     delete s.caseDiameterMm;
   }
   if (s.lugToLugMm !== undefined) {
-    // Cushion and rectangular cases can measure slightly less lug-to-lug than
-    // across (e.g. Dennison ALD: 37mm wide, 35.6mm lug-to-lug), so only a
-    // value well under the diameter indicates a swap or misread.
-    const tooSmall = s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm * 0.85;
-    if (!inRange(s.lugToLugMm, 20, 70) || tooSmall) delete s.lugToLugMm;
+    const tooSmall =
+      s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm * LUG_TO_LUG_MIN_RATIO;
+    if (!inSpecRange("lugToLugMm", s.lugToLugMm) || tooSmall) delete s.lugToLugMm;
   }
-  if (s.lugWidthMm !== undefined && !inRange(s.lugWidthMm, 8, 30)) delete s.lugWidthMm;
-  if (s.waterResistanceM !== undefined && !inRange(s.waterResistanceM, 10, 2000)) delete s.waterResistanceM;
-  if (s.powerReserveHours !== undefined && !inRange(s.powerReserveHours, 24, 400)) delete s.powerReserveHours;
   return s;
 }
 

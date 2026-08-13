@@ -27,6 +27,7 @@
 //   node scripts/backfill-specs.mjs --verbose    # show research summaries
 
 import { readFile, writeFile } from "node:fs/promises";
+import { inSpecRange, LUG_TO_LUG_MIN_RATIO } from "../src/lib/spec-ranges.mjs";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
@@ -114,26 +115,22 @@ const TagsFlagsSchema = z.object({
   }),
 });
 
-const inRange = (n, min, max) => Number.isFinite(n) && n >= min && n <= max;
-
-// Same plausibility rules as sanitizeSpecs in src/lib/extract.ts.
+// Same plausibility rules as sanitizeSpecs in src/lib/extract.ts, off the
+// shared bounds in src/lib/spec-ranges.mjs.
 function sanitizeSpecs(specs) {
   const s = { ...specs };
-  if (s.caseDiameterMm !== undefined && !inRange(s.caseDiameterMm, 16, 60)) delete s.caseDiameterMm;
-  if (s.caseThicknessMm !== undefined && !inRange(s.caseThicknessMm, 3, 25)) delete s.caseThicknessMm;
+  for (const key of ["caseDiameterMm", "caseThicknessMm", "lugWidthMm", "waterResistanceM", "powerReserveHours"]) {
+    if (s[key] !== undefined && !inSpecRange(key, s[key])) delete s[key];
+  }
   if (s.caseThicknessMm !== undefined && s.caseDiameterMm !== undefined && s.caseThicknessMm >= s.caseDiameterMm) {
     delete s.caseThicknessMm;
     delete s.caseDiameterMm;
   }
   if (s.lugToLugMm !== undefined) {
-    // Cushion and rectangular cases can measure slightly less lug-to-lug than
-    // across, so only a value well under the diameter indicates a swap.
-    const tooSmall = s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm * 0.85;
-    if (!inRange(s.lugToLugMm, 20, 70) || tooSmall) delete s.lugToLugMm;
+    const tooSmall =
+      s.caseDiameterMm !== undefined && s.lugToLugMm < s.caseDiameterMm * LUG_TO_LUG_MIN_RATIO;
+    if (!inSpecRange("lugToLugMm", s.lugToLugMm) || tooSmall) delete s.lugToLugMm;
   }
-  if (s.lugWidthMm !== undefined && !inRange(s.lugWidthMm, 8, 30)) delete s.lugWidthMm;
-  if (s.waterResistanceM !== undefined && !inRange(s.waterResistanceM, 10, 2000)) delete s.waterResistanceM;
-  if (s.powerReserveHours !== undefined && !inRange(s.powerReserveHours, 24, 400)) delete s.powerReserveHours;
   return s;
 }
 
