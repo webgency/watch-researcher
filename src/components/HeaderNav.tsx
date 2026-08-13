@@ -37,6 +37,14 @@ export default function HeaderNav() {
         Value
       </Link>
       {!IS_STATIC && (
+        <Link
+          href="/design"
+          className={`btn-secondary h-9 shrink-0 px-3 ${pathname === "/design" ? "border-slate-900 text-slate-900" : ""}`}
+        >
+          Design
+        </Link>
+      )}
+      {!IS_STATIC && (
         <Link href="/watch/new" className="btn-primary shrink-0">
           + Add watch
         </Link>

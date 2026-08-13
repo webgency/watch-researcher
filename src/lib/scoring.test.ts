@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  assignQuadrant,
   caliberTier,
+  computeDesignScore,
   computeStanding,
+  medianScore,
   deriveCategory,
   derivePeerGroup,
   percentile,
@@ -288,5 +291,58 @@ describe("percentile", () => {
 
   it("ranks within pools of six or more", () => {
     expect(percentile(0.5, [0.1, 0.2, 0.3, 0.4, 0.5, 0.9])).toBe(0.8);
+  });
+});
+
+describe("design score", () => {
+  it("rescales the 1-5 rank onto 0-100", () => {
+    expect(computeDesignScore(makeWatch({ designUniqueness: 1 }))).toBe(0);
+    expect(computeDesignScore(makeWatch({ designUniqueness: 3 }))).toBe(50);
+    expect(computeDesignScore(makeWatch({ designUniqueness: 5 }))).toBe(100);
+  });
+
+  it("returns null for an unranked watch rather than a neutral middle", () => {
+    // A neutral fill would park every unranked watch on the median line and
+    // read as an opinion that was never given.
+    expect(computeDesignScore(makeWatch())).toBeNull();
+  });
+
+  it("rejects out-of-range and non-integer ranks", () => {
+    expect(computeDesignScore(makeWatch({ designUniqueness: 0 }))).toBeNull();
+    expect(computeDesignScore(makeWatch({ designUniqueness: 6 }))).toBeNull();
+    expect(computeDesignScore(makeWatch({ designUniqueness: 3.5 }))).toBeNull();
+  });
+
+  it("ignores the wishlist tier, which the matrix exists to inform", () => {
+    const mustHave = makeWatch({ wishlistTier: "must-have" });
+    const pass = makeWatch({ wishlistTier: "pass" });
+    expect(computeDesignScore(mustHave)).toBe(computeDesignScore(pass));
+  });
+});
+
+describe("medianScore", () => {
+  it("returns null for an empty set so callers can choose their own fallback", () => {
+    expect(medianScore([])).toBeNull();
+  });
+
+  it("averages the middle pair for an even count", () => {
+    expect(medianScore([0, 25, 75, 100])).toBe(50);
+    expect(medianScore([100, 0, 50])).toBe(50);
+  });
+});
+
+describe("assignQuadrant", () => {
+  const thresholds = { value: 50, design: 50 };
+
+  it("places a watch by both axes", () => {
+    expect(assignQuadrant(60, 60, thresholds)).toBe("buy");
+    expect(assignQuadrant(40, 60, thresholds)).toBe("aspirational");
+    expect(assignQuadrant(60, 40, thresholds)).toBe("sensible");
+    expect(assignQuadrant(40, 40, thresholds)).toBe("skip");
+  });
+
+  it("gives no quadrant when either axis is missing", () => {
+    expect(assignQuadrant(null, 60, thresholds)).toBeNull();
+    expect(assignQuadrant(60, null, thresholds)).toBeNull();
   });
 });
