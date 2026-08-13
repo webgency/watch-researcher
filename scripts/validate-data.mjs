@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
+import { SPEC_RANGES, inSpecRange, LUG_TO_LUG_MIN_RATIO } from "../src/lib/spec-ranges.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 const BRANDS_URL = new URL("../data/brands.json", import.meta.url);
@@ -116,6 +117,38 @@ function checkSpecs(value, path, errors) {
     if (type === "number") checkPositiveNumber(specValue, specPath, errors);
     else if (type === "movement" && !MOVEMENTS.has(specValue)) errors.push(`${specPath} must be a known movement type`);
     else if (type === "string") checkString(specValue, specPath, errors);
+  }
+  checkSpecPlausibility(value, path, errors);
+}
+
+/**
+ * The same physical bounds sanitizeSpecs applies to incoming data, enforced
+ * against what is already on disk. sanitizeSpecs only runs on scraped and
+ * backfilled values, so a swapped or duplicated measurement entering by any
+ * other path used to sit in the file unnoticed and quietly distort scoring —
+ * a 15mm case diameter with a 15.5mm thickness, for instance.
+ */
+function checkSpecPlausibility(specs, path, errors) {
+  for (const key of Object.keys(SPEC_RANGES)) {
+    const value = specs[key];
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    if (!inSpecRange(key, value)) {
+      const [min, max] = SPEC_RANGES[key];
+      errors.push(`${path}.${key} is ${value}, outside the plausible range ${min}-${max}`);
+    }
+  }
+
+  const { caseDiameterMm: diameter, caseThicknessMm: thickness, lugToLugMm: lugToLug, lugWidthMm: lugWidth } = specs;
+  const num = (v) => typeof v === "number" && Number.isFinite(v);
+
+  if (num(diameter) && num(thickness) && thickness >= diameter) {
+    errors.push(`${path} has caseThicknessMm ${thickness} at or above caseDiameterMm ${diameter}; one of them is a misread`);
+  }
+  if (num(diameter) && num(lugToLug) && lugToLug < diameter * LUG_TO_LUG_MIN_RATIO) {
+    errors.push(`${path} has lugToLugMm ${lugToLug} well under caseDiameterMm ${diameter}; the two are probably swapped`);
+  }
+  if (num(diameter) && num(lugWidth) && lugWidth >= diameter) {
+    errors.push(`${path} has lugWidthMm ${lugWidth} at or above caseDiameterMm ${diameter}`);
   }
 }
 
