@@ -221,7 +221,14 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
     );
   }
 
-  if (BRACELET_FLAGS.some((flag) => f[flag] !== undefined)) {
+  // A watch sold on a strap has no bracelet to judge, so the dimension is not
+  // applicable rather than bad. Scoring it 0 against a 0.40-0.85 rubric
+  // expectation conflated "no bracelet offered" with "poor bracelet", and
+  // double-counted a concern the model deliberately keeps out of the numbers:
+  // friction.braceletUpchargeUsd already surfaces the cost of adding one, as
+  // text. Not applicable is distinct from not recorded, but both mean the
+  // dimension should stay out of the composite.
+  if (f.braceletIncluded !== false && BRACELET_FLAGS.some((flag) => f[flag] !== undefined)) {
     out.bracelet = clamp01(
       (f.braceletIncluded ? 0.4 : 0) +
         (f.microAdjustClasp ? 0.35 : 0) +
