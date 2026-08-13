@@ -171,12 +171,16 @@ export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => vo
   return money ? normalizePriceToUsd(money, onWarning) : undefined;
 }
 
+/** qualityFlags each dimension reads. A dimension is rated only if at least one is recorded. */
+const CASE_CRAFT_FLAGS = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers"] as const;
+const BRACELET_FLAGS = ["braceletIncluded", "microAdjustClasp", "quickRelease"] as const;
+
 /**
  * Raw dimension scores against fixed anchors. Any dimension lacking source
  * data returns undefined, not a number:
  * - movement needs a recognized caliber
  * - wearability needs both diameter and thickness
- * - caseCraft and bracelet need qualityFlags to have been recorded at all
+ * - caseCraft and bracelet each need one of their own qualityFlags recorded
  * - durability needs a water-resistance rating
  */
 export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>> {
@@ -201,7 +205,13 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
     out.wearability = clamp01((0.36 - ratio) / 0.10);
   }
 
-  if (Object.keys(f).length > 0) {
+  // Each of these needs its own source data. Gating both on "any qualityFlags
+  // at all" scored a watch that had only, say, an accuracy spec recorded as
+  // though its case had no hardening, no sapphire bezel and no drilled lugs.
+  // For caseCraft that fabricated score was the 0.35 base, which sits below
+  // every band's rubric reference, so the watch was guaranteed to trail on a
+  // dimension nobody had measured.
+  if (CASE_CRAFT_FLAGS.some((flag) => f[flag] !== undefined)) {
     out.caseCraft = clamp01(
       0.35 +
         (f.hardenedCoatingHv ? 0.2 : 0) +
@@ -209,6 +219,9 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
         (f.drilledLugs ? 0.1 : 0) +
         (Math.min(f.arLayers ?? 0, 8) / 8) * 0.2
     );
+  }
+
+  if (BRACELET_FLAGS.some((flag) => f[flag] !== undefined)) {
     out.bracelet = clamp01(
       (f.braceletIncluded ? 0.4 : 0) +
         (f.microAdjustClasp ? 0.35 : 0) +
