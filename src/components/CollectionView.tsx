@@ -12,13 +12,16 @@ import {
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { IS_STATIC } from "@/lib/config";
-import type { WatchScoreSummary } from "@/lib/scoring";
+import type { Standing, WatchScoreSummary } from "@/lib/scoring";
+import { DIMENSIONS } from "@/lib/rubrics";
 import { useCollectionSearch } from "./CollectionSearchContext";
 import WatchCard from "./WatchCard";
 
 type SortKey =
   | "wishlistTier"
   | "valueScore"
+  | "bandValue"
+  | "bandQuality"
   | "dateAdded"
   | "priceAsc"
   | "priceDesc"
@@ -28,6 +31,8 @@ type SortKey =
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "wishlistTier", label: "Wishlist priority" },
   { key: "valueScore", label: "Value score" },
+  { key: "bandValue", label: "Band value" },
+  { key: "bandQuality", label: "Band quality" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },
   { key: "priceDesc", label: "Price: high to low" },
@@ -41,12 +46,30 @@ function tierRank(tier?: WishlistTier): number {
   return index === -1 ? Infinity : index;
 }
 
+/** Matches the "thin evidence" warning on the card and the detail panel. */
+const THIN_EVIDENCE_MAX = 2;
+
+/**
+ * A composite over one or two dimensions is not comparable to one over five —
+ * with fewer dimensions there is less to drag the average down, so the least
+ * evidenced watches would otherwise sort straight to the top. Rank them as a
+ * trailing group instead of interleaving them.
+ */
+function evidenceTier(standing?: Standing): number {
+  if (!standing) return 2;
+  const ratedCount = DIMENSIONS.length - standing.unrated.length;
+  if (ratedCount === 0) return 2;
+  return ratedCount <= THIN_EVIDENCE_MAX ? 1 : 0;
+}
+
 export default function CollectionView({
   watches,
   scoreSummaries = {},
+  standings = {},
 }: {
   watches: Watch[];
   scoreSummaries?: Record<string, WatchScoreSummary>;
+  standings?: Record<string, Standing>;
 }) {
   const router = useRouter();
   const { query } = useCollectionSearch();
@@ -100,6 +123,7 @@ export default function CollectionView({
         w.referenceNumber,
         w.wishlistTier ? WISHLIST_TIER_LABELS[w.wishlistTier] : null,
         scoreSummaries[w.id]?.quadrant,
+        standings[w.id]?.peerLabel,
         ...w.tags,
       ]
         .filter(Boolean)
@@ -118,6 +142,20 @@ export default function CollectionView({
             (scoreSummaries[b.id]?.desirabilityScore ?? -Infinity) - (scoreSummaries[a.id]?.desirabilityScore ?? -Infinity) ||
             b.dateAdded.localeCompare(a.dateAdded)
           );
+        // Unrated watches sort last rather than as a zero — there is no
+        // evidence they are bad, only that nothing was recorded.
+        case "bandValue":
+          return (
+            evidenceTier(standings[a.id]) - evidenceTier(standings[b.id]) ||
+            (standings[b.id]?.valueScore ?? -Infinity) - (standings[a.id]?.valueScore ?? -Infinity) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
+        case "bandQuality":
+          return (
+            evidenceTier(standings[a.id]) - evidenceTier(standings[b.id]) ||
+            (standings[b.id]?.qualityScore ?? -Infinity) - (standings[a.id]?.qualityScore ?? -Infinity) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
         case "priceAsc":
           return (a.price?.amount ?? Infinity) - (b.price?.amount ?? Infinity);
         case "priceDesc":
@@ -132,7 +170,7 @@ export default function CollectionView({
       }
     });
     return list;
-  }, [watches, query, status, selectedTierSet, sort, scoreSummaries]);
+  }, [watches, query, status, selectedTierSet, sort, scoreSummaries, standings]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: watches.length };
@@ -243,6 +281,7 @@ export default function CollectionView({
               watch={watch}
               selected={selected.has(watch.id)}
               scoreSummary={scoreSummaries[watch.id]}
+              standing={standings[watch.id]}
               onToggleSelect={toggleSelect}
               onChangeWishlistTier={IS_STATIC ? undefined : changeWishlistTier}
             />

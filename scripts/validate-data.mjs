@@ -117,6 +117,30 @@ function checkSpecs(value, path, errors) {
     else if (type === "movement" && !MOVEMENTS.has(specValue)) errors.push(`${specPath} must be a known movement type`);
     else if (type === "string") checkString(specValue, specPath, errors);
   }
+  checkCaseGeometry(value, path);
+}
+
+/**
+ * Physically impossible case geometry, warned rather than failed so a bad
+ * record never blocks the build. These are the shapes a spec extractor
+ * produces when it grabs the wrong number: a thickness copied from the
+ * diameter, or a diameter that picked up some other measurement entirely.
+ * Wearability is thickness/diameter, so either one silently scores 0.
+ */
+function checkCaseGeometry(specs, path) {
+  const diameter = specs.caseDiameterMm;
+  const thickness = specs.caseThicknessMm;
+  const lugToLug = specs.lugToLugMm;
+
+  if (typeof diameter === "number" && (diameter < 20 || diameter > 55)) {
+    warnings.push(`${path}.caseDiameterMm ${diameter} is outside the plausible 20-55mm range.`);
+  }
+  if (typeof diameter === "number" && typeof thickness === "number" && thickness >= diameter) {
+    warnings.push(`${path}.caseThicknessMm ${thickness} is not thinner than caseDiameterMm ${diameter}.`);
+  }
+  if (typeof diameter === "number" && typeof lugToLug === "number" && lugToLug < diameter) {
+    warnings.push(`${path}.lugToLugMm ${lugToLug} is shorter than caseDiameterMm ${diameter}.`);
+  }
 }
 
 function checkTags(value, path, errors) {

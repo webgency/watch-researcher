@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import type { WatchScoreSummary } from "@/lib/scoring";
+import type { Standing, WatchScoreSummary } from "@/lib/scoring";
+import { DIMENSIONS } from "@/lib/rubrics";
 import { Watch, WishlistTier, WISHLIST_TIERS, WISHLIST_TIER_LABELS } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
@@ -31,12 +32,14 @@ export default function WatchCard({
   watch,
   selected,
   scoreSummary,
+  standing,
   onToggleSelect,
   onChangeWishlistTier,
 }: {
   watch: Watch;
   selected: boolean;
   scoreSummary?: WatchScoreSummary;
+  standing?: Standing;
   onToggleSelect: (id: string) => void;
   onChangeWishlistTier?: (id: string, next: WishlistTier | "") => void;
 }) {
@@ -87,6 +90,7 @@ export default function WatchCard({
             {[specs.caseDiameterMm ? `${specs.caseDiameterMm}mm` : null, specs.movement].filter(Boolean).join(" · ")}
           </span>
         </div>
+        {standing && <BandStanding standing={standing} />}
         {scoreSummary && <ScoreSummary summary={scoreSummary} />}
         {onChangeWishlistTier && (
           <select
@@ -116,6 +120,84 @@ export default function WatchCard({
               </span>
             ))}
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Compact band standing for the grid. The detail page carries the per-dimension
+ * meters; here the reader is scanning, so this is only the two headline numbers
+ * plus how much evidence sits behind them.
+ */
+function BandStanding({ standing }: { standing: Standing }) {
+  const ratedCount = DIMENSIONS.length - standing.unrated.length;
+  if (ratedCount === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
+      <div className="flex items-baseline justify-between gap-2">
+        {/* "vs" matters: the chips below carry collection-wide value rank, so
+            without it two different numbers both read as plain "Value". */}
+        <span
+          className="truncate text-[11px] font-medium text-slate-500"
+          title={`Scored against the rubric for ${standing.peerLabel}`}
+        >
+          vs {standing.peerLabel}
+        </span>
+        <span
+          className={`flex-shrink-0 text-[11px] ${ratedCount <= 2 ? "text-amber-700" : "text-slate-400"}`}
+          title="Dimensions with enough recorded data to score"
+        >
+          {ratedCount}/{DIMENSIONS.length} rated
+        </span>
+      </div>
+      <div className="mt-1.5 grid grid-cols-2 gap-2.5">
+        {/* Quality is a bare magnitude — the rubric sets par per dimension, not
+            for the composite, so there is no honest tick to draw on it. */}
+        <MiniMeter label="Quality" value={standing.qualityScore} />
+        {/* Value is centred on par by construction, so 50 is the line. */}
+        <MiniMeter label="Value" value={standing.valueScore} par={0.5} />
+      </div>
+    </div>
+  );
+}
+
+function MiniMeter({ label, value, par }: { label: string; value?: number; par?: number }) {
+  const pct = value === undefined ? 0 : Math.round(value * 100);
+  const beats = par !== undefined && value !== undefined && value > par + 0.05;
+  const trails = par !== undefined && value !== undefined && value < par - 0.05;
+  const fill = beats ? "bg-emerald-600" : trails ? "bg-amber-600" : "bg-slate-500";
+  const track = beats ? "bg-emerald-100" : trails ? "bg-amber-100" : "bg-slate-200";
+
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-1">
+        <span className="text-[11px] text-slate-500">{label}</span>
+        <span className="text-xs font-semibold tabular-nums text-slate-800">
+          {value === undefined ? "—" : pct}
+        </span>
+      </div>
+      <div
+        className={`relative mt-1 h-1.5 overflow-hidden rounded-full ${value === undefined ? "bg-slate-100" : track}`}
+        role="img"
+        aria-label={
+          value === undefined
+            ? `${label}: not rated`
+            : par === undefined
+              ? `${label}: ${pct} of 100`
+              : `${label}: ${pct} of 100, par ${Math.round(par * 100)}`
+        }
+      >
+        {value !== undefined && (
+          <div className={`h-full rounded-full ${fill}`} style={{ width: `${Math.max(pct, 2)}%` }} />
+        )}
+        {par !== undefined && value !== undefined && (
+          <div
+            className="absolute inset-y-0 w-px -translate-x-1/2 bg-slate-900/60"
+            style={{ left: `${Math.round(par * 100)}%` }}
+          />
         )}
       </div>
     </div>
