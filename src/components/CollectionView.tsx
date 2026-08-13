@@ -12,13 +12,14 @@ import {
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { IS_STATIC } from "@/lib/config";
-import type { WatchScoreSummary } from "@/lib/scoring";
+import type { StandingSummary } from "@/lib/scoring";
 import { useCollectionSearch } from "./CollectionSearchContext";
 import WatchCard from "./WatchCard";
 
 type SortKey =
   | "wishlistTier"
   | "valueScore"
+  | "qualityScore"
   | "dateAdded"
   | "priceAsc"
   | "priceDesc"
@@ -27,13 +28,21 @@ type SortKey =
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "wishlistTier", label: "Wishlist priority" },
-  { key: "valueScore", label: "Value score" },
+  { key: "valueScore", label: "Value vs band" },
+  { key: "qualityScore", label: "Quality score" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },
   { key: "priceDesc", label: "Price: high to low" },
   { key: "brand", label: "Brand A–Z" },
   { key: "caseSize", label: "Case size" },
 ];
+
+/** Sort key for an optional score. Unrated sorts last; -1 rather than -Infinity
+ *  so that two unrated watches subtract to 0 and fall through to the tiebreak
+ *  instead of producing NaN. */
+function rank(score: number | undefined): number {
+  return score ?? -1;
+}
 
 function tierRank(tier?: WishlistTier): number {
   if (!tier) return Infinity;
@@ -46,7 +55,7 @@ export default function CollectionView({
   scoreSummaries = {},
 }: {
   watches: Watch[];
-  scoreSummaries?: Record<string, WatchScoreSummary>;
+  scoreSummaries?: Record<string, StandingSummary>;
 }) {
   const router = useRouter();
   const { query } = useCollectionSearch();
@@ -99,7 +108,7 @@ export default function CollectionView({
         w.model,
         w.referenceNumber,
         w.wishlistTier ? WISHLIST_TIER_LABELS[w.wishlistTier] : null,
-        scoreSummaries[w.id]?.quadrant,
+        scoreSummaries[w.id]?.standing.peerLabel,
         ...w.tags,
       ]
         .filter(Boolean)
@@ -114,8 +123,13 @@ export default function CollectionView({
           return tierRank(a.wishlistTier) - tierRank(b.wishlistTier) || b.dateAdded.localeCompare(a.dateAdded);
         case "valueScore":
           return (
-            (scoreSummaries[b.id]?.valueScore ?? -Infinity) - (scoreSummaries[a.id]?.valueScore ?? -Infinity) ||
-            (scoreSummaries[b.id]?.desirabilityScore ?? -Infinity) - (scoreSummaries[a.id]?.desirabilityScore ?? -Infinity) ||
+            rank(scoreSummaries[b.id]?.standing.valueScore) - rank(scoreSummaries[a.id]?.standing.valueScore) ||
+            rank(scoreSummaries[b.id]?.desirabilityScore) - rank(scoreSummaries[a.id]?.desirabilityScore) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
+        case "qualityScore":
+          return (
+            rank(scoreSummaries[b.id]?.standing.qualityScore) - rank(scoreSummaries[a.id]?.standing.qualityScore) ||
             b.dateAdded.localeCompare(a.dateAdded)
           );
         case "priceAsc":

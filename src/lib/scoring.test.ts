@@ -64,7 +64,7 @@ describe("scoreDimensions", () => {
     expect(scoreDimensions(watch).wearability).toBeUndefined();
   });
 
-  it("scores caseCraft and bracelet only once qualityFlags exist", () => {
+  it("scores caseCraft and bracelet only once their own qualityFlags exist", () => {
     const bare = makeWatch();
     expect(scoreDimensions(bare).caseCraft).toBeUndefined();
     expect(scoreDimensions(bare).bracelet).toBeUndefined();
@@ -74,7 +74,27 @@ describe("scoreDimensions", () => {
     });
     const raw = scoreDimensions(flagged);
     expect(raw.bracelet).toBe(1);
-    expect(raw.caseCraft).toBeCloseTo(0.35);
+    // Bracelet hardware says nothing about case finishing, so caseCraft stays
+    // unrated rather than dropping to its 0.35 base.
+    expect(raw.caseCraft).toBeUndefined();
+  });
+
+  it("leaves caseCraft unrated when only unrelated flags are recorded", () => {
+    const watch = makeWatch({ qualityFlags: { accuracySpecSpd: 40 } });
+    expect(scoreDimensions(watch).caseCraft).toBeUndefined();
+    expect(scoreDimensions(watch).bracelet).toBeUndefined();
+  });
+
+  it("rates caseCraft from any one of its own flags, and bracelet independently", () => {
+    const watch = makeWatch({ qualityFlags: { drilledLugs: true } });
+    const raw = scoreDimensions(watch);
+    expect(raw.caseCraft).toBeCloseTo(0.45);
+    expect(raw.bracelet).toBeUndefined();
+  });
+
+  it("keeps an explicit braceletIncluded: false as a real zero, not unrated", () => {
+    const watch = makeWatch({ qualityFlags: { braceletIncluded: false } });
+    expect(scoreDimensions(watch).bracelet).toBe(0);
   });
 
   it("judges water resistance against the category expectation, not raw maximums", () => {

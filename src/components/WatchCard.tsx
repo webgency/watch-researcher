@@ -1,25 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import type { WatchScoreSummary } from "@/lib/scoring";
+import { toDisplayScore, type StandingSummary } from "@/lib/scoring";
+import { DIMENSION_LABELS } from "@/lib/rubrics";
 import { Watch, WishlistTier, WISHLIST_TIERS, WISHLIST_TIER_LABELS } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
 import WishlistTierBadge from "./WishlistTierBadge";
-
-const QUADRANT_LABELS: Record<string, string> = {
-  buy: "Buy",
-  aspirational: "Aspirational",
-  sensible: "Sensible",
-  skip: "Skip",
-};
-
-const QUADRANT_CLASSES: Record<string, string> = {
-  buy: "bg-emerald-50 text-emerald-700",
-  aspirational: "bg-amber-50 text-amber-700",
-  sensible: "bg-sky-50 text-sky-700",
-  skip: "bg-slate-100 text-slate-600",
-};
 
 function initials(watch: Watch): string {
   const a = watch.brand?.trim()?.[0] ?? "?";
@@ -36,7 +23,7 @@ export default function WatchCard({
 }: {
   watch: Watch;
   selected: boolean;
-  scoreSummary?: WatchScoreSummary;
+  scoreSummary?: StandingSummary;
   onToggleSelect: (id: string) => void;
   onChangeWishlistTier?: (id: string, next: WishlistTier | "") => void;
 }) {
@@ -87,7 +74,7 @@ export default function WatchCard({
             {[specs.caseDiameterMm ? `${specs.caseDiameterMm}mm` : null, specs.movement].filter(Boolean).join(" · ")}
           </span>
         </div>
-        {scoreSummary && <ScoreSummary summary={scoreSummary} />}
+        {scoreSummary && <StandingBlock summary={scoreSummary} />}
         {onChangeWishlistTier && (
           <select
             value={watch.wishlistTier ?? ""}
@@ -122,26 +109,57 @@ export default function WatchCard({
   );
 }
 
-function ScoreSummary({ summary }: { summary: WatchScoreSummary }) {
-  const roundedValue = summary.valueScore === null ? null : Math.round(summary.valueScore);
-  const roundedDesire = Math.round(summary.desirabilityScore);
-  const quadrantClass = summary.quadrant ? QUADRANT_CLASSES[summary.quadrant] : "bg-slate-100 text-slate-600";
+function StandingBlock({ summary }: { summary: StandingSummary }) {
+  const { standing } = summary;
+  const dimensionList = (dimensions: typeof standing.beats) =>
+    dimensions.map((dimension) => DIMENSION_LABELS[dimension]).join(", ");
 
   return (
-    <div className="flex flex-wrap gap-1 text-xs">
-      <span
-        title="Value rank among priced wishlist watches"
-        className="rounded-full bg-slate-900 px-2 py-1 font-medium text-white"
-      >
-        {summary.valueRank ? `Value #${summary.valueRank} · ${roundedValue}` : "Value unrated"}
-      </span>
-      <span title="Calculated desire score" className="rounded-full bg-slate-100 px-2 py-1 font-medium text-slate-600">
-        Desire {roundedDesire}
-      </span>
-      {summary.quadrant && (
-        <span className={`rounded-full px-2 py-1 font-medium ${quadrantClass}`}>
-          {QUADRANT_LABELS[summary.quadrant]}
+    <div className="space-y-1.5 text-xs">
+      <div className="flex flex-wrap gap-1">
+        <span
+          title={`Quality against what ${standing.peerLabel} should buy, adjusted for where the price sits in the band. 50 is par.`}
+          className="rounded-full bg-slate-900 px-2 py-1 font-medium text-white"
+        >
+          {standing.valueScore === undefined
+            ? "Value unrated"
+            : `Value ${Math.round(toDisplayScore(standing.valueScore))}`}
         </span>
+        <span title="Composite of the rated dimensions" className="rounded-full bg-slate-100 px-2 py-1 font-medium text-slate-600">
+          {standing.qualityScore === undefined
+            ? "Quality unrated"
+            : `Quality ${Math.round(toDisplayScore(standing.qualityScore))}`}
+        </span>
+        <span title="Calculated desire score" className="rounded-full bg-slate-100 px-2 py-1 font-medium text-slate-600">
+          Desire {Math.round(summary.desirabilityScore)}
+        </span>
+      </div>
+
+      <p className="text-slate-500">
+        {standing.peerLabel}
+        {standing.qualityPercentile !== undefined && ` · ${Math.round(standing.qualityPercentile * 100)}th pct of ${standing.peerCount}`}
+      </p>
+
+      {standing.beats.length > 0 && (
+        <p className="text-emerald-700">Beats band on {dimensionList(standing.beats)}</p>
+      )}
+      {standing.trails.length > 0 && (
+        <p className="text-amber-700">Trails band on {dimensionList(standing.trails)}</p>
+      )}
+      {standing.unrated.length > 0 && (
+        <p className="text-slate-400" title="No source data recorded for these dimensions, so they are excluded from the scores">
+          Unrated: {dimensionList(standing.unrated)}
+        </p>
+      )}
+
+      {standing.frictions.length > 0 && (
+        <div className="flex flex-wrap gap-1 pt-0.5">
+          {standing.frictions.map((friction) => (
+            <span key={friction} className="rounded bg-amber-50 px-1.5 py-0.5 font-medium text-amber-800">
+              {friction}
+            </span>
+          ))}
+        </div>
       )}
     </div>
   );

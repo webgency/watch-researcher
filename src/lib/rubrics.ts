@@ -20,6 +20,15 @@ export const DIMENSIONS: Dimension[] = [
   "bracelet",
 ];
 
+/** Display names for the scored dimensions. */
+export const DIMENSION_LABELS: Record<Dimension, string> = {
+  movement: "movement",
+  caseCraft: "case & finishing",
+  wearability: "wearability",
+  durability: "durability",
+  bracelet: "bracelet",
+};
+
 /** Categories the rubric knows about. Watches whose tags match none fall back to "dress". */
 export type RubricCategory = "diver" | "chronograph" | "gmt" | "dress";
 
