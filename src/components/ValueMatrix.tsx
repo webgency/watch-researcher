@@ -99,6 +99,14 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
   const rated = entries.filter(isRated).sort(compareEntries);
   const unrated = entries.filter((entry) => entry.quadrant === null);
   const ranks = new Map(rated.map((entry, index) => [entry.watch.id, index + 1]));
+  // Rank order, so the highest-value watches get first pick of label position.
+  const points = rated.map((entry, index) => ({
+    id: entry.watch.id,
+    x: xFor(toDisplayScore(entry.summary.standing.valueScore!)),
+    y: yFor(entry.summary.desirabilityScore),
+    text: String(index + 1),
+  }));
+  const rankLabels = placeRankLabels(points, quadrantHeadingBoxes());
   const grouped = Object.fromEntries(
     QUADRANTS.map((quadrant) => [quadrant, rated.filter((entry) => entry.quadrant === quadrant)])
   ) as Record<Quadrant, RatedEntry[]>;
@@ -144,17 +152,20 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
               className="w-full min-w-[640px]"
             >
               <rect x={CHART.left} y={CHART.top} width={plotWidth} height={plotHeight} fill="#ffffff" />
-              {quadrantRects().map((rect) => (
-                <g key={rect.quadrant}>
-                  <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill={QUADRANT_META[rect.quadrant].fill} opacity="0.65" />
-                  <text x={rect.x + 14} y={rect.y + 24} className="fill-slate-700 text-[13px] font-semibold">
-                    {QUADRANT_META[rect.quadrant].label}
-                  </text>
-                  <text x={rect.x + 14} y={rect.y + 42} className="fill-slate-500 text-[11px]">
-                    {QUADRANT_META[rect.quadrant].shortLabel}
-                  </text>
-                </g>
-              ))}
+              {quadrantRects().map((rect) => {
+                const heading = quadrantHeading(rect);
+                return (
+                  <g key={rect.quadrant}>
+                    <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill={QUADRANT_META[rect.quadrant].fill} opacity="0.65" />
+                    <text x={heading.x} y={heading.titleY} textAnchor={heading.anchor} className="fill-slate-700 text-[13px] font-semibold">
+                      {QUADRANT_META[rect.quadrant].label}
+                    </text>
+                    <text x={heading.x} y={heading.subY} textAnchor={heading.anchor} className="fill-slate-500 text-[11px]">
+                      {QUADRANT_META[rect.quadrant].shortLabel}
+                    </text>
+                  </g>
+                );
+              })}
 
               {[0, 25, 50, 75, 100].map((tick) => (
                 <g key={tick}>
@@ -181,20 +192,22 @@ export default function ValueMatrix({ watches, brands }: { watches: Watch[]; bra
               </text>
 
               {rated.map((entry) => {
-                const x = xFor(toDisplayScore(entry.summary.standing.valueScore!));
-                const y = yFor(entry.summary.desirabilityScore);
+                const point = points.find((candidate) => candidate.id === entry.watch.id)!;
+                const label = rankLabels.get(entry.watch.id);
                 return (
                   <g key={entry.watch.id}>
-                    <circle cx={x} cy={y} r="7" fill="#0f172a" opacity="0.9" stroke="#ffffff" strokeWidth="2">
+                    <circle cx={point.x} cy={point.y} r={DOT_RADIUS} fill="#0f172a" opacity="0.9" stroke="#ffffff" strokeWidth="2">
                       <title>
                         {`${entry.watch.brand} ${entry.watch.model}: #${ranks.get(entry.watch.id)} by value, ` +
                           `value ${formatScore(toDisplayScore(entry.summary.standing.valueScore!))}, ` +
                           `desire ${formatScore(entry.summary.desirabilityScore)} — ${entry.summary.standing.peerLabel}`}
                       </title>
                     </circle>
-                    <text x={x + 10} y={y + 4} className="fill-slate-700 text-[10px]">
-                      {ranks.get(entry.watch.id)}
-                    </text>
+                    {label && (
+                      <text x={label.x} y={label.y} textAnchor={label.anchor} className="fill-slate-700 text-[10px]">
+                        {point.text}
+                      </text>
+                    )}
                   </g>
                 );
               })}
@@ -313,6 +326,74 @@ function compareEntries(a: RatedEntry, b: RatedEntry): number {
   );
 }
 
+const DOT_RADIUS = 7;
+// Measured from the rendered 10px labels: a digit is 6.37 wide and 11.28 tall.
+// Rounded up so a collision box is never smaller than the glyphs it stands for,
+// which leaves roughly a pixel of breathing room between neighbours.
+const LABEL_HEIGHT = 12;
+const LABEL_CHAR_WIDTH = 7;
+
+interface Box {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+type Anchor = "start" | "middle" | "end";
+
+// Tried in order, so a label sits to the right of its dot when there is room.
+const LABEL_POSITIONS: Array<{ dx: number; dy: number; anchor: Anchor }> = [
+  { dx: DOT_RADIUS + 3, dy: 4, anchor: "start" },
+  { dx: -(DOT_RADIUS + 3), dy: 4, anchor: "end" },
+  { dx: 0, dy: -(DOT_RADIUS + 4), anchor: "middle" },
+  { dx: 0, dy: DOT_RADIUS + LABEL_HEIGHT + 1, anchor: "middle" },
+];
+
+function intersects(a: Box, b: Box): boolean {
+  return a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1;
+}
+
+/**
+ * Greedy label placement. Points arrive in rank order, so the best-ranked
+ * watches get first choice of position; every dot and every already-placed
+ * label is an obstacle, so a number never lands on another watch's point.
+ * A point with no free position gets no label — it keeps its dot and tooltip,
+ * and its rank is still listed in the quadrant tables below the chart.
+ */
+function placeRankLabels(
+  points: Array<{ id: string; x: number; y: number; text: string }>,
+  reserved: Box[]
+): Map<string, { x: number; y: number; anchor: Anchor }> {
+  const obstacles: Box[] = [
+    ...reserved,
+    ...points.map((point) => ({
+      x1: point.x - DOT_RADIUS,
+      y1: point.y - DOT_RADIUS,
+      x2: point.x + DOT_RADIUS,
+      y2: point.y + DOT_RADIUS,
+    })),
+  ];
+
+  const placed = new Map<string, { x: number; y: number; anchor: Anchor }>();
+  for (const point of points) {
+    for (const position of LABEL_POSITIONS) {
+      const width = point.text.length * LABEL_CHAR_WIDTH;
+      const x = point.x + position.dx;
+      const y = point.y + position.dy;
+      const left = position.anchor === "start" ? x : position.anchor === "end" ? x - width : x - width / 2;
+      const box = { x1: left, y1: y - LABEL_HEIGHT, x2: left + width, y2: y };
+      const insidePlot =
+        box.x1 >= CHART.left && box.x2 <= plotRight && box.y1 >= CHART.top && box.y2 <= plotBottom;
+      if (!insidePlot || obstacles.some((obstacle) => intersects(box, obstacle))) continue;
+      obstacles.push(box);
+      placed.set(point.id, { x, y, anchor: position.anchor });
+      break;
+    }
+  }
+  return placed;
+}
+
 function xFor(score: number): number {
   return CHART.left + (score / 100) * plotWidth;
 }
@@ -324,12 +405,37 @@ function yFor(score: number): number {
 function quadrantRects() {
   const thresholdX = xFor(PAR_DISPLAY);
   const thresholdY = yFor(DESIRE_SPLIT);
+  // Headings sit in each quadrant's outer corner, away from the centre where
+  // the points cluster. Anchoring all four at their top-left put the two lower
+  // headings directly under the data.
   return [
-    { quadrant: "aspirational" as const, x: CHART.left, y: CHART.top, width: thresholdX - CHART.left, height: thresholdY - CHART.top },
-    { quadrant: "buy" as const, x: thresholdX, y: CHART.top, width: plotRight - thresholdX, height: thresholdY - CHART.top },
-    { quadrant: "skip" as const, x: CHART.left, y: thresholdY, width: thresholdX - CHART.left, height: plotBottom - thresholdY },
-    { quadrant: "sensible" as const, x: thresholdX, y: thresholdY, width: plotRight - thresholdX, height: plotBottom - thresholdY },
+    { quadrant: "aspirational" as const, x: CHART.left, y: CHART.top, width: thresholdX - CHART.left, height: thresholdY - CHART.top, right: false, bottom: false },
+    { quadrant: "buy" as const, x: thresholdX, y: CHART.top, width: plotRight - thresholdX, height: thresholdY - CHART.top, right: true, bottom: false },
+    { quadrant: "skip" as const, x: CHART.left, y: thresholdY, width: thresholdX - CHART.left, height: plotBottom - thresholdY, right: false, bottom: true },
+    { quadrant: "sensible" as const, x: thresholdX, y: thresholdY, width: plotRight - thresholdX, height: plotBottom - thresholdY, right: true, bottom: true },
   ];
+}
+
+/** Where a quadrant's two heading lines sit, given its outer corner. */
+function quadrantHeading(rect: ReturnType<typeof quadrantRects>[number]) {
+  const x = rect.right ? rect.x + rect.width - 14 : rect.x + 14;
+  const titleY = rect.bottom ? rect.y + rect.height - 32 : rect.y + 24;
+  return { x, titleY, subY: titleY + 18, anchor: (rect.right ? "end" : "start") as Anchor };
+}
+
+/** Heading boxes, reserved so rank labels never land on them. */
+function quadrantHeadingBoxes(): Box[] {
+  return quadrantRects().map((rect) => {
+    const { x, titleY, subY, anchor } = quadrantHeading(rect);
+    // The subtitle is the wider of the two lines.
+    const width = QUADRANT_META[rect.quadrant].shortLabel.length * 6;
+    return {
+      x1: anchor === "end" ? x - width : x,
+      y1: titleY - 16,
+      x2: anchor === "end" ? x : x + width,
+      y2: subY + 4,
+    };
+  });
 }
 
 function formatScore(value: number): string {
