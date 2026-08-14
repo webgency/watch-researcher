@@ -10,8 +10,11 @@ import {
   derivePeerGroup,
   percentile,
   scoreDimensions,
+  CURRENCY_TO_USD,
+  normalizePriceToUsd,
 } from "./scoring";
 import { DIMENSIONS } from "./rubrics";
+import { CURRENCIES } from "./types";
 import type { Watch } from "./types";
 
 let nextId = 0;
@@ -353,5 +356,38 @@ describe("assignQuadrant", () => {
   it("gives no quadrant when either axis is missing", () => {
     expect(assignQuadrant(null, 60, thresholds)).toBeNull();
     expect(assignQuadrant(60, null, thresholds)).toBeNull();
+  });
+});
+
+describe("currency conversion", () => {
+  // The entry form offers every code in CURRENCIES. Any one missing from the
+  // rate table falls back to 1.0, which silently scores 3000 SEK as $3000 and
+  // lands the watch several price bands too high.
+  it("has a rate for every currency the form offers", () => {
+    const missing = CURRENCIES.filter((code) => CURRENCY_TO_USD[code] === undefined);
+    expect(missing).toEqual([]);
+  });
+
+  it("has no rate that is implausibly far from 1, except JPY-like minor units", () => {
+    for (const [code, rate] of Object.entries(CURRENCY_TO_USD)) {
+      expect(rate, `${code} rate`).toBeGreaterThan(0);
+      expect(rate, `${code} rate`).toBeLessThan(10);
+    }
+  });
+
+  it("converts a foreign amount using the table", () => {
+    const usd = normalizePriceToUsd({ amount: 100, currency: "EUR" });
+    expect(usd).toBeCloseTo(100 * CURRENCY_TO_USD.EUR);
+  });
+
+  it("warns and passes the amount through for an unknown currency", () => {
+    const warnings: string[] = [];
+    const usd = normalizePriceToUsd({ amount: 100, currency: "XYZ" }, (m) => warnings.push(m));
+    expect(usd).toBe(100);
+    expect(warnings).toHaveLength(1);
+  });
+
+  it("normalizes case and padding before lookup", () => {
+    expect(normalizePriceToUsd({ amount: 10, currency: " eur " })).toBeCloseTo(10 * CURRENCY_TO_USD.EUR);
   });
 });

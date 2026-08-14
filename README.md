@@ -148,7 +148,7 @@ npm run build:static && npx serve out
 
 **Phase 2 — Price & value** *(partly done)*
 - ✅ Per-band value scoring and a value matrix
-- ✅ USD normalization for scoring — though rates in `CURRENCY_TO_USD` are hardcoded and drift; a live rate source would fix that
+- ✅ USD normalization for scoring, covering every currency the form offers — rates are a dated snapshot in `src/lib/currency-rates.mjs`, refreshed by hand (the file says how); a live rate source would remove the drift entirely
 - ✅ Price-history snapshots per watch + a target-price flag ("ping me under $X")
 - ⬜ Best-price surfacing across multiple retailer links
 - ⬜ Actual notification when a target is met — today the collection view flags it, but nothing pushes
@@ -169,6 +169,7 @@ npm run build:static && npx serve out
 
 - **Auto-fetching specs from links:** the add form scrapes the retailer page when you paste a URL. Needs open outbound network access, so it works best on your own machine.
 - **Editing online (instead of read-only Pages):** the JSON-file store writes to disk, which works locally and on a long-running server but **not** on serverless/static hosts. For a fully editable online version, deploy to a server host (Render / Fly / a VPS) or swap `src/lib/store.ts` for a database (SQLite / Postgres / Turso) — the function signatures stay the same, so nothing else changes.
+- **Exchange rates go stale:** `src/lib/currency-rates.mjs` is a dated snapshot, not a feed. A few percent of drift can move a watch across a price band and change the rubric it's scored against, so refresh it (the file documents the one-liner) if you track much in non-USD. `RATES_AS_OF` records when they were taken.
 - **Caliber coverage:** `CALIBER_TIER_PATTERNS` in `src/lib/scoring.ts` is a hand-maintained substring table. An unrecognized caliber leaves `movement` unrated rather than guessing, so adding watches from new movement families means adding entries there.
 
 ---
