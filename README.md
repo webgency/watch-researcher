@@ -1,8 +1,10 @@
 # ⌚ Watch Researcher
 
-A personal app to **track your watch wishlist, compare specs and prices side by side, and grow your collection** over time.
+A personal app to **track your watch wishlist, judge each watch against its price band, and grow your collection** over time.
 
 Built with Next.js (App Router) + TypeScript + Tailwind CSS. Your collection lives in a single, version-controlled JSON file (`data/watches.json`) — no database to set up, easy to back up, and you can literally commit your wishlist.
+
+Currently tracking **55 watches** (53 wishlist, 2 owned).
 
 ---
 
@@ -14,27 +16,38 @@ npm run dev
 # open http://localhost:3000
 ```
 
-For validation and a production build:
+Validate, lint, and build in one go:
 
 ```bash
 npm run check
-npm start
 ```
 
 ---
 
-## What it does today (Phase 1 — MVP)
+## What it does
 
-- **Collection view** — every watch as a card, with search, status/priority filters, and sorting (wishlist priority, recently added, price, brand, case size).
-- **Wishlist tiers** — categorize each watch as Next purchase, Must have, Love it, Interested, Maybe later, or Pass.
-- **Add / edit watches** — one full form covering basics, URL autofill, specifications, image, multiple retailer links, tags, and notes.
-- **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table. The **best value in each row is highlighted** (lowest price, larger power reserve, etc.).
-- **Per-watch detail page** — full specs, all retailer links, and notes.
-- **Dashboard stats** — total watches, next-purchase count, must-have count, and owned count.
+### Browsing and editing
 
-The collection comes pre-seeded with **36 watches from your wishlist**.
+- **Collection view** — every watch as a card, with search, status/priority filters, and sorting by wishlist priority, value vs. band, quality score, recently added, price, brand, or case size.
+- **Wishlist tiers** — Next purchase, Must have, Love it, Interested, Maybe later, or Pass.
+- **Add / edit watches** — one form covering basics, URL autofill, specs, image, multiple retailer links, tags, and notes.
+- **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table, with the best value in each row highlighted.
+- **Per-watch detail page** — full specs, retailer links, notes, and the peer-band standing panel.
+- **Dashboard stats** — totals by status and wishlist tier.
 
-> **Heads-up on the seeded data:** brand, model, reference number, links, and tags were taken straight from your links. Case sizes, movements, and well-known calibers (e.g. Omega 8800, Longines L888/L688, Tudor MT5450-U, Certina Powermatic 80) were pre-filled where they could be identified with confidence — **please double-check them**. Prices are tracked where they were available; edit any watch to adjust the figure you're actually tracking.
+### Scoring
+
+The app's opinionated half. It answers "is this watch good *for its money*?" while keeping your taste separate from the arithmetic.
+
+- **Peer-band standing** (`/watch/[id]`) — five dimensions (movement, case & finishing, wearability, durability, bracelet) scored 0–1 against a fixed rubric for the watch's **category** (diver / chronograph / GMT / dress) and **price band** (under $500 → $5000+). Shows which dimensions beat or trail par for that band.
+- **Design rank** (`/design`) — your own 1–5 read on how a watch looks. Deliberately the one judgement in the app that is yours rather than calculated.
+- **Value matrix** (`/value`) — value-vs-band on one axis, your design rank on the other, splitting the collection into buy / aspirational / sensible / skip quadrants.
+
+Three principles hold the model together, and they're worth preserving if you extend it:
+
+1. **Missing data is never a zero.** A dimension without source data comes back `undefined` and is excluded from the composite — the UI shows "unrated" with the reason, rather than a score the data doesn't support.
+2. **Friction is never numeric.** Availability, bracelet upcharges, and thin secondary markets render as text chips and never enter a score.
+3. **Par is absolute, not relative.** A watch at exactly its band's rubric reference scores 0.5, so the split doesn't drift as you add watches. Peer groups here are small (2–4 watches), so percentile ranking only appears once a group has n ≥ 6.
 
 ---
 
@@ -47,11 +60,16 @@ Each watch (`src/lib/types.ts`):
 | `brand`, `model` | required |
 | `referenceNumber` | optional |
 | `status` | `wishlist` \| `owned` \| `sold` |
-| `price` | `{ amount, currency }` — the price you're tracking |
+| `wishlistTier` | next purchase, must have, love it, interested, maybe later, pass |
+| `designUniqueness` | your 1–5 design rank; drives the value matrix's vertical axis |
+| `price` | `{ amount, currency }` — the headline price you're tracking |
+| `priceUpdatedAt` | ISO timestamp, set by the enrich script |
+| `landedPrice` | all-in cost (base + bracelet delta + shipping + duty); falls back to `price` |
 | `links[]` | retailer links, each with optional price + `new`/`pre-owned` condition |
-| `specs` | case diameter, thickness, lug-to-lug, lug width, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
-| `tags[]` | e.g. `diver`, `GMT`, `chronograph` |
-| `wishlistTier` | wishlist priority bucket: next purchase, must have, love it, interested, maybe later, or pass |
+| `specs` | case diameter, thickness, lug-to-lug, lug width, material, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
+| `qualityFlags` | verifiable engineering details feeding the score — regulation, accuracy spec, coating hardness, antimagnetism, sapphire bezel, drilled lugs, micro-adjust clasp, quick-release, bracelet included, AR layers |
+| `friction` | availability, expected ship date, bracelet upcharge, brand liquidity — **never** folded into a score |
+| `tags[]` | `diver`, `gmt`, `chronograph`, `dress`, … — the first recognized tag picks the rubric category |
 | `notes` | free text |
 | `purchase`, `sale` | filled in as a watch moves through `owned` → `sold` |
 
@@ -59,64 +77,89 @@ Spec fields are defined once in `src/lib/specs.ts` and drive the form, detail vi
 
 ### Editing data directly
 
-You can edit `data/watches.json` by hand if you prefer, or use the in-app forms (which write to the same file via the API in `src/app/api/watches`).
-
-Validate hand edits before committing:
+Edit `data/watches.json` by hand, or use the in-app forms (which write to the same file via the API in `src/app/api/watches`). Validate hand edits before committing:
 
 ```bash
 npm run validate:data
 ```
 
+This checks enum values, types, and **spec plausibility** (`src/lib/spec-ranges.mjs`) — it will reject a 200mm case or a lug-to-lug shorter than the diameter.
+
+---
+
+## Data-maintenance scripts
+
+All need real outbound network access, so run them from a local terminal. The cloud sandbox routes traffic through an egress proxy that blocks retailer domains.
+
+```bash
+node scripts/enrich-watches.mjs --dry
+```
+
+Scrapes price and image from each watch's retailer links. `--dry` reports only; `--force` overwrites existing values; `--id=foo` limits to one watch.
+
+```bash
+node scripts/backfill-specs.mjs --dry --limit=5
+```
+
+Fills missing specs, tags, and quality flags via the Claude API with web search. Conservative by design: only fills gaps, never overwrites, and drops implausible readings. Needs `ANTHROPIC_API_KEY`. `friction` is deliberately excluded — it goes stale too fast and `brandLiquidity` is a judgement call.
+
+```bash
+node scripts/backfill-prices.mjs
+```
+
+One-off estimated prices for retailers whose bot protection defeats the scraper. Skips any watch that already has a price.
+
 ---
 
 ## Deploying to GitHub Pages (auto-published, read-only)
 
-A GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) builds a **static, read-only** export of your collection and deploys it to GitHub Pages on every push, so you can browse, search, sort, and compare from any device:
+`.github/workflows/deploy-pages.yml` builds a **static, read-only** export and deploys it on every push:
 
 **https://webgency.github.io/watch-researcher/**
 
 How it works:
 
 - `npm run build:static` builds from a temporary prepared copy with `NEXT_PUBLIC_STATIC=true`, which switches Next.js to `output: 'export'` and adds the `/watch-researcher` base path (see `next.config.mjs`).
-- `scripts/prepare-pages.mjs` removes the server-only routes from that temporary copy — Pages can't run a server.
-- Write actions (Add / Edit / Delete) are hidden on the published site, which shows a "read-only" banner.
+- `scripts/prepare-pages.mjs` strips the server-only routes from that copy — Pages can't run a server.
+- Write actions (Add / Edit / Delete) are hidden, and `/design` shows a "needs the live app" placeholder since ranking writes to disk.
 
-**One-time setup:** enable Pages under **Settings → Pages → Source: GitHub Actions** (the workflow token can't create the Pages site automatically in all orgs).
+**One-time setup:** enable Pages under **Settings → Pages → Source: GitHub Actions**.
 
 **Editing stays local:** add or edit watches with `npm run dev`, commit `data/watches.json`, and push — the site rebuilds automatically.
 
-To preview the static build locally:
+Preview the static build locally:
 
 ```bash
 npm run build:static && npx serve out
 ```
 
-## Roadmap — growing the collection
+---
 
-**Phase 2 — Price & value**
-- Price-history snapshots per watch + a target-price flag ("ping me under $X")
-- Best-price surfacing across multiple retailer links
-- Price refreshes that keep all tracked prices normalized to USD
+## Roadmap
+
+**Phase 2 — Price & value** *(partly done)*
+- ✅ Per-band value scoring and a value matrix
+- ✅ USD normalization for scoring — though rates in `CURRENCY_TO_USD` are hardcoded and drift; a live rate source would fix that
+- ⬜ Price-history snapshots per watch + a target-price flag ("ping me under $X")
+- ⬜ Best-price surfacing across multiple retailer links
 
 **Phase 3 — Collection management**
-- Status workflow (wishlist → bought → owned → sold) with purchase/sale price & dates
-- Richer dashboard: total spent, value by brand/movement, size distribution
-- Wishlist tier insights & budget planning ("what's next")
-- Overlap detection ("you already have a 39mm diver")
-- Service-history reminders; insurance/valuation CSV/PDF export
+- ⬜ Richer dashboard: total spent, value by brand/movement, size distribution
+- ⬜ Overlap detection ("you already have a 39mm diver")
+- ⬜ Service-history reminders; insurance/valuation CSV/PDF export
 
 **Phase 4 — Convenience**
-- **Link auto-fetch improvements**: price-history snapshots and richer retailer-specific parsers
-- CSV / JSON import-export + backup
-- Mobile / PWA so you can check it in-store
-- Shareable read-only wishlist (gift hints)
+- ⬜ CSV / JSON import-export + backup
+- ⬜ Mobile / PWA so you can check it in-store
+- ⬜ Shareable read-only wishlist (gift hints)
 
 ---
 
 ## Notes for later
 
-- **Auto-fetching specs from links:** the add form scrapes the retailer page when you paste a URL. It needs open outbound network access, so it works best on your own machine or a self-hosted deployment.
+- **Auto-fetching specs from links:** the add form scrapes the retailer page when you paste a URL. Needs open outbound network access, so it works best on your own machine.
 - **Editing online (instead of read-only Pages):** the JSON-file store writes to disk, which works locally and on a long-running server but **not** on serverless/static hosts. For a fully editable online version, deploy to a server host (Render / Fly / a VPS) or swap `src/lib/store.ts` for a database (SQLite / Postgres / Turso) — the function signatures stay the same, so nothing else changes.
+- **Caliber coverage:** `CALIBER_TIER_PATTERNS` in `src/lib/scoring.ts` is a hand-maintained substring table. An unrecognized caliber leaves `movement` unrated rather than guessing, so adding watches from new movement families means adding entries there.
 
 ---
 
@@ -127,17 +170,30 @@ src/
   app/
     page.tsx                 # collection
     compare/page.tsx         # side-by-side comparison
+    value/page.tsx           # value matrix (value vs. design rank)
+    design/page.tsx          # design ranker
     watch/new/page.tsx       # add form
-    watch/[id]/page.tsx      # detail
+    watch/[id]/page.tsx      # detail + standing panel
     watch/[id]/edit/page.tsx # edit
-    api/watches/...          # REST API (GET/POST/PUT/DELETE)
-  components/                # CollectionView, WatchCard, CompareTable, WatchForm, ...
+    api/watches/...          # REST API (GET/POST/PUT/DELETE) + /scrape
+  components/                # CollectionView, WatchCard, CompareTable, WatchForm,
+                             # ValueMatrix, DesignRanker, StandingPanel, ...
   lib/
     types.ts                 # domain model
+    scoring.ts               # standing engine, design score, quadrants
+    rubrics.ts               # dimensions, price bands, per-category rubric tables
     store.ts                 # JSON-file persistence
     validation.ts            # runtime input/data validation
     specs.ts                 # spec field definitions
+    spec-ranges.mjs          # plausibility bounds, shared with validate-data
+    brands.ts                # brand catalog lookup
+    scrape.ts / extract.ts   # retailer page fetching + field extraction
+    config.ts                # IS_STATIC flag
     format.ts                # currency / date helpers
 data/
   watches.json               # your collection (version-controlled)
+  brands.json                # brand reputation tiers
+scripts/                     # enrich, backfill, validate, static-build helpers
 ```
+
+Tests live next to their subjects (`src/lib/scoring.test.ts`, `src/lib/extract.test.ts`) and run with `npm test`.
