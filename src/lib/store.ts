@@ -81,7 +81,17 @@ export async function updateWatch(
     // importer, say) is left alone.
     if (next.price && !sameMoney(existing.price, next.price) && patch.priceHistory === undefined) {
       const observedAt = patch.priceUpdatedAt ?? new Date().toISOString();
-      next.priceHistory = appendSnapshot(existing.priceHistory, next.price, observedAt, "manual");
+
+      // A watch that predates price tracking has no series, so its outgoing
+      // price would be lost on the very first edit. Seed it first, dated to
+      // when that price was last known, so the first recorded move shows what
+      // it moved *from* rather than starting the story at the new number.
+      let history = existing.priceHistory;
+      if (!history?.length && existing.price) {
+        history = appendSnapshot([], existing.price, existing.priceUpdatedAt ?? existing.dateAdded, "manual");
+      }
+
+      next.priceHistory = appendSnapshot(history, next.price, observedAt, "manual");
       next.priceUpdatedAt = observedAt;
     }
 

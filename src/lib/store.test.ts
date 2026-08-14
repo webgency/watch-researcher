@@ -50,10 +50,32 @@ describe("updateWatch price history", () => {
     await updateWatch("w1", { price: { amount: 450, currency: "USD" } });
 
     const [stored] = await readStored();
-    expect(stored.priceHistory).toHaveLength(1);
-    expect(stored.priceHistory?.[0].price.amount).toBe(450);
-    expect(stored.priceHistory?.[0].source).toBe("manual");
+    const latest = stored.priceHistory?.[stored.priceHistory.length - 1];
+    expect(latest?.price.amount).toBe(450);
+    expect(latest?.source).toBe("manual");
     expect(stored.priceUpdatedAt).toBeTruthy();
+  });
+
+  it("seeds the outgoing price when a watch has no series yet", async () => {
+    const { updateWatch } = await import("./store");
+    await seed([{ ...baseWatch, priceUpdatedAt: "2026-03-01T00:00:00Z" }]);
+
+    await updateWatch("w1", { price: { amount: 450, currency: "USD" } });
+
+    const [stored] = await readStored();
+    // The price it moved *from* is preserved, dated to when it was last known.
+    expect(stored.priceHistory?.map((s) => s.price.amount)).toEqual([500, 450]);
+    expect(stored.priceHistory?.[0].date).toBe("2026-03-01T00:00:00Z");
+  });
+
+  it("falls back to dateAdded when seeding a watch with no priceUpdatedAt", async () => {
+    const { updateWatch } = await import("./store");
+    await seed([baseWatch]);
+
+    await updateWatch("w1", { price: { amount: 450, currency: "USD" } });
+
+    const [stored] = await readStored();
+    expect(stored.priceHistory?.[0].date).toBe("2026-01-01T00:00:00Z");
   });
 
   it("appends to an existing series", async () => {
