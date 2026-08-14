@@ -96,6 +96,24 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-08-14T04:46:06.968Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 890,
+          "currency": "USD"
+        },
+        "date": "2026-06-23T03:08:10.239Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 1020,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:06.968Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "quickRelease": true,
       "braceletIncluded": false
@@ -124,25 +142,7 @@
       "dress"
     ],
     "id": "w04",
-    "dateAdded": "2026-06-22T15:29:00Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 890,
-          "currency": "USD"
-        },
-        "date": "2026-06-23T03:08:10.239Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 1020,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:06.968Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-22T15:29:00Z"
   },
   {
     "brand": "Certina",
@@ -150,7 +150,7 @@
     "referenceNumber": "C029.426.36.041.00",
     "status": "wishlist",
     "wishlistTier": "maybe-later",
-    "designUniqueness": 3,
+    "designUniqueness": 2,
     "price": {
       "amount": 795,
       "currency": "USD"
@@ -189,12 +189,30 @@
     "referenceNumber": "C60-42ADA31S0KW3-B0",
     "status": "wishlist",
     "wishlistTier": "pass",
-    "designUniqueness": 3,
+    "designUniqueness": 2,
     "price": {
       "amount": 1640,
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-08-14T04:46:08.679Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 1495,
+          "currency": "USD"
+        },
+        "date": "2026-06-23T03:23:35.877Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 1640,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:08.679Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "accuracySpecSpd": 20,
       "sapphireBezelInsert": true,
@@ -225,25 +243,7 @@
       "diver"
     ],
     "id": "w06",
-    "dateAdded": "2026-06-22T15:27:00Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 1495,
-          "currency": "USD"
-        },
-        "date": "2026-06-23T03:23:35.877Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 1640,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:08.679Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-22T15:27:00Z"
   },
   {
     "brand": "Echo/Neutra",
@@ -290,7 +290,7 @@
     "referenceNumber": "2161-A",
     "status": "wishlist",
     "wishlistTier": "interested",
-    "designUniqueness": 4,
+    "designUniqueness": 2,
     "price": {
       "amount": 1538,
       "currency": "USD"
@@ -339,6 +339,24 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-08-14T04:46:10.869Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 1668,
+          "currency": "USD"
+        },
+        "date": "2026-06-23T03:08:14.810Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 1680,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:10.869Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "accuracySpecSpd": 9,
       "sapphireBezelInsert": false,
@@ -370,25 +388,7 @@
       "dress"
     ],
     "id": "w09",
-    "dateAdded": "2026-06-22T15:24:00Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 1668,
-          "currency": "USD"
-        },
-        "date": "2026-06-23T03:08:14.810Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 1680,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:10.869Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-22T15:24:00Z"
   },
   {
     "brand": "Traska",
@@ -443,12 +443,30 @@
     "referenceNumber": "8315",
     "status": "wishlist",
     "wishlistTier": "love-it",
-    "designUniqueness": 3,
+    "designUniqueness": 4,
     "price": {
       "amount": 2458,
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-08-14T04:46:11.853Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 2441,
+          "currency": "USD"
+        },
+        "date": "2026-06-23T03:08:16.106Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 2458,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:11.853Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "sapphireBezelInsert": false
     },
@@ -476,25 +494,7 @@
       "GMT"
     ],
     "id": "w11",
-    "dateAdded": "2026-06-22T15:22:00Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 2441,
-          "currency": "USD"
-        },
-        "date": "2026-06-23T03:08:16.106Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 2458,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:11.853Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-22T15:22:00Z"
   },
   {
     "brand": "Longines",
@@ -591,6 +591,24 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-08-14T04:46:12.707Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 4700,
+          "currency": "USD"
+        },
+        "date": "2026-06-23T03:08:16.990Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 3650,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:12.707Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "accuracySpecSpd": 5,
       "antimagneticAm": 1200000,
@@ -620,25 +638,7 @@
       "diver"
     ],
     "id": "w14",
-    "dateAdded": "2026-06-22T15:19:00Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 4700,
-          "currency": "USD"
-        },
-        "date": "2026-06-23T03:08:16.990Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 3650,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:12.707Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-22T15:19:00Z"
   },
   {
     "brand": "Raymond Weil",
@@ -735,7 +735,7 @@
     "model": "1A SCR II — Blue",
     "status": "wishlist",
     "wishlistTier": "must-have",
-    "designUniqueness": 2,
+    "designUniqueness": 1,
     "price": {
       "amount": 278,
       "currency": "USD"
@@ -987,6 +987,24 @@
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-08-14T04:46:17.587Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 339,
+          "currency": "USD"
+        },
+        "date": "2026-06-23T03:08:22.352Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 429,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:17.587Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "drilledLugs": false,
@@ -1018,25 +1036,7 @@
     ],
     "notes": "brown variant",
     "id": "w24",
-    "dateAdded": "2026-06-22T15:09:00Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 339,
-          "currency": "USD"
-        },
-        "date": "2026-06-23T03:08:22.352Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 429,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:17.587Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-22T15:09:00Z"
   },
   {
     "brand": "Spinnaker",
@@ -1044,7 +1044,7 @@
     "referenceNumber": "SP-5088-02",
     "status": "wishlist",
     "wishlistTier": "interested",
-    "designUniqueness": 2,
+    "designUniqueness": 1,
     "price": {
       "amount": 375,
       "currency": "USD"
@@ -1302,7 +1302,7 @@
     "model": "Scalegraph — Classic Panda",
     "status": "wishlist",
     "wishlistTier": "interested",
-    "designUniqueness": 3,
+    "designUniqueness": 4,
     "price": {
       "amount": 1875.3,
       "currency": "USD"
@@ -1397,6 +1397,7 @@
       "amount": 850,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:22.599Z",
     "qualityFlags": {
       "arLayers": 1,
       "sapphireBezelInsert": false,
@@ -1431,8 +1432,7 @@
       "dress"
     ],
     "id": "mqsu2beijgdat5",
-    "dateAdded": "2026-06-25T01:38:20.346Z",
-    "priceUpdatedAt": "2026-08-14T04:46:22.599Z"
+    "dateAdded": "2026-06-25T01:38:20.346Z"
   },
   {
     "brand": "Laventure Watches",
@@ -1485,7 +1485,22 @@
     "model": "Touring GMT",
     "status": "wishlist",
     "wishlistTier": "maybe-later",
-    "designUniqueness": 4,
+    "designUniqueness": 3,
+    "price": {
+      "amount": 899,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-08-14T04:46:24.183Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 899,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:31:03.094Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "accuracySpecSpd": 10,
       "microAdjustClasp": true,
@@ -1516,22 +1531,7 @@
       "GMT"
     ],
     "id": "mqsv75d21b7q4i",
-    "dateAdded": "2026-06-25T02:10:05.414Z",
-    "price": {
-      "amount": 899,
-      "currency": "USD"
-    },
-    "priceUpdatedAt": "2026-08-14T04:46:24.183Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 899,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:31:03.094Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-25T02:10:05.414Z"
   },
   {
     "brand": "Albishorn",
@@ -1629,11 +1629,30 @@
     "model": "SubMeloner",
     "status": "wishlist",
     "wishlistTier": "must-have",
-    "designUniqueness": 4,
+    "designUniqueness": 3,
     "price": {
       "amount": 415,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:25.816Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 395,
+          "currency": "USD"
+        },
+        "date": "2026-06-25T17:48:17.392Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 415,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:25.816Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "accuracySpecSpd": 40,
       "sapphireBezelInsert": false,
@@ -1662,26 +1681,7 @@
       "diver"
     ],
     "id": "mqtspoj46282kg",
-    "dateAdded": "2026-06-25T17:48:17.392Z",
-    "priceUpdatedAt": "2026-08-14T04:46:25.816Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 395,
-          "currency": "USD"
-        },
-        "date": "2026-06-25T17:48:17.392Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 415,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:25.816Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-25T17:48:17.392Z"
   },
   {
     "brand": "Out of Order Watches",
@@ -1737,6 +1737,25 @@
       "amount": 415,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:26.499Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 395,
+          "currency": "USD"
+        },
+        "date": "2026-06-25T20:14:21.884Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 415,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:26.499Z",
+        "source": "scrape"
+      }
+    ],
     "links": [
       {
         "url": "https://mreatwell.com/shop/sublime",
@@ -1756,26 +1775,7 @@
       "diver"
     ],
     "id": "mqtxxj98g4kzid",
-    "dateAdded": "2026-06-25T20:14:21.884Z",
-    "priceUpdatedAt": "2026-08-14T04:46:26.499Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 395,
-          "currency": "USD"
-        },
-        "date": "2026-06-25T20:14:21.884Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 415,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:26.499Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-25T20:14:21.884Z"
   },
   {
     "brand": "Depancel",
@@ -1788,6 +1788,7 @@
       "amount": 495,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:26.741Z",
     "qualityFlags": {
       "braceletIncluded": false
     },
@@ -1818,8 +1819,7 @@
       "chronograph"
     ],
     "id": "mqv0hsbx08t6iv",
-    "dateAdded": "2026-06-26T14:13:52.173Z",
-    "priceUpdatedAt": "2026-08-14T04:46:26.741Z"
+    "dateAdded": "2026-06-26T14:13:52.173Z"
   },
   {
     "brand": "Nivada Grenchen",
@@ -1832,6 +1832,7 @@
       "amount": 1975,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:27.448Z",
     "qualityFlags": {
       "drilledLugs": true
     },
@@ -1861,8 +1862,7 @@
       "chronograph"
     ],
     "id": "mqva0pezshklga",
-    "dateAdded": "2026-06-26T18:40:31.403Z",
-    "priceUpdatedAt": "2026-08-14T04:46:27.448Z"
+    "dateAdded": "2026-06-26T18:40:31.403Z"
   },
   {
     "brand": "Sơn Mài – Silver Leaf",
@@ -1875,6 +1875,7 @@
       "amount": 2490,
       "currency": "EUR"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:27.855Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "microAdjustClasp": false,
@@ -1906,8 +1907,7 @@
     },
     "tags": [],
     "id": "mqvayw3dxkegdt",
-    "dateAdded": "2026-06-26T19:07:06.361Z",
-    "priceUpdatedAt": "2026-08-14T04:46:27.855Z"
+    "dateAdded": "2026-06-26T19:07:06.361Z"
   },
   {
     "brand": "farer-online",
@@ -1920,6 +1920,7 @@
       "amount": 2095,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:28.214Z",
     "qualityFlags": {
       "arLayers": 7,
       "sapphireBezelInsert": false,
@@ -1954,19 +1955,19 @@
       "chronograph"
     ],
     "id": "mqvb5cp2lst9xl",
-    "dateAdded": "2026-06-26T19:12:07.814Z",
-    "priceUpdatedAt": "2026-08-14T04:46:28.214Z"
+    "dateAdded": "2026-06-26T19:12:07.814Z"
   },
   {
     "brand": "Studio Underd0g",
     "model": "Mint Ch0c Chip (Gen3)",
     "status": "wishlist",
-    "wishlistTier": "must-have",
+    "wishlistTier": "next-purchase",
     "designUniqueness": 5,
     "price": {
       "amount": 800,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:28.818Z",
     "qualityFlags": {
       "regulatedPositions": 3,
       "accuracySpecSpd": 15,
@@ -1995,15 +1996,16 @@
       "powerReserveHours": 50,
       "waterResistanceM": 50,
       "crystal": "Sapphire",
-      "braceletStrap": "Leather",
+      "dialColor": "Satin sandblast base-dial and coarse dégradé top-dial",
+      "braceletStrap": "Italian Epsom Leather",
       "complications": "Chronograph, Tachymeter"
     },
     "tags": [
       "chronograph"
     ],
+    "notes": "The 3rd Generation of the 01SERIES sees some incremental, but impactful improvements. The mid-case has been slimmed down, making the 01SERIES even more wearable at a total thickness of 12.9mm (down from 13.6mm). The crown thickness has been increased to guarantee a smooth winding action. The dial has been re-tooled and now features the ‘Assembled in Great Britain’ mark which is something few British brands can boast. We’ve also increased the size of the sapphire exhibition crystal to allow for better visibility of the new movement.",
     "id": "mqvcnaioumgl16",
-    "dateAdded": "2026-06-26T19:54:04.416Z",
-    "priceUpdatedAt": "2026-08-14T04:46:28.818Z"
+    "dateAdded": "2026-06-26T19:54:04.416Z"
   },
   {
     "brand": "Kuoe Kyoto",
@@ -2016,6 +2018,7 @@
       "amount": 889,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:29.212Z",
     "qualityFlags": {
       "accuracySpecSpd": 30,
       "microAdjustClasp": true,
@@ -2049,8 +2052,7 @@
       "diver"
     ],
     "id": "mqxyuhhhkdzs92",
-    "dateAdded": "2026-06-28T15:51:03.941Z",
-    "priceUpdatedAt": "2026-08-14T04:46:29.212Z"
+    "dateAdded": "2026-06-28T15:51:03.941Z"
   },
   {
     "brand": "OLTO-8 WATCHES",
@@ -2062,6 +2064,7 @@
       "amount": 589,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:29.765Z",
     "qualityFlags": {
       "quickRelease": true,
       "braceletIncluded": false
@@ -2091,8 +2094,7 @@
       "dress"
     ],
     "id": "mqxzyep4fkag8s",
-    "dateAdded": "2026-06-28T16:22:06.568Z",
-    "priceUpdatedAt": "2026-08-14T04:46:29.765Z"
+    "dateAdded": "2026-06-28T16:22:06.568Z"
   },
   {
     "brand": "Venezianico",
@@ -2105,6 +2107,7 @@
       "amount": 1495,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:30.261Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "braceletIncluded": false
@@ -2137,8 +2140,7 @@
       "diver"
     ],
     "id": "mqxzzmf7e5kge7",
-    "dateAdded": "2026-06-28T16:23:03.235Z",
-    "priceUpdatedAt": "2026-08-14T04:46:30.261Z"
+    "dateAdded": "2026-06-28T16:23:03.235Z"
   },
   {
     "brand": "Knot",
@@ -2195,6 +2197,7 @@
       "amount": 499,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:31.951Z",
     "qualityFlags": {
       "arLayers": 3,
       "sapphireBezelInsert": false,
@@ -2230,8 +2233,7 @@
       "diver"
     ],
     "id": "mqy05hsfxu6ewm",
-    "dateAdded": "2026-06-28T16:27:37.167Z",
-    "priceUpdatedAt": "2026-08-14T04:46:31.951Z"
+    "dateAdded": "2026-06-28T16:27:37.167Z"
   },
   {
     "brand": "Serica Watches",
@@ -2244,6 +2246,25 @@
       "amount": 1870,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:32.685Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 1848,
+          "currency": "USD"
+        },
+        "date": "2026-06-28T16:43:08.682Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 1870,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:32.685Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "accuracySpecSpd": 6,
       "antimagneticAm": 50000,
@@ -2277,26 +2298,7 @@
       "diver"
     ],
     "id": "mqy0pgjuv702im",
-    "dateAdded": "2026-06-28T16:43:08.682Z",
-    "priceUpdatedAt": "2026-08-14T04:46:32.685Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 1848,
-          "currency": "USD"
-        },
-        "date": "2026-06-28T16:43:08.682Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 1870,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:32.685Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-28T16:43:08.682Z"
   },
   {
     "brand": "Straum",
@@ -2309,6 +2311,25 @@
       "amount": 2850,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:33.319Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 2500,
+          "currency": "USD"
+        },
+        "date": "2026-06-28T16:45:44.949Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 2850,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:46:33.319Z",
+        "source": "scrape"
+      }
+    ],
     "qualityFlags": {
       "regulatedPositions": 4,
       "accuracySpecSpd": 7,
@@ -2341,26 +2362,7 @@
     },
     "tags": [],
     "id": "mqy0st4lie7fpb",
-    "dateAdded": "2026-06-28T16:45:44.949Z",
-    "priceUpdatedAt": "2026-08-14T04:46:33.319Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 2500,
-          "currency": "USD"
-        },
-        "date": "2026-06-28T16:45:44.949Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 2850,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:33.319Z",
-        "source": "scrape"
-      }
-    ]
+    "dateAdded": "2026-06-28T16:45:44.949Z"
   },
   {
     "brand": "True North",
@@ -2409,6 +2411,7 @@
       "amount": 1400,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:34.525Z",
     "qualityFlags": {
       "accuracySpecSpd": 15,
       "sapphireBezelInsert": false,
@@ -2440,8 +2443,7 @@
       "dress"
     ],
     "id": "mqzd7f4jh8pv3l",
-    "dateAdded": "2026-06-29T15:20:48.211Z",
-    "priceUpdatedAt": "2026-08-14T04:46:34.525Z"
+    "dateAdded": "2026-06-29T15:20:48.211Z"
   },
   {
     "brand": "Baltic",
@@ -2541,6 +2543,7 @@
       "amount": 1150,
       "currency": "USD"
     },
+    "priceUpdatedAt": "2026-08-14T04:46:35.753Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "braceletIncluded": true
@@ -2573,7 +2576,262 @@
       "GMT"
     ],
     "id": "mr029cjx2djdu2",
-    "dateAdded": "2026-06-30T03:02:08.589Z",
-    "priceUpdatedAt": "2026-08-14T04:46:35.753Z"
+    "dateAdded": "2026-06-30T03:02:08.589Z"
+  },
+  {
+    "brand": "Dan Henry",
+    "model": "1962",
+    "referenceNumber": "DH62-38M-G1",
+    "status": "wishlist",
+    "designUniqueness": 2,
+    "price": {
+      "amount": 280,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 280,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T05:16:22.362Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://danhenrywatches.com/products/1962-racing-chronograph?variant=29246494638162",
+        "retailer": "danhenrywatches.com",
+        "price": {
+          "amount": 280,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://danhenrywatches.com/cdn/shop/files/Dan_Henry_1962_Racing_Chronograph_Blue_No_Date.png?v=1614301267&width=1946",
+    "specs": {
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 13.5,
+      "lugToLugMm": 45.9,
+      "lugWidthMm": 20,
+      "caseMaterial": "stainless steel 316L",
+      "movement": "quartz",
+      "caliber": "Meca-quartz Seiko Japan cal. VK63",
+      "waterResistanceM": 50,
+      "crystal": "Mineral",
+      "dialColor": "Matte blue with 60-min chronograph, 24-hour indicator, and orange LumiNova® lume",
+      "braceletStrap": "Leather",
+      "complications": "Chronograph, Tachymeter"
+    },
+    "tags": [
+      "CHRONOGRAPH"
+    ],
+    "id": "msshvavwg41qiq",
+    "dateAdded": "2026-08-14T05:16:22.362Z"
+  },
+  {
+    "brand": "Henry Archer",
+    "model": "Tidevand Meteorite - Kosmos",
+    "referenceNumber": "HAC-TDV-KOS-BOR",
+    "status": "wishlist",
+    "designUniqueness": 5,
+    "price": {
+      "amount": 847,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 847,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T05:23:47.627Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://henryarcher.com/en-us/collections/tidevand/products/tidevand-meteorite-kosmos",
+        "retailer": "henryarcher.com",
+        "price": {
+          "amount": 847,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://henryarcher.com/cdn/shop/files/Tidevand-Kosmos_00003.jpg?v=1748961942&width=1080",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 10.65,
+      "lugToLugMm": 47,
+      "lugWidthMm": 20,
+      "caseMaterial": "316L surgical-grade stainless steel with Sunset Rose Gold PVD coating",
+      "movement": "automatic",
+      "caliber": "Premium Miyota 9015",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire",
+      "dialColor": "Meteorite stone dial",
+      "braceletStrap": "316L stainless steel BoR (Beads-of-Rice) bracelet. 20 mm width.",
+      "complications": "GMT"
+    },
+    "qualityFlags": {
+      "arLayers": 6
+    },
+    "tags": [
+      "dive"
+    ],
+    "notes": "4 BILLION YEARS IN THE MAKING\nThe meteorite stone used on TIDEVAND METEORITE comes from the Swedish “Muonionalusta” meteorite.\n\nThe Muonionalusta meteorite was found in 1906 at the Swedish/Finnish border, near the village of “Kitkiöjärvi.”\n\nIsotope readings show that the Muonionalusta meteorite is more than 4 billion years old, and hit earth around 1 million years ago.",
+    "id": "mssi4ugd8wfp1r",
+    "dateAdded": "2026-08-14T05:23:47.627Z"
+  },
+  {
+    "brand": "BOLDR Supply Co",
+    "model": "Safari GMT Banff",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 469,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 469,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T05:29:59.373Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://www.boldrsupply.co/products/gmt-banff",
+        "retailer": "boldrsupply.co",
+        "price": {
+          "amount": 469,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://www.boldrsupply.co/cdn/shop/files/SafariBanff_1024x1024.jpg?v=1733718957",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 12.7,
+      "lugToLugMm": 48,
+      "movement": "automatic",
+      "caliber": "SII NH34 GMT Automatic",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire",
+      "dialColor": "Ombré Greenish-blue matt dial with modern stencil Arabic numerals",
+      "braceletStrap": "316L stainless steel bracelet",
+      "complications": "GMT"
+    },
+    "tags": [
+      "GMT"
+    ],
+    "notes": "the Safari GMT Banff, a timepiece inspired by the breathtaking beauty of Canada's Banff National Park. Reflecting the park's vibrant hues, this SII NH34-powered watch features a captivating contrast GMT hand reminiscent of Banff's turquoise lakes against lush green landscapes. With its precision-engineered functionality, including a prominent date display at 3 o'clock",
+    "id": "mssictanrac4ow",
+    "dateAdded": "2026-08-14T05:29:59.373Z"
+  },
+  {
+    "brand": "Le Forban Sécurité Mer",
+    "model": "Malouine<br>Onyx Blue",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 490,
+      "currency": "EUR"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 490,
+          "currency": "EUR"
+        },
+        "date": "2026-08-14T05:33:04.167Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://leforbansecuritemer.com/en/la-malouine/",
+        "retailer": "leforbansecuritemer.com",
+        "price": {
+          "amount": 490,
+          "currency": "EUR"
+        }
+      }
+    ],
+    "imageUrl": "https://leforbansecuritemer.com/wp-content/themes/leforban/img/v2/products/malouine/PACKSHOTS_COMMANDE_MALOUINE_BLEUE_2.webp",
+    "specs": {
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 12.55,
+      "lugToLugMm": 45,
+      "lugWidthMm": 20,
+      "caseMaterial": "316L steel",
+      "movement": "automatic",
+      "caliber": "Miyota 8215",
+      "powerReserveHours": 42,
+      "waterResistanceM": 150,
+      "crystal": "Sapphire",
+      "dialColor": "Blue sunburst finish Silver bezel Painted hour markers (Super-Luminova C1)",
+      "braceletStrap": "silicone"
+    },
+    "tags": [
+      "diver"
+    ],
+    "id": "mssigrvtucx52n",
+    "dateAdded": "2026-08-14T05:33:04.167Z"
+  },
+  {
+    "brand": "Naga",
+    "model": "Granturismo Chronograph 39 Amalfi",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "designUniqueness": 5,
+    "price": {
+      "amount": 660,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 660,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T12:33:19.955Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://nagawatches.com/collections/granturismo-chronograph-39/products/naga-granturismo-chronograph-39-amalfi",
+        "retailer": "nagawatches.com",
+        "price": {
+          "amount": 660,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://nagawatches.com/cdn/shop/files/1086525.jpg?v=1786462007&width=900",
+    "specs": {
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 11,
+      "caseMaterial": "Acciaio inox 316L",
+      "movement": "quartz",
+      "caliber": "Seiko VK64 Meca-Quartz",
+      "waterResistanceM": 100,
+      "crystal": "Sapphire",
+      "dialColor": "dark counters and blue accents",
+      "braceletStrap": "Acciaio inox 316L",
+      "complications": "Ore, minuti, ora del giorno, data, secondi cronografo, minuti cronografo"
+    },
+    "tags": [
+      "Chronograph"
+    ],
+    "id": "mssxh8iem1cs9b",
+    "dateAdded": "2026-08-14T12:33:19.955Z"
   }
 ]

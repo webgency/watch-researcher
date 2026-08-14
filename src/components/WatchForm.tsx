@@ -15,7 +15,14 @@ import {
   WISHLIST_TIERS,
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
-import { SPEC_FIELDS } from "@/lib/specs";
+import {
+  QUALITY_FLAG_FIELDS,
+  QUALITY_FLAG_UNSET,
+  SPEC_FIELDS,
+  qualityFlagsFromForm,
+  qualityFlagsToForm,
+} from "@/lib/specs";
+import { DIMENSION_LABELS } from "@/lib/rubrics";
 import { hostname } from "@/lib/format";
 import ImageDropzone from "./ImageDropzone";
 
@@ -26,6 +33,19 @@ interface LinkRow {
   priceCurrency: string;
   condition: "" | Condition;
 }
+
+// Derived from the field declarations so a flag added in specs.ts lands in the
+// right group here without touching this file.
+const FLAG_GROUPS: Array<{ title: string; fields: typeof QUALITY_FLAG_FIELDS }> = (() => {
+  const groups: Array<{ title: string; fields: typeof QUALITY_FLAG_FIELDS }> = [];
+  for (const field of QUALITY_FLAG_FIELDS) {
+    const title = field.dimension ? `Feeds ${DIMENSION_LABELS[field.dimension]}` : "Recorded only";
+    const existing = groups.find((g) => g.title === title);
+    if (existing) existing.fields.push(field);
+    else groups.push({ title, fields: [field] });
+  }
+  return groups;
+})();
 
 function toLinkRow(link: RetailerLink): LinkRow {
   return {
@@ -95,6 +115,10 @@ export default function WatchForm({
     }
     return s;
   });
+  // Flags are held as strings so a blank stays distinguishable from a recorded
+  // false. The conversions both ways live in specs.ts, where that distinction
+  // is unit-tested.
+  const [flags, setFlags] = useState<Record<string, string>>(() => qualityFlagsToForm(initial?.qualityFlags));
   const [links, setLinks] = useState<LinkRow[]>(
     initial?.links?.length ? initial.links.map(toLinkRow) : [{ url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }]
   );
@@ -225,6 +249,10 @@ export default function WatchForm({
       notes: notes.trim() || undefined,
       links: builtLinks,
     };
+    // Undefined when nothing is recorded, which payloadJson sends as null and
+    // the PATCH reads as "clear this" — same convention as targetPrice, so
+    // unsetting the last flag removes the object instead of leaving it stale.
+    payload.qualityFlags = qualityFlagsFromForm(flags);
     const amount = parseNum(priceAmount);
     if (amount !== undefined) payload.price = { amount, currency: priceCurrency };
     // Sent as null when cleared so the PATCH removes an existing target rather
@@ -410,6 +438,53 @@ export default function WatchForm({
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="card space-y-4 p-5">
+        <div>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Quality flags</h2>
+          <p className="mt-1 text-xs text-slate-400">
+            What the scoring engine reads for case &amp; finishing, bracelet, and regulation. Leave a field blank when
+            you don&apos;t know — a dimension with nothing recorded stays unrated rather than scoring badly.
+          </p>
+        </div>
+        {FLAG_GROUPS.map((group) => (
+          <div key={group.title}>
+            <h3 className="label">{group.title}</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {group.fields.map((f) => (
+                <div key={String(f.key)}>
+                  <label className="label">
+                    {f.label}
+                    {f.unit ? ` (${f.unit})` : ""}
+                  </label>
+                  {f.type === "boolean" ? (
+                    <select
+                      className="input"
+                      value={flags[f.key]}
+                      onChange={(e) => setFlags((s) => ({ ...s, [f.key]: e.target.value }))}
+                    >
+                      {/* Three options, not a checkbox: an unchecked box cannot
+                          say whether the feature is absent or simply unchecked. */}
+                      <option value={QUALITY_FLAG_UNSET}>— Not recorded</option>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  ) : (
+                    <input
+                      className="input"
+                      inputMode="decimal"
+                      value={flags[f.key]}
+                      placeholder="—"
+                      onChange={(e) => setFlags((s) => ({ ...s, [f.key]: e.target.value }))}
+                    />
+                  )}
+                  {f.hint ? <p className="mt-1 text-xs text-slate-400">{f.hint}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
 
       <section className="card space-y-4 p-5">
