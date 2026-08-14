@@ -88,6 +88,55 @@ export const QUALITY_FLAG_FIELDS: QualityFlagField[] = [
   },
 ];
 
+/** Form value for a tri-state boolean flag. */
+export const QUALITY_FLAG_YES = "yes";
+export const QUALITY_FLAG_NO = "no";
+
+/**
+ * Stored flags -> form values. A flag that is absent becomes the unset
+ * sentinel, and a stored false becomes "no" — the two must not converge, or
+ * editing a watch would quietly upgrade "recorded as absent" to "unknown".
+ */
+export function qualityFlagsToForm(flags: QualityFlags | undefined): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const field of QUALITY_FLAG_FIELDS) {
+    const stored = flags?.[field.key];
+    values[field.key] =
+      stored === undefined
+        ? QUALITY_FLAG_UNSET
+        : field.type === "boolean"
+          ? stored
+            ? QUALITY_FLAG_YES
+            : QUALITY_FLAG_NO
+          : String(stored);
+  }
+  return values;
+}
+
+/**
+ * Form values -> stored flags, or undefined when nothing is recorded.
+ *
+ * Unset fields produce no key at all. Writing false for a field nobody
+ * checked would be read by scoreDimensions as measured evidence and scored
+ * against, turning a gap into a failure — the invariant that missing data is
+ * never a zero. Returning undefined for an empty result lets the caller send
+ * a clear rather than leave a stale object behind.
+ */
+export function qualityFlagsFromForm(values: Record<string, string>): QualityFlags | undefined {
+  const flags: QualityFlags = {};
+  for (const field of QUALITY_FLAG_FIELDS) {
+    const raw = values[field.key]?.trim() ?? QUALITY_FLAG_UNSET;
+    if (raw === QUALITY_FLAG_UNSET) continue;
+    if (field.type === "boolean") {
+      (flags[field.key] as boolean) = raw === QUALITY_FLAG_YES;
+    } else {
+      const n = Number(raw);
+      if (Number.isFinite(n)) (flags[field.key] as number) = n;
+    }
+  }
+  return Object.keys(flags).length ? flags : undefined;
+}
+
 export function formatSpecValue(field: SpecField, value: unknown): string {
   if (value === undefined || value === null || value === "") return "—";
   if (field.unit) return `${value} ${field.unit}`;

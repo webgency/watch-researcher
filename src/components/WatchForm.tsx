@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   CURRENCIES,
   Condition,
-  QualityFlags,
   RetailerLink,
   Watch,
   WatchInput,
@@ -16,7 +15,13 @@ import {
   WISHLIST_TIERS,
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
-import { QUALITY_FLAG_FIELDS, QUALITY_FLAG_UNSET, SPEC_FIELDS } from "@/lib/specs";
+import {
+  QUALITY_FLAG_FIELDS,
+  QUALITY_FLAG_UNSET,
+  SPEC_FIELDS,
+  qualityFlagsFromForm,
+  qualityFlagsToForm,
+} from "@/lib/specs";
 import { DIMENSION_LABELS } from "@/lib/rubrics";
 import { hostname } from "@/lib/format";
 import ImageDropzone from "./ImageDropzone";
@@ -111,15 +116,9 @@ export default function WatchForm({
     return s;
   });
   // Flags are held as strings so a blank stays distinguishable from a recorded
-  // false. Booleans use "yes"/"no"; "" means not recorded and is never sent.
-  const [flags, setFlags] = useState<Record<string, string>>(() => {
-    const f: Record<string, string> = {};
-    for (const field of QUALITY_FLAG_FIELDS) {
-      const v = initial?.qualityFlags?.[field.key];
-      f[field.key] = v === undefined ? QUALITY_FLAG_UNSET : field.type === "boolean" ? (v ? "yes" : "no") : String(v);
-    }
-    return f;
-  });
+  // false. The conversions both ways live in specs.ts, where that distinction
+  // is unit-tested.
+  const [flags, setFlags] = useState<Record<string, string>>(() => qualityFlagsToForm(initial?.qualityFlags));
   const [links, setLinks] = useState<LinkRow[]>(
     initial?.links?.length ? initial.links.map(toLinkRow) : [{ url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }]
   );
@@ -222,22 +221,6 @@ export default function WatchForm({
       }
     }
 
-    // Only flags actually recorded are sent. An unset flag must stay absent
-    // rather than go out as false: scoreDimensions reads a recorded false as
-    // measured evidence and scores against it, so writing one for a field
-    // nobody checked would turn a gap into a failure.
-    const builtFlags: QualityFlags = {};
-    for (const f of QUALITY_FLAG_FIELDS) {
-      const raw = flags[f.key]?.trim() ?? QUALITY_FLAG_UNSET;
-      if (raw === QUALITY_FLAG_UNSET) continue;
-      if (f.type === "boolean") {
-        (builtFlags[f.key] as boolean) = raw === "yes";
-      } else {
-        const n = parseNum(raw);
-        if (n !== undefined) (builtFlags[f.key] as number) = n;
-      }
-    }
-
     const builtLinks: RetailerLink[] = links
       .filter((l) => l.url.trim() !== "")
       .map((l) => {
@@ -269,7 +252,7 @@ export default function WatchForm({
     // Undefined when nothing is recorded, which payloadJson sends as null and
     // the PATCH reads as "clear this" — same convention as targetPrice, so
     // unsetting the last flag removes the object instead of leaving it stale.
-    payload.qualityFlags = Object.keys(builtFlags).length ? builtFlags : undefined;
+    payload.qualityFlags = qualityFlagsFromForm(flags);
     const amount = parseNum(priceAmount);
     if (amount !== undefined) payload.price = { amount, currency: priceCurrency };
     // Sent as null when cleared so the PATCH removes an existing target rather
