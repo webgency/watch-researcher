@@ -11,9 +11,14 @@
 // Usage:
 //   node scripts/enrich-watches.mjs           # fetch + write (skips fields already set)
 //   node scripts/enrich-watches.mjs --dry     # report only, write nothing
+//   node scripts/enrich-watches.mjs --refresh # re-check prices already set, recording any move
 //   node scripts/enrich-watches.mjs --force   # overwrite existing price/imageUrl
 //   node scripts/enrich-watches.mjs --id=foo  # only this watch id (repeatable)
 //   node scripts/enrich-watches.mjs --verbose # show per-link failures
+//
+// Price history accumulates only from runs that actually re-read a price, so
+// use --refresh on a schedule if you want a series to build up; the default run
+// fills gaps and will never observe a move.
 
 import { readFile, writeFile } from "node:fs/promises";
 
@@ -22,7 +27,35 @@ const DATA_URL = new URL("../data/watches.json", import.meta.url);
 const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
 const FORCE = args.includes("--force");
+const REFRESH = args.includes("--refresh");
 const VERBOSE = args.includes("--verbose");
+
+/**
+ * Set the tracked price and record the move in priceHistory. Mirrors
+ * appendSnapshot in src/lib/price-history.ts — the series records moves only,
+ * so re-reading an unchanged price leaves the history alone and keeps its
+ * existing date, which is what makes that date mean "unchanged since".
+ *
+ * Returns true when the price actually moved.
+ */
+function recordPrice(watch, price, source) {
+  const history = Array.isArray(watch.priceHistory) ? watch.priceHistory : [];
+  const latest = history[history.length - 1];
+  const moved = !latest || latest.price.amount !== price.amount || latest.price.currency !== price.currency;
+
+  if (moved) {
+    const observedAt = new Date().toISOString();
+    watch.price = price;
+    watch.priceUpdatedAt = observedAt;
+    watch.priceHistory = [...history, { price, date: observedAt, source }];
+  } else {
+    // Same price, but we did just confirm it — worth recording on the watch
+    // even though the series stays put.
+    watch.price = price;
+    watch.priceUpdatedAt = new Date().toISOString();
+  }
+  return moved;
+}
 const ONLY = args.filter((a) => a.startsWith("--id=")).map((a) => a.slice(5));
 
 const UA =
@@ -203,7 +236,7 @@ async function main() {
 
   for (const w of targets) {
     const name = `${w.brand} ${w.model}`;
-    const needPrice = FORCE || !w.price;
+    const needPrice = FORCE || REFRESH || !w.price;
     const needImage = FORCE || !w.imageUrl;
     if (!needPrice && !needImage) { if (VERBOSE) console.log(`· skip  ${name}`); continue; }
 
@@ -217,7 +250,11 @@ async function main() {
 
     if (!got) { misses.push(name); console.log(`✗ miss  ${name}`); continue; }
     const did = [];
-    if (needPrice && got.price) { w.price = got.price; w.priceUpdatedAt = new Date().toISOString(); priceN++; did.push(`${got.price.amount} ${got.price.currency}`); }
+    if (needPrice && got.price) {
+      const moved = recordPrice(w, got.price, "scrape");
+      priceN++;
+      did.push(moved ? `${got.price.amount} ${got.price.currency}` : `${got.price.amount} ${got.price.currency} (unchanged)`);
+    }
     if (needImage && got.image) { w.imageUrl = got.image; imageN++; did.push("image"); }
     if (did.length) { changed++; console.log(`✓ ${String(got.source || "?").padEnd(8)}${name.padEnd(34)} ${did.join(", ")}`); }
     else { misses.push(name); console.log(`✗ miss  ${name} (nothing usable)`); }

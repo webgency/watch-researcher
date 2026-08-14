@@ -34,6 +34,22 @@ export interface RetailerLink {
   condition?: Condition;
 }
 
+/**
+ * One observation of a watch's tracked price. The series includes the current
+ * price as its last entry, so `price` and the newest snapshot normally agree.
+ *
+ * `date` is when the price was first seen at this level, not when it was last
+ * confirmed: a run that re-reads an unchanged price extends nothing, so the
+ * date answers "it has been this much since when?".
+ */
+export interface PriceSnapshot {
+  price: Money;
+  /** ISO timestamp of when this price was first observed. */
+  date: string;
+  /** Where the observation came from, e.g. "scrape", "manual". */
+  source?: string;
+}
+
 export interface WatchSpecs {
   caseDiameterMm?: number;
   caseThicknessMm?: number;
@@ -110,6 +126,16 @@ export interface Watch {
   price?: Money;
   /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */
   priceUpdatedAt?: string;
+  /**
+   * Every distinct tracked price seen so far, oldest first. Appended to only
+   * when the price actually moves, so consecutive entries always differ.
+   */
+  priceHistory?: PriceSnapshot[];
+  /**
+   * "Ping me under $X." Compared against the all-in landed price, so it means
+   * the total you are willing to pay, not the sticker.
+   */
+  targetPrice?: Money;
   /**
    * All-in cost of the configuration actually being considered: base price plus
    * bracelet/strap delta, shipping, and duty. Falls back to `price` when absent.

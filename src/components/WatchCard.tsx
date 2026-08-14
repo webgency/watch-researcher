@@ -5,6 +5,7 @@ import { toDisplayScore, type StandingSummary } from "@/lib/scoring";
 import { DIMENSION_LABELS } from "@/lib/rubrics";
 import { Watch, WishlistTier, WISHLIST_TIERS, WISHLIST_TIER_LABELS } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
+import { targetStatus } from "@/lib/price-history";
 import StatusBadge from "./StatusBadge";
 import WishlistTierBadge from "./WishlistTierBadge";
 
@@ -28,6 +29,7 @@ export default function WatchCard({
   onChangeWishlistTier?: (id: string, next: WishlistTier | "") => void;
 }) {
   const { specs } = watch;
+  const target = targetStatus(watch);
   return (
     <div className={`card group relative overflow-hidden transition-shadow hover:shadow-md ${selected ? "ring-2 ring-slate-900" : ""}`}>
       {/* Stretched overlay link: the whole card navigates to the detail page.
@@ -69,7 +71,17 @@ export default function WatchCard({
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold">{formatMoney(watch.price)}</span>
+          <span className="flex items-baseline gap-2">
+            <span className="text-lg font-bold">{formatMoney(watch.price)}</span>
+            {target?.met && (
+              <span
+                className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700"
+                title={`At or below your ${formatMoney(target.target)} target`}
+              >
+                at target
+              </span>
+            )}
+          </span>
           <span className="text-xs text-slate-500">
             {[specs.caseDiameterMm ? `${specs.caseDiameterMm}mm` : null, specs.movement].filter(Boolean).join(" · ")}
           </span>

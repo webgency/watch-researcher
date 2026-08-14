@@ -85,6 +85,43 @@ function checkMoney(value, path, errors) {
   }
 }
 
+function checkPriceHistory(value, path, errors) {
+  if (value === undefined || value === null) return;
+  if (!Array.isArray(value)) {
+    errors.push(`${path} must be an array`);
+    return;
+  }
+  value.forEach((snapshot, index) => {
+    const snapshotPath = `${path}[${index}]`;
+    if (!isRecord(snapshot)) {
+      errors.push(`${snapshotPath} must be an object`);
+      return;
+    }
+    if (snapshot.price === undefined || snapshot.price === null) {
+      errors.push(`${snapshotPath}.price is required`);
+    } else {
+      checkMoney(snapshot.price, `${snapshotPath}.price`, errors);
+    }
+    checkDate(snapshot.date, `${snapshotPath}.date`, errors, { required: true });
+    checkString(snapshot.source, `${snapshotPath}.source`, errors);
+
+    // Oldest first, moves only — the invariant every reader relies on when it
+    // treats the last entry as the current price.
+    const previous = value[index - 1];
+    if (index > 0 && isRecord(previous) && isRecord(previous.price) && isRecord(snapshot.price)) {
+      if (new Date(snapshot.date).getTime() < new Date(previous.date).getTime()) {
+        errors.push(`${snapshotPath}.date is earlier than the entry before it`);
+      }
+      if (
+        snapshot.price.amount === previous.price.amount &&
+        snapshot.price.currency === previous.price.currency
+      ) {
+        errors.push(`${snapshotPath} repeats the previous price; the series records moves only`);
+      }
+    }
+  });
+}
+
 function checkLinks(value, path, errors) {
   if (!Array.isArray(value)) {
     errors.push(`${path} must be an array`);
@@ -217,7 +254,23 @@ if (!Array.isArray(watches)) {
     checkIntegerRange(watch.designUniqueness, `${path}.designUniqueness`, errors);
     checkMoney(watch.price, `${path}.price`, errors);
     checkDate(watch.priceUpdatedAt, `${path}.priceUpdatedAt`, errors);
+    checkPriceHistory(watch.priceHistory, `${path}.priceHistory`, errors);
+    checkMoney(watch.targetPrice, `${path}.targetPrice`, errors);
     checkLinks(watch.links, `${path}.links`, errors);
+
+    // A history whose newest entry disagrees with the tracked price means one
+    // of the two was hand-edited without the other. Not fatal — the price is
+    // still the source of truth — but the series has a gap worth knowing about.
+    const newest = Array.isArray(watch.priceHistory) && watch.priceHistory.length
+      ? watch.priceHistory[watch.priceHistory.length - 1]
+      : undefined;
+    if (newest && isRecord(newest.price) && isRecord(watch.price)) {
+      if (newest.price.amount !== watch.price.amount || newest.price.currency !== watch.price.currency) {
+        warnings.push(
+          `${path}.priceHistory ends at ${newest.price.amount} ${newest.price.currency} but price is ${watch.price.amount} ${watch.price.currency}; the latest move was not recorded.`
+        );
+      }
+    }
     checkString(watch.imageUrl, `${path}.imageUrl`, errors);
     checkSpecs(watch.specs, `${path}.specs`, errors);
     checkTags(watch.tags, `${path}.tags`, errors);

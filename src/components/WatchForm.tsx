@@ -82,6 +82,8 @@ export default function WatchForm({
   const [designUniqueness, setDesignUniqueness] = useState(initial?.designUniqueness != null ? String(initial.designUniqueness) : "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
+  const [targetAmount, setTargetAmount] = useState(initial?.targetPrice?.amount != null ? String(initial.targetPrice.amount) : "");
+  const [targetCurrency, setTargetCurrency] = useState(initial?.targetPrice?.currency ?? "USD");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [tags, setTags] = useState(initial?.tags?.join(", ") ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
@@ -225,6 +227,10 @@ export default function WatchForm({
     };
     const amount = parseNum(priceAmount);
     if (amount !== undefined) payload.price = { amount, currency: priceCurrency };
+    // Sent as null when cleared so the PATCH removes an existing target rather
+    // than silently keeping it.
+    const target = parseNum(targetAmount);
+    payload.targetPrice = target !== undefined ? { amount: target, currency: targetCurrency } : undefined;
     return payload;
   }
 
@@ -337,7 +343,7 @@ export default function WatchForm({
             </div>
           </div>
           <div>
-            <label className="label">Target / tracked price</label>
+            <label className="label">Tracked price</label>
             <div className="flex gap-2">
               <input className="input" inputMode="decimal" value={priceAmount} onChange={(e) => setPriceAmount(e.target.value)} placeholder="5600" />
               <select className="input w-28" value={priceCurrency} onChange={(e) => setPriceCurrency(e.target.value)}>
@@ -348,6 +354,21 @@ export default function WatchForm({
                 ))}
               </select>
             </div>
+            <p className="mt-1 text-xs text-slate-400">Changing this records a price-history entry.</p>
+          </div>
+          <div>
+            <label className="label">Target price</label>
+            <div className="flex gap-2">
+              <input className="input" inputMode="decimal" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} placeholder="4800" />
+              <select className="input w-28" value={targetCurrency} onChange={(e) => setTargetCurrency(e.target.value)}>
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="mt-1 text-xs text-slate-400">Flags the watch once the all-in price drops to this. Leave blank for none.</p>
           </div>
         </div>
         <div>

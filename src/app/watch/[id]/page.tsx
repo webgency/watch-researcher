@@ -10,6 +10,7 @@ import StatusBadge from "@/components/StatusBadge";
 import WishlistTierBadge from "@/components/WishlistTierBadge";
 import WatchActions from "@/components/WatchActions";
 import StandingPanel from "@/components/StandingPanel";
+import PriceHistoryPanel from "@/components/PriceHistoryPanel";
 
 // Pre-render a detail page for every watch in the static export. In dynamic
 // mode return nothing so pages render on demand and reflect edits immediately.
@@ -78,6 +79,8 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
       </div>
 
       <StandingPanel watch={watch} standing={standing} />
+
+      <PriceHistoryPanel watch={watch} />
 
       <section className="card p-5">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Specifications</h2>
