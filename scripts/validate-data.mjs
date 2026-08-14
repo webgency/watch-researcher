@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import { SPEC_RANGES, inSpecRange, LUG_TO_LUG_MIN_RATIO } from "../src/lib/spec-ranges.mjs";
-import { CURRENCY_TO_USD } from "../src/lib/currency-rates.mjs";
+import {
+  CURRENCY_TO_USD,
+  RATES_AS_OF,
+  RATES_STALE_AFTER_DAYS,
+  ratesAgeDays,
+  ratesAreStale,
+} from "../src/lib/currency-rates.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 const BRANDS_URL = new URL("../data/brands.json", import.meta.url);
@@ -287,6 +293,34 @@ if (!Array.isArray(watches)) {
       warnings.push(`${path}.brand ${watch.brand} is not present in data/brands.json; desirability scoring will use neutral reputation.`);
     }
   });
+}
+
+// Stale rates only matter if something actually needs converting. A collection
+// priced entirely in USD is unaffected by drift, so staying quiet there keeps
+// the warning meaningful when it does appear.
+const foreignCurrencies = new Set();
+for (const watch of watches) {
+  const monies = [
+    watch.price,
+    watch.landedPrice,
+    watch.targetPrice,
+    ...(watch.links ?? []).map((link) => link.price),
+    ...(watch.priceHistory ?? []).map((snapshot) => snapshot.price),
+  ];
+  for (const money of monies) {
+    if (isRecord(money) && typeof money.currency === "string" && money.currency !== "USD") {
+      foreignCurrencies.add(money.currency);
+    }
+  }
+}
+
+if (foreignCurrencies.size && ratesAreStale()) {
+  const age = ratesAgeDays();
+  warnings.push(
+    `Exchange rates in src/lib/currency-rates.mjs are ${age} days old (taken ${RATES_AS_OF}, stale after ${RATES_STALE_AFTER_DAYS}). ` +
+      `${foreignCurrencies.size} non-USD currenc${foreignCurrencies.size === 1 ? "y is" : "ies are"} in use (${[...foreignCurrencies].sort().join(", ")}), ` +
+      `so scoring converts at rates that have had time to drift across a price band. Refresh with: curl -s "https://api.frankfurter.dev/v1/latest?base=USD"`
+  );
 }
 
 if (warnings.length) {
