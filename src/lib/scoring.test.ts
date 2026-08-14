@@ -15,6 +15,12 @@ import {
 } from "./scoring";
 import { DIMENSIONS } from "./rubrics";
 import { CURRENCIES } from "./types";
+import {
+  RATES_AS_OF,
+  RATES_STALE_AFTER_DAYS,
+  ratesAgeDays,
+  ratesAreStale,
+} from "./currency-rates.mjs";
 import type { Watch } from "./types";
 
 let nextId = 0;
@@ -389,5 +395,32 @@ describe("currency conversion", () => {
 
   it("normalizes case and padding before lookup", () => {
     expect(normalizePriceToUsd({ amount: 10, currency: " eur " })).toBeCloseTo(10 * CURRENCY_TO_USD.EUR);
+  });
+});
+
+describe("rate staleness", () => {
+  const asOf = new Date(`${RATES_AS_OF}T00:00:00Z`);
+  const daysAfter = (n: number) => new Date(asOf.getTime() + n * 86_400_000);
+
+  it("is zero days old on the day the rates were taken", () => {
+    expect(ratesAgeDays(asOf)).toBe(0);
+    expect(ratesAreStale(asOf)).toBe(false);
+  });
+
+  it("counts whole days elapsed", () => {
+    expect(ratesAgeDays(daysAfter(45))).toBe(45);
+  });
+
+  it("is not stale on the threshold day itself", () => {
+    expect(ratesAreStale(daysAfter(RATES_STALE_AFTER_DAYS))).toBe(false);
+  });
+
+  it("goes stale the day after the threshold", () => {
+    expect(ratesAreStale(daysAfter(RATES_STALE_AFTER_DAYS + 1))).toBe(true);
+  });
+
+  it("reports a negative age rather than throwing if the date is in the future", () => {
+    expect(ratesAgeDays(daysAfter(-10))).toBe(-10);
+    expect(ratesAreStale(daysAfter(-10))).toBe(false);
   });
 });

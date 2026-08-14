@@ -22,6 +22,30 @@
 export const RATES_AS_OF = "2026-08-13";
 
 /**
+ * How old the snapshot may get before validate:data complains.
+ *
+ * Chosen against the failure that actually matters: not that a price is a few
+ * dollars off, but that drift moves a watch across a price band and changes the
+ * rubric it is judged by. The bands are hundreds of dollars wide, so it takes a
+ * multi-percent move to cross one — a quarter's drift on a major pair, roughly.
+ * Shorter would cry wolf; much longer and a band could shift unnoticed.
+ */
+export const RATES_STALE_AFTER_DAYS = 90;
+
+/** Whole days between RATES_AS_OF and `now`. Negative if the date is in the future. */
+export function ratesAgeDays(now = new Date()) {
+  const takenAt = new Date(`${RATES_AS_OF}T00:00:00Z`);
+  if (Number.isNaN(takenAt.getTime())) return undefined;
+  return Math.floor((now.getTime() - takenAt.getTime()) / 86_400_000);
+}
+
+/** True once the snapshot is older than RATES_STALE_AFTER_DAYS. */
+export function ratesAreStale(now = new Date()) {
+  const age = ratesAgeDays(now);
+  return age !== undefined && age > RATES_STALE_AFTER_DAYS;
+}
+
+/**
  * USD value of one unit of each currency. Every currency offered by the entry
  * form (CURRENCIES in types.ts) must appear here — a missing entry falls back
  * to a 1.0 rate, which silently scores e.g. 3000 SEK as $3000.
