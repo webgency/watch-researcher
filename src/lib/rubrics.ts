@@ -33,7 +33,7 @@ export const DIMENSION_LABELS: Record<Dimension, string> = {
 export const DIMENSION_BLURBS: Record<Dimension, string> = {
   movement: "Caliber tier, plus regulation and power reserve.",
   caseCraft: "Finishing and case hardware: coatings, bezel insert, drilled lugs, AR layers.",
-  wearability: "Thickness relative to diameter — how the case sits on a wrist.",
+  wearability: "Thickness against what the diameter should cost — how the case sits on a wrist.",
   durability: "Water resistance against what the category needs, plus crystal and antimagnetism.",
   bracelet: "Bracelet hardware: whether one is included, micro-adjust clasp, quick-release.",
 };
@@ -96,9 +96,12 @@ export type RubricReference = Record<Dimension, number>;
 // Anchors, roughly:
 // - movement: what caliber tier the band's money should buy (NH35 ~0.30,
 //   Miyota 9x ~0.55, SW200-1 ~0.58, SW510/L688 ~0.72, manufacture/METAS ~0.80+).
-// - wearability: raw score 0.5 corresponds to a thickness/diameter ratio of
-//   0.31; divers get a lower reference (thickness is the cost of the WR),
-//   dress watches a higher one.
+// - wearability: raw score 0.5 corresponds to a case of expected thickness for
+//   its diameter — 12.4mm at 40mm, 11.9mm at 37mm, 13.0mm at 44mm — with each
+//   further millimetre worth 0.25. Divers get a lower reference (thickness is
+//   the cost of the WR), dress watches a higher one. These references predate
+//   the diameter-aware formula and still hold: it was pinned to leave the 40mm
+//   case exactly where the old thickness/diameter ratio of 0.31 put it.
 // - durability: divers are expected to clear their 200m bar with sapphire;
 //   dress watches only need to survive a sleeve.
 // - caseCraft/bracelet: finishing and clasp hardware expectations scale with

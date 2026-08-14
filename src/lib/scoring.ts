@@ -173,6 +173,22 @@ export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => vo
 const CASE_CRAFT_FLAGS = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers"] as const;
 const BRACELET_FLAGS = ["braceletIncluded", "microAdjustClasp", "quickRelease"] as const;
 
+// Expected case thickness for a diameter: a fixed vertical stack plus a part
+// that does scale with width (bezel, crystal dome, lug arch). The pair is
+// pinned so that a 40mm case expects 12.4mm — exactly the old 0.31 ratio par —
+// which keeps every rubric reference in rubrics.ts calibrated where it was.
+// Only the slope away from 40mm changed. The empirical fit over the collection
+// (5.53 + 0.173*d) agrees to within 0.06mm at 40mm; these are the rounded pair.
+const WEARABILITY_FIXED_STACK_MM = 6.0;
+const WEARABILITY_THICKNESS_PER_MM = 0.16;
+
+// Millimetres of thickness between wearing excellently (1) and badly (0),
+// held constant across diameters on purpose: 2mm of extra height reads as 2mm
+// on the wrist whether the case is 37mm or 44mm wide. Under the old ratio this
+// span silently widened with diameter (0.10 * d), which is the second half of
+// why big watches got an easier grade than small ones.
+const WEARABILITY_SPAN_MM = 4.0;
+
 /**
  * Raw dimension scores against fixed anchors. Any dimension lacking source
  * data returns undefined, not a number:
@@ -198,9 +214,16 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
   }
 
   if (s.caseDiameterMm !== undefined && s.caseDiameterMm > 0 && s.caseThicknessMm !== undefined) {
-    // Thickness-to-diameter ratio: ~0.26 wears excellently, ~0.36 is chunky.
-    const ratio = s.caseThicknessMm / s.caseDiameterMm;
-    out.wearability = clamp01((0.36 - ratio) / 0.10);
+    // Thickness measured against what this diameter should cost, not as a bare
+    // thickness/diameter ratio. A ratio assumes height scales with width, and
+    // it does not: a movement, crystal and caseback are a near-fixed stack
+    // whatever the case is around them. Regressing thickness on diameter over
+    // the collection gives t = 5.53 + 0.173*d — about 5.5mm that never shrinks.
+    // So a ratio charges small cases for height they cannot avoid and hands
+    // large ones credit for width they did nothing to earn: a 37x11.6 (a well
+    // proportioned watch) scored below a 44x13 (a slab).
+    const expectedThicknessMm = WEARABILITY_FIXED_STACK_MM + WEARABILITY_THICKNESS_PER_MM * s.caseDiameterMm;
+    out.wearability = clamp01(0.5 + (expectedThicknessMm - s.caseThicknessMm) / WEARABILITY_SPAN_MM);
   }
 
   // Each of these needs its own source data. Gating both on "any qualityFlags

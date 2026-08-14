@@ -85,6 +85,29 @@ describe("scoreDimensions", () => {
     expect(scoreDimensions(watch).wearability).toBeUndefined();
   });
 
+  it("keeps the 40mm wearability anchor where the old thickness/diameter ratio put it", () => {
+    // Every rubric reference was tuned against a formula where 40x12.4 was par.
+    // Moving that anchor would silently recalibrate all four category tables.
+    const wearability = (d: number, t: number) =>
+      scoreDimensions(makeWatch({ specs: { caseDiameterMm: d, caseThicknessMm: t } })).wearability;
+    expect(wearability(40, 12.4)).toBeCloseTo(0.5, 5);
+    expect(wearability(40, 10.4)).toBeCloseTo(1, 5);
+    expect(wearability(40, 14.4)).toBeCloseTo(0, 5);
+  });
+
+  it("does not bottom out a small case for height it cannot avoid", () => {
+    // A movement, crystal and caseback are a near-fixed stack, so a bare
+    // thickness/diameter ratio charges narrow cases for millimetres that do not
+    // scale down. A 37x11.6 is a well proportioned watch and must beat a 44x13
+    // slab; under the ratio it scored 0.46 against that slab's 0.65.
+    const wearability = (d: number, t: number) =>
+      scoreDimensions(makeWatch({ specs: { caseDiameterMm: d, caseThicknessMm: t } })).wearability!;
+    expect(wearability(37, 11.6)).toBeGreaterThan(wearability(44, 13));
+    // Genuinely thick still reads as thick — this fixes the slope, not the floor.
+    expect(wearability(37, 13.8)).toBeLessThan(0.1);
+    expect(wearability(41, 16)).toBe(0);
+  });
+
   it("scores caseCraft and bracelet only once their own qualityFlags exist", () => {
     const bare = makeWatch();
     expect(scoreDimensions(bare).caseCraft).toBeUndefined();
