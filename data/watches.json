@@ -1407,7 +1407,22 @@
       "GMT"
     ],
     "id": "mqsv75d21b7q4i",
-    "dateAdded": "2026-06-25T02:10:05.414Z"
+    "dateAdded": "2026-06-25T02:10:05.414Z",
+    "price": {
+      "amount": 899,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-08-14T04:31:03.094Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 899,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T04:31:03.094Z",
+        "source": "scrape"
+      }
+    ]
   },
   {
     "brand": "Albishorn",
