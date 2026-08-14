@@ -28,6 +28,7 @@ const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
 const FORCE = args.includes("--force");
 const REFRESH = args.includes("--refresh");
+const ALLOW_CURRENCY_CHANGE = args.includes("--allow-currency-change");
 const VERBOSE = args.includes("--verbose");
 
 /**
@@ -39,22 +40,41 @@ const VERBOSE = args.includes("--verbose");
  * Returns true when the price actually moved.
  */
 function recordPrice(watch, price, source) {
-  const history = Array.isArray(watch.priceHistory) ? watch.priceHistory : [];
-  const latest = history[history.length - 1];
-  const moved = !latest || latest.price.amount !== price.amount || latest.price.currency !== price.currency;
+  const observedAt = new Date().toISOString();
+  const current = watch.price;
 
-  if (moved) {
-    const observedAt = new Date().toISOString();
-    watch.price = price;
-    watch.priceUpdatedAt = observedAt;
-    watch.priceHistory = [...history, { price, date: observedAt, source }];
-  } else {
-    // Same price, but we did just confirm it — worth recording on the watch
-    // even though the series stays put.
-    watch.price = price;
-    watch.priceUpdatedAt = new Date().toISOString();
+  // A scrape that returns a different currency is not a price change, it is a
+  // change of units: several watches are stored as pre-converted USD, and
+  // rewriting them to the retailer's native currency silently rescores them
+  // through the hardcoded CURRENCY_TO_USD rates. That moved one watch across a
+  // price band and so changed the rubric it was judged against. Skip by
+  // default; --allow-currency-change opts in.
+  if (current && current.currency !== price.currency && !ALLOW_CURRENCY_CHANGE) {
+    return "currency";
   }
-  return moved;
+
+  const moved = !current || current.amount !== price.amount || current.currency !== price.currency;
+
+  // Compare against the tracked price, NOT against the tail of priceHistory.
+  // Comparing against the series meant a watch with no history recorded every
+  // scrape as a move, stamping a price that had been stable for months as
+  // "first seen today" and destroying what the dates mean.
+  if (!moved) {
+    watch.priceUpdatedAt = observedAt;
+    return false;
+  }
+
+  let history = Array.isArray(watch.priceHistory) ? watch.priceHistory : [];
+  // Seed the outgoing price so the first recorded move shows what it moved
+  // from, dated to when that price was last known. Mirrors updateWatch.
+  if (!history.length && current) {
+    history = [{ price: current, date: watch.priceUpdatedAt ?? watch.dateAdded, source: "manual" }];
+  }
+
+  watch.price = price;
+  watch.priceUpdatedAt = observedAt;
+  watch.priceHistory = [...history, { price, date: observedAt, source }];
+  return true;
 }
 const ONLY = args.filter((a) => a.startsWith("--id=")).map((a) => a.slice(5));
 
@@ -233,6 +253,7 @@ async function main() {
 
   let priceN = 0, imageN = 0, changed = 0;
   const misses = [];
+  const currencySkips = [];
 
   for (const w of targets) {
     const name = `${w.brand} ${w.model}`;
@@ -251,9 +272,13 @@ async function main() {
     if (!got) { misses.push(name); console.log(`✗ miss  ${name}`); continue; }
     const did = [];
     if (needPrice && got.price) {
-      const moved = recordPrice(w, got.price, "scrape");
-      priceN++;
-      did.push(moved ? `${got.price.amount} ${got.price.currency}` : `${got.price.amount} ${got.price.currency} (unchanged)`);
+      const result = recordPrice(w, got.price, "scrape");
+      if (result === "currency") {
+        currencySkips.push(`${name}: stored ${w.price.amount} ${w.price.currency}, site quotes ${got.price.amount} ${got.price.currency}`);
+      } else {
+        priceN++;
+        did.push(result ? `${got.price.amount} ${got.price.currency}` : `${got.price.amount} ${got.price.currency} (unchanged)`);
+      }
     }
     if (needImage && got.image) { w.imageUrl = got.image; imageN++; did.push("image"); }
     if (did.length) { changed++; console.log(`✓ ${String(got.source || "?").padEnd(8)}${name.padEnd(34)} ${did.join(", ")}`); }
@@ -262,6 +287,11 @@ async function main() {
 
   console.log(`\nPrices: ${priceN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
   if (misses.length) console.log(`Missing (${misses.length}): ${misses.map((m) => short(m, 22)).join("; ")}`);
+  if (currencySkips.length) {
+    console.log(`\nSkipped — site quotes a different currency than we track (${currencySkips.length}).`);
+    console.log(`Rewriting these would rescore them through the hardcoded rates. Use --allow-currency-change to accept:`);
+    for (const skip of currencySkips) console.log(`  · ${skip}`);
+  }
 
   if (DRY) return console.log("\n--dry: nothing written.");
   if (changed) {
