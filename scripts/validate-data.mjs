@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import { SPEC_RANGES, inSpecRange, LUG_TO_LUG_MIN_RATIO } from "../src/lib/spec-ranges.mjs";
+import { CURRENCY_TO_USD } from "../src/lib/currency-rates.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 const BRANDS_URL = new URL("../data/brands.json", import.meta.url);
@@ -9,7 +10,9 @@ const STATUSES = new Set(["wishlist", "owned", "sold"]);
 const WISHLIST_TIERS = new Set(["next-purchase", "must-have", "love-it", "interested", "maybe-later", "pass"]);
 const MOVEMENTS = new Set(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"]);
 const CONDITIONS = new Set(["new", "pre-owned"]);
-const CURRENCY_TO_USD = new Set(["USD", "EUR", "GBP", "CHF", "JPY"]);
+// Derived from the shared table rather than restated, so adding a currency in
+// one place cannot leave the validator warning about a rate that now exists.
+const KNOWN_CURRENCIES = new Set(Object.keys(CURRENCY_TO_USD));
 
 const SPEC_TYPES = {
   caseDiameterMm: "number",
@@ -80,7 +83,7 @@ function checkMoney(value, path, errors) {
   checkPositiveNumber(value.amount, `${path}.amount`, errors, { required: true });
   if (typeof value.currency !== "string" || !/^[A-Z]{3}$/.test(value.currency)) {
     errors.push(`${path}.currency must be a 3-letter currency code`);
-  } else if (!CURRENCY_TO_USD.has(value.currency)) {
+  } else if (!KNOWN_CURRENCIES.has(value.currency)) {
     warnings.push(`${path}.currency ${value.currency} is not in the known currency list; scoring will use its fallback rate.`);
   }
 }

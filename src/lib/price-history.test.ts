@@ -8,6 +8,7 @@ import {
   targetStatus,
   watchesAtTarget,
 } from "./price-history";
+import { CURRENCY_TO_USD } from "./scoring";
 import { Money, PriceSnapshot, Watch } from "./types";
 
 const usd = (amount: number): Money => ({ amount, currency: "USD" });
@@ -107,9 +108,13 @@ describe("priceMovement", () => {
   });
 
   it("normalizes currencies before comparing", () => {
-    // 500 EUR at the 1.08 rate is 540 USD, so this is a rise, not a fall.
+    // 500 EUR converts to more than 500 USD, so against a 520 USD prior this is
+    // a rise, not the fall the raw numbers suggest. Derived from the rate table
+    // rather than hardcoded, so refreshing rates does not break the test.
+    const eurInUsd = 500 * CURRENCY_TO_USD.EUR;
     const movement = priceMovement([snapshot(520, "2026-01-01"), snapshot(500, "2026-02-01", "EUR")]);
-    expect(movement?.deltaUsd).toBeCloseTo(20);
+    expect(movement?.deltaUsd).toBeCloseTo(eurInUsd - 520);
+    expect(movement!.deltaUsd).toBeGreaterThan(0);
   });
 });
 
@@ -161,12 +166,13 @@ describe("targetStatus", () => {
   });
 
   it("normalizes currencies on both sides", () => {
-    // 350 EUR = 378 USD, under a 400 USD target.
+    // 300 EUR converts to comfortably under a 400 USD target at any plausible
+    // rate. Asserted against the table so a rate refresh cannot flip the case.
     const status = targetStatus(
-      watch({ price: { amount: 350, currency: "EUR" }, targetPrice: usd(400) })
+      watch({ price: { amount: 300, currency: "EUR" }, targetPrice: usd(400) })
     );
+    expect(status?.currentUsd).toBeCloseTo(300 * CURRENCY_TO_USD.EUR);
     expect(status?.met).toBe(true);
-    expect(status?.currentUsd).toBeCloseTo(378);
   });
 });
 

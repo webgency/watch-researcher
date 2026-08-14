@@ -31,14 +31,16 @@ export interface ScoreThresholds {
 export const DESIGN_RANK_MIN = 1;
 export const DESIGN_RANK_MAX = 5;
 
-// Tuning knob: currency conversion rates used before scoring.
-export const CURRENCY_TO_USD: Record<string, number> = {
-  USD: 1.0,
-  EUR: 1.08,
-  GBP: 1.27,
-  CHF: 1.12,
-  JPY: 0.0064,
-};
+// Currency conversion rates used before scoring. The table lives in
+// ./currency-rates.mjs because scripts/validate-data.mjs needs the same
+// currency list and runs under bare Node with no build step. Re-exported here
+// so existing importers keep working.
+import { CURRENCY_TO_USD as RATES, RATES_AS_OF } from "./currency-rates.mjs";
+
+// Widened to a string index so an unrecognized code reads as undefined and hits
+// the warning path below, rather than being a type error at every call site.
+export const CURRENCY_TO_USD: Record<string, number> = RATES;
+export { RATES_AS_OF };
 
 export function normalizePriceToUsd(money: Money, onWarning?: (message: string) => void): number {
   const currency = money.currency.trim().toUpperCase();
