@@ -7,6 +7,7 @@ import {
   Friction,
   Money,
   MOVEMENT_TYPES,
+  PriceSnapshot,
   QualityFlags,
   RetailerLink,
   Watch,
@@ -180,6 +181,55 @@ function cleanLinks(value: unknown, required: boolean, errors: string[]): Retail
     if (condition) link.condition = condition;
     return [link];
   });
+}
+
+function cleanPriceHistory(value: unknown, errors: string[]): PriceSnapshot[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!Array.isArray(value)) {
+    errors.push("priceHistory must be an array");
+    return undefined;
+  }
+
+  const history = value.flatMap((item, index) => {
+    const path = `priceHistory[${index}]`;
+    if (!isRecord(item)) {
+      errors.push(`${path} must be an object`);
+      return [];
+    }
+
+    const price = cleanMoney(item.price, `${path}.price`, errors);
+    if (!price) {
+      errors.push(`${path}.price is required`);
+      return [];
+    }
+    const date = cleanDateString(item.date, `${path}.date`, errors);
+    if (!date) {
+      errors.push(`${path}.date is required`);
+      return [];
+    }
+
+    const snapshot: PriceSnapshot = { price, date };
+    const source = cleanOptionalString(item.source, `${path}.source`, errors);
+    if (source) snapshot.source = source;
+    return [snapshot];
+  });
+
+  // The series is meant to be a list of moves, oldest first. Catching an
+  // out-of-order or duplicated entry here keeps every consumer free to treat
+  // the last element as "current" without re-sorting or de-duplicating.
+  for (let i = 1; i < history.length; i++) {
+    if (new Date(history[i].date).getTime() < new Date(history[i - 1].date).getTime()) {
+      errors.push(`priceHistory[${i}].date is earlier than the entry before it`);
+    }
+    if (
+      history[i].price.amount === history[i - 1].price.amount &&
+      history[i].price.currency === history[i - 1].price.currency
+    ) {
+      errors.push(`priceHistory[${i}] repeats the previous price; the series records moves only`);
+    }
+  }
+
+  return history;
 }
 
 function cleanSpecs(value: unknown, required: boolean, errors: string[]): WatchSpecs | undefined {
@@ -374,6 +424,8 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
+  assignIfPresent(output, body, "priceHistory", cleanPriceHistory(body.priceHistory, errors));
+  assignIfPresent(output, body, "targetPrice", cleanMoney(body.targetPrice, "targetPrice", errors));
   assignIfPresent(output, body, "landedPrice", cleanMoney(body.landedPrice, "landedPrice", errors));
   assignIfPresent(output, body, "qualityFlags", cleanQualityFlags(body.qualityFlags, errors));
   assignIfPresent(output, body, "friction", cleanFriction(body.friction, errors));

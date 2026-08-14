@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { Watch, WatchInput } from "./types";
+import { appendSnapshot, sameMoney } from "./price-history";
 import { validateWatchCollection } from "./validation";
 
 // The collection lives in a single JSON file at the repo root so it can be
@@ -45,11 +46,17 @@ async function saveAll(watches: Watch[]): Promise<void> {
 export async function addWatch(input: WatchInput): Promise<Watch> {
   return withWriteLock(async () => {
     const watches = await getWatches();
+    const now = new Date().toISOString();
     const watch: Watch = {
       ...input,
       id: generateId(),
-      dateAdded: new Date().toISOString(),
+      dateAdded: now,
     };
+    // Seed the series so a watch added with a price starts with one data point
+    // rather than needing a later change to acquire any history at all.
+    if (watch.price && !watch.priceHistory?.length) {
+      watch.priceHistory = appendSnapshot([], watch.price, watch.priceUpdatedAt ?? now, "manual");
+    }
     watches.push(watch);
     await saveAll(watches);
     return watch;
@@ -66,7 +73,19 @@ export async function updateWatch(
     if (idx === -1) return undefined;
     // id and dateAdded are immutable.
     const existing = watches[idx];
-    watches[idx] = { ...existing, ...patch, id: existing.id, dateAdded: existing.dateAdded };
+    const next: Watch = { ...existing, ...patch, id: existing.id, dateAdded: existing.dateAdded };
+
+    // Record a move whenever an edit changes the tracked price. Doing it here
+    // rather than in the form means hand-written API calls and future callers
+    // build history too, and a caller that supplies its own priceHistory (an
+    // importer, say) is left alone.
+    if (next.price && !sameMoney(existing.price, next.price) && patch.priceHistory === undefined) {
+      const observedAt = patch.priceUpdatedAt ?? new Date().toISOString();
+      next.priceHistory = appendSnapshot(existing.priceHistory, next.price, observedAt, "manual");
+      next.priceUpdatedAt = observedAt;
+    }
+
+    watches[idx] = next;
     await saveAll(watches);
     return watches[idx];
   });

@@ -32,7 +32,8 @@ npm run check
 - **Wishlist tiers** — Next purchase, Must have, Love it, Interested, Maybe later, or Pass.
 - **Add / edit watches** — one form covering basics, URL autofill, specs, image, multiple retailer links, tags, and notes.
 - **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table, with the best value in each row highlighted.
-- **Per-watch detail page** — full specs, retailer links, notes, and the peer-band standing panel.
+- **Per-watch detail page** — full specs, retailer links, notes, the peer-band standing panel, and price history.
+- **Price tracking** — set a target price per watch and the collection view flags it once the all-in price drops to it. Every price change is recorded as a history entry, with the latest move and lowest recorded price shown on the detail page.
 - **Dashboard stats** — totals by status and wishlist tier.
 
 ### Scoring
@@ -64,6 +65,8 @@ Each watch (`src/lib/types.ts`):
 | `designUniqueness` | your 1–5 design rank; drives the value matrix's vertical axis |
 | `price` | `{ amount, currency }` — the headline price you're tracking |
 | `priceUpdatedAt` | ISO timestamp, set by the enrich script |
+| `priceHistory[]` | every distinct price seen, oldest first — appended to only when the price actually moves |
+| `targetPrice` | "ping me under $X"; compared against the all-in landed price |
 | `landedPrice` | all-in cost (base + bracelet delta + shipping + duty); falls back to `price` |
 | `links[]` | retailer links, each with optional price + `new`/`pre-owned` condition |
 | `specs` | case diameter, thickness, lug-to-lug, lug width, material, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
@@ -96,6 +99,12 @@ node scripts/enrich-watches.mjs --dry
 ```
 
 Scrapes price and image from each watch's retailer links. `--dry` reports only; `--force` overwrites existing values; `--id=foo` limits to one watch.
+
+**`--refresh` is what builds price history.** The default run only fills gaps, so it never re-reads a price it already has and therefore never observes a move. Run it on a schedule to accumulate a series:
+
+```bash
+node scripts/enrich-watches.mjs --refresh
+```
 
 ```bash
 node scripts/backfill-specs.mjs --dry --limit=5
@@ -140,8 +149,9 @@ npm run build:static && npx serve out
 **Phase 2 — Price & value** *(partly done)*
 - ✅ Per-band value scoring and a value matrix
 - ✅ USD normalization for scoring — though rates in `CURRENCY_TO_USD` are hardcoded and drift; a live rate source would fix that
-- ⬜ Price-history snapshots per watch + a target-price flag ("ping me under $X")
+- ✅ Price-history snapshots per watch + a target-price flag ("ping me under $X")
 - ⬜ Best-price surfacing across multiple retailer links
+- ⬜ Actual notification when a target is met — today the collection view flags it, but nothing pushes
 
 **Phase 3 — Collection management**
 - ⬜ Richer dashboard: total spent, value by brand/movement, size distribution

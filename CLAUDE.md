@@ -10,7 +10,7 @@ A personal Next.js (App Router) + TypeScript + Tailwind app for tracking a watch
 
 ```bash
 npm run check          # validate:data + lint + build — run this before proposing a change is done
-npm test               # vitest, 41 tests
+npm test               # vitest, 70 tests
 npm run dev            # local dev server
 npm run validate:data  # data-only check; fast, run after any edit to watches.json
 npm run build:static   # GitHub Pages export, into out/
@@ -27,6 +27,8 @@ npm run build:static   # GitHub Pages export, into out/
 3. **Par is absolute.** A watch at its band's rubric reference scores 0.5. Peer groups are small (2–4), so they supply only the label and count; percentile ranking is gated behind `n >= 6`.
 
 `unratedReason()` mirrors the gates in `scoreDimensions()`. Change one and the other must follow.
+
+**`priceHistory` records moves, not polls.** `appendSnapshot()` in `src/lib/price-history.ts` is a no-op when the price is unchanged, so consecutive entries always differ and each `date` means "unchanged since". Consumers rely on the series being oldest-first with the newest entry equal to `price`; both validators enforce that. Don't add a snapshot per scrape run — it would add a line per watch per run to `watches.json` and destroy the meaning of the dates. `updateWatch()` appends automatically on a price change, so callers should not build the series by hand unless they are importing one (passing `priceHistory` explicitly suppresses the automatic append).
 
 **`CALIBER_TIER_PATTERNS`** in `scoring.ts` is a hand-maintained substring table, ordered most-specific-first. Unknown calibers return `undefined` (unrated), never a fallback tier. Adding watches from new movement families means adding entries here.
 
