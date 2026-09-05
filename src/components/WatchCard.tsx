@@ -133,7 +133,7 @@ function StandingBlock({ summary }: { summary: StandingSummary }) {
     <div className="space-y-1.5 text-xs">
       <div className="flex flex-wrap gap-1">
         <span
-          title={`Quality against what ${standing.peerLabel} should buy, adjusted for where the price sits in the band. 50 is par.`}
+          title={`Quality against what ${standing.peerLabel} should buy, adjusted for its position within the price range. 50 is expected.`}
           className="rounded-full bg-slate-900 px-2 py-1 font-medium text-white"
         >
           {standing.valueScore === undefined

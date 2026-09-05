@@ -148,7 +148,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
         </div>
         <p className="text-xs text-slate-400 sm:text-right">
           Rated on {ratedCount} of {DIMENSIONS.length} dimensions
-          {standing.peerCount > 1 && <> · {standing.peerCount} in band</>}
+          {standing.peerCount > 1 && <> · {standing.peerCount} similar watches</>}
         </p>
       </div>
 
@@ -219,7 +219,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
 
           {standing.qualityPercentile !== undefined && (
             <p className="mt-2 text-xs text-slate-500">
-              Ahead of {pct(standing.qualityPercentile)}% of the {standing.peerCount} watches in this band.
+              Ranks above {pct(standing.qualityPercentile)}% of {standing.peerCount} similar watches in this price range.
             </p>
           )}
 
