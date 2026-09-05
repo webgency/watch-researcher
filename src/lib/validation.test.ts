@@ -30,3 +30,24 @@ describe("scoring category validation", () => {
     });
   });
 });
+
+describe("design preference validation", () => {
+  it("accepts pairwise rating metadata", () => {
+    expect(normalizeWatchPatch({ designPreferenceElo: 1016, designComparisonCount: 3 })).toEqual({
+      ok: true,
+      data: { designPreferenceElo: 1016, designComparisonCount: 3 },
+    });
+  });
+
+  it("clears pairwise metadata with nulls", () => {
+    expect(normalizeWatchPatch({ designPreferenceElo: null, designComparisonCount: null })).toEqual({
+      ok: true,
+      data: { designPreferenceElo: undefined, designComparisonCount: undefined },
+    });
+  });
+
+  it("rejects negative Elo and fractional comparison counts", () => {
+    const result = normalizeWatchPatch({ designPreferenceElo: -1, designComparisonCount: 1.5 });
+    expect(result.ok).toBe(false);
+  });
+});

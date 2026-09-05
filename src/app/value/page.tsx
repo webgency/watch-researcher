@@ -14,7 +14,7 @@ export default async function ValuePage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Value</h1>
         <p className="text-sm text-slate-500">
-          Compare each watch against the rubric for its category and price band, plotted against your own design rank.
+          Compare what each watch delivers for its price, plotted against your own design appeal.
         </p>
       </div>
       <ValueMatrix watches={watches} />

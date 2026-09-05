@@ -9,27 +9,27 @@ type Verdict = "beats" | "par" | "trails" | "unbanded";
 // green/amber pair stand up under protanopia.
 const VERDICT: Record<Verdict, { label: string; fill: string; track: string; text: string }> = {
   beats: {
-    label: "Beats par",
+    label: "Above expected",
     fill: "bg-emerald-600",
     track: "bg-emerald-100",
     text: "text-emerald-700",
   },
   par: {
-    label: "At par",
+    label: "As expected",
     fill: "bg-slate-500",
     track: "bg-slate-200",
     text: "text-slate-600",
   },
   trails: {
-    label: "Trails",
+    label: "Below expected",
     fill: "bg-amber-600",
     track: "bg-amber-100",
     text: "text-amber-700",
   },
   // A watch with no price has no band, so there is no reference to be at, above
-  // or below. Saying "At par" there would be a claim the engine never made.
+  // or below. Saying "As expected" there would be a claim the engine never made.
   unbanded: {
-    label: "No par",
+    label: "No benchmark",
     fill: "bg-slate-400",
     track: "bg-slate-200",
     text: "text-slate-400",
@@ -82,8 +82,8 @@ function DimensionMeter({
         role="img"
         aria-label={
           reference === undefined
-            ? `${DIMENSION_LABELS[dimension]}: ${pct(raw)} of 100, no band reference`
-            : `${DIMENSION_LABELS[dimension]}: ${pct(raw)} of 100 against par ${pct(reference)} — ${style.label}`
+            ? `${DIMENSION_LABELS[dimension]}: ${pct(raw)} of 100, no price benchmark`
+            : `${DIMENSION_LABELS[dimension]}: ${pct(raw)} of 100; expected ${pct(reference)} at this price — ${style.label}`
         }
       >
         <div className={`h-full rounded-full ${style.fill}`} style={{ width: `${Math.max(pct(raw), 1.5)}%` }} />
@@ -144,7 +144,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Standing</h2>
-          <p className="mt-1 text-sm text-slate-500">Scored against the rubric for {standing.peerLabel}.</p>
+          <p className="mt-1 text-sm text-slate-500">Compared with what the price should buy for {standing.peerLabel}.</p>
         </div>
         <p className="text-xs text-slate-400 sm:text-right">
           Rated on {ratedCount} of {DIMENSIONS.length} dimensions
@@ -209,7 +209,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
           {banded ? (
             <p className="mt-3 flex items-center gap-2 text-xs text-slate-400">
               <span className="inline-block h-3 w-0.5 bg-slate-900/70" />
-              Par for {standing.peerLabel}
+              Expected for {standing.peerLabel}
             </p>
           ) : (
             <p className="mt-3 text-xs text-slate-400">

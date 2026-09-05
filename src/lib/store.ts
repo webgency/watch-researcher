@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { Watch, WatchInput } from "./types";
 import { appendSnapshot, sameMoney } from "./price-history";
+import { DESIGN_ELO_BASE, DesignComparisonOutcome, updateDesignElo } from "./scoring";
 import { validateWatchCollection } from "./validation";
 
 // The collection lives in a single JSON file at the repo root so it can be
@@ -108,6 +109,50 @@ export async function deleteWatch(id: string): Promise<boolean> {
     if (next.length === watches.length) return false;
     await saveAll(next);
     return true;
+  });
+}
+
+export async function recordDesignComparison(
+  leftId: string,
+  rightId: string,
+  outcome: DesignComparisonOutcome
+): Promise<{ left: Watch; right: Watch } | undefined> {
+  return withWriteLock(async () => {
+    if (leftId === rightId) return undefined;
+    const watches = await getWatches();
+    const leftIndex = watches.findIndex((watch) => watch.id === leftId);
+    const rightIndex = watches.findIndex((watch) => watch.id === rightId);
+    if (leftIndex === -1 || rightIndex === -1) return undefined;
+
+    const left = watches[leftIndex];
+    const right = watches[rightIndex];
+    // Comparisons refine ties; crossing appeal bands would undermine the
+    // meaning of the anchored 1-5 rating.
+    if (
+      left.designUniqueness === undefined ||
+      right.designUniqueness === undefined ||
+      left.designUniqueness !== right.designUniqueness
+    ) {
+      return undefined;
+    }
+
+    const updated = updateDesignElo(
+      left.designPreferenceElo ?? DESIGN_ELO_BASE,
+      right.designPreferenceElo ?? DESIGN_ELO_BASE,
+      outcome
+    );
+    watches[leftIndex] = {
+      ...left,
+      designPreferenceElo: updated.left,
+      designComparisonCount: (left.designComparisonCount ?? 0) + 1,
+    };
+    watches[rightIndex] = {
+      ...right,
+      designPreferenceElo: updated.right,
+      designComparisonCount: (right.designComparisonCount ?? 0) + 1,
+    };
+    await saveAll(watches);
+    return { left: watches[leftIndex], right: watches[rightIndex] };
   });
 }
 

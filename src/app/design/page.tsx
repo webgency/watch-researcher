@@ -11,16 +11,16 @@ export default async function DesignPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Design rank</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Design appeal</h1>
         <p className="text-sm text-slate-500">
-          Your own 1–5 read on how each watch looks. It is the vertical axis of the value matrix, and the one
-          judgement in the app that is meant to be yours rather than calculated.
+          Start with an anchored 1–5 reaction to each watch, then optionally refine ties with head-to-head choices.
+          The resulting score is the vertical axis of the value matrix.
         </p>
       </div>
 
       {IS_STATIC ? (
         <p className="card p-12 text-center text-sm text-slate-500">
-          Ranking needs the live app — this is the static export.
+          Rating designs needs the live app — this is the static export.
         </p>
       ) : (
         <DesignRanker watches={watches} />

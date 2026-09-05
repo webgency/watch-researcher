@@ -125,8 +125,12 @@ export interface Watch {
   wishlistTier?: WishlistTier;
   /** Rubric category for value scoring; inferred from an unambiguous legacy tag when absent. */
   scoringCategory?: ScoringCategory;
-  /** User-rated visual/design distinctiveness, 1-5. */
+  /** User-rated visual appeal, 1-5. Kept under its original key for data compatibility. */
   designUniqueness?: number;
+  /** Pairwise preference rating used only to order watches within the same 1-5 appeal band. */
+  designPreferenceElo?: number;
+  /** Number of pairwise design choices contributing to designPreferenceElo. */
+  designComparisonCount?: number;
   /** Headline price you're tracking (usually the best/target price). */
   price?: Money;
   /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */

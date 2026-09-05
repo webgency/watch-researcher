@@ -169,3 +169,34 @@ describe("addWatch price history", () => {
     expect(created.priceHistory).toBeUndefined();
   });
 });
+
+describe("recordDesignComparison", () => {
+  it("updates both watches atomically inside the same appeal band", async () => {
+    const { recordDesignComparison } = await import("./store");
+    await seed([
+      { ...baseWatch, id: "left", designUniqueness: 4 },
+      { ...baseWatch, id: "right", designUniqueness: 4 },
+    ]);
+
+    const result = await recordDesignComparison("left", "right", "left");
+    expect(result?.left.designPreferenceElo).toBe(1016);
+    expect(result?.right.designPreferenceElo).toBe(984);
+
+    const stored = await readStored();
+    expect(stored.map((watch) => watch.designComparisonCount)).toEqual([1, 1]);
+  });
+
+  it("rejects comparisons across different anchored ratings", async () => {
+    const { recordDesignComparison } = await import("./store");
+    await seed([
+      { ...baseWatch, id: "left", designUniqueness: 3 },
+      { ...baseWatch, id: "right", designUniqueness: 4 },
+    ]);
+
+    expect(await recordDesignComparison("left", "right", "left")).toBeUndefined();
+    expect(await readStored()).toEqual([
+      { ...baseWatch, id: "left", designUniqueness: 3 },
+      { ...baseWatch, id: "right", designUniqueness: 4 },
+    ]);
+  });
+});
