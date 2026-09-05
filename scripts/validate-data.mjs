@@ -265,6 +265,13 @@ if (!Array.isArray(watches)) {
       errors.push(`${path}.scoringCategory must be one of ${Array.from(SCORING_CATEGORIES).join(", ")}`);
     }
     checkIntegerRange(watch.designUniqueness, `${path}.designUniqueness`, errors);
+    if (watch.designPreferenceElo !== undefined && (!Number.isFinite(watch.designPreferenceElo) || watch.designPreferenceElo < 0)) {
+      errors.push(`${path}.designPreferenceElo must be a non-negative number`);
+    }
+    checkIntegerRange(watch.designComparisonCount, `${path}.designComparisonCount`, errors, {
+      min: 0,
+      max: Number.MAX_SAFE_INTEGER,
+    });
     checkMoney(watch.price, `${path}.price`, errors);
     checkDate(watch.priceUpdatedAt, `${path}.priceUpdatedAt`, errors);
     checkPriceHistory(watch.priceHistory, `${path}.priceHistory`, errors);

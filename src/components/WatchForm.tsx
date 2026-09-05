@@ -283,6 +283,12 @@ export default function WatchForm({
       notes: notes.trim() || undefined,
       links: builtLinks,
     };
+    if (initial && design !== initial.designUniqueness) {
+      // Pairwise choices were made inside the previous appeal band, so changing
+      // the anchored rating intentionally clears that refinement.
+      payload.designPreferenceElo = undefined;
+      payload.designComparisonCount = undefined;
+    }
     // Undefined when nothing is recorded, which payloadJson sends as null and
     // the PATCH reads as "clear this" — same convention as targetPrice, so
     // unsetting the last flag removes the object instead of leaving it stale.
@@ -388,7 +394,7 @@ export default function WatchForm({
             </select>
           </div>
           <div>
-            <label className="label">Design uniqueness</label>
+            <label className="label">Design appeal</label>
             <select className="input" value={designUniqueness} onChange={(e) => setDesignUniqueness(e.target.value)}>
               <option value="">No rating</option>
               {[1, 2, 3, 4, 5].map((rating) => (
@@ -397,6 +403,7 @@ export default function WatchForm({
                 </option>
               ))}
             </select>
+            <p className="mt-1 text-xs text-slate-400">1 leaves you cold; 5 is a design you would keep staring at.</p>
           </div>
           <div>
             <label className="label">Value-scoring category</label>

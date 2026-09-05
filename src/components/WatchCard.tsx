@@ -133,7 +133,7 @@ function StandingBlock({ summary }: { summary: StandingSummary }) {
     <div className="space-y-1.5 text-xs">
       <div className="flex flex-wrap gap-1">
         <span
-          title={`Quality against what ${standing.peerLabel} should buy, adjusted for where the price sits in the band. 50 is par.`}
+          title={`Quality against what ${standing.peerLabel} should buy, adjusted for its position within the price range. 50 is expected.`}
           className="rounded-full bg-slate-900 px-2 py-1 font-medium text-white"
         >
           {standing.valueScore === undefined
@@ -156,12 +156,12 @@ function StandingBlock({ summary }: { summary: StandingSummary }) {
             : `Quality ${Math.round(toDisplayScore(standing.qualityScore))}`}
         </span>
         <span
-          title={summary.designScore === null ? "Not yet ranked for design" : "Your design rank"}
+          title={summary.designScore === null ? "Design appeal not yet rated" : "Your design-appeal score"}
           className={`rounded-full px-2 py-1 font-medium ${
             summary.designScore === null ? "bg-slate-50 text-slate-400" : "bg-slate-100 text-slate-600"
           }`}
         >
-          {summary.designScore === null ? "Design unranked" : `Design ${Math.round(summary.designScore)}`}
+          {summary.designScore === null ? "Design unrated" : `Design ${Math.round(summary.designScore)}`}
         </span>
       </div>
 
@@ -171,10 +171,10 @@ function StandingBlock({ summary }: { summary: StandingSummary }) {
       </p>
 
       {standing.beats.length > 0 && (
-        <p className="text-emerald-700">Beats band on {dimensionList(standing.beats)}</p>
+        <p className="text-emerald-700">Above expectations: {dimensionList(standing.beats)}</p>
       )}
       {standing.trails.length > 0 && (
-        <p className="text-amber-700">Trails band on {dimensionList(standing.trails)}</p>
+        <p className="text-amber-700">Below expectations: {dimensionList(standing.trails)}</p>
       )}
       {standing.unrated.length > 0 && (
         <p className="text-slate-400" title="No source data recorded for these dimensions, so they are excluded from the scores">

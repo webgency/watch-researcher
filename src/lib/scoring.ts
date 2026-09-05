@@ -27,9 +27,29 @@ export interface ScoreThresholds {
   design: number;
 }
 
-/** Bounds of the 1-5 design rank. */
+/** Bounds of the anchored 1-5 design-appeal rating. */
 export const DESIGN_RANK_MIN = 1;
 export const DESIGN_RANK_MAX = 5;
+export const DESIGN_ELO_BASE = 1000;
+export const DESIGN_ELO_K = 32;
+/** Ratings 4-5 mean “I like the look”; the line sits between 3 and 4. */
+export const DESIGN_LIKE_THRESHOLD = 60;
+
+export type DesignComparisonOutcome = "left" | "right" | "tie";
+
+export function updateDesignElo(
+  leftElo = DESIGN_ELO_BASE,
+  rightElo = DESIGN_ELO_BASE,
+  outcome: DesignComparisonOutcome
+): { left: number; right: number } {
+  const expectedLeft = 1 / (1 + 10 ** ((rightElo - leftElo) / 400));
+  const actualLeft = outcome === "left" ? 1 : outcome === "right" ? 0 : 0.5;
+  const change = DESIGN_ELO_K * (actualLeft - expectedLeft);
+  return {
+    left: Math.round((leftElo + change) * 100) / 100,
+    right: Math.round((rightElo - change) * 100) / 100,
+  };
+}
 
 // Currency conversion rates used before scoring. The table lives in
 // ./currency-rates.mjs because scripts/validate-data.mjs needs the same
@@ -53,14 +73,16 @@ export function normalizePriceToUsd(money: Money, onWarning?: (message: string) 
 }
 
 /**
- * Your 1-5 design rank as a 0-100 score, or null when you have not ranked it.
+ * Your anchored 1-5 design appeal as a continuous 0-100 score, or null when
+ * you have not rated it. Pairwise preferences refine position only inside the
+ * selected 20-point band, so a refined 3 can never outrank a 4.
  *
  * This replaces a weighted desirability score whose three inputs did not hold
  * up. Brand reputation was a constant — every brand in data/brands.json sits at
  * reputationTier 3 — so its 35% contributed no variance. Wishlist tier is the
  * judgement the matrix exists to inform, so feeding it back in at 25% made the
  * chart partly restate its own input. Design was the only live term, and for
- * the watches without a design rank the score collapsed to exactly five
+ * the watches without a design rating the score collapsed to exactly five
  * values, one per wishlist tier.
  *
  * Unranked returns null rather than a neutral 3: a neutral fill would park
@@ -70,7 +92,12 @@ export function computeDesignScore(watch: Watch): number | null {
   const rank = watch.designUniqueness;
   if (typeof rank !== "number" || !Number.isInteger(rank)) return null;
   if (rank < DESIGN_RANK_MIN || rank > DESIGN_RANK_MAX) return null;
-  return ((rank - DESIGN_RANK_MIN) / (DESIGN_RANK_MAX - DESIGN_RANK_MIN)) * 100;
+  const bandStart = (rank - DESIGN_RANK_MIN) * 20;
+  if (!watch.designComparisonCount || watch.designPreferenceElo === undefined) return bandStart + 10;
+  // 80 Elo points spans the useful interior of a band. Clamp away from the
+  // edges to preserve a visible gap between adjacent appeal ratings.
+  const withinBand = clamp01(0.5 + (watch.designPreferenceElo - DESIGN_ELO_BASE) / 160);
+  return bandStart + 1 + withinBand * 18;
 }
 
 /** Median of the supplied scores. Callers pass only the watches scored on that axis. */
@@ -390,7 +417,7 @@ export function percentile(value: number, pool: number[]): number | undefined {
 }
 
 // Rated dimensions must diverge from the rubric reference by more than this
-// before a watch is said to beat or trail the band.
+// before a watch is described as above or below expectations for its price.
 export const RUBRIC_TOLERANCE = 0.05;
 
 // How strongly within-band price position tilts the value score.
@@ -584,7 +611,7 @@ export function unratedReason(watch: Watch, dimension: Dimension): string {
  */
 export interface StandingSummary {
   standing: Standing;
-  /** Your design rank as 0-100, or null when the watch is unranked. */
+  /** Your design appeal as 0-100, or null when the watch is unrated. */
   designScore: number | null;
 }
 

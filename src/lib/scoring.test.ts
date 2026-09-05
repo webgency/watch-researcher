@@ -15,6 +15,7 @@ import {
   CURRENCY_TO_USD,
   landedPriceUsd,
   normalizePriceToUsd,
+  updateDesignElo,
 } from "./scoring";
 import { DIMENSIONS } from "./rubrics";
 import { CURRENCIES } from "./types";
@@ -405,10 +406,10 @@ describe("evidence confidence", () => {
 });
 
 describe("design score", () => {
-  it("rescales the 1-5 rank onto 0-100", () => {
-    expect(computeDesignScore(makeWatch({ designUniqueness: 1 }))).toBe(0);
+  it("maps 1-5 ratings to semantic band centers", () => {
+    expect(computeDesignScore(makeWatch({ designUniqueness: 1 }))).toBe(10);
     expect(computeDesignScore(makeWatch({ designUniqueness: 3 }))).toBe(50);
-    expect(computeDesignScore(makeWatch({ designUniqueness: 5 }))).toBe(100);
+    expect(computeDesignScore(makeWatch({ designUniqueness: 5 }))).toBe(90);
   });
 
   it("returns null for an unranked watch rather than a neutral middle", () => {
@@ -427,6 +428,26 @@ describe("design score", () => {
     const mustHave = makeWatch({ wishlistTier: "must-have" });
     const pass = makeWatch({ wishlistTier: "pass" });
     expect(computeDesignScore(mustHave)).toBe(computeDesignScore(pass));
+  });
+
+  it("uses pairwise preferences to spread watches without crossing appeal bands", () => {
+    const preferred = computeDesignScore(
+      makeWatch({ designUniqueness: 4, designPreferenceElo: 1016, designComparisonCount: 1 })
+    )!;
+    const other = computeDesignScore(
+      makeWatch({ designUniqueness: 4, designPreferenceElo: 984, designComparisonCount: 1 })
+    )!;
+    expect(preferred).toBeGreaterThan(other);
+    expect(other).toBeGreaterThan(60);
+    expect(preferred).toBeLessThan(80);
+  });
+});
+
+describe("updateDesignElo", () => {
+  it("rewards the preferred design and handles ties symmetrically", () => {
+    expect(updateDesignElo(1000, 1000, "left")).toEqual({ left: 1016, right: 984 });
+    expect(updateDesignElo(1000, 1000, "right")).toEqual({ left: 984, right: 1016 });
+    expect(updateDesignElo(1000, 1000, "tie")).toEqual({ left: 1000, right: 1000 });
   });
 });
 

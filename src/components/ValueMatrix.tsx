@@ -2,8 +2,8 @@ import Link from "next/link";
 import { formatMoney } from "@/lib/format";
 import {
   assignQuadrant,
+  DESIGN_LIKE_THRESHOLD,
   landedPriceUsd,
-  medianScore,
   PAR_SCORE,
   Quadrant,
   standingSummaries,
@@ -26,37 +26,34 @@ const QUADRANTS: Quadrant[] = ["buy", "aspirational", "sensible", "skip"];
 const QUADRANT_META: Record<Quadrant, { label: string; shortLabel: string; color: string; fill: string }> = {
   buy: {
     label: "Buy",
-    shortLabel: "Beats its band / like the look",
+    shortLabel: "Good value · Like the design",
     color: "text-emerald-700",
     fill: "#d1fae5",
   },
   aspirational: {
     label: "Aspirational",
-    shortLabel: "Trails its band / like the look",
+    shortLabel: "Below expected · Like the design",
     color: "text-amber-700",
     fill: "#fef3c7",
   },
   sensible: {
     label: "Sensible",
-    shortLabel: "Beats its band / lukewarm on it",
+    shortLabel: "Good value · Lukewarm on it",
     color: "text-sky-700",
     fill: "#e0f2fe",
   },
   skip: {
     label: "Skip",
-    shortLabel: "Trails its band / lukewarm on it",
+    shortLabel: "Below expected · Lukewarm on it",
     color: "text-slate-600",
     fill: "#f1f5f9",
   },
 };
 
-// The value axis is rubric-relative, so par is an absolute reference rather
-// than a split derived from the collection. The design axis has no such
-// anchor — a 1-5 rank means only what it means relative to your other ranks —
-// so it splits at the median of the watches you have actually ranked, with the
-// scale midpoint as the fallback while too few are ranked to have one.
+// Both axes have semantic anchors. Value splits at rubric par; design splits
+// between the anchored “fine” (3) and “really like it” (4) ratings. Pairwise
+// refinement can spread points inside a rating band but never cross this line.
 const PAR_DISPLAY = toDisplayScore(PAR_SCORE);
-const DESIGN_SPLIT_FALLBACK = 50;
 
 const CHART = {
   width: 760,
@@ -86,15 +83,7 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
   // Peer groups are drawn from the whole collection, not just the wishlist.
   const summaries = standingSummaries(wishlist, watches);
 
-  // Taken from the watches actually ranked, so a half-ranked collection still
-  // splits sensibly instead of being dragged by watches you have no opinion on.
-  const designSplit =
-    medianScore(
-      wishlist.flatMap((watch) => {
-        const score = summaries[watch.id].designScore;
-        return score === null ? [] : [score];
-      })
-    ) ?? DESIGN_SPLIT_FALLBACK;
+  const designSplit = DESIGN_LIKE_THRESHOLD;
   const thresholds = { value: PAR_DISPLAY, design: designSplit };
 
   const entries: Entry[] = wishlist.map((watch) => {
@@ -138,17 +127,17 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
           <div>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Value matrix</h2>
             <p className="mt-1 text-sm text-slate-500">
-              {rated.length} scored wishlist watch{rated.length === 1 ? "" : "es"} plotted against their price bands.
+              {rated.length} scored wishlist watch{rated.length === 1 ? "" : "es"} plotted by value for the price.
             </p>
           </div>
           <div className="text-left text-xs text-slate-500 sm:text-right">
-            <p>Value par {PAR_DISPLAY}</p>
-            <p>Design split {formatScore(designSplit)}</p>
+            <p>Expected value {PAR_DISPLAY}</p>
+            <p>Design split: ratings 4–5</p>
           </div>
         </div>
 
         <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-          {`Value is scored against the fixed rubric for each watch's category and price band, so a score of ${PAR_DISPLAY} means “exactly what that money should buy”. Dimensions without recorded data are left unrated rather than filled with a mid value.`}
+          {`Value is compared with fixed expectations for each category and price range, so a score of ${PAR_DISPLAY} means “what that money should buy”. Dimensions without recorded data are left unrated rather than filled with a mid value.`}
         </p>
 
         {warnings.length > 0 && (
@@ -167,7 +156,7 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
           <div className="overflow-x-auto">
             <svg
               role="img"
-              aria-label="Value against design rank, split into quadrants"
+              aria-label="Value against design appeal, split into quadrants"
               viewBox={`0 0 ${CHART.width} ${CHART.height}`}
               className="w-full min-w-[640px]"
             >
@@ -179,9 +168,6 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
                     <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill={QUADRANT_META[rect.quadrant].fill} opacity="0.65" />
                     <text x={heading.x} y={heading.titleY} textAnchor={heading.anchor} className="fill-slate-700 text-[13px] font-semibold">
                       {QUADRANT_META[rect.quadrant].label}
-                    </text>
-                    <text x={heading.x} y={heading.subY} textAnchor={heading.anchor} className="fill-slate-500 text-[11px]">
-                      {QUADRANT_META[rect.quadrant].shortLabel}
                     </text>
                   </g>
                 );
@@ -205,10 +191,10 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
               <rect x={CHART.left} y={CHART.top} width={plotWidth} height={plotHeight} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
 
               <text x={(CHART.left + plotRight) / 2} y={CHART.height - 18} textAnchor="middle" className="fill-slate-700 text-[12px] font-semibold">
-                Value vs price band
+                Value for the price
               </text>
               <text x="20" y={(CHART.top + plotBottom) / 2} textAnchor="middle" transform={`rotate(-90 20 ${(CHART.top + plotBottom) / 2})`} className="fill-slate-700 text-[12px] font-semibold">
-                Design rank
+                Design appeal
               </text>
 
               {rated.map((entry) => {
@@ -259,7 +245,7 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Not yet ranked</h3>
               <p className="text-xs text-slate-500">
-                These need your design rank before they can be placed.{" "}
+                These need your design-appeal rating before they can be placed.{" "}
                 <Link href="/design" className="font-medium text-blue-600 hover:underline">
                   Rank them →
                 </Link>
@@ -315,8 +301,8 @@ function EntryList({
                 {standing.qualityPercentile !== undefined &&
                   ` · ${Math.round(standing.qualityPercentile * 100)}th pct of ${standing.peerCount}`}
               </p>
-              {standing.beats.length > 0 && <p className="text-xs text-emerald-700">Beats: {labelFor(standing.beats)}</p>}
-              {standing.trails.length > 0 && <p className="text-xs text-amber-700">Trails: {labelFor(standing.trails)}</p>}
+              {standing.beats.length > 0 && <p className="text-xs text-emerald-700">Above expectations: {labelFor(standing.beats)}</p>}
+              {standing.trails.length > 0 && <p className="text-xs text-amber-700">Below expectations: {labelFor(standing.trails)}</p>}
               {standing.unrated.length > 0 && <p className="text-xs text-slate-400">Unrated: {labelFor(standing.unrated)}</p>}
               {standing.frictions.length > 0 && (
                 <div className="mt-1 flex flex-wrap gap-1">
@@ -474,14 +460,13 @@ function quadrantHeading(rect: ReturnType<typeof quadrantRects>[number]) {
 /** Heading boxes, reserved so rank labels never land on them. */
 function quadrantHeadingBoxes(designSplit: number): Box[] {
   return quadrantRects(designSplit).map((rect) => {
-    const { x, titleY, subY, anchor } = quadrantHeading(rect);
-    // The subtitle is the wider of the two lines.
-    const width = QUADRANT_META[rect.quadrant].shortLabel.length * 6;
+    const { x, titleY, anchor } = quadrantHeading(rect);
+    const width = QUADRANT_META[rect.quadrant].label.length * 7;
     return {
       x1: anchor === "end" ? x - width : x,
       y1: titleY - 16,
       x2: anchor === "end" ? x : x + width,
-      y2: subY + 4,
+      y2: titleY + 4,
     };
   });
 }

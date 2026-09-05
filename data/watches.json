@@ -2243,7 +2243,7 @@
     "model": "Ref. 5303-2",
     "referenceNumber": "5303-WHITE-COSC-3H-STD",
     "status": "wishlist",
-    "wishlistTier": "love-it",
+    "wishlistTier": "pass",
     "designUniqueness": 3,
     "price": {
       "amount": 1870,
@@ -2902,6 +2902,19 @@
       "amount": 425,
       "currency": "USD"
     },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 425,
+          "currency": "USD"
+        },
+        "date": "2026-09-05T15:45:50.562Z",
+        "source": "manual"
+      }
+    ],
+    "qualityFlags": {
+      "braceletIncluded": true
+    },
     "links": [
       {
         "url": "https://spinnaker-watches.com/products/croft-mid-size-automatic-dolphin-project-limited-edition-dolphin-cave-sp-5177-22",
@@ -2928,23 +2941,10 @@
       "braceletStrap": "20mm stainless steel bracelet with fold-over safety clasp and push button; extra grey rPET strap",
       "complications": "Date"
     },
-    "qualityFlags": {
-      "braceletIncluded": true
-    },
     "tags": [
       "diver"
     ],
     "id": "mtok1joku7s7dc",
-    "dateAdded": "2026-09-05T15:45:50.562Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 425,
-          "currency": "USD"
-        },
-        "date": "2026-09-05T15:45:50.562Z",
-        "source": "manual"
-      }
-    ]
+    "dateAdded": "2026-09-05T15:45:50.562Z"
   }
 ]
