@@ -331,6 +331,16 @@ function EntryList({
             <div className="flex flex-shrink-0 flex-wrap items-center gap-2 text-xs">
               <ScorePill label={rank ? `Value #${rank}` : "Value"} value={standing.valueScore} scaled />
               <ScorePill label="Quality" value={standing.qualityScore} scaled />
+              <span
+                className={`rounded-full px-2 py-1 font-medium ${
+                  standing.confidence === "low"
+                    ? "bg-amber-50 text-amber-800"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+                title={`${standing.confidence} confidence from recorded scoring inputs`}
+              >
+                Evidence {Math.round(standing.evidenceCoverage * 100)}%
+              </span>
               <ScorePill label="Design" value={summary.designScore ?? undefined} />
             </div>
           </li>

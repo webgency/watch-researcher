@@ -10,6 +10,8 @@ import {
   PriceSnapshot,
   QualityFlags,
   RetailerLink,
+  ScoringCategory,
+  SCORING_CATEGORIES,
   Watch,
   WatchInput,
   WatchSpecs,
@@ -143,6 +145,15 @@ function cleanWishlistTier(value: unknown, errors: string[]): WishlistTier | und
     return undefined;
   }
   return value as WishlistTier;
+}
+
+function cleanScoringCategory(value: unknown, errors: string[]): ScoringCategory | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string" || !SCORING_CATEGORIES.includes(value as ScoringCategory)) {
+    errors.push(`scoringCategory must be one of ${SCORING_CATEGORIES.join(", ")}`);
+    return undefined;
+  }
+  return value as ScoringCategory;
 }
 
 function cleanCondition(value: unknown, path: string, errors: string[]): Condition | undefined {
@@ -421,6 +432,7 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "referenceNumber", cleanOptionalString(body.referenceNumber, "referenceNumber", errors));
   assignIfPresent(output, body, "status", cleanStatus(body.status, !partial, errors));
   assignIfPresent(output, body, "wishlistTier", cleanWishlistTier(body.wishlistTier, errors));
+  assignIfPresent(output, body, "scoringCategory", cleanScoringCategory(body.scoringCategory, errors));
   assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));

@@ -689,6 +689,7 @@
     "referenceNumber": "M7939G1A0NRU-0003",
     "status": "wishlist",
     "wishlistTier": "must-have",
+    "scoringCategory": "gmt",
     "designUniqueness": 3,
     "price": {
       "amount": 4375,
@@ -1347,6 +1348,7 @@
     "model": "Aquascaphe GMT — Orange",
     "status": "wishlist",
     "wishlistTier": "interested",
+    "scoringCategory": "diver",
     "designUniqueness": 3,
     "price": {
       "amount": 851,
@@ -1870,6 +1872,7 @@
     "referenceNumber": "SMRA25AW",
     "status": "wishlist",
     "wishlistTier": "interested",
+    "scoringCategory": "dress",
     "designUniqueness": 4,
     "price": {
       "amount": 2490,
@@ -2306,6 +2309,7 @@
     "referenceNumber": "WATCH-JANMAYEN-CPL-02-TI5-AURORASKY-39-RUBBER-BLACK",
     "status": "wishlist",
     "wishlistTier": "love-it",
+    "scoringCategory": "dress",
     "designUniqueness": 2,
     "price": {
       "amount": 2850,
@@ -2450,6 +2454,7 @@
     "model": "Hermétique Tourer Bronze Green- Baltic Watches",
     "status": "wishlist",
     "wishlistTier": "love-it",
+    "scoringCategory": "dress",
     "designUniqueness": 5,
     "price": {
       "amount": 550,
@@ -2634,6 +2639,7 @@
     "model": "Tidevand Meteorite - Kosmos",
     "referenceNumber": "HAC-TDV-KOS-BOR",
     "status": "wishlist",
+    "scoringCategory": "diver",
     "designUniqueness": 5,
     "price": {
       "amount": 847,

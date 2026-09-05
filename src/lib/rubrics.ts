@@ -39,7 +39,9 @@ export const DIMENSION_BLURBS: Record<Dimension, string> = {
 };
 
 /** Categories the rubric knows about. Watches whose tags match none fall back to "dress". */
-export type RubricCategory = "diver" | "chronograph" | "gmt" | "dress";
+import type { ScoringCategory } from "./types";
+
+export type RubricCategory = ScoringCategory;
 
 export const RUBRIC_CATEGORIES: RubricCategory[] = ["diver", "chronograph", "gmt", "dress"];
 
