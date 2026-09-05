@@ -1376,7 +1376,7 @@
     "model": "Aquascaphe GMT — Orange",
     "status": "wishlist",
     "wishlistTier": "interested",
-    "scoringCategory": "diver",
+    "scoringCategory": "gmt",
     "designUniqueness": 3,
     "designPreferenceElo": 1045.81,
     "designComparisonCount": 3,
@@ -1413,7 +1413,6 @@
       "complications": "GMT"
     },
     "tags": [
-      "diver",
       "gmt"
     ],
     "id": "w32",
