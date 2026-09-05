@@ -107,12 +107,15 @@ for (const w of noDiameter) notes.push(`no caseDiameterMm: ${label(w)}`);
 
 // --- Findings that need a human, never fatal -------------------------------
 
-// A category the Phase 0 layer resolves but rubrics.ts has no column for, so
-// the engine leaves the watch unrated. Today that is only `sports`.
+// A category the Phase 0 layer resolves but rubrics.ts has no column for.
+// computeStanding needs a rubric to produce a valueScore, so these watches
+// have no value score at all and fall out of the quadrant chart — not merely
+// a dimension short. Today that is only `sports`.
 const unscored = watches.filter((w) => categoryFor(w) === "sports");
 if (unscored.length) {
   notes.push(
-    `${unscored.length} record(s) resolve to "sports", which RUBRICS has no column for; they stay unrated until Phase 1 adds one:`
+    `${unscored.length} record(s) resolve to "sports", which RUBRICS has no column for. ` +
+      `They have no valueScore and no quadrant until Phase 1 adds one:`
   );
   for (const w of unscored) notes.push(`  sports: ${label(w)}`);
 }
