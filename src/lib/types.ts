@@ -90,8 +90,18 @@ export interface QualityFlags {
   microAdjustClasp?: boolean;
   quickRelease?: boolean;
   braceletIncluded?: boolean;
-  /** Anti-reflective coating layer count. */
+  /** Anti-reflective coating layer count, when the brand publishes one. */
   arLayers?: number;
+  /**
+   * Whether an AR coating is present, for the common case where the brand
+   * says "anti-reflective coated" and never gives a layer count.
+   *
+   * The same input as arLayers, recorded more coarsely — not a second one.
+   * arLayers wins when both are set, because a count is strictly more
+   * information. false is a verified absence, not an absence of evidence:
+   * leave the field out when the page simply does not say.
+   */
+  arCoated?: boolean;
 }
 
 export type Availability = "in-stock" | "pre-order" | "sold-out" | "discontinued";

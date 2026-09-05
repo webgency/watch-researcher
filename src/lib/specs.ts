@@ -66,7 +66,20 @@ export const QUALITY_FLAG_FIELDS: QualityFlagField[] = [
   { key: "hardenedCoatingHv", label: "Surface hardening", unit: "HV", type: "number", dimension: "caseCraft" },
   { key: "sapphireBezelInsert", label: "Sapphire bezel insert", type: "boolean", dimension: "caseCraft" },
   { key: "drilledLugs", label: "Drilled lugs", type: "boolean", dimension: "caseCraft" },
-  { key: "arLayers", label: "AR coating layers", type: "number", dimension: "caseCraft" },
+  {
+    key: "arLayers",
+    label: "AR coating layers",
+    type: "number",
+    dimension: "caseCraft",
+    hint: "Leave blank and use the toggle below if the brand only says it is coated.",
+  },
+  {
+    key: "arCoated",
+    label: "AR coated",
+    type: "boolean",
+    dimension: "caseCraft",
+    hint: "For when no layer count is published. A recorded count takes precedence.",
+  },
   {
     key: "braceletIncluded",
     label: "Bracelet included",

@@ -315,6 +315,7 @@ function cleanQualityFlags(value: unknown, errors: string[]): QualityFlags | und
     "microAdjustClasp",
     "quickRelease",
     "braceletIncluded",
+    "arCoated",
   ] as const;
   for (const key of booleans) {
     const cleaned = cleanBoolean(value[key], `qualityFlags.${key}`, errors);

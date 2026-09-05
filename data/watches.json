@@ -792,7 +792,8 @@
     "priceUpdatedAt": "2026-08-14T04:46:14.967Z",
     "qualityFlags": {
       "accuracySpecSpd": 40,
-      "braceletIncluded": false
+      "braceletIncluded": false,
+      "arCoated": true
     },
     "links": [
       {
@@ -838,7 +839,8 @@
       "sapphireBezelInsert": false,
       "drilledLugs": true,
       "microAdjustClasp": true,
-      "braceletIncluded": true
+      "braceletIncluded": true,
+      "arCoated": true
     },
     "links": [
       {
@@ -900,7 +902,10 @@
       "diver"
     ],
     "id": "w19",
-    "dateAdded": "2026-06-22T15:14:00Z"
+    "dateAdded": "2026-06-22T15:14:00Z",
+    "qualityFlags": {
+      "arCoated": true
+    }
   },
   {
     "brand": "Brew",
@@ -960,7 +965,8 @@
     "priceUpdatedAt": "2026-08-14T04:46:16.758Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
-      "braceletIncluded": false
+      "braceletIncluded": false,
+      "arCoated": true
     },
     "links": [
       {
@@ -1202,7 +1208,8 @@
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "quickRelease": true,
-      "braceletIncluded": false
+      "braceletIncluded": false,
+      "arCoated": true
     },
     "links": [
       {
@@ -3056,7 +3063,8 @@
       }
     ],
     "qualityFlags": {
-      "braceletIncluded": true
+      "braceletIncluded": true,
+      "arCoated": true
     },
     "links": [
       {

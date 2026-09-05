@@ -151,7 +151,9 @@ for (const w of watches) {
 
 // qualityFlags gate caseCraft and bracelet. The spec's advice is to accept
 // partial coverage rather than attack it, so this reports and never fails.
-const CASE_CRAFT = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers"];
+// Mirrors CASE_CRAFT_INPUTS in scoring.ts. arLayers and arCoated are the same
+// input recorded at two precisions, so a record with either one counts once.
+const CASE_CRAFT = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers", "arCoated"];
 const BRACELET = ["braceletIncluded", "microAdjustClasp", "quickRelease"];
 const has = (w, keys) => keys.some((k) => w.qualityFlags?.[k] !== undefined);
 const caseCraft = watches.filter((w) => has(w, CASE_CRAFT)).length;

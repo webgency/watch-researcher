@@ -1,5 +1,5 @@
 import { TAG_TO_CATEGORY } from "./categories";
-import { Money, Watch } from "./types";
+import { Money, QualityFlags, Watch } from "./types";
 import {
   CATEGORY_EXPECTATION,
   Dimension,
@@ -232,7 +232,19 @@ export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => vo
 }
 
 /** qualityFlags each dimension reads. A dimension is rated only if at least one is recorded. */
-const CASE_CRAFT_FLAGS = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers"] as const;
+//
+// caseCraft has four inputs, not four flags: AR coating is one input that can
+// be recorded two ways, as a layer count when the brand publishes one and as a
+// plain yes/no when it only says "anti-reflective coated", which is how most of
+// them put it. Treating arCoated as a fifth input would quietly cut every
+// existing record's coverage — a watch with 2 of 4 recorded would become 2 of
+// 5 and drop under MIN_REFERENCE_COVERAGE without anyone touching its data.
+const CASE_CRAFT_INPUTS: Array<(flags: QualityFlags) => boolean> = [
+  (f) => f.hardenedCoatingHv !== undefined,
+  (f) => f.sapphireBezelInsert !== undefined,
+  (f) => f.drilledLugs !== undefined,
+  (f) => f.arLayers !== undefined || f.arCoated !== undefined,
+];
 const BRACELET_FLAGS = ["braceletIncluded", "microAdjustClasp", "quickRelease"] as const;
 
 export interface DimensionEvidence {
@@ -334,7 +346,7 @@ export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, 
   // For caseCraft that fabricated score was the 0.35 base, which sits below
   // every band's rubric reference, so the watch was guaranteed to trail on a
   // dimension nobody had measured.
-  if (CASE_CRAFT_FLAGS.some((flag) => f[flag] !== undefined)) {
+  if (CASE_CRAFT_INPUTS.some((recorded) => recorded(f))) {
     let achieved = 0;
     if (f.hardenedCoatingHv !== undefined) {
       if (f.hardenedCoatingHv > 0) achieved += 0.2;
@@ -347,12 +359,18 @@ export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, 
     }
     if (f.arLayers !== undefined) {
       achieved += (Math.min(f.arLayers, 8) / 8) * 0.2;
+    } else if (f.arCoated) {
+      // Credit exactly what "it is coated" guarantees: one layer. A brand that
+      // publishes a real count scores higher, which is the right incentive —
+      // awarding the average coating here would be inventing a number the
+      // manufacturer declined to give.
+      achieved += (1 / 8) * 0.2;
     }
-    const knownInputs = CASE_CRAFT_FLAGS.filter((flag) => f[flag] !== undefined).length;
+    const knownInputs = CASE_CRAFT_INPUTS.filter((recorded) => recorded(f)).length;
     // Keep the established rubric scale: the score states verified capability,
     // while coverage states how much of the possible evidence was inspected.
     // Unknown features add neither verified points nor negative evidence.
-    out.caseCraft = evidence(0.35 + achieved, knownInputs, CASE_CRAFT_FLAGS.length);
+    out.caseCraft = evidence(0.35 + achieved, knownInputs, CASE_CRAFT_INPUTS.length);
   }
 
   // A watch sold on a strap has no bracelet to judge, so the dimension is not
