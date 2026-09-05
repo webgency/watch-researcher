@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   QUALITY_FLAG_FIELDS,
+  QUALITY_FLAG_NO,
   QUALITY_FLAG_UNSET,
   qualityFlagsFromForm,
   qualityFlagsToForm,
 } from "./specs";
-import { scoreDimensions, unratedReason } from "./scoring";
+import { scoreDimensionEvidence, scoreDimensions, unratedReason } from "./scoring";
 import { QualityFlags, Watch } from "./types";
 
 /** Form values with every flag left unrecorded. */
@@ -103,5 +104,60 @@ describe("quality flags reaching the scoring engine", () => {
   it("rates caseCraft once the form records one of its flags", () => {
     const flags = qualityFlagsFromForm({ ...blankForm(), drilledLugs: "yes" })!;
     expect(scoreDimensions(makeWatch(flags)).caseCraft).toBeCloseTo(0.45, 5);
+  });
+});
+
+describe("AR coating recorded without a layer count", () => {
+  it("rates caseCraft from arCoated alone", () => {
+    // The gap this closes: brands routinely say "anti-reflective coated" and
+    // never publish a count, so the fact was unrecordable and caseCraft went
+    // unrated on watches whose coating was stated outright.
+    const rated = scoreDimensions(makeWatch({ arCoated: true }));
+    expect(rated.caseCraft).toBeDefined();
+    expect(unratedReason(makeWatch({}), "caseCraft")).toBe("No finishing details recorded");
+  });
+
+  it("credits one layer, less than a published count", () => {
+    const coated = scoreDimensions(makeWatch({ arCoated: true }));
+    const oneLayer = scoreDimensions(makeWatch({ arLayers: 1 }));
+    const fourLayers = scoreDimensions(makeWatch({ arLayers: 4 }));
+    expect(coated.caseCraft).toBeCloseTo(oneLayer.caseCraft!, 10);
+    expect(coated.caseCraft!).toBeLessThan(fourLayers.caseCraft!);
+  });
+
+  it("treats a recorded absence as absence, not as a missing input", () => {
+    const notCoated = scoreDimensionEvidence(makeWatch({ arCoated: false }));
+    // Rated, because the fact is known — and it adds nothing, because there
+    // is no coating to credit.
+    expect(notCoated.caseCraft).toBeDefined();
+    expect(notCoated.caseCraft!.raw).toBeCloseTo(0.35, 10);
+    expect(notCoated.caseCraft!.knownInputs).toBe(1);
+  });
+
+  it("lets a published count win over the coarse flag", () => {
+    const both = scoreDimensions(makeWatch({ arLayers: 6, arCoated: true }));
+    const countOnly = scoreDimensions(makeWatch({ arLayers: 6 }));
+    expect(both.caseCraft).toBeCloseTo(countOnly.caseCraft!, 10);
+  });
+
+  it("counts AR as one input however it was recorded", () => {
+    // The reason arCoated is not a fifth flag: a fifth would silently cut the
+    // coverage of every record already in the file, dropping some under
+    // MIN_REFERENCE_COVERAGE without their data changing.
+    for (const flags of [{ arLayers: 2 }, { arCoated: true }, { arLayers: 2, arCoated: true }]) {
+      const ev = scoreDimensionEvidence(makeWatch(flags)).caseCraft!;
+      expect(ev.totalInputs).toBe(4);
+      expect(ev.knownInputs).toBe(1);
+    }
+  });
+
+  it("round-trips through the form", () => {
+    const values = qualityFlagsToForm({ arCoated: false });
+    expect(values.arCoated).toBe(QUALITY_FLAG_NO);
+    expect(qualityFlagsFromForm(values)?.arCoated).toBe(false);
+    const blank = qualityFlagsToForm({});
+    expect(blank.arCoated).toBe(QUALITY_FLAG_UNSET);
+    // An all-blank form records nothing at all, rather than a flag set to false.
+    expect(qualityFlagsFromForm(blank)).toBeUndefined();
   });
 });

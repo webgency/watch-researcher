@@ -56,6 +56,7 @@ const SCORING_CATEGORY_LABELS: Record<ScoringCategory, string> = {
   chronograph: "Chronograph",
   gmt: "GMT / worldtimer",
   dress: "Dress / everyday",
+  sports: "Sports / field",
 };
 
 function toLinkRow(link: RetailerLink): LinkRow {

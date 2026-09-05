@@ -1,4 +1,5 @@
-import { Money, Watch } from "./types";
+import { TAG_TO_CATEGORY } from "./categories";
+import { Money, QualityFlags, Watch } from "./types";
 import {
   CATEGORY_EXPECTATION,
   Dimension,
@@ -140,11 +141,23 @@ const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 // added. Unknown calibers return undefined — they do NOT fall back to a mid value.
 const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["co-axial master chronometer 8800", 0.95],
+  // Rolex 3285. Level with the Omega above rather than ranked against it:
+  // both are flagship manufacture calibers and each wins on a different axis
+  // (Rolex -2/+2 s/day and a 70h barrel, Omega 15,000 gauss and METAS). The
+  // power-reserve bonus in scoreDimensions already separates them on reserve,
+  // so baking that into the base tier would count it twice.
+  ["3285", 0.95],
   ["mt5450", 0.80],
   ["m100", 0.80],
   // Proprietary automatic monopusher chronograph with a patented retrograde
   // regatta module and 64h reserve; kept below the METAS anchor above.
   ["alb01 a", 0.80],
+  // Muehle MU 9419: a Sellita SW500 (the 7750-architecture automatic
+  // chronograph) reworked with the woodpecker-neck regulation, a Glashuette
+  // three-quarter plate and a 62h barrel. Above the bare SW510 below it for
+  // the regulation and the rework, below Tudor's in-house COSC MT5450, which
+  // is a movement rather than a treatment of someone else's.
+  ["mu 9419", 0.75],
   ["sw510", 0.72],
   ["l688", 0.72],
   ["st-1901b", 0.70],
@@ -200,14 +213,15 @@ export function caliberTier(caliber: string | undefined): number | undefined {
 export function deriveCategory(watch: Watch): RubricCategory | undefined {
   if (watch.scoringCategory) return watch.scoringCategory;
 
-  const inferred = new Set<RubricCategory>();
-  for (const tag of watch.tags ?? []) {
-    const normalized = tag.trim().toLowerCase();
-    if (normalized === "diver" || normalized === "dive") inferred.add("diver");
-    if (normalized === "chronograph") inferred.add("chronograph");
-    if (normalized === "gmt" || normalized === "worldtimer") inferred.add("gmt");
-    if (normalized === "dress") inferred.add("dress");
-  }
+  // The tag vocabulary lives in category-tags.mjs, shared with the bare-Node
+  // audit script. It used to be restated here as a chain of comparisons, which
+  // is how "sports" came to be a tag the data carried and this function could
+  // not see: three watches were tagged and still resolved to nothing.
+  const inferred = new Set<RubricCategory>(
+    (watch.tags ?? [])
+      .map((tag) => TAG_TO_CATEGORY[tag.trim().toLowerCase()])
+      .filter((category): category is RubricCategory => category !== undefined)
+  );
   return inferred.size === 1 ? [...inferred][0] : undefined;
 }
 
@@ -218,7 +232,19 @@ export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => vo
 }
 
 /** qualityFlags each dimension reads. A dimension is rated only if at least one is recorded. */
-const CASE_CRAFT_FLAGS = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers"] as const;
+//
+// caseCraft has four inputs, not four flags: AR coating is one input that can
+// be recorded two ways, as a layer count when the brand publishes one and as a
+// plain yes/no when it only says "anti-reflective coated", which is how most of
+// them put it. Treating arCoated as a fifth input would quietly cut every
+// existing record's coverage — a watch with 2 of 4 recorded would become 2 of
+// 5 and drop under MIN_REFERENCE_COVERAGE without anyone touching its data.
+const CASE_CRAFT_INPUTS: Array<(flags: QualityFlags) => boolean> = [
+  (f) => f.hardenedCoatingHv !== undefined,
+  (f) => f.sapphireBezelInsert !== undefined,
+  (f) => f.drilledLugs !== undefined,
+  (f) => f.arLayers !== undefined || f.arCoated !== undefined,
+];
 const BRACELET_FLAGS = ["braceletIncluded", "microAdjustClasp", "quickRelease"] as const;
 
 export interface DimensionEvidence {
@@ -320,7 +346,7 @@ export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, 
   // For caseCraft that fabricated score was the 0.35 base, which sits below
   // every band's rubric reference, so the watch was guaranteed to trail on a
   // dimension nobody had measured.
-  if (CASE_CRAFT_FLAGS.some((flag) => f[flag] !== undefined)) {
+  if (CASE_CRAFT_INPUTS.some((recorded) => recorded(f))) {
     let achieved = 0;
     if (f.hardenedCoatingHv !== undefined) {
       if (f.hardenedCoatingHv > 0) achieved += 0.2;
@@ -333,12 +359,18 @@ export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, 
     }
     if (f.arLayers !== undefined) {
       achieved += (Math.min(f.arLayers, 8) / 8) * 0.2;
+    } else if (f.arCoated) {
+      // Credit exactly what "it is coated" guarantees: one layer. A brand that
+      // publishes a real count scores higher, which is the right incentive —
+      // awarding the average coating here would be inventing a number the
+      // manufacturer declined to give.
+      achieved += (1 / 8) * 0.2;
     }
-    const knownInputs = CASE_CRAFT_FLAGS.filter((flag) => f[flag] !== undefined).length;
+    const knownInputs = CASE_CRAFT_INPUTS.filter((recorded) => recorded(f)).length;
     // Keep the established rubric scale: the score states verified capability,
     // while coverage states how much of the possible evidence was inspected.
     // Unknown features add neither verified points nor negative evidence.
-    out.caseCraft = evidence(0.35 + achieved, knownInputs, CASE_CRAFT_FLAGS.length);
+    out.caseCraft = evidence(0.35 + achieved, knownInputs, CASE_CRAFT_INPUTS.length);
   }
 
   // A watch sold on a strap has no bracelet to judge, so the dimension is not
@@ -408,6 +440,7 @@ const CATEGORY_PLURAL: Record<RubricCategory, string> = {
   chronograph: "chronographs",
   gmt: "GMTs",
   dress: "dress",
+  sports: "sports",
 };
 
 /** Peer group = same rubric category + same price band. Unpriced watches group together. */

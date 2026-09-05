@@ -38,12 +38,15 @@ export const DIMENSION_BLURBS: Record<Dimension, string> = {
   bracelet: "Bracelet hardware: whether one is included, micro-adjust clasp, quick-release.",
 };
 
-/** Categories the rubric knows about. Watches whose tags match none fall back to "dress". */
+/** Categories the rubric knows about. Watches whose tags match none stay unrated. */
+import { RUBRIC_CATEGORIES as RUBRIC_CATEGORY_LIST } from "./rubric-categories.mjs";
 import type { ScoringCategory } from "./types";
 
 export type RubricCategory = ScoringCategory;
 
-export const RUBRIC_CATEGORIES: RubricCategory[] = ["diver", "chronograph", "gmt", "dress"];
+// Imported rather than restated so scripts/audit-data.mjs, which runs under
+// bare Node, reads the same list the type system checks RUBRICS against.
+export const RUBRIC_CATEGORIES: RubricCategory[] = RUBRIC_CATEGORY_LIST as RubricCategory[];
 
 export type PriceBandId =
   | "under-500"
@@ -90,6 +93,10 @@ export const CATEGORY_EXPECTATION: Record<
   chronograph: { wrM: 50, needsBezel: false, needsScrewCrown: false },
   gmt: { wrM: 100, needsBezel: false, needsScrewCrown: false },
   dress: { wrM: 30, needsBezel: false, needsScrewCrown: false },
+  // Field and everyday sports watches: enough to swim in, well short of what a
+  // diver is held to. The same 100m bar as gmt, because the requirement is the
+  // same one — survive water without being a dive instrument.
+  sports: { wrM: 100, needsBezel: false, needsScrewCrown: false },
 };
 
 /** "Par" raw score (0-1) per dimension for a category + price band. */
@@ -146,6 +153,32 @@ export const RUBRICS: Record<RubricCategory, Record<PriceBandId, RubricReference
     "1000-2000": { movement: 0.55, caseCraft: 0.45, wearability: 0.65, durability: 0.50, bracelet: 0.40 },
     "2000-5000": { movement: 0.65, caseCraft: 0.52, wearability: 0.70, durability: 0.55, bracelet: 0.50 },
     "5000-plus": { movement: 0.82, caseCraft: 0.60, wearability: 0.75, durability: 0.60, bracelet: 0.60 },
+  },
+  // Field and everyday sports watches — the category for a watch that is
+  // neither a diver nor a dress watch, which was previously graded as one or
+  // the other and misread both times. Each column is set against a neighbour
+  // that already has a defensible number, rather than invented:
+  //
+  // - movement is a touch above diver. A plain three-hander carries no chrono
+  //   module, no GMT hand and no dive bezel assembly, so more of the same
+  //   money reaches the caliber. Not as high as that sounds: the gap is one
+  //   step, not a tier.
+  // - caseCraft matches every other category, which the table already treats
+  //   as scaling with price rather than with what the watch is for.
+  // - wearability sits between gmt and dress. There is no dive-case bulk to
+  //   forgive, but no dress-watch obligation to be thin either.
+  // - durability matches gmt exactly, because both are judged against the same
+  //   100m bar and read the same three inputs. A higher reference would score
+  //   two watches with identical specs differently for no measurable reason.
+  // - bracelet matches chronograph. A sports watch ships on a strap about as
+  //   often as not, so unlike a diver the bracelet is not part of the
+  //   category's identity and par should not assume one.
+  sports: {
+    "under-500": { movement: 0.32, caseCraft: 0.35, wearability: 0.45, durability: 0.55, bracelet: 0.35 },
+    "500-1000": { movement: 0.48, caseCraft: 0.40, wearability: 0.50, durability: 0.60, bracelet: 0.45 },
+    "1000-2000": { movement: 0.60, caseCraft: 0.45, wearability: 0.55, durability: 0.65, bracelet: 0.55 },
+    "2000-5000": { movement: 0.70, caseCraft: 0.52, wearability: 0.60, durability: 0.70, bracelet: 0.65 },
+    "5000-plus": { movement: 0.85, caseCraft: 0.60, wearability: 0.65, durability: 0.75, bracelet: 0.75 },
   },
 };
 
