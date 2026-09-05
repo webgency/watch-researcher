@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import {
   CATEGORIES,
   CATEGORY_EXPECTATION,
+  CATEGORY_WR_EXPECTATION,
   categoriesInTags,
   categoryFor,
   normalizeTags,
@@ -72,6 +73,15 @@ describe("normalizeTags", () => {
 describe("CATEGORY_EXPECTATION", () => {
   it("covers all five categories", () => {
     expect(Object.keys(CATEGORY_EXPECTATION).sort()).toEqual([...CATEGORIES].sort());
+  });
+
+  it("keeps the bare-Node copy of the water-resistance bar in step", () => {
+    // audit-data.mjs cannot import TypeScript, so category-tags.mjs carries its
+    // own copy of the wrM numbers. This is what stops the two drifting.
+    const fromExpectation = Object.fromEntries(
+      Object.entries(CATEGORY_EXPECTATION).map(([k, v]) => [k, v.wrM])
+    );
+    expect(CATEGORY_WR_EXPECTATION).toEqual(fromExpectation);
   });
 
   it("puts sports at 100m — above a dress watch, below a diver", () => {

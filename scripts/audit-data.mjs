@@ -14,7 +14,12 @@
 
 import { readFile } from "node:fs/promises";
 import { isKnownCaliber, isQuartzMovement, normalizeCaliber } from "../src/lib/caliber-aliases.mjs";
-import { categoriesInTags, categoryFor, resolveCategory } from "../src/lib/category-tags.mjs";
+import {
+  CATEGORY_WR_EXPECTATION,
+  categoriesInTags,
+  categoryFor,
+  resolveCategory,
+} from "../src/lib/category-tags.mjs";
 import { plausibilityErrors, plausibilityWarnings } from "../src/lib/spec-plausibility.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
@@ -50,13 +55,16 @@ criterion(
 );
 for (const w of unresolved) notes.push(`no category: ${label(w)} tags=${JSON.stringify(w.tags ?? [])}`);
 
-// No record may reach a category by default. resolveCategory has no default
-// left, so this holds by construction — asserted rather than assumed, because
-// re-adding one is a one-line change that nothing else would catch.
-const byFallback = watches.filter(
-  (w) => !w.scoringCategory && (w.tags ?? []).length > 0 && resolveCategory(w.tags) === undefined && categoryFor(w) !== undefined
+// No record may reach a category by default. Probed with a tag set that
+// resolves to nothing rather than counted over the data: with the default
+// removed, a fallback cannot show up as a record, only as a reintroduced
+// `?? "dress"` — and that is a one-line change nothing else here would catch.
+const fallbackProbe = resolveCategory(["not-a-category"]);
+criterion(
+  "an unresolvable tag set returns undefined, not a default category",
+  fallbackProbe === undefined,
+  fallbackProbe === undefined ? "no default" : `defaults to ${fallbackProbe}`
 );
-criterion("no record resolves to a category by fallback", byFallback.length === 0, `${byFallback.length} found`);
 
 // --- 2. Plausibility -------------------------------------------------------
 const specErrors = watches.flatMap((w) =>
@@ -119,6 +127,19 @@ for (const w of watches) {
       `category mismatch: ${label(w)} — scoringCategory=${w.scoringCategory}, tags say ${fromTags.join("/")}`
     );
   }
+}
+
+// A watch whose recorded water resistance falls well short of the bar its
+// category is judged against is usually mis-categorised, not badly built —
+// the same failure as the old dress default, pointing the other way.
+for (const w of watches) {
+  const category = categoryFor(w);
+  const wr = w.specs?.waterResistanceM;
+  const bar = category ? CATEGORY_WR_EXPECTATION[category] : undefined;
+  if (typeof wr !== "number" || bar === undefined || wr >= bar) continue;
+  notes.push(
+    `under its category bar: ${label(w)} — ${wr}m against the ${bar}m expected of a ${category}`
+  );
 }
 
 // qualityFlags gate caseCraft and bracelet. The spec's advice is to accept

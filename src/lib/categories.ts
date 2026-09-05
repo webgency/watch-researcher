@@ -7,6 +7,7 @@
 import {
   CATEGORIES as CATEGORY_LIST,
   TAG_TO_CATEGORY as TAG_MAP,
+  CATEGORY_WR_EXPECTATION as WR_EXPECTATION,
   categoriesInTags as categoriesInTagsJs,
   categoryFor as categoryForJs,
   normalizeTags as normalizeTagsJs,
@@ -51,6 +52,10 @@ export const CATEGORY_EXPECTATION: Readonly<Record<Category, CategoryExpectation
   ...RUBRIC_EXPECTATION,
   sports: { wrM: 100, needsBezel: false, needsScrewCrown: false },
 };
+
+/** Water resistance each category is judged against, for bare-Node consumers. */
+export const CATEGORY_WR_EXPECTATION: Readonly<Record<Category, number>> =
+  WR_EXPECTATION as Record<Category, number>;
 
 /**
  * Category implied by a tag list, or undefined when none resolve.

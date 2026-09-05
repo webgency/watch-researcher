@@ -12,6 +12,21 @@
 export const CATEGORIES = ["diver", "chronograph", "gmt", "dress", "sports"];
 
 /**
+ * Water resistance each category is judged against, in metres.
+ *
+ * Duplicated from CATEGORY_EXPECTATION in categories.ts so bare-Node consumers
+ * (scripts/audit-data.mjs) can read it; categories.test.ts asserts the two
+ * agree. The authoritative table for the four scored categories is rubrics.ts.
+ */
+export const CATEGORY_WR_EXPECTATION = {
+  diver: 200,
+  chronograph: 50,
+  gmt: 100,
+  dress: 30,
+  sports: 100,
+};
+
+/**
  * Descriptive tags mapped to the category they imply.
  *
  * Keys are lowercase; lookups lowercase and trim first, because the data has
