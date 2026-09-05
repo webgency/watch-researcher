@@ -186,10 +186,12 @@ function cleanLinks(value: unknown, required: boolean, errors: string[]): Retail
     const retailer = cleanOptionalString(item.retailer, `${path}.retailer`, errors);
     const price = cleanMoney(item.price, `${path}.price`, errors);
     const condition = cleanCondition(item.condition, `${path}.condition`, errors);
+    const observedAt = cleanDateString(item.observedAt, `${path}.observedAt`, errors);
 
     if (retailer) link.retailer = retailer;
     if (price) link.price = price;
     if (condition) link.condition = condition;
+    if (observedAt) link.observedAt = observedAt;
     return [link];
   });
 }
@@ -436,6 +438,7 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
   assignIfPresent(output, body, "designPreferenceElo", cleanNonNegativeNumber(body.designPreferenceElo, "designPreferenceElo", errors));
   assignIfPresent(output, body, "designComparisonCount", cleanIntegerRange(body.designComparisonCount, "designComparisonCount", errors, 0, Number.MAX_SAFE_INTEGER));
+  assignIfPresent(output, body, "personalFit", cleanIntegerRange(body.personalFit, "personalFit", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
   assignIfPresent(output, body, "priceHistory", cleanPriceHistory(body.priceHistory, errors));

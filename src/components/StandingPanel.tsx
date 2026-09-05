@@ -1,8 +1,8 @@
-import { RUBRIC_TOLERANCE, Standing, unratedReason } from "@/lib/scoring";
+import { MIN_REFERENCE_COVERAGE, RUBRIC_TOLERANCE, Standing, unratedReason } from "@/lib/scoring";
 import { DIMENSIONS, DIMENSION_BLURBS, DIMENSION_LABELS, type Dimension } from "@/lib/rubrics";
 import type { Watch } from "@/lib/types";
 
-type Verdict = "beats" | "par" | "trails" | "unbanded";
+type Verdict = "beats" | "par" | "trails" | "limited" | "unbanded";
 
 // Status encoding, not series identity. Every row also carries the verdict in
 // words, so the colour never has to be read on its own — which is what lets the
@@ -26,6 +26,12 @@ const VERDICT: Record<Verdict, { label: string; fill: string; track: string; tex
     track: "bg-amber-100",
     text: "text-amber-700",
   },
+  limited: {
+    label: "Limited evidence",
+    fill: "bg-slate-400",
+    track: "bg-slate-200",
+    text: "text-slate-500",
+  },
   // A watch with no price has no band, so there is no reference to be at, above
   // or below. Saying "As expected" there would be a claim the engine never made.
   unbanded: {
@@ -41,8 +47,9 @@ function pct(value: number): number {
   return Math.round(value * 100);
 }
 
-function verdictFor(raw: number, reference?: number): Verdict {
+function verdictFor(dimension: Dimension, raw: number, reference: number | undefined, coverage: number): Verdict {
   if (reference === undefined) return "unbanded";
+  if (coverage < MIN_REFERENCE_COVERAGE[dimension]) return "limited";
   if (raw > reference + RUBRIC_TOLERANCE) return "beats";
   if (raw < reference - RUBRIC_TOLERANCE) return "trails";
   return "par";
@@ -68,7 +75,7 @@ function DimensionMeter({
   knownInputs: number;
   totalInputs: number;
 }) {
-  const verdict = verdictFor(raw, reference);
+  const verdict = verdictFor(dimension, raw, reference, coverage);
   const style = VERDICT[verdict];
 
   return (
@@ -83,11 +90,13 @@ function DimensionMeter({
         aria-label={
           reference === undefined
             ? `${DIMENSION_LABELS[dimension]}: ${pct(raw)} of 100, no price benchmark`
+            : verdict === "limited"
+              ? `${DIMENSION_LABELS[dimension]}: ${pct(raw)} of 100; limited evidence, so no comparison is made`
             : `${DIMENSION_LABELS[dimension]}: ${pct(raw)} of 100; expected ${pct(reference)} at this price — ${style.label}`
         }
       >
         <div className={`h-full rounded-full ${style.fill}`} style={{ width: `${Math.max(pct(raw), 1.5)}%` }} />
-        {reference !== undefined && (
+        {reference !== undefined && verdict !== "limited" && (
           // Par marker. Sits above the fill so it stays visible when the fill
           // runs past it.
           <div

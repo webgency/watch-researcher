@@ -35,6 +35,8 @@ export interface RetailerLink {
   retailer?: string;
   price?: Money;
   condition?: Condition;
+  /** Date this asking price was observed. Required for market comparisons. */
+  observedAt?: string;
 }
 
 /**
@@ -131,6 +133,8 @@ export interface Watch {
   designPreferenceElo?: number;
   /** Number of pairwise design choices contributing to designPreferenceElo. */
   designComparisonCount?: number;
+  /** Personal, firsthand fit assessment. Kept separate from objective value scoring. */
+  personalFit?: number;
   /** Headline price you're tracking (usually the best/target price). */
   price?: Money;
   /** ISO timestamp of when `price` was last refreshed (set by the enrich script). */

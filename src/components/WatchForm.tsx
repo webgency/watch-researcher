@@ -35,6 +35,7 @@ interface LinkRow {
   priceAmount: string;
   priceCurrency: string;
   condition: "" | Condition;
+  observedAt: string;
 }
 
 // Derived from the field declarations so a flag added in specs.ts lands in the
@@ -64,6 +65,7 @@ function toLinkRow(link: RetailerLink): LinkRow {
     priceAmount: link.price?.amount != null ? String(link.price.amount) : "",
     priceCurrency: link.price?.currency ?? "USD",
     condition: link.condition ?? "",
+    observedAt: link.observedAt?.slice(0, 10) ?? "",
   };
 }
 
@@ -113,6 +115,7 @@ export default function WatchForm({
   const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial?.wishlistTier ?? "");
   const [scoringCategory, setScoringCategory] = useState<ScoringCategory | "">(initial?.scoringCategory ?? "");
   const [designUniqueness, setDesignUniqueness] = useState(initial?.designUniqueness != null ? String(initial.designUniqueness) : "");
+  const [personalFit, setPersonalFit] = useState(initial?.personalFit != null ? String(initial.personalFit) : "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
   const [targetAmount, setTargetAmount] = useState(initial?.targetPrice?.amount != null ? String(initial.targetPrice.amount) : "");
@@ -133,7 +136,7 @@ export default function WatchForm({
   // is unit-tested.
   const [flags, setFlags] = useState<Record<string, string>>(() => qualityFlagsToForm(initial?.qualityFlags));
   const [links, setLinks] = useState<LinkRow[]>(
-    initial?.links?.length ? initial.links.map(toLinkRow) : [{ url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }]
+    initial?.links?.length ? initial.links.map(toLinkRow) : [{ url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "", observedAt: "" }]
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,8 +155,8 @@ export default function WatchForm({
     setLinks((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
 
-  async function autofillFromUrl() {
-    const url = fetchUrl.trim();
+  async function autofillFromUrl(urlOverride?: string) {
+    const url = (urlOverride ?? fetchUrl).trim();
     if (!/^https?:\/\/\S+$/i.test(url)) {
       setFetchMsg("Enter a full http(s) link.");
       return;
@@ -161,6 +164,7 @@ export default function WatchForm({
 
     setFetching(true);
     setFetchMsg(null);
+    setFetchUrl(url);
     try {
       const res = await fetch("/api/watches/scrape", {
         method: "POST",
@@ -217,13 +221,23 @@ export default function WatchForm({
       }
 
       setLinks((rows) => {
-        if (rows.some((row) => row.url.trim() === url)) return rows;
+        const observedAt = data.price?.amount ? new Date().toISOString().slice(0, 10) : "";
+        if (rows.some((row) => row.url.trim() === url)) {
+          return rows.map((row) => row.url.trim() === url ? {
+            ...row,
+            retailer: data.retailer || row.retailer || hostname(url),
+            priceAmount: data.price?.amount ? String(data.price.amount) : row.priceAmount,
+            priceCurrency: data.price?.currency || row.priceCurrency,
+            observedAt: observedAt || row.observedAt,
+          } : row);
+        }
         const row: LinkRow = {
           url,
           retailer: data.retailer || hostname(url),
           priceAmount: data.price?.amount ? String(data.price.amount) : "",
           priceCurrency: data.price?.currency || "USD",
           condition: "",
+          observedAt,
         };
         return rows[0]?.url.trim() ? [...rows, row] : [row, ...rows.slice(1)];
       });
@@ -262,6 +276,7 @@ export default function WatchForm({
         const amount = parseNum(l.priceAmount);
         if (amount !== undefined) link.price = { amount, currency: l.priceCurrency };
         if (l.condition) link.condition = l.condition;
+        if (l.observedAt) link.observedAt = l.observedAt;
         return link;
       });
 
@@ -274,6 +289,7 @@ export default function WatchForm({
       wishlistTier: wishlistTier || undefined,
       scoringCategory: scoringCategory || undefined,
       designUniqueness: design,
+      personalFit: parseNum(personalFit),
       imageUrl: imageUrl.trim() || undefined,
       specs: builtSpecs,
       tags: tags
@@ -350,11 +366,35 @@ export default function WatchForm({
                 }
               }}
             />
-            <button type="button" className="btn-secondary whitespace-nowrap" onClick={autofillFromUrl} disabled={fetching}>
+            <button type="button" className="btn-secondary whitespace-nowrap" onClick={() => autofillFromUrl()} disabled={fetching}>
               {fetching ? "Fetching..." : "Fetch details"}
             </button>
           </div>
           {fetchMsg && <p className="text-xs text-slate-600">{fetchMsg}</p>}
+        </section>
+      )}
+      {isEdit && links.some((link) => link.url.trim()) && (
+        <section className="card space-y-3 p-5">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Refresh from retailer</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Re-fetch a saved product page to check its current price and specifications. Review the changes below before saving.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {links.filter((link) => link.url.trim()).map((link, index) => (
+              <button
+                key={`${link.url}-${index}`}
+                type="button"
+                className="btn-secondary"
+                onClick={() => autofillFromUrl(link.url)}
+                disabled={fetching}
+              >
+                {fetching && fetchUrl === link.url ? "Refreshing…" : `Refresh ${link.retailer || hostname(link.url)}`}
+              </button>
+            ))}
+          </div>
+          {fetchMsg && <p className="text-xs text-slate-600" role="status">{fetchMsg}</p>}
         </section>
       )}
       <section className="card space-y-4 p-5">
@@ -404,6 +444,14 @@ export default function WatchForm({
               ))}
             </select>
             <p className="mt-1 text-xs text-slate-400">1 leaves you cold; 5 is a design you would keep staring at.</p>
+          </div>
+          <div>
+            <label className="label">Fit for me</label>
+            <select className="input" value={personalFit} onChange={(e) => setPersonalFit(e.target.value)}>
+              <option value="">Not rated</option>
+              {[1, 2, 3, 4, 5].map((rating) => <option key={rating} value={rating}>{rating}</option>)}
+            </select>
+            <p className="mt-1 text-xs text-slate-400">Your firsthand fit rating. Personal only; it does not change specification value.</p>
           </div>
           <div>
             <label className="label">Value-scoring category</label>
@@ -517,7 +565,7 @@ export default function WatchForm({
         </summary>
         <div className="space-y-4 border-t border-slate-100 p-5">
           <p className="text-xs text-slate-400">
-            What the scoring engine reads for case &amp; finishing, bracelet, and regulation. Leave a field blank when
+            What the scoring engine reads for case features, bracelet, and regulation. Leave a field blank when
             you don&apos;t know — a dimension with nothing recorded stays unrated rather than scoring badly.
           </p>
           {FLAG_GROUPS.map((group) => (
@@ -574,7 +622,7 @@ export default function WatchForm({
             <button
               type="button"
               className="btn-secondary"
-              onClick={() => setLinks((rows) => [...rows, { url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }])}
+              onClick={() => setLinks((rows) => [...rows, { url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "", observedAt: "" }])}
             >
               + Add link
             </button>
@@ -586,7 +634,7 @@ export default function WatchForm({
                 <input className="input sm:col-span-2" value={l.url} onChange={(e) => setLink(i, { url: e.target.value })} placeholder="https://retailer.com/product" />
                 <input className="input" value={l.retailer} onChange={(e) => setLink(i, { retailer: e.target.value })} placeholder="Retailer (optional)" />
                 <div className="flex gap-2">
-                  <input className="input" inputMode="decimal" value={l.priceAmount} onChange={(e) => setLink(i, { priceAmount: e.target.value })} placeholder="Price" />
+                  <input className="input" inputMode="decimal" value={l.priceAmount} onChange={(e) => setLink(i, { priceAmount: e.target.value, observedAt: l.observedAt || (e.target.value ? new Date().toISOString().slice(0, 10) : "") })} placeholder="Price" />
                   <select className="input w-24" value={l.priceCurrency} onChange={(e) => setLink(i, { priceCurrency: e.target.value })}>
                     {CURRENCIES.map((c) => (
                       <option key={c} value={c}>
@@ -600,6 +648,10 @@ export default function WatchForm({
                   <option value="new">New</option>
                   <option value="pre-owned">Pre-owned</option>
                 </select>
+                <label className="text-xs text-slate-500">
+                  <span className="mb-1 block">Price observed</span>
+                  <input className="input" type="date" value={l.observedAt} onChange={(e) => setLink(i, { observedAt: e.target.value })} />
+                </label>
               </div>
               <button type="button" className="btn-danger self-start" onClick={() => setLinks((rows) => rows.filter((_, idx) => idx !== i))} aria-label="Remove link">
                 Remove

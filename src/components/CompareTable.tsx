@@ -78,6 +78,9 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
               </Cell>
             ))}
           </Row>
+          <Row label="Fit for me" sticky>
+            {watches.map((w) => <Cell key={w.id}>{w.personalFit ? `${w.personalFit}/5` : "—"}</Cell>)}
+          </Row>
           <Row label="Reference" sticky>
             {watches.map((w) => (
               <Cell key={w.id}>{w.referenceNumber || "—"}</Cell>

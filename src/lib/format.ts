@@ -1,6 +1,7 @@
 import { Money } from "./types";
+import { normalizePriceToUsd } from "./scoring";
 
-export function formatMoney(money?: Money | null): string {
+function formatNativeMoney(money?: Money | null): string {
   if (!money || typeof money.amount !== "number" || Number.isNaN(money.amount)) {
     return "—";
   }
@@ -13,6 +14,20 @@ export function formatMoney(money?: Money | null): string {
   } catch {
     return `${money.amount} ${money.currency ?? ""}`.trim();
   }
+}
+
+/**
+ * Display a consistent USD comparison price while retaining the retailer's
+ * original currency as context. Stored money is never rewritten, so exchange
+ * rate updates can recalculate the USD display without corrupting history.
+ */
+export function formatMoney(money?: Money | null): string {
+  if (!money || typeof money.amount !== "number" || Number.isNaN(money.amount)) return "—";
+  const currency = money.currency.trim().toUpperCase();
+  const original = formatNativeMoney({ ...money, currency });
+  if (currency === "USD") return original;
+  const usd = formatNativeMoney({ amount: normalizePriceToUsd(money), currency: "USD" });
+  return `${usd} (${original})`;
 }
 
 export function formatDate(iso?: string): string {

@@ -127,6 +127,17 @@ describe("scoreDimensions", () => {
     expect(wearability(41, 16)).toBe(0);
   });
 
+  it("recognizes a compact lug-to-lug as part of case profile", () => {
+    const compact = scoreDimensions(makeWatch({
+      specs: { caseDiameterMm: 38.5, caseThicknessMm: 12.9, lugToLugMm: 44.5 },
+    })).wearability!;
+    const thicknessOnly = scoreDimensions(makeWatch({
+      specs: { caseDiameterMm: 38.5, caseThicknessMm: 12.9 },
+    })).wearability!;
+    expect(compact).toBeCloseTo(0.489, 3);
+    expect(compact).toBeGreaterThan(thicknessOnly);
+  });
+
   it("scores caseCraft and bracelet only once their own qualityFlags exist", () => {
     const bare = makeWatch();
     expect(scoreDimensions(bare).caseCraft).toBeUndefined();
@@ -357,6 +368,37 @@ describe("computeStanding", () => {
     const standing = computeStanding(watch, [watch]);
     expect(standing.beats).toContain("movement");
     expect(standing.trails).toContain("durability");
+  });
+
+  it("does not turn one narrow case flag into a case-quality verdict or value penalty", () => {
+    const omega = makeWatch({
+      scoringCategory: "diver",
+      price: { amount: 7100, currency: "USD" },
+      specs: {
+        caliber: "Co-Axial Master Chronometer 8800",
+        powerReserveHours: 55,
+        caseDiameterMm: 42,
+        caseThicknessMm: 13.7,
+        waterResistanceM: 300,
+        crystal: "Sapphire",
+      },
+      qualityFlags: {
+        antimagneticAm: 1200000,
+        sapphireBezelInsert: false,
+        braceletIncluded: true,
+      },
+    });
+    const withoutNarrowCaseFlag = makeWatch({
+      ...omega,
+      qualityFlags: { antimagneticAm: 1200000, braceletIncluded: true },
+    });
+
+    const standing = computeStanding(omega, [omega]);
+    const comparison = computeStanding(withoutNarrowCaseFlag, [withoutNarrowCaseFlag]);
+    expect(standing.dimensions.caseCraft?.coverage).toBe(0.25);
+    expect(standing.beats).not.toContain("caseCraft");
+    expect(standing.trails).not.toContain("caseCraft");
+    expect(standing.valueScore).toBeCloseTo(comparison.valueScore!);
   });
 
   it("only reports a percentile once the peer group reaches six members", () => {

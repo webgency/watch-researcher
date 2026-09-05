@@ -89,6 +89,7 @@ export default function WatchCard({
             {[specs.caseDiameterMm ? `${specs.caseDiameterMm}mm` : null, specs.movement].filter(Boolean).join(" · ")}
           </span>
         </div>
+        {watch.personalFit && <p className="text-xs font-medium text-slate-500">Fit for me: {watch.personalFit}/5</p>}
         {scoreSummary && <StandingBlock summary={scoreSummary} />}
         {onChangeWishlistTier && (
           <select

@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "validate:data": "node scripts/validate-data.mjs"
+    "validate:data": "node scripts/validate-data.mjs",
+    "calibrate:scoring": "jiti scripts/calibrate-scoring.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
