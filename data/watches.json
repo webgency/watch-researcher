@@ -442,7 +442,7 @@
     "model": "8315 GMT — Desert Red",
     "referenceNumber": "8315",
     "status": "wishlist",
-    "wishlistTier": "love-it",
+    "wishlistTier": "pass",
     "designUniqueness": 4,
     "price": {
       "amount": 2458,
@@ -1871,7 +1871,7 @@
     "model": "Jurassic Watch RAPTORS Edition",
     "referenceNumber": "SMRA25AW",
     "status": "wishlist",
-    "wishlistTier": "interested",
+    "wishlistTier": "pass",
     "scoringCategory": "dress",
     "designUniqueness": 4,
     "price": {
@@ -2498,6 +2498,7 @@
     "brand": "FREDERIQUE CONSTANT",
     "model": "Classics Moneta Moonphase Watch FC-206B3S5",
     "status": "wishlist",
+    "wishlistTier": "pass",
     "designUniqueness": 2,
     "price": {
       "amount": 1595,
@@ -2655,6 +2656,9 @@
         "source": "manual"
       }
     ],
+    "qualityFlags": {
+      "arLayers": 6
+    },
     "links": [
       {
         "url": "https://henryarcher.com/en-us/collections/tidevand/products/tidevand-meteorite-kosmos",
@@ -2679,9 +2683,6 @@
       "dialColor": "Meteorite stone dial",
       "braceletStrap": "316L stainless steel BoR (Beads-of-Rice) bracelet. 20 mm width.",
       "complications": "GMT"
-    },
-    "qualityFlags": {
-      "arLayers": 6
     },
     "tags": [
       "dive"
@@ -2839,5 +2840,111 @@
     ],
     "id": "mssxh8iem1cs9b",
     "dateAdded": "2026-08-14T12:33:19.955Z"
+  },
+  {
+    "brand": "AV86",
+    "model": "1956 Marine Automatic, Steel / Blue Fade",
+    "referenceNumber": "003906",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "scoringCategory": "dress",
+    "designUniqueness": 4,
+    "price": {
+      "amount": 499,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 499,
+          "currency": "USD"
+        },
+        "date": "2026-08-14T13:34:52.138Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://av86.com/products/1956-marine-automatic-steel-blue-fade",
+        "retailer": "av86.com",
+        "price": {
+          "amount": 499,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://av86.com/cdn/shop/files/1956-Marine_Steel_BlueFade_003906-862404_Dark_Grey_Vintage_Leather.png?v=1773060578&width=1920",
+    "specs": {
+      "caseDiameterMm": 41,
+      "caseThicknessMm": 13.8,
+      "lugToLugMm": 49.2,
+      "lugWidthMm": 20,
+      "caseMaterial": "316L high precision stainless steel",
+      "movement": "automatic",
+      "caliber": "Miyota 8215",
+      "powerReserveHours": 42,
+      "waterResistanceM": 200,
+      "crystal": "Sapphire",
+      "dialColor": "Blue Dial Textured gradient",
+      "braceletStrap": "Italian leather (genuine) with Pin buckle."
+    },
+    "tags": [],
+    "id": "msszodf01pmo5l",
+    "dateAdded": "2026-08-14T13:34:52.138Z"
+  },
+  {
+    "brand": "Spinnaker",
+    "model": "Croft Mid-Size Automatic - Dolphin Project Limited Edition — Dolphin Cave",
+    "referenceNumber": "SP-5177-22",
+    "status": "wishlist",
+    "scoringCategory": "diver",
+    "price": {
+      "amount": 425,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://spinnaker-watches.com/products/croft-mid-size-automatic-dolphin-project-limited-edition-dolphin-cave-sp-5177-22",
+        "retailer": "spinnaker-watches.com",
+        "price": {
+          "amount": 425,
+          "currency": "USD"
+        }
+      }
+    ],
+    "imageUrl": "https://spinnaker-watches.com/cdn/shop/files/SP-5177-22-Q.png?v=1782209285&width=2000",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 14.1,
+      "lugToLugMm": 47,
+      "lugWidthMm": 20,
+      "caseMaterial": "Stainless Steel",
+      "movement": "automatic",
+      "caliber": "Miyota 8215",
+      "powerReserveHours": 42,
+      "waterResistanceM": 150,
+      "crystal": "Sapphire",
+      "dialColor": "Green",
+      "braceletStrap": "20mm stainless steel bracelet with fold-over safety clasp and push button; extra grey rPET strap",
+      "complications": "Date"
+    },
+    "qualityFlags": {
+      "braceletIncluded": true
+    },
+    "tags": [
+      "diver"
+    ],
+    "id": "mtok1joku7s7dc",
+    "dateAdded": "2026-09-05T15:45:50.562Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 425,
+          "currency": "USD"
+        },
+        "date": "2026-09-05T15:45:50.562Z",
+        "source": "manual"
+      }
+    ]
   }
 ]
