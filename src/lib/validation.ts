@@ -438,6 +438,7 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
   assignIfPresent(output, body, "designPreferenceElo", cleanNonNegativeNumber(body.designPreferenceElo, "designPreferenceElo", errors));
   assignIfPresent(output, body, "designComparisonCount", cleanIntegerRange(body.designComparisonCount, "designComparisonCount", errors, 0, Number.MAX_SAFE_INTEGER));
+  assignIfPresent(output, body, "personalFit", cleanIntegerRange(body.personalFit, "personalFit", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
   assignIfPresent(output, body, "priceHistory", cleanPriceHistory(body.priceHistory, errors));

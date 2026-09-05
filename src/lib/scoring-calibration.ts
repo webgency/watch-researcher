@@ -1,5 +1,5 @@
 import { DIMENSIONS, Dimension, PRICE_BANDS, RUBRICS, RubricCategory } from "./rubrics";
-import { deriveCategory, landedPriceUsd, MIN_REFERENCE_COVERAGE, scoreDimensionEvidence } from "./scoring";
+import { caseProfileEvidence, deriveCategory, landedPriceUsd, MIN_REFERENCE_COVERAGE, scoreDimensionEvidence } from "./scoring";
 import { Watch } from "./types";
 
 const PRICE_ANCHORS_USD = PRICE_BANDS.map((range) => (range.minUsd + range.maxUsd) / 2);
@@ -60,11 +60,7 @@ export function calibrationScore(watch: Watch): CalibrationResult {
   const evidence = scoreDimensionEvidence(watch);
 
   if (category && evidence.wearability && watch.specs.caseDiameterMm && watch.specs.caseThicknessMm !== undefined) {
-    const expectedThickness = 6 + 0.16 * watch.specs.caseDiameterMm + CATEGORY_THICKNESS_ALLOWANCE_MM[category];
-    evidence.wearability = {
-      ...evidence.wearability,
-      raw: clamp01(0.5 + (expectedThickness - watch.specs.caseThicknessMm) / 4),
-    };
+    evidence.wearability = caseProfileEvidence(watch.specs, CATEGORY_THICKNESS_ALLOWANCE_MM[category]);
   }
 
   const rated = DIMENSIONS.filter((dimension) => evidence[dimension] !== undefined);

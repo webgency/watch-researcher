@@ -52,6 +52,16 @@ describe("design preference validation", () => {
   });
 });
 
+describe("personal fit validation", () => {
+  it("accepts a 1-5 firsthand fit rating", () => {
+    expect(normalizeWatchPatch({ personalFit: 5 })).toEqual({ ok: true, data: { personalFit: 5 } });
+  });
+
+  it("rejects ratings outside 1-5", () => {
+    expect(normalizeWatchPatch({ personalFit: 6 }).ok).toBe(false);
+  });
+});
+
 describe("market observation validation", () => {
   it("accepts an observation date on a retailer price", () => {
     const result = normalizeWatchPatch({

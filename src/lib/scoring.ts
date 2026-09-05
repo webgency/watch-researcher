@@ -248,6 +248,29 @@ const WEARABILITY_THICKNESS_PER_MM = 0.16;
 // span silently widened with diameter (0.10 * d), which is the second half of
 // why big watches got an easier grade than small ones.
 const WEARABILITY_SPAN_MM = 4.0;
+const EXPECTED_LUG_OVERHANG_MM = 8.0;
+const LUG_TO_LUG_SPAN_MM = 8.0;
+const THICKNESS_PROFILE_WEIGHT = 0.6;
+
+export function caseProfileEvidence(
+  specs: Watch["specs"],
+  thicknessAllowanceMm = 0
+): DimensionEvidence | undefined {
+  if (specs.caseDiameterMm === undefined || specs.caseDiameterMm <= 0 || specs.caseThicknessMm === undefined) {
+    return undefined;
+  }
+  const expectedThicknessMm =
+    WEARABILITY_FIXED_STACK_MM + WEARABILITY_THICKNESS_PER_MM * specs.caseDiameterMm + thicknessAllowanceMm;
+  const thicknessScore = clamp01(0.5 + (expectedThicknessMm - specs.caseThicknessMm) / WEARABILITY_SPAN_MM);
+  const hasLugToLug = specs.lugToLugMm !== undefined;
+  const lugToLugScore = hasLugToLug
+    ? clamp01(0.5 + (specs.caseDiameterMm + EXPECTED_LUG_OVERHANG_MM - specs.lugToLugMm!) / LUG_TO_LUG_SPAN_MM)
+    : undefined;
+  const raw = lugToLugScore === undefined
+    ? thicknessScore
+    : thicknessScore * THICKNESS_PROFILE_WEIGHT + lugToLugScore * (1 - THICKNESS_PROFILE_WEIGHT);
+  return evidence(raw, hasLugToLug ? 3 : 2, 3);
+}
 
 /**
  * Raw dimension scores against fixed anchors. Any dimension lacking source
@@ -275,7 +298,8 @@ export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, 
     out.movement = evidence(caliberBase + regBonus + prBonus, knownInputs, 3);
   }
 
-  if (s.caseDiameterMm !== undefined && s.caseDiameterMm > 0 && s.caseThicknessMm !== undefined) {
+  const profile = caseProfileEvidence(s);
+  if (profile) {
     // Thickness measured against what this diameter should cost, not as a bare
     // thickness/diameter ratio. A ratio assumes height scales with width, and
     // it does not: a movement, crystal and caseback are a near-fixed stack
@@ -284,12 +308,10 @@ export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, 
     // So a ratio charges small cases for height they cannot avoid and hands
     // large ones credit for width they did nothing to earn: a 37x11.6 (a well
     // proportioned watch) scored below a 44x13 (a slab).
-    const expectedThicknessMm = WEARABILITY_FIXED_STACK_MM + WEARABILITY_THICKNESS_PER_MM * s.caseDiameterMm;
-    out.wearability = evidence(
-      0.5 + (expectedThicknessMm - s.caseThicknessMm) / WEARABILITY_SPAN_MM,
-      2,
-      2
-    );
+    // Thickness remains the primary profile signal, while a compact or broad
+    // footprint can move the result meaningfully without claiming to know how
+    // the watch fits a particular wrist.
+    out.wearability = profile;
   }
 
   // Each of these needs its own source data. Gating both on "any qualityFlags
@@ -427,7 +449,7 @@ export const RUBRIC_TOLERANCE = 0.05;
 export const MIN_REFERENCE_COVERAGE: Record<Dimension, number> = {
   movement: 1 / 3,
   caseCraft: 0.5,
-  wearability: 1,
+  wearability: 2 / 3,
   durability: 1 / 3,
   bracelet: 0.5,
 };

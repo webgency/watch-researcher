@@ -115,6 +115,7 @@ export default function WatchForm({
   const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial?.wishlistTier ?? "");
   const [scoringCategory, setScoringCategory] = useState<ScoringCategory | "">(initial?.scoringCategory ?? "");
   const [designUniqueness, setDesignUniqueness] = useState(initial?.designUniqueness != null ? String(initial.designUniqueness) : "");
+  const [personalFit, setPersonalFit] = useState(initial?.personalFit != null ? String(initial.personalFit) : "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
   const [targetAmount, setTargetAmount] = useState(initial?.targetPrice?.amount != null ? String(initial.targetPrice.amount) : "");
@@ -288,6 +289,7 @@ export default function WatchForm({
       wishlistTier: wishlistTier || undefined,
       scoringCategory: scoringCategory || undefined,
       designUniqueness: design,
+      personalFit: parseNum(personalFit),
       imageUrl: imageUrl.trim() || undefined,
       specs: builtSpecs,
       tags: tags
@@ -444,6 +446,14 @@ export default function WatchForm({
             <p className="mt-1 text-xs text-slate-400">1 leaves you cold; 5 is a design you would keep staring at.</p>
           </div>
           <div>
+            <label className="label">Fit for me</label>
+            <select className="input" value={personalFit} onChange={(e) => setPersonalFit(e.target.value)}>
+              <option value="">Not rated</option>
+              {[1, 2, 3, 4, 5].map((rating) => <option key={rating} value={rating}>{rating}</option>)}
+            </select>
+            <p className="mt-1 text-xs text-slate-400">Your firsthand fit rating. Personal only; it does not change specification value.</p>
+          </div>
+          <div>
             <label className="label">Value-scoring category</label>
             <select
               className="input"
@@ -555,7 +565,7 @@ export default function WatchForm({
         </summary>
         <div className="space-y-4 border-t border-slate-100 p-5">
           <p className="text-xs text-slate-400">
-            What the scoring engine reads for case &amp; finishing, bracelet, and regulation. Leave a field blank when
+            What the scoring engine reads for case features, bracelet, and regulation. Leave a field blank when
             you don&apos;t know — a dimension with nothing recorded stays unrated rather than scoring badly.
           </p>
           {FLAG_GROUPS.map((group) => (

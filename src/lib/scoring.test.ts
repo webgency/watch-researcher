@@ -127,6 +127,17 @@ describe("scoreDimensions", () => {
     expect(wearability(41, 16)).toBe(0);
   });
 
+  it("recognizes a compact lug-to-lug as part of case profile", () => {
+    const compact = scoreDimensions(makeWatch({
+      specs: { caseDiameterMm: 38.5, caseThicknessMm: 12.9, lugToLugMm: 44.5 },
+    })).wearability!;
+    const thicknessOnly = scoreDimensions(makeWatch({
+      specs: { caseDiameterMm: 38.5, caseThicknessMm: 12.9 },
+    })).wearability!;
+    expect(compact).toBeCloseTo(0.489, 3);
+    expect(compact).toBeGreaterThan(thicknessOnly);
+  });
+
   it("scores caseCraft and bracelet only once their own qualityFlags exist", () => {
     const bare = makeWatch();
     expect(scoreDimensions(bare).caseCraft).toBeUndefined();

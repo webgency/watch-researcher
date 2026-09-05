@@ -128,7 +128,7 @@ export default function CalibrationWorkspace({
                     <p><span className="text-slate-400">Current {candidate.currentValue}</span> → <strong>{candidate.proposedValue}</strong></p>
                   </div>
                   <div className="rounded bg-slate-50 p-2">
-                    <p className="text-xs text-slate-500">Wearability</p>
+                  <p className="text-xs text-slate-500">Case profile</p>
                     <p><span className="text-slate-400">Current {candidate.currentWearability ?? "—"}</span> → <strong>{candidate.proposedWearability ?? "—"}</strong></p>
                   </div>
                 </div>
@@ -139,7 +139,7 @@ export default function CalibrationWorkspace({
                   <JudgmentButtons value={benchmark?.value} onChange={(value) => update(candidate.watch.id, { value })} />
                 </div>
                 <div className="text-xs font-semibold text-slate-600">
-                  <p>Proposed wearability score</p>
+                  <p>Proposed case-profile score</p>
                   <JudgmentButtons value={benchmark?.wearability} onChange={(wearability) => update(candidate.watch.id, { wearability })} />
                 </div>
                 <textarea

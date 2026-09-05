@@ -266,6 +266,7 @@ if (!Array.isArray(watches)) {
       errors.push(`${path}.scoringCategory must be one of ${Array.from(SCORING_CATEGORIES).join(", ")}`);
     }
     checkIntegerRange(watch.designUniqueness, `${path}.designUniqueness`, errors);
+    checkIntegerRange(watch.personalFit, `${path}.personalFit`, errors);
     if (watch.designPreferenceElo !== undefined && (!Number.isFinite(watch.designPreferenceElo) || watch.designPreferenceElo < 0)) {
       errors.push(`${path}.designPreferenceElo must be a non-negative number`);
     }
