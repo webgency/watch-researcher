@@ -57,16 +57,22 @@ function DimensionMeter({
   dimension,
   raw,
   reference,
+  coverage,
+  knownInputs,
+  totalInputs,
 }: {
   dimension: Dimension;
   raw: number;
   reference?: number;
+  coverage: number;
+  knownInputs: number;
+  totalInputs: number;
 }) {
   const verdict = verdictFor(raw, reference);
   const style = VERDICT[verdict];
 
   return (
-    <div className="grid grid-cols-[9rem_1fr_auto] items-center gap-3 py-2 sm:grid-cols-[11rem_1fr_auto]">
+    <div className="grid grid-cols-[9rem_1fr_auto] items-center gap-x-3 py-2 sm:grid-cols-[11rem_1fr_auto]">
       <p className="truncate text-sm font-medium capitalize text-slate-700" title={DIMENSION_BLURBS[dimension]}>
         {DIMENSION_LABELS[dimension]}
       </p>
@@ -95,6 +101,11 @@ function DimensionMeter({
         <span className="text-sm font-semibold tabular-nums text-slate-800">{pct(raw)}</span>
         <span className={`w-20 text-right text-xs font-medium ${style.text}`}>{style.label}</span>
       </div>
+      {coverage < 1 && (
+        <p className="col-span-3 mt-1 text-xs text-slate-400">
+          Based on {knownInputs} of {totalInputs} recorded inputs; missing inputs are excluded.
+        </p>
+      )}
     </div>
   );
 }
@@ -147,7 +158,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
         </p>
       ) : (
         <>
-          <div className="mb-4 grid grid-cols-2 gap-3 sm:max-w-md">
+          <div className="mb-4 grid grid-cols-3 gap-3 sm:max-w-2xl">
             <ScoreTile
               label="Quality"
               value={standing.qualityScore}
@@ -156,14 +167,25 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
             <ScoreTile
               label="Value"
               value={standing.valueScore}
-              caption={standing.valueScore === undefined ? "Needs a price" : "Quality for the money"}
+              caption={
+                standing.valueScore === undefined
+                  ? standing.peerLabel.startsWith("category unrated")
+                    ? "Needs a category"
+                    : "Needs a price"
+                  : "Quality for the money"
+              }
+            />
+            <ScoreTile
+              label="Evidence"
+              value={standing.evidenceCoverage}
+              caption={`${standing.confidence[0].toUpperCase()}${standing.confidence.slice(1)} confidence`}
             />
           </div>
 
-          {ratedCount <= 2 && (
+          {standing.confidence === "low" && (
             <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-              Only {ratedCount} dimension{ratedCount === 1 ? " is" : "s are"} rated, so these composites rest on thin
-              evidence.
+              Low confidence: only {pct(standing.evidenceCoverage)}% of applicable scoring evidence is recorded. Treat
+              the composite as provisional.
             </p>
           )}
 
@@ -174,6 +196,9 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
                 dimension={dimension}
                 raw={standing.dimensions[dimension]!.raw}
                 reference={standing.dimensions[dimension]!.reference}
+                coverage={standing.dimensions[dimension]!.coverage}
+                knownInputs={standing.dimensions[dimension]!.knownInputs}
+                totalInputs={standing.dimensions[dimension]!.totalInputs}
               />
             ))}
             {standing.unrated.map((dimension) => (

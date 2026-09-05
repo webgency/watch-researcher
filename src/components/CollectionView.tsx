@@ -12,7 +12,7 @@ import {
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { IS_STATIC } from "@/lib/config";
-import type { StandingSummary } from "@/lib/scoring";
+import { landedPriceUsd, type StandingSummary } from "@/lib/scoring";
 import { useCollectionSearch } from "./CollectionSearchContext";
 import WatchCard from "./WatchCard";
 
@@ -133,9 +133,9 @@ export default function CollectionView({
             b.dateAdded.localeCompare(a.dateAdded)
           );
         case "priceAsc":
-          return (a.price?.amount ?? Infinity) - (b.price?.amount ?? Infinity);
+          return (landedPriceUsd(a) ?? Infinity) - (landedPriceUsd(b) ?? Infinity);
         case "priceDesc":
-          return (b.price?.amount ?? -Infinity) - (a.price?.amount ?? -Infinity);
+          return (landedPriceUsd(b) ?? -Infinity) - (landedPriceUsd(a) ?? -Infinity);
         case "brand":
           return `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`);
         case "caseSize":

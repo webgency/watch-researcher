@@ -115,6 +115,9 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["co-axial master chronometer 8800", 0.95],
   ["mt5450", 0.80],
   ["m100", 0.80],
+  // Proprietary automatic monopusher chronograph with a patented retrograde
+  // regatta module and 64h reserve; kept below the METAS anchor above.
+  ["alb01 a", 0.80],
   ["sw510", 0.72],
   ["l688", 0.72],
   ["st-1901b", 0.70],
@@ -126,21 +129,33 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   // rated higher here: certification is regulation, which scoreDimensions
   // already rewards separately through regulatedPositions.
   ["sw330", 0.65],
+  ["ne88", 0.65],
+  ["ne86", 0.62],
   ["la joux-perret", 0.65],
   ["miyota 9075", 0.62],
   ["powermatic 80", 0.60],
   ["rw3230", 0.60],
   ["peseux 7001", 0.60],
+  // Catalogs often wrap Peseux in punctuation ("ETA (Peseux) 7001"), so the
+  // caliber number is the stable alias rather than the exact display string.
+  ["7001", 0.60],
+  ["miyota 9100", 0.58],
   ["sw200-1", 0.58],
   ["sw200", 0.55],
   ["miyota 9015", 0.55],
   ["miyota 9039", 0.55],
   ["9039", 0.55],
   ["france ebauche", 0.45],
+  // OT.G102 is a 4 Hz automatic base with the maker's jump-hour module. The
+  // architecture is distinctive, but it is not presented as chronometer-grade.
+  ["ot.g102", 0.45],
+  ["st1721", 0.45],
+  ["miyota 8215", 0.38],
   ["nh38", 0.35],
   ["nh34", 0.32],
   ["nh35", 0.30],
   ["meca-quartz", 0.30],
+  ["fc-206", 0.25],
   ["ronda 1032", 0.20],
 ];
 
@@ -151,16 +166,22 @@ export function caliberTier(caliber: string | undefined): number | undefined {
   return CALIBER_TIER_PATTERNS.find(([pattern]) => key.includes(pattern))?.[1];
 }
 
-/** First tag that maps to a rubric category; unrecognized/untagged falls back to "dress". */
-export function deriveCategory(watch: Watch): RubricCategory {
+/**
+ * Explicit category wins. Legacy tags are accepted only when they resolve to
+ * one category; ordering must never decide which rubric a hybrid watch gets.
+ */
+export function deriveCategory(watch: Watch): RubricCategory | undefined {
+  if (watch.scoringCategory) return watch.scoringCategory;
+
+  const inferred = new Set<RubricCategory>();
   for (const tag of watch.tags ?? []) {
     const normalized = tag.trim().toLowerCase();
-    if (normalized === "diver") return "diver";
-    if (normalized === "chronograph") return "chronograph";
-    if (normalized === "gmt" || normalized === "worldtimer") return "gmt";
-    if (normalized === "dress") return "dress";
+    if (normalized === "diver" || normalized === "dive") inferred.add("diver");
+    if (normalized === "chronograph") inferred.add("chronograph");
+    if (normalized === "gmt" || normalized === "worldtimer") inferred.add("gmt");
+    if (normalized === "dress") inferred.add("dress");
   }
-  return "dress";
+  return inferred.size === 1 ? [...inferred][0] : undefined;
 }
 
 /** All-in USD price used for banding: landedPrice when present, else price. */
@@ -172,6 +193,18 @@ export function landedPriceUsd(watch: Watch, onWarning?: (message: string) => vo
 /** qualityFlags each dimension reads. A dimension is rated only if at least one is recorded. */
 const CASE_CRAFT_FLAGS = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers"] as const;
 const BRACELET_FLAGS = ["braceletIncluded", "microAdjustClasp", "quickRelease"] as const;
+
+export interface DimensionEvidence {
+  raw: number;
+  /** Fraction of this dimension's source inputs that are recorded. */
+  coverage: number;
+  knownInputs: number;
+  totalInputs: number;
+}
+
+function evidence(raw: number, knownInputs: number, totalInputs: number): DimensionEvidence {
+  return { raw: clamp01(raw), coverage: knownInputs / totalInputs, knownInputs, totalInputs };
+}
 
 // Expected case thickness for a diameter: a fixed vertical stack plus a part
 // that does scale with width (bezel, crystal dome, lug arch). The pair is
@@ -195,14 +228,15 @@ const WEARABILITY_SPAN_MM = 4.0;
  * - movement needs a recognized caliber
  * - wearability needs both diameter and thickness
  * - caseCraft and bracelet each need one of their own qualityFlags recorded
- * - durability needs a water-resistance rating
+ * - durability needs at least one recorded durability input
  */
-export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>> {
+export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, DimensionEvidence>> {
   const s = watch.specs ?? {};
   const f = watch.qualityFlags ?? {};
-  const expectation = CATEGORY_EXPECTATION[deriveCategory(watch)];
+  const category = deriveCategory(watch);
+  const expectation = category ? CATEGORY_EXPECTATION[category] : undefined;
 
-  const out: Partial<Record<Dimension, number>> = {};
+  const out: Partial<Record<Dimension, DimensionEvidence>> = {};
 
   const caliberBase = caliberTier(s.caliber);
   if (caliberBase !== undefined) {
@@ -210,7 +244,8 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
     const regBonus = f.regulatedPositions ? Math.min(0.2, f.regulatedPositions * 0.05) : 0;
     const prBonus =
       s.powerReserveHours !== undefined ? clamp01((s.powerReserveHours - 38) / 42) * 0.1 : 0;
-    out.movement = clamp01(caliberBase + regBonus + prBonus);
+    const knownInputs = 1 + Number(f.regulatedPositions !== undefined) + Number(s.powerReserveHours !== undefined);
+    out.movement = evidence(caliberBase + regBonus + prBonus, knownInputs, 3);
   }
 
   if (s.caseDiameterMm !== undefined && s.caseDiameterMm > 0 && s.caseThicknessMm !== undefined) {
@@ -223,7 +258,11 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
     // large ones credit for width they did nothing to earn: a 37x11.6 (a well
     // proportioned watch) scored below a 44x13 (a slab).
     const expectedThicknessMm = WEARABILITY_FIXED_STACK_MM + WEARABILITY_THICKNESS_PER_MM * s.caseDiameterMm;
-    out.wearability = clamp01(0.5 + (expectedThicknessMm - s.caseThicknessMm) / WEARABILITY_SPAN_MM);
+    out.wearability = evidence(
+      0.5 + (expectedThicknessMm - s.caseThicknessMm) / WEARABILITY_SPAN_MM,
+      2,
+      2
+    );
   }
 
   // Each of these needs its own source data. Gating both on "any qualityFlags
@@ -233,13 +272,24 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
   // every band's rubric reference, so the watch was guaranteed to trail on a
   // dimension nobody had measured.
   if (CASE_CRAFT_FLAGS.some((flag) => f[flag] !== undefined)) {
-    out.caseCraft = clamp01(
-      0.35 +
-        (f.hardenedCoatingHv ? 0.2 : 0) +
-        (f.sapphireBezelInsert ? 0.15 : 0) +
-        (f.drilledLugs ? 0.1 : 0) +
-        (Math.min(f.arLayers ?? 0, 8) / 8) * 0.2
-    );
+    let achieved = 0;
+    if (f.hardenedCoatingHv !== undefined) {
+      if (f.hardenedCoatingHv > 0) achieved += 0.2;
+    }
+    if (f.sapphireBezelInsert !== undefined) {
+      if (f.sapphireBezelInsert) achieved += 0.15;
+    }
+    if (f.drilledLugs !== undefined) {
+      if (f.drilledLugs) achieved += 0.1;
+    }
+    if (f.arLayers !== undefined) {
+      achieved += (Math.min(f.arLayers, 8) / 8) * 0.2;
+    }
+    const knownInputs = CASE_CRAFT_FLAGS.filter((flag) => f[flag] !== undefined).length;
+    // Keep the established rubric scale: the score states verified capability,
+    // while coverage states how much of the possible evidence was inspected.
+    // Unknown features add neither verified points nor negative evidence.
+    out.caseCraft = evidence(0.35 + achieved, knownInputs, CASE_CRAFT_FLAGS.length);
   }
 
   // A watch sold on a strap has no bracelet to judge, so the dimension is not
@@ -250,26 +300,53 @@ export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>
   // text. Not applicable is distinct from not recorded, but both mean the
   // dimension should stay out of the composite.
   if (f.braceletIncluded !== false && BRACELET_FLAGS.some((flag) => f[flag] !== undefined)) {
-    out.bracelet = clamp01(
-      (f.braceletIncluded ? 0.4 : 0) +
-        (f.microAdjustClasp ? 0.35 : 0) +
-        (f.quickRelease ? 0.25 : 0)
-    );
+    const parts: Array<[boolean | undefined, number]> = [
+      [f.braceletIncluded, 0.4],
+      [f.microAdjustClasp, 0.35],
+      [f.quickRelease, 0.25],
+    ];
+    const known = parts.filter(([value]) => value !== undefined);
+    const achieved = known.reduce((sum, [value, weight]) => sum + (value ? weight : 0), 0);
+    out.bracelet = evidence(achieved, known.length, parts.length);
   }
 
-  if (s.waterResistanceM !== undefined) {
-    out.durability = clamp01(
-      0.5 * clamp01(s.waterResistanceM / expectation.wrM) +
-        0.25 * ((s.crystal ?? "").toLowerCase().includes("sapphire") ? 1 : 0) +
-        0.25 * clamp01((f.antimagneticAm ?? 0) / 25000)
-    );
+  if ((s.waterResistanceM !== undefined && expectation) || s.crystal !== undefined || f.antimagneticAm !== undefined) {
+    const parts: Array<{ known: boolean; weight: number; score: number }> = [
+      {
+        known: s.waterResistanceM !== undefined && expectation !== undefined,
+        weight: 0.5,
+        score: s.waterResistanceM !== undefined && expectation
+          ? clamp01(s.waterResistanceM / expectation.wrM)
+          : 0,
+      },
+      {
+        known: s.crystal !== undefined,
+        weight: 0.25,
+        score: (s.crystal ?? "").toLowerCase().includes("sapphire") ? 1 : 0,
+      },
+      {
+        known: f.antimagneticAm !== undefined,
+        weight: 0.25,
+        score: clamp01((f.antimagneticAm ?? 0) / 25000),
+      },
+    ];
+    const known = parts.filter((part) => part.known);
+    const achieved = known.reduce((sum, part) => sum + part.score * part.weight, 0);
+    out.durability = evidence(achieved, known.length, parts.length);
   }
 
   return out;
 }
 
+/** Backwards-compatible raw score view for callers that do not need coverage. */
+export function scoreDimensions(watch: Watch): Partial<Record<Dimension, number>> {
+  return Object.fromEntries(
+    Object.entries(scoreDimensionEvidence(watch)).map(([dimension, result]) => [dimension, result.raw])
+  );
+}
+
 export interface PeerGroup {
-  category: RubricCategory;
+  category?: RubricCategory;
   band?: PriceBand;
   /** Display context, e.g. "divers, $500-1000". */
   label: string;
@@ -300,7 +377,7 @@ export function derivePeerGroup(watch: Watch, allWatches: Watch[]): PeerGroup {
   return {
     category,
     band,
-    label: `${CATEGORY_PLURAL[category]}, ${band ? band.label : "unpriced"}`,
+    label: `${category ? CATEGORY_PLURAL[category] : "category unrated"}, ${band ? band.label : "unpriced"}`,
     members: members.some((member) => member.id === watch.id) ? members : [...members, watch],
   };
 }
@@ -327,13 +404,16 @@ export interface Standing {
    * band's rubric reference. `reference` is undefined only for an unbanded
    * watch, i.e. one with no price.
    */
-  dimensions: Partial<Record<Dimension, { raw: number; rubricBand: string; reference?: number }>>;
+  dimensions: Partial<Record<Dimension, { raw: number; coverage: number; knownInputs: number; totalInputs: number; rubricBand: string; reference?: number }>>;
   /** Dimensions with missing source data — display "unrated", never 0. */
   unrated: Dimension[];
   /** Composite of rated dimensions only. Undefined when nothing is rated. */
   qualityScore?: number;
   /** Quality relative to landed price within the band. Needs a price and a rated dimension. */
   valueScore?: number;
+  /** How much applicable source evidence is recorded, from 0-1. */
+  evidenceCoverage: number;
+  confidence: "low" | "medium" | "high";
   /** Rank of qualityScore within the peer group; only when the group has n >= 6. */
   qualityPercentile?: number;
   /** Dimensions above the band's rubric reference. */
@@ -344,13 +424,20 @@ export interface Standing {
   frictions: string[];
 }
 
-function compositeQuality(raw: Partial<Record<Dimension, number>>): number | undefined {
+function compositeQuality(raw: Partial<Record<Dimension, DimensionEvidence>>): number | undefined {
   const rated = DIMENSIONS.flatMap((dimension) => {
     const value = raw[dimension];
     return value === undefined ? [] : [value];
   });
   if (rated.length === 0) return undefined;
-  return rated.reduce((sum, value) => sum + value, 0) / rated.length;
+  const totalWeight = rated.reduce((sum, value) => sum + value.coverage, 0);
+  return rated.reduce((sum, value) => sum + value.raw * value.coverage, 0) / totalWeight;
+}
+
+export function confidenceFor(coverage: number): Standing["confidence"] {
+  if (coverage >= 0.8) return "high";
+  if (coverage >= 0.5) return "medium";
+  return "low";
 }
 
 function frictionChips(watch: Watch): string[] {
@@ -385,11 +472,11 @@ function frictionChips(watch: Watch): string[] {
  */
 export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   const peerGroup = derivePeerGroup(watch, allWatches);
-  const raw = scoreDimensions(watch);
+  const raw = scoreDimensionEvidence(watch);
   const usd = landedPriceUsd(watch);
   const band = peerGroup.band;
   const rubric: RubricReference | undefined = band
-    ? rubricFor(peerGroup.category, band.id)
+    && peerGroup.category ? rubricFor(peerGroup.category, band.id)
     : undefined;
 
   const dimensions: Standing["dimensions"] = {};
@@ -399,13 +486,16 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
     const value = raw[dimension];
     if (value === undefined) continue;
     dimensions[dimension] = {
-      raw: value,
+      raw: value.raw,
+      coverage: value.coverage,
+      knownInputs: value.knownInputs,
+      totalInputs: value.totalInputs,
       rubricBand: band?.id ?? "unbanded",
       reference: rubric?.[dimension],
     };
     if (rubric) {
-      if (value > rubric[dimension] + RUBRIC_TOLERANCE) beats.push(dimension);
-      else if (value < rubric[dimension] - RUBRIC_TOLERANCE) trails.push(dimension);
+      if (value.raw > rubric[dimension] + RUBRIC_TOLERANCE) beats.push(dimension);
+      else if (value.raw < rubric[dimension] - RUBRIC_TOLERANCE) trails.push(dimension);
     }
   }
 
@@ -418,9 +508,10 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   let valueScore: number | undefined;
   if (qualityScore !== undefined && rubric && band && usd !== undefined) {
     const ratedDimensions = DIMENSIONS.filter((dimension) => raw[dimension] !== undefined);
+    const evidenceWeight = ratedDimensions.reduce((sum, dimension) => sum + raw[dimension]!.coverage, 0);
     const referenceQuality =
-      ratedDimensions.reduce((sum, dimension) => sum + rubric[dimension], 0) /
-      ratedDimensions.length;
+      ratedDimensions.reduce((sum, dimension) => sum + rubric[dimension] * raw[dimension]!.coverage, 0) /
+      evidenceWeight;
     const pricePosition = clamp01((usd - band.minUsd) / (band.maxUsd - band.minUsd));
     valueScore = clamp01(
       0.5 + (qualityScore - referenceQuality) - VALUE_PRICE_TILT * (pricePosition - 0.5)
@@ -431,11 +522,19 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   let qualityPercentile: number | undefined;
   if (qualityScore !== undefined) {
     const pool = peerGroup.members.flatMap((member) => {
-      const memberQuality = compositeQuality(scoreDimensions(member));
+      const memberQuality = compositeQuality(scoreDimensionEvidence(member));
       return memberQuality === undefined ? [] : [memberQuality];
     });
     qualityPercentile = percentile(qualityScore, pool);
   }
+
+  const applicableDimensions = DIMENSIONS.filter(
+    (dimension) => dimension !== "bracelet" || watch.qualityFlags?.braceletIncluded !== false
+  );
+  const evidenceCoverage = applicableDimensions.reduce(
+    (sum, dimension) => sum + (raw[dimension]?.coverage ?? 0),
+    0
+  ) / applicableDimensions.length;
 
   return {
     peerLabel: peerGroup.label,
@@ -444,6 +543,8 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
     unrated: DIMENSIONS.filter((dimension) => raw[dimension] === undefined),
     qualityScore,
     valueScore,
+    evidenceCoverage,
+    confidence: confidenceFor(evidenceCoverage),
     qualityPercentile,
     beats,
     trails,

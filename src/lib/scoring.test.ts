@@ -10,7 +10,10 @@ import {
   derivePeerGroup,
   percentile,
   scoreDimensions,
+  scoreDimensionEvidence,
+  confidenceFor,
   CURRENCY_TO_USD,
+  landedPriceUsd,
   normalizePriceToUsd,
 } from "./scoring";
 import { DIMENSIONS } from "./rubrics";
@@ -69,6 +72,21 @@ describe("scoreDimensions", () => {
     expect(caliberTier("Automatic Cal. Miyota 9075 GMT")).toBe(0.62);
     expect(caliberTier("Seiko NH35")).toBe(0.3);
     expect(caliberTier(undefined)).toBeUndefined();
+  });
+
+  it("recognizes every caliber family currently represented in the collection", () => {
+    const currentAliases = [
+      "ETA (Peseux) 7001, elaboré grade",
+      "Seiko/TMI NE86",
+      "ALB01 A",
+      "Seagull ST1721",
+      "OT.G102",
+      "Seiko Instruments (SII/TMI) NE88",
+      "Miyota 9100",
+      "FC-206",
+      "Miyota 8215",
+    ];
+    expect(currentAliases.filter((caliber) => caliberTier(caliber) === undefined)).toEqual([]);
   });
 
   it("matches a base caliber through a brand's own designation", () => {
@@ -146,6 +164,31 @@ describe("scoreDimensions", () => {
     expect(scoreDimensions(watch).bracelet).toBeCloseTo(0.65);
   });
 
+  it("tracks missing sub-inputs as lower evidence rather than recorded failures", () => {
+    const partial = makeWatch({ qualityFlags: { drilledLugs: true } });
+    const moreCertain = makeWatch({ qualityFlags: { drilledLugs: true, sapphireBezelInsert: false } });
+    const partialEvidence = scoreDimensionEvidence(partial).caseCraft!;
+    const certainEvidence = scoreDimensionEvidence(moreCertain).caseCraft!;
+
+    // Recording an absent feature does not retroactively lower the verified
+    // capability score, but it does make the evidence more complete.
+    expect(certainEvidence.raw).toBe(partialEvidence.raw);
+    expect(partialEvidence.coverage).toBe(0.25);
+    expect(certainEvidence.coverage).toBe(0.5);
+  });
+
+  it("reports durability coverage separately from its verified score", () => {
+    const watch = makeWatch({
+      scoringCategory: "diver",
+      specs: { waterResistanceM: 200, crystal: "Sapphire" },
+    });
+    const durability = scoreDimensionEvidence(watch).durability!;
+    expect(durability.raw).toBe(0.75);
+    expect(durability.knownInputs).toBe(2);
+    expect(durability.totalInputs).toBe(3);
+    expect(durability.coverage).toBeCloseTo(2 / 3);
+  });
+
   it("excludes an unrated bracelet from the composite rather than scoring it 0", () => {
     const strap = makeWatch({
       specs: { caliber: "NH35", waterResistanceM: 200, crystal: "Sapphire" },
@@ -166,16 +209,17 @@ describe("scoreDimensions", () => {
 });
 
 describe("category and peer group derivation", () => {
-  it("falls back to dress for a watch with no tags and still produces a standing", () => {
+  it("leaves an unclassified watch without a rubric instead of silently using dress", () => {
     const watch = makeWatch({
       price: { amount: 700, currency: "USD" },
       specs: { caliber: "Seiko NH35", caseDiameterMm: 40, caseThicknessMm: 12 },
     });
-    expect(deriveCategory(watch)).toBe("dress");
+    expect(deriveCategory(watch)).toBeUndefined();
 
     const standing = computeStanding(watch, [watch]);
-    expect(standing.peerLabel).toBe("dress, $500-1000");
+    expect(standing.peerLabel).toBe("category unrated, $500-1000");
     expect(standing.qualityScore).toBeDefined();
+    expect(standing.valueScore).toBeUndefined();
     expect(standing.unrated).toContain("durability");
   });
 
@@ -188,6 +232,17 @@ describe("category and peer group derivation", () => {
     const group = derivePeerGroup(gmt, [gmt, sameBand, otherBand, otherCategory]);
     expect(group.label).toBe("GMTs, $500-1000");
     expect(group.members.map((member) => member.id)).toEqual([gmt.id, sameBand.id]);
+  });
+
+  it("requires an explicit category when legacy tags name different rubrics", () => {
+    const hybrid = makeWatch({ tags: ["GMT", "diver"] });
+    expect(deriveCategory(hybrid)).toBeUndefined();
+    expect(deriveCategory({ ...hybrid, scoringCategory: "gmt" })).toBe("gmt");
+  });
+
+  it("accepts the legacy dive tag without treating every unknown tag as dress", () => {
+    expect(deriveCategory(makeWatch({ tags: ["dive"] }))).toBe("diver");
+    expect(deriveCategory(makeWatch({ tags: ["field"] }))).toBeUndefined();
   });
 
   it("prefers landedPrice over list price for banding", () => {
@@ -335,6 +390,20 @@ describe("percentile", () => {
   });
 });
 
+describe("evidence confidence", () => {
+  it("uses stable low, medium, and high thresholds", () => {
+    expect(confidenceFor(0.49)).toBe("low");
+    expect(confidenceFor(0.5)).toBe("medium");
+    expect(confidenceFor(0.79)).toBe("medium");
+    expect(confidenceFor(0.8)).toBe("high");
+  });
+
+  it("excludes a known strap-only bracelet from overall evidence coverage", () => {
+    const watch = makeWatch({ qualityFlags: { braceletIncluded: false } });
+    expect(computeStanding(watch, [watch]).evidenceCoverage).toBe(0);
+  });
+});
+
 describe("design score", () => {
   it("rescales the 1-5 rank onto 0-100", () => {
     expect(computeDesignScore(makeWatch({ designUniqueness: 1 }))).toBe(0);
@@ -418,6 +487,18 @@ describe("currency conversion", () => {
 
   it("normalizes case and padding before lookup", () => {
     expect(normalizePriceToUsd({ amount: 10, currency: " eur " })).toBeCloseTo(10 * CURRENCY_TO_USD.EUR);
+  });
+
+  it("orders watch prices by normalized landed cost rather than raw amounts", () => {
+    const euros = makeWatch({ price: { amount: 900, currency: "EUR" } });
+    const dollars = makeWatch({ price: { amount: 950, currency: "USD" } });
+    expect(landedPriceUsd(euros)!).toBeGreaterThan(landedPriceUsd(dollars)!);
+
+    const landed = makeWatch({
+      price: { amount: 800, currency: "USD" },
+      landedPrice: { amount: 1000, currency: "USD" },
+    });
+    expect(landedPriceUsd(landed)).toBe(1000);
   });
 });
 

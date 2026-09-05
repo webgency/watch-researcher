@@ -21,6 +21,9 @@ export type MovementType =
 
 export type Condition = "new" | "pre-owned";
 
+/** Explicit rubric used for price-band scoring. Tags remain descriptive. */
+export type ScoringCategory = "diver" | "chronograph" | "gmt" | "dress";
+
 export interface Money {
   amount: number;
   /** ISO 4217 currency code, e.g. "USD", "EUR", "GBP". */
@@ -120,6 +123,8 @@ export interface Watch {
   status: WatchStatus;
   /** Personal wishlist priority bucket for planning. */
   wishlistTier?: WishlistTier;
+  /** Rubric category for value scoring; inferred from an unambiguous legacy tag when absent. */
+  scoringCategory?: ScoringCategory;
   /** User-rated visual/design distinctiveness, 1-5. */
   designUniqueness?: number;
   /** Headline price you're tracking (usually the best/target price). */
@@ -166,6 +171,8 @@ export interface BrandInfo {
 export type BrandCatalog = Record<string, BrandInfo>;
 
 export const WATCH_STATUSES: WatchStatus[] = ["wishlist", "owned", "sold"];
+
+export const SCORING_CATEGORIES: ScoringCategory[] = ["diver", "chronograph", "gmt", "dress"];
 
 export const WISHLIST_TIERS: WishlistTier[] = [
   "next-purchase",

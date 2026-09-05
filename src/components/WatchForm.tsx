@@ -6,6 +6,8 @@ import {
   CURRENCIES,
   Condition,
   RetailerLink,
+  ScoringCategory,
+  SCORING_CATEGORIES,
   Watch,
   WatchInput,
   WatchSpecs,
@@ -46,6 +48,13 @@ const FLAG_GROUPS: Array<{ title: string; fields: typeof QUALITY_FLAG_FIELDS }> 
   }
   return groups;
 })();
+
+const SCORING_CATEGORY_LABELS: Record<ScoringCategory, string> = {
+  diver: "Diver",
+  chronograph: "Chronograph",
+  gmt: "GMT / worldtimer",
+  dress: "Dress / everyday",
+};
 
 function toLinkRow(link: RetailerLink): LinkRow {
   return {
@@ -99,6 +108,7 @@ export default function WatchForm({
   const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
   const [status, setStatus] = useState<WatchStatus>(initial?.status ?? "wishlist");
   const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial?.wishlistTier ?? "");
+  const [scoringCategory, setScoringCategory] = useState<ScoringCategory | "">(initial?.scoringCategory ?? "");
   const [designUniqueness, setDesignUniqueness] = useState(initial?.designUniqueness != null ? String(initial.designUniqueness) : "");
   const [priceAmount, setPriceAmount] = useState(initial?.price?.amount != null ? String(initial.price.amount) : "");
   const [priceCurrency, setPriceCurrency] = useState(initial?.price?.currency ?? "USD");
@@ -239,6 +249,7 @@ export default function WatchForm({
       referenceNumber: referenceNumber.trim() || undefined,
       status,
       wishlistTier: wishlistTier || undefined,
+      scoringCategory: scoringCategory || undefined,
       designUniqueness: design,
       imageUrl: imageUrl.trim() || undefined,
       specs: builtSpecs,
@@ -363,6 +374,24 @@ export default function WatchForm({
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="label">Value-scoring category</label>
+            <select
+              className="input"
+              value={scoringCategory}
+              onChange={(e) => setScoringCategory(e.target.value as ScoringCategory | "")}
+            >
+              <option value="">Infer from one category tag</option>
+              {SCORING_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {SCORING_CATEGORY_LABELS[category]}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-400">
+              Choose explicitly for hybrid watches. Ambiguous tags leave value unrated.
+            </p>
           </div>
           <div>
             <label className="label">Brand reputation</label>

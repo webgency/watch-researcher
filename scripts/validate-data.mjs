@@ -16,6 +16,7 @@ const STATUSES = new Set(["wishlist", "owned", "sold"]);
 const WISHLIST_TIERS = new Set(["next-purchase", "must-have", "love-it", "interested", "maybe-later", "pass"]);
 const MOVEMENTS = new Set(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"]);
 const CONDITIONS = new Set(["new", "pre-owned"]);
+const SCORING_CATEGORIES = new Set(["diver", "chronograph", "gmt", "dress"]);
 // Derived from the shared table rather than restated, so adding a currency in
 // one place cannot leave the validator warning about a rate that now exists.
 const KNOWN_CURRENCIES = new Set(Object.keys(CURRENCY_TO_USD));
@@ -259,6 +260,9 @@ if (!Array.isArray(watches)) {
     if (!STATUSES.has(watch.status)) errors.push(`${path}.status must be wishlist, owned, or sold`);
     if (watch.wishlistTier !== undefined && !WISHLIST_TIERS.has(watch.wishlistTier)) {
       errors.push(`${path}.wishlistTier must be one of ${Array.from(WISHLIST_TIERS).join(", ")}`);
+    }
+    if (watch.scoringCategory !== undefined && !SCORING_CATEGORIES.has(watch.scoringCategory)) {
+      errors.push(`${path}.scoringCategory must be one of ${Array.from(SCORING_CATEGORIES).join(", ")}`);
     }
     checkIntegerRange(watch.designUniqueness, `${path}.designUniqueness`, errors);
     checkMoney(watch.price, `${path}.price`, errors);

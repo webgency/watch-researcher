@@ -137,6 +137,16 @@ function StandingBlock({ summary }: { summary: StandingSummary }) {
             ? "Value unrated"
             : `Value ${Math.round(toDisplayScore(standing.valueScore))}`}
         </span>
+        <span
+          title={`${standing.confidence} confidence from recorded scoring inputs`}
+          className={`rounded-full px-2 py-1 font-medium ${
+            standing.confidence === "low"
+              ? "bg-amber-50 text-amber-800"
+              : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          Evidence {Math.round(standing.evidenceCoverage * 100)}%
+        </span>
         <span title="Composite of the rated dimensions" className="rounded-full bg-slate-100 px-2 py-1 font-medium text-slate-600">
           {standing.qualityScore === undefined
             ? "Quality unrated"

@@ -4,6 +4,7 @@ import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
 import WishlistTierBadge from "./WishlistTierBadge";
+import { landedPriceUsd } from "@/lib/scoring";
 
 /** Indexes of the "best" cells in a row, for highlighting. */
 function bestIndexes(values: (number | undefined)[], prefer: "higher" | "lower"): Set<number> {
@@ -19,7 +20,7 @@ function bestIndexes(values: (number | undefined)[], prefer: "higher" | "lower")
 
 export default function CompareTable({ watches }: { watches: Watch[] }) {
   const priceBest = bestIndexes(
-    watches.map((w) => w.price?.amount),
+    watches.map((w) => landedPriceUsd(w)),
     "lower"
   );
 

@@ -40,7 +40,7 @@ npm run check
 
 The app's opinionated half. It answers "is this watch good *for its money*?" while keeping your taste separate from the arithmetic.
 
-- **Peer-band standing** (`/watch/[id]`) — five dimensions (movement, case & finishing, wearability, durability, bracelet) scored 0–1 against a fixed rubric for the watch's **category** (diver / chronograph / GMT / dress) and **price band** (under $500 → $5000+). Shows which dimensions beat or trail par for that band.
+- **Peer-band standing** (`/watch/[id]`) — five dimensions (movement, case & finishing, wearability, durability, bracelet) scored 0–1 against a fixed rubric for the watch's **category** (diver / chronograph / GMT / dress) and **price band** (under $500 → $5000+). Shows which dimensions beat or trail par for that band and how much evidence supports the composite.
 - **Design rank** (`/design`) — your own 1–5 read on how a watch looks. Deliberately the one judgement in the app that is yours rather than calculated.
 - **Value matrix** (`/value`) — value-vs-band on one axis, your design rank on the other, splitting the collection into buy / aspirational / sensible / skip quadrants.
 
@@ -72,7 +72,8 @@ Each watch (`src/lib/types.ts`):
 | `specs` | case diameter, thickness, lug-to-lug, lug width, material, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
 | `qualityFlags` | verifiable engineering details feeding the score — regulation, accuracy spec, coating hardness, antimagnetism, sapphire bezel, drilled lugs, micro-adjust clasp, quick-release, bracelet included, AR layers |
 | `friction` | availability, expected ship date, bracelet upcharge, brand liquidity — **never** folded into a score |
-| `tags[]` | `diver`, `gmt`, `chronograph`, `dress`, … — the first recognized tag picks the rubric category |
+| `scoringCategory` | Explicit `diver`, `gmt`, `chronograph`, or `dress` rubric; use this for hybrid watches |
+| `tags[]` | Descriptive labels; a single unambiguous legacy category tag can still infer `scoringCategory` |
 | `notes` | free text |
 | `purchase`, `sale` | filled in as a watch moves through `owned` → `sold` |
 
