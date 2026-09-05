@@ -359,6 +359,37 @@ describe("computeStanding", () => {
     expect(standing.trails).toContain("durability");
   });
 
+  it("does not turn one narrow case flag into a case-quality verdict or value penalty", () => {
+    const omega = makeWatch({
+      scoringCategory: "diver",
+      price: { amount: 7100, currency: "USD" },
+      specs: {
+        caliber: "Co-Axial Master Chronometer 8800",
+        powerReserveHours: 55,
+        caseDiameterMm: 42,
+        caseThicknessMm: 13.7,
+        waterResistanceM: 300,
+        crystal: "Sapphire",
+      },
+      qualityFlags: {
+        antimagneticAm: 1200000,
+        sapphireBezelInsert: false,
+        braceletIncluded: true,
+      },
+    });
+    const withoutNarrowCaseFlag = makeWatch({
+      ...omega,
+      qualityFlags: { antimagneticAm: 1200000, braceletIncluded: true },
+    });
+
+    const standing = computeStanding(omega, [omega]);
+    const comparison = computeStanding(withoutNarrowCaseFlag, [withoutNarrowCaseFlag]);
+    expect(standing.dimensions.caseCraft?.coverage).toBe(0.25);
+    expect(standing.beats).not.toContain("caseCraft");
+    expect(standing.trails).not.toContain("caseCraft");
+    expect(standing.valueScore).toBeCloseTo(comparison.valueScore!);
+  });
+
   it("only reports a percentile once the peer group reaches six members", () => {
     const diverAt = (amount: number, thickness: number) =>
       makeWatch({

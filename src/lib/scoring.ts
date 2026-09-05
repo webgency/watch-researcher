@@ -420,6 +420,18 @@ export function percentile(value: number, pool: number[]): number | undefined {
 // before a watch is described as above or below expectations for its price.
 export const RUBRIC_TOLERANCE = 0.05;
 
+// A single recorded flag can produce a tentative dimension score, but it is
+// not enough evidence to make a price-relative verdict or influence value.
+// This prevents one narrow fact (for example, a ceramic rather than sapphire
+// bezel insert) from masquerading as a judgment of the whole case.
+export const MIN_REFERENCE_COVERAGE: Record<Dimension, number> = {
+  movement: 1 / 3,
+  caseCraft: 0.5,
+  wearability: 1,
+  durability: 1 / 3,
+  bracelet: 0.5,
+};
+
 // How strongly within-band price position tilts the value score.
 export const VALUE_PRICE_TILT = 0.3;
 
@@ -520,7 +532,7 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
       rubricBand: band?.id ?? "unbanded",
       reference: rubric?.[dimension],
     };
-    if (rubric) {
+    if (rubric && value.coverage >= MIN_REFERENCE_COVERAGE[dimension]) {
       if (value.raw > rubric[dimension] + RUBRIC_TOLERANCE) beats.push(dimension);
       else if (value.raw < rubric[dimension] - RUBRIC_TOLERANCE) trails.push(dimension);
     }
@@ -530,19 +542,29 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
 
   // Par quality at the band's midpoint price scores 0.5: beating the rubric on
   // the rated dimensions raises it, sitting cheap within the band raises it.
-  // The reference composite averages only the dimensions actually rated, so a
-  // partially-rated watch is compared like-for-like.
+  // Price-relative value uses only dimensions with enough evidence to support
+  // a comparison. Tentative scores can still inform Quality at reduced weight,
+  // but cannot manufacture an above/below expectation verdict.
   let valueScore: number | undefined;
   if (qualityScore !== undefined && rubric && band && usd !== undefined) {
-    const ratedDimensions = DIMENSIONS.filter((dimension) => raw[dimension] !== undefined);
-    const evidenceWeight = ratedDimensions.reduce((sum, dimension) => sum + raw[dimension]!.coverage, 0);
-    const referenceQuality =
-      ratedDimensions.reduce((sum, dimension) => sum + rubric[dimension] * raw[dimension]!.coverage, 0) /
-      evidenceWeight;
-    const pricePosition = clamp01((usd - band.minUsd) / (band.maxUsd - band.minUsd));
-    valueScore = clamp01(
-      0.5 + (qualityScore - referenceQuality) - VALUE_PRICE_TILT * (pricePosition - 0.5)
+    const ratedDimensions = DIMENSIONS.filter(
+      (dimension) => raw[dimension] !== undefined && raw[dimension]!.coverage >= MIN_REFERENCE_COVERAGE[dimension]
     );
+    if (ratedDimensions.length === 0) {
+      valueScore = undefined;
+    } else {
+      const evidenceWeight = ratedDimensions.reduce((sum, dimension) => sum + raw[dimension]!.coverage, 0);
+      const comparableQuality =
+        ratedDimensions.reduce((sum, dimension) => sum + raw[dimension]!.raw * raw[dimension]!.coverage, 0) /
+        evidenceWeight;
+      const referenceQuality =
+        ratedDimensions.reduce((sum, dimension) => sum + rubric[dimension] * raw[dimension]!.coverage, 0) /
+        evidenceWeight;
+      const pricePosition = clamp01((usd - band.minUsd) / (band.maxUsd - band.minUsd));
+      valueScore = clamp01(
+        0.5 + (comparableQuality - referenceQuality) - VALUE_PRICE_TILT * (pricePosition - 0.5)
+      );
+    }
   }
 
   // Optional peer-relative rank, only meaningful once the group is big enough.

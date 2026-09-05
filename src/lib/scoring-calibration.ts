@@ -1,5 +1,5 @@
 import { DIMENSIONS, Dimension, PRICE_BANDS, RUBRICS, RubricCategory } from "./rubrics";
-import { deriveCategory, landedPriceUsd, scoreDimensionEvidence } from "./scoring";
+import { deriveCategory, landedPriceUsd, MIN_REFERENCE_COVERAGE, scoreDimensionEvidence } from "./scoring";
 import { Watch } from "./types";
 
 const PRICE_ANCHORS_USD = PRICE_BANDS.map((range) => (range.minUsd + range.maxUsd) / 2);
@@ -79,14 +79,21 @@ export function calibrationScore(watch: Watch): CalibrationResult {
     return { qualityScore, wearabilityScore: evidence.wearability?.raw };
   }
 
-  const referenceQuality = rated.reduce(
+  const comparable = rated.filter((dimension) => evidence[dimension]!.coverage >= MIN_REFERENCE_COVERAGE[dimension]);
+  if (!comparable.length) return { qualityScore, wearabilityScore: evidence.wearability?.raw };
+  const comparisonWeight = comparable.reduce((sum, dimension) => sum + evidence[dimension]!.coverage, 0);
+  const comparableQuality = comparable.reduce(
+    (sum, dimension) => sum + evidence[dimension]!.raw * evidence[dimension]!.coverage,
+    0
+  ) / comparisonWeight;
+  const referenceQuality = comparable.reduce(
     (sum, dimension) => sum + continuousReference(category, dimension, priceUsd) * evidence[dimension]!.coverage,
     0
-  ) / totalWeight;
+  ) / comparisonWeight;
 
   return {
     qualityScore,
-    valueScore: clamp01(0.5 + qualityScore - referenceQuality),
+    valueScore: clamp01(0.5 + comparableQuality - referenceQuality),
     wearabilityScore: evidence.wearability?.raw,
     referenceQuality,
   };

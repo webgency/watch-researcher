@@ -23,7 +23,7 @@ export const DIMENSIONS: Dimension[] = [
 /** Display names for the scored dimensions. */
 export const DIMENSION_LABELS: Record<Dimension, string> = {
   movement: "movement",
-  caseCraft: "case & finishing",
+  caseCraft: "case features",
   wearability: "wearability",
   durability: "durability",
   bracelet: "bracelet",
@@ -32,7 +32,7 @@ export const DIMENSION_LABELS: Record<Dimension, string> = {
 /** What each dimension actually reads, for tooltips and detail views. */
 export const DIMENSION_BLURBS: Record<Dimension, string> = {
   movement: "Caliber tier, plus regulation and power reserve.",
-  caseCraft: "Finishing and case hardware: coatings, bezel insert, drilled lugs, AR layers.",
+  caseCraft: "Recorded case hardware and treatments: hardening, sapphire bezel insert, drilled lugs, and AR layers. This does not rate visual finishing quality.",
   wearability: "Thickness against what the diameter should cost — how the case sits on a wrist.",
   durability: "Water resistance against what the category needs, plus crystal and antimagnetism.",
   bracelet: "Bracelet hardware: whether one is included, micro-adjust clasp, quick-release.",
