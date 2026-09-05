@@ -18,12 +18,14 @@ function initials(watch: Watch): string {
 export default function WatchCard({
   watch,
   selected,
+  selectionDisabled,
   scoreSummary,
   onToggleSelect,
   onChangeWishlistTier,
 }: {
   watch: Watch;
   selected: boolean;
+  selectionDisabled?: boolean;
   scoreSummary?: StandingSummary;
   onToggleSelect: (id: string) => void;
   onChangeWishlistTier?: (id: string, next: WishlistTier | "") => void;
@@ -50,10 +52,11 @@ export default function WatchCard({
           <input
             type="checkbox"
             checked={selected}
+            disabled={selectionDisabled}
             onChange={() => onToggleSelect(watch.id)}
             className="h-3.5 w-3.5 accent-slate-900"
           />
-          Compare
+          {selectionDisabled ? "Limit reached" : "Compare"}
         </label>
       </div>
       <div className="space-y-2 p-4">

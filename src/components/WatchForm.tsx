@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   CURRENCIES,
   Condition,
+  QualityFlags,
   RetailerLink,
   ScoringCategory,
   SCORING_CATEGORIES,
@@ -90,6 +91,8 @@ interface AutofillResult {
   price?: { amount?: number; currency?: string };
   imageUrl?: string;
   specs?: Record<string, unknown>;
+  tags?: string[];
+  qualityFlags?: QualityFlags;
   retailer?: string;
 }
 
@@ -137,6 +140,12 @@ export default function WatchForm({
   const [fetchUrl, setFetchUrl] = useState("");
   const [fetching, setFetching] = useState(false);
   const [fetchMsg, setFetchMsg] = useState<string | null>(null);
+  const [specsOpen, setSpecsOpen] = useState(
+    Boolean(initial && Object.values(initial.specs).some((value) => value !== undefined && value !== ""))
+  );
+  const [qualityOpen, setQualityOpen] = useState(Boolean(initial?.qualityFlags));
+  const [linksOpen, setLinksOpen] = useState(Boolean(initial?.links?.length));
+  const [notesOpen, setNotesOpen] = useState(Boolean(initial?.notes));
   const resolvedBrandReputation = resolveBrandReputation(brand, brandReputations);
 
   function setLink(i: number, patch: Partial<LinkRow>) {
@@ -186,12 +195,25 @@ export default function WatchForm({
 
       const specCount = data.specs ? Object.keys(data.specs).length : 0;
       if (specCount) {
+        setSpecsOpen(true);
         setSpecs((current) => {
           const next = { ...current };
           for (const [key, value] of Object.entries(data.specs ?? {})) next[key] = String(value);
           return next;
         });
         filled.push(`${specCount} spec${specCount > 1 ? "s" : ""}`);
+      }
+      if (data.tags?.length) {
+        setTags((current) => Array.from(new Set([
+          ...current.split(",").map((tag) => tag.trim()).filter(Boolean),
+          ...data.tags!,
+        ])).join(", "));
+        filled.push(`${data.tags.length} category tag${data.tags.length > 1 ? "s" : ""}`);
+      }
+      if (data.qualityFlags && Object.keys(data.qualityFlags).length) {
+        setFlags((current) => ({ ...current, ...qualityFlagsToForm(data.qualityFlags) }));
+        setQualityOpen(true);
+        filled.push("quality evidence");
       }
 
       setLinks((rows) => {
@@ -205,6 +227,7 @@ export default function WatchForm({
         };
         return rows[0]?.url.trim() ? [...rows, row] : [row, ...rows.slice(1)];
       });
+      setLinksOpen(true);
 
       setFetchMsg(
         filled.length
@@ -438,9 +461,16 @@ export default function WatchForm({
         </div>
       </section>
 
-      <section className="card space-y-4 p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Specifications</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <details className="card group" open={specsOpen} onToggle={(event) => setSpecsOpen(event.currentTarget.open)}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Specifications</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Dimensions, movement, materials, and functions</span>
+          </span>
+          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+        </summary>
+        <div className="grid gap-4 border-t border-slate-100 p-5 sm:grid-cols-2 lg:grid-cols-3">
           {SPEC_FIELDS.map((f) => (
             <div key={String(f.key)}>
               <label className="label">
@@ -467,68 +497,83 @@ export default function WatchForm({
             </div>
           ))}
         </div>
-      </section>
+      </details>
 
-      <section className="card space-y-4 p-5">
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Quality flags</h2>
-          <p className="mt-1 text-xs text-slate-400">
+      <details className="card group" open={qualityOpen} onToggle={(event) => setQualityOpen(event.currentTarget.open)}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Quality evidence</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Optional details that improve scoring confidence</span>
+          </span>
+          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+        </summary>
+        <div className="space-y-4 border-t border-slate-100 p-5">
+          <p className="text-xs text-slate-400">
             What the scoring engine reads for case &amp; finishing, bracelet, and regulation. Leave a field blank when
             you don&apos;t know — a dimension with nothing recorded stays unrated rather than scoring badly.
           </p>
-        </div>
-        {FLAG_GROUPS.map((group) => (
-          <div key={group.title}>
-            <h3 className="label">{group.title}</h3>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {group.fields.map((f) => (
-                <div key={String(f.key)}>
-                  <label className="label">
-                    {f.label}
-                    {f.unit ? ` (${f.unit})` : ""}
-                  </label>
-                  {f.type === "boolean" ? (
-                    <select
-                      className="input"
-                      value={flags[f.key]}
-                      onChange={(e) => setFlags((s) => ({ ...s, [f.key]: e.target.value }))}
-                    >
+          {FLAG_GROUPS.map((group) => (
+            <div key={group.title}>
+              <h3 className="label">{group.title}</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {group.fields.map((f) => (
+                  <div key={String(f.key)}>
+                    <label className="label">
+                      {f.label}
+                      {f.unit ? ` (${f.unit})` : ""}
+                    </label>
+                    {f.type === "boolean" ? (
+                      <select
+                        className="input"
+                        value={flags[f.key]}
+                        onChange={(e) => setFlags((s) => ({ ...s, [f.key]: e.target.value }))}
+                      >
                       {/* Three options, not a checkbox: an unchecked box cannot
                           say whether the feature is absent or simply unchecked. */}
                       <option value={QUALITY_FLAG_UNSET}>— Not recorded</option>
                       <option value="yes">Yes</option>
                       <option value="no">No</option>
-                    </select>
-                  ) : (
-                    <input
-                      className="input"
-                      inputMode="decimal"
-                      value={flags[f.key]}
-                      placeholder="—"
-                      onChange={(e) => setFlags((s) => ({ ...s, [f.key]: e.target.value }))}
-                    />
-                  )}
-                  {f.hint ? <p className="mt-1 text-xs text-slate-400">{f.hint}</p> : null}
-                </div>
-              ))}
+                      </select>
+                    ) : (
+                      <input
+                        className="input"
+                        inputMode="decimal"
+                        value={flags[f.key]}
+                        placeholder="—"
+                        onChange={(e) => setFlags((s) => ({ ...s, [f.key]: e.target.value }))}
+                      />
+                    )}
+                    {f.hint ? <p className="mt-1 text-xs text-slate-400">{f.hint}</p> : null}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </section>
-
-      <section className="card space-y-4 p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Retailer links</h2>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => setLinks((rows) => [...rows, { url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }])}
-          >
-            + Add link
-          </button>
+          ))}
         </div>
-        <div className="space-y-3">
-          {links.map((l, i) => (
+      </details>
+
+      <details className="card group" open={linksOpen} onToggle={(event) => setLinksOpen(event.currentTarget.open)}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Retailer links</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Optional sources, prices, and condition</span>
+          </span>
+          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+        </summary>
+        <div className="space-y-4 border-t border-slate-100 p-5">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setLinks((rows) => [...rows, { url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }])}
+            >
+              + Add link
+            </button>
+          </div>
+          <div className="space-y-3">
+            {links.map((l, i) => (
             <div key={i} className="grid gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-[1fr_auto]">
               <div className="grid gap-2 sm:grid-cols-2">
                 <input className="input sm:col-span-2" value={l.url} onChange={(e) => setLink(i, { url: e.target.value })} placeholder="https://retailer.com/product" />
@@ -553,14 +598,25 @@ export default function WatchForm({
                 Remove
               </button>
             </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </section>
+      </details>
 
-      <section className="card space-y-2 p-5">
-        <label className="label">Notes</label>
-        <textarea className="input min-h-[6rem]" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Why you want it, condition observations, deal history…" />
-      </section>
+      <details className="card group" open={notesOpen} onToggle={(event) => setNotesOpen(event.currentTarget.open)}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Notes</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Optional context, observations, and deal history</span>
+          </span>
+          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+        </summary>
+        <div className="border-t border-slate-100 p-5">
+          <label className="sr-only">Notes</label>
+          <textarea className="input min-h-[6rem]" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Why you want it, condition observations, deal history…" />
+        </div>
+      </details>
 
       {error && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>}
 
