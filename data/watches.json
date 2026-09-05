@@ -1985,8 +1985,8 @@
     "imageUrl": "https://awakewatches.com/cdn/shop/files/SonMai2-JURASSICWATCHgreenWebproduit.jpg?v=1744735759&width=1920",
     "specs": {
       "caseDiameterMm": 39,
-      "caseThicknessMm": 20,
-      "lugToLugMm": 39,
+      "caseThicknessMm": 11.8,
+      "lugToLugMm": 45.6,
       "lugWidthMm": 20,
       "caseMaterial": "Recycled 316L stainless steel",
       "movement": "automatic",
@@ -2689,7 +2689,7 @@
     ],
     "imageUrl": "https://us.venezianico.com/cdn/shop/files/NereideGMT39BLU.png?v=1775137685",
     "specs": {
-      "caseDiameterMm": 45.5,
+      "caseDiameterMm": 39,
       "caseThicknessMm": 11.9,
       "lugToLugMm": 45.5,
       "caseMaterial": "316L Stainless Steel",

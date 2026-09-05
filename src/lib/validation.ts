@@ -1,4 +1,5 @@
 import { SPEC_FIELDS } from "./specs";
+import { plausibilityIssues } from "./spec-plausibility.mjs";
 import {
   Availability,
   AVAILABILITY_STATES,
@@ -24,7 +25,14 @@ import {
 type RecordValue = Record<string, unknown>;
 
 type ValidationResult<T> =
-  | { ok: true; data: T }
+  /**
+   * `warnings` carries plausibility problems that must not block the write.
+   * The add form's URL autofill is where most bad values came from in the
+   * first place, and rejecting a half-scraped record would lose the good
+   * fields with the bad. npm run validate:data is the gate that actually
+   * refuses them, so nothing implausible reaches a commit.
+   */
+  | { ok: true; data: T; warnings: string[] }
   | { ok: false; errors: string[] };
 
 export class DataValidationError extends Error {
@@ -407,6 +415,17 @@ function assignIfPresent<T extends RecordValue, K extends keyof WatchInput>(
   }
 }
 
+/**
+ * Plausibility problems in a spec block, as human-readable strings.
+ *
+ * Both severities are returned here. On the write path everything is advisory:
+ * the distinction between "cannot be right" and "unlikely" only decides which
+ * of them fails npm run validate:data.
+ */
+export function specPlausibilityWarnings(specs: WatchSpecs | undefined): string[] {
+  return plausibilityIssues(specs).map((issue: { message: string }) => issue.message);
+}
+
 export function normalizeWatchInput(body: unknown): ValidationResult<WatchInput> {
   return normalizeWatchShape(body, false) as ValidationResult<WatchInput>;
 }
@@ -463,7 +482,12 @@ function normalizeWatchShape(
     output.tags ??= [];
   }
 
-  return errors.length ? { ok: false, errors } : { ok: true, data: output as WatchInput | Partial<WatchInput> };
+  if (errors.length) return { ok: false, errors };
+  return {
+    ok: true,
+    data: output as WatchInput | Partial<WatchInput>,
+    warnings: specPlausibilityWarnings(output.specs),
+  };
 }
 
 export function validateWatchCollection(value: unknown): Watch[] {

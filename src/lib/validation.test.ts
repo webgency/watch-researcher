@@ -14,7 +14,7 @@ const base = {
 describe("scoring category validation", () => {
   it("accepts a supported explicit scoring category", () => {
     const result = normalizeWatchInput({ ...base, scoringCategory: "gmt" });
-    expect(result).toEqual({ ok: true, data: { ...base, scoringCategory: "gmt" } });
+    expect(result).toEqual({ ok: true, data: { ...base, scoringCategory: "gmt" }, warnings: [] });
   });
 
   it("rejects an unsupported scoring category", () => {
@@ -27,6 +27,7 @@ describe("scoring category validation", () => {
     expect(normalizeWatchPatch({ scoringCategory: null })).toEqual({
       ok: true,
       data: { scoringCategory: undefined },
+      warnings: [],
     });
   });
 });
@@ -36,6 +37,7 @@ describe("design preference validation", () => {
     expect(normalizeWatchPatch({ designPreferenceElo: 1016, designComparisonCount: 3 })).toEqual({
       ok: true,
       data: { designPreferenceElo: 1016, designComparisonCount: 3 },
+      warnings: [],
     });
   });
 
@@ -43,6 +45,7 @@ describe("design preference validation", () => {
     expect(normalizeWatchPatch({ designPreferenceElo: null, designComparisonCount: null })).toEqual({
       ok: true,
       data: { designPreferenceElo: undefined, designComparisonCount: undefined },
+      warnings: [],
     });
   });
 
@@ -54,7 +57,7 @@ describe("design preference validation", () => {
 
 describe("personal fit validation", () => {
   it("accepts a 1-5 firsthand fit rating", () => {
-    expect(normalizeWatchPatch({ personalFit: 5 })).toEqual({ ok: true, data: { personalFit: 5 } });
+    expect(normalizeWatchPatch({ personalFit: 5 })).toEqual({ ok: true, data: { personalFit: 5 }, warnings: [] });
   });
 
   it("rejects ratings outside 1-5", () => {

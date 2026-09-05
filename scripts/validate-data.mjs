@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
-import { SPEC_RANGES, inSpecRange, LUG_TO_LUG_MIN_RATIO } from "../src/lib/spec-ranges.mjs";
+import { SPEC_RANGES, inSpecRange } from "../src/lib/spec-ranges.mjs";
+import { plausibilityIssues } from "../src/lib/spec-plausibility.mjs";
 import {
   CURRENCY_TO_USD,
   RATES_AS_OF,
@@ -153,7 +154,7 @@ function checkLinks(value, path, errors) {
   });
 }
 
-function checkSpecs(value, path, errors) {
+function checkSpecs(value, path, errors, warnings) {
   if (!isRecord(value)) {
     errors.push(`${path} must be an object`);
     return;
@@ -166,7 +167,7 @@ function checkSpecs(value, path, errors) {
     else if (type === "movement" && !MOVEMENTS.has(specValue)) errors.push(`${specPath} must be a known movement type`);
     else if (type === "string") checkString(specValue, specPath, errors);
   }
-  checkSpecPlausibility(value, path, errors);
+  checkSpecPlausibility(value, path, errors, warnings);
 }
 
 /**
@@ -175,8 +176,12 @@ function checkSpecs(value, path, errors) {
  * backfilled values, so a swapped or duplicated measurement entering by any
  * other path used to sit in the file unnoticed and quietly distort scoring —
  * a 15mm case diameter with a 15.5mm thickness, for instance.
+ *
+ * The per-field ranges live in spec-ranges.mjs; the rules that compare fields
+ * against each other live in spec-plausibility.mjs, shared with the write path
+ * so both judge a record the same way. Warn-level rules never fail the run.
  */
-function checkSpecPlausibility(specs, path, errors) {
+function checkSpecPlausibility(specs, path, errors, warnings) {
   for (const key of Object.keys(SPEC_RANGES)) {
     const value = specs[key];
     if (typeof value !== "number" || !Number.isFinite(value)) continue;
@@ -186,17 +191,10 @@ function checkSpecPlausibility(specs, path, errors) {
     }
   }
 
-  const { caseDiameterMm: diameter, caseThicknessMm: thickness, lugToLugMm: lugToLug, lugWidthMm: lugWidth } = specs;
-  const num = (v) => typeof v === "number" && Number.isFinite(v);
-
-  if (num(diameter) && num(thickness) && thickness >= diameter) {
-    errors.push(`${path} has caseThicknessMm ${thickness} at or above caseDiameterMm ${diameter}; one of them is a misread`);
-  }
-  if (num(diameter) && num(lugToLug) && lugToLug < diameter * LUG_TO_LUG_MIN_RATIO) {
-    errors.push(`${path} has lugToLugMm ${lugToLug} well under caseDiameterMm ${diameter}; the two are probably swapped`);
-  }
-  if (num(diameter) && num(lugWidth) && lugWidth >= diameter) {
-    errors.push(`${path} has lugWidthMm ${lugWidth} at or above caseDiameterMm ${diameter}`);
+  for (const issue of plausibilityIssues(specs)) {
+    const line = `${path} ${issue.message}`;
+    if (issue.severity === "error") errors.push(line);
+    else warnings.push(line);
   }
 }
 
@@ -294,7 +292,7 @@ if (!Array.isArray(watches)) {
       }
     }
     checkString(watch.imageUrl, `${path}.imageUrl`, errors);
-    checkSpecs(watch.specs, `${path}.specs`, errors);
+    checkSpecs(watch.specs, `${path}.specs`, errors, warnings);
     checkTags(watch.tags, `${path}.tags`, errors);
     checkString(watch.notes, `${path}.notes`, errors);
     checkDate(watch.dateAdded, `${path}.dateAdded`, errors, { required: true });
