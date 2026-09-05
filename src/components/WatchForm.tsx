@@ -154,8 +154,8 @@ export default function WatchForm({
     setLinks((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
 
-  async function autofillFromUrl() {
-    const url = fetchUrl.trim();
+  async function autofillFromUrl(urlOverride?: string) {
+    const url = (urlOverride ?? fetchUrl).trim();
     if (!/^https?:\/\/\S+$/i.test(url)) {
       setFetchMsg("Enter a full http(s) link.");
       return;
@@ -163,6 +163,7 @@ export default function WatchForm({
 
     setFetching(true);
     setFetchMsg(null);
+    setFetchUrl(url);
     try {
       const res = await fetch("/api/watches/scrape", {
         method: "POST",
@@ -219,14 +220,23 @@ export default function WatchForm({
       }
 
       setLinks((rows) => {
-        if (rows.some((row) => row.url.trim() === url)) return rows;
+        const observedAt = data.price?.amount ? new Date().toISOString().slice(0, 10) : "";
+        if (rows.some((row) => row.url.trim() === url)) {
+          return rows.map((row) => row.url.trim() === url ? {
+            ...row,
+            retailer: data.retailer || row.retailer || hostname(url),
+            priceAmount: data.price?.amount ? String(data.price.amount) : row.priceAmount,
+            priceCurrency: data.price?.currency || row.priceCurrency,
+            observedAt: observedAt || row.observedAt,
+          } : row);
+        }
         const row: LinkRow = {
           url,
           retailer: data.retailer || hostname(url),
           priceAmount: data.price?.amount ? String(data.price.amount) : "",
           priceCurrency: data.price?.currency || "USD",
           condition: "",
-          observedAt: data.price?.amount ? new Date().toISOString().slice(0, 10) : "",
+          observedAt,
         };
         return rows[0]?.url.trim() ? [...rows, row] : [row, ...rows.slice(1)];
       });
@@ -354,11 +364,35 @@ export default function WatchForm({
                 }
               }}
             />
-            <button type="button" className="btn-secondary whitespace-nowrap" onClick={autofillFromUrl} disabled={fetching}>
+            <button type="button" className="btn-secondary whitespace-nowrap" onClick={() => autofillFromUrl()} disabled={fetching}>
               {fetching ? "Fetching..." : "Fetch details"}
             </button>
           </div>
           {fetchMsg && <p className="text-xs text-slate-600">{fetchMsg}</p>}
+        </section>
+      )}
+      {isEdit && links.some((link) => link.url.trim()) && (
+        <section className="card space-y-3 p-5">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Refresh from retailer</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Re-fetch a saved product page to check its current price and specifications. Review the changes below before saving.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {links.filter((link) => link.url.trim()).map((link, index) => (
+              <button
+                key={`${link.url}-${index}`}
+                type="button"
+                className="btn-secondary"
+                onClick={() => autofillFromUrl(link.url)}
+                disabled={fetching}
+              >
+                {fetching && fetchUrl === link.url ? "Refreshing…" : `Refresh ${link.retailer || hostname(link.url)}`}
+              </button>
+            ))}
+          </div>
+          {fetchMsg && <p className="text-xs text-slate-600" role="status">{fetchMsg}</p>}
         </section>
       )}
       <section className="card space-y-4 p-5">
