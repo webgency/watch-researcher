@@ -1,3 +1,4 @@
+import { TAG_TO_CATEGORY } from "./categories";
 import { Money, Watch } from "./types";
 import {
   CATEGORY_EXPECTATION,
@@ -200,14 +201,15 @@ export function caliberTier(caliber: string | undefined): number | undefined {
 export function deriveCategory(watch: Watch): RubricCategory | undefined {
   if (watch.scoringCategory) return watch.scoringCategory;
 
-  const inferred = new Set<RubricCategory>();
-  for (const tag of watch.tags ?? []) {
-    const normalized = tag.trim().toLowerCase();
-    if (normalized === "diver" || normalized === "dive") inferred.add("diver");
-    if (normalized === "chronograph") inferred.add("chronograph");
-    if (normalized === "gmt" || normalized === "worldtimer") inferred.add("gmt");
-    if (normalized === "dress") inferred.add("dress");
-  }
+  // The tag vocabulary lives in category-tags.mjs, shared with the bare-Node
+  // audit script. It used to be restated here as a chain of comparisons, which
+  // is how "sports" came to be a tag the data carried and this function could
+  // not see: three watches were tagged and still resolved to nothing.
+  const inferred = new Set<RubricCategory>(
+    (watch.tags ?? [])
+      .map((tag) => TAG_TO_CATEGORY[tag.trim().toLowerCase()])
+      .filter((category): category is RubricCategory => category !== undefined)
+  );
   return inferred.size === 1 ? [...inferred][0] : undefined;
 }
 
@@ -408,6 +410,7 @@ const CATEGORY_PLURAL: Record<RubricCategory, string> = {
   chronograph: "chronographs",
   gmt: "GMTs",
   dress: "dress",
+  sports: "sports",
 };
 
 /** Peer group = same rubric category + same price band. Unpriced watches group together. */

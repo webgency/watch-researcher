@@ -21,6 +21,7 @@ import {
   resolveCategory,
 } from "../src/lib/category-tags.mjs";
 import { plausibilityErrors, plausibilityWarnings } from "../src/lib/spec-plausibility.mjs";
+import { RUBRIC_CATEGORIES } from "../src/lib/rubric-categories.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 
@@ -107,17 +108,20 @@ for (const w of noDiameter) notes.push(`no caseDiameterMm: ${label(w)}`);
 
 // --- Findings that need a human, never fatal -------------------------------
 
-// A category the Phase 0 layer resolves but rubrics.ts has no column for.
-// computeStanding needs a rubric to produce a valueScore, so these watches
-// have no value score at all and fall out of the quadrant chart — not merely
-// a dimension short. Today that is only `sports`.
-const unscored = watches.filter((w) => categoryFor(w) === "sports");
+// A category the Phase 0 layer resolves but RUBRICS has no column for.
+// computeStanding needs a rubric to produce a valueScore, so such a watch
+// would have no value score at all and fall out of the quadrant chart — not
+// merely be a dimension short. Empty today; sports was the last one.
+const unscored = watches.filter((w) => {
+  const category = categoryFor(w);
+  return category !== undefined && !RUBRIC_CATEGORIES.includes(category);
+});
 if (unscored.length) {
   notes.push(
-    `${unscored.length} record(s) resolve to "sports", which RUBRICS has no column for. ` +
-      `They have no valueScore and no quadrant until Phase 1 adds one:`
+    `${unscored.length} record(s) resolve to a category RUBRICS has no column for. ` +
+      `They have no valueScore and no quadrant until one is added:`
   );
-  for (const w of unscored) notes.push(`  sports: ${label(w)}`);
+  for (const w of unscored) notes.push(`  ${categoryFor(w)}: ${label(w)}`);
 }
 
 // An explicit scoringCategory that contradicts the tags. The field wins, so a

@@ -20,7 +20,7 @@ describe("scoring category validation", () => {
   it("rejects an unsupported scoring category", () => {
     const result = normalizeWatchInput({ ...base, scoringCategory: "field" });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.errors).toContain("scoringCategory must be one of diver, chronograph, gmt, dress");
+    if (!result.ok) expect(result.errors).toContain("scoringCategory must be one of diver, chronograph, gmt, dress, sports");
   });
 
   it("clears an explicit category when a patch sends null", () => {

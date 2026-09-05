@@ -254,7 +254,10 @@ describe("category and peer group derivation", () => {
 
   it("accepts the legacy dive tag without treating every unknown tag as dress", () => {
     expect(deriveCategory(makeWatch({ tags: ["dive"] }))).toBe("diver");
-    expect(deriveCategory(makeWatch({ tags: ["field"] }))).toBeUndefined();
+    // "field" now resolves to sports, which is a scored category. A tag that
+    // names nothing still resolves to nothing — never to a default.
+    expect(deriveCategory(makeWatch({ tags: ["field"] }))).toBe("sports");
+    expect(deriveCategory(makeWatch({ tags: ["titanium"] }))).toBeUndefined();
   });
 
   it("prefers landedPrice over list price for banding", () => {

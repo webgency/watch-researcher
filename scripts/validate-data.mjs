@@ -17,7 +17,7 @@ const STATUSES = new Set(["wishlist", "owned", "sold"]);
 const WISHLIST_TIERS = new Set(["next-purchase", "must-have", "love-it", "interested", "maybe-later", "pass"]);
 const MOVEMENTS = new Set(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"]);
 const CONDITIONS = new Set(["new", "pre-owned"]);
-const SCORING_CATEGORIES = new Set(["diver", "chronograph", "gmt", "dress"]);
+const SCORING_CATEGORIES = new Set(["diver", "chronograph", "gmt", "dress", "sports"]);
 // Derived from the shared table rather than restated, so adding a currency in
 // one place cannot leave the validator warning about a rate that now exists.
 const KNOWN_CURRENCIES = new Set(Object.keys(CURRENCY_TO_USD));

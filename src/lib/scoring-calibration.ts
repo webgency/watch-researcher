@@ -10,6 +10,9 @@ export const CATEGORY_THICKNESS_ALLOWANCE_MM: Record<RubricCategory, number> = {
   chronograph: 0.5,
   gmt: 0.3,
   dress: 0,
+  // No dive-case stack and no chronograph pushers, but not held to a dress
+  // watch's thinness either — between gmt and dress.
+  sports: 0.15,
 };
 
 function clamp01(value: number): number {

@@ -20,14 +20,11 @@ import type { ScoringCategory, Watch } from "./types";
 /**
  * The five categories the collection is scored against.
  *
- * `sports` is the one that is not yet a ScoringCategory. Roughly a third of
- * the collection — Formex Essence, Tissot Gentleman, Straum Jan Mayen — is
- * neither diver nor dress, and forcing those into `dress` at 30m understates
- * them exactly the way the old `dress` default overstated the divers. Wiring
- * it into the scored rubric means adding a column to RUBRICS in rubrics.ts,
- * which is Phase 1 work; until then it resolves and reports but does not score.
+ * Identical to ScoringCategory. The alias is kept because this module is the
+ * one that resolves a category from tags, and callers read `Category` as "what
+ * a tag resolved to" rather than "what was written in the record".
  */
-export type Category = ScoringCategory | "sports";
+export type Category = ScoringCategory;
 
 export const CATEGORIES: readonly Category[] = CATEGORY_LIST as Category[];
 
@@ -41,17 +38,10 @@ export interface CategoryExpectation {
 }
 
 /**
- * Fitness-for-purpose expectations for all five categories.
- *
- * The four scored categories are re-exported from rubrics.ts rather than
- * restated, so there is one set of numbers. `sports` is added here at 100m:
- * enough that a watch calling itself a sports watch should survive swimming,
- * well short of what a diver is held to.
+ * Fitness-for-purpose expectations for all five categories, re-exported from
+ * rubrics.ts rather than restated so there is one set of numbers.
  */
-export const CATEGORY_EXPECTATION: Readonly<Record<Category, CategoryExpectation>> = {
-  ...RUBRIC_EXPECTATION,
-  sports: { wrM: 100, needsBezel: false, needsScrewCrown: false },
-};
+export const CATEGORY_EXPECTATION: Readonly<Record<Category, CategoryExpectation>> = RUBRIC_EXPECTATION;
 
 /** Water resistance each category is judged against, for bare-Node consumers. */
 export const CATEGORY_WR_EXPECTATION: Readonly<Record<Category, number>> =

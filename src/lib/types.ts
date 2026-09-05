@@ -22,7 +22,7 @@ export type MovementType =
 export type Condition = "new" | "pre-owned";
 
 /** Explicit rubric used for price-band scoring. Tags remain descriptive. */
-export type ScoringCategory = "diver" | "chronograph" | "gmt" | "dress";
+export type ScoringCategory = "diver" | "chronograph" | "gmt" | "dress" | "sports";
 
 export interface Money {
   amount: number;
@@ -180,7 +180,7 @@ export type BrandCatalog = Record<string, BrandInfo>;
 
 export const WATCH_STATUSES: WatchStatus[] = ["wishlist", "owned", "sold"];
 
-export const SCORING_CATEGORIES: ScoringCategory[] = ["diver", "chronograph", "gmt", "dress"];
+export const SCORING_CATEGORIES: ScoringCategory[] = ["diver", "chronograph", "gmt", "dress", "sports"];
 
 export const WISHLIST_TIERS: WishlistTier[] = [
   "next-purchase",
