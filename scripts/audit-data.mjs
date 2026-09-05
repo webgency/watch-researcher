@@ -22,6 +22,7 @@ import {
 } from "../src/lib/category-tags.mjs";
 import { plausibilityErrors, plausibilityWarnings } from "../src/lib/spec-plausibility.mjs";
 import { RUBRIC_CATEGORIES } from "../src/lib/rubric-categories.mjs";
+import { BRACELET_FLAG_KEYS, CASE_CRAFT_FLAG_KEYS } from "../src/lib/quality-flag-inputs.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 
@@ -151,13 +152,11 @@ for (const w of watches) {
 
 // qualityFlags gate caseCraft and bracelet. The spec's advice is to accept
 // partial coverage rather than attack it, so this reports and never fails.
-// Mirrors CASE_CRAFT_INPUTS in scoring.ts. arLayers and arCoated are the same
-// input recorded at two precisions, so a record with either one counts once.
-const CASE_CRAFT = ["hardenedCoatingHv", "sapphireBezelInsert", "drilledLugs", "arLayers", "arCoated"];
-const BRACELET = ["braceletIncluded", "microAdjustClasp", "quickRelease"];
+// The key lists are imported rather than restated here; a test locks them to
+// what scoreDimensionEvidence actually reads.
 const has = (w, keys) => keys.some((k) => w.qualityFlags?.[k] !== undefined);
-const caseCraft = watches.filter((w) => has(w, CASE_CRAFT)).length;
-const bracelet = watches.filter((w) => has(w, BRACELET)).length;
+const caseCraft = watches.filter((w) => has(w, CASE_CRAFT_FLAG_KEYS)).length;
+const bracelet = watches.filter((w) => has(w, BRACELET_FLAG_KEYS)).length;
 const lugToLug = watches.filter((w) => typeof w.specs?.lugToLugMm === "number").length;
 
 // --- Report ----------------------------------------------------------------
