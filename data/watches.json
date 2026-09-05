@@ -3188,7 +3188,8 @@
       "crystal": "Sapphire",
       "dialColor": "Blue with an embossed texture",
       "braceletStrap": "Canvas-rubber strap with pin buckle.",
-      "complications": "Chronograph, GMT, Moon phase"
+      "complications": "Chronograph, GMT, Moon phase",
+      "powerReserveHours": 62
     },
     "tags": [
       "gmt",

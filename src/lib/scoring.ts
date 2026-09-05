@@ -141,11 +141,23 @@ const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 // added. Unknown calibers return undefined — they do NOT fall back to a mid value.
 const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["co-axial master chronometer 8800", 0.95],
+  // Rolex 3285. Level with the Omega above rather than ranked against it:
+  // both are flagship manufacture calibers and each wins on a different axis
+  // (Rolex -2/+2 s/day and a 70h barrel, Omega 15,000 gauss and METAS). The
+  // power-reserve bonus in scoreDimensions already separates them on reserve,
+  // so baking that into the base tier would count it twice.
+  ["3285", 0.95],
   ["mt5450", 0.80],
   ["m100", 0.80],
   // Proprietary automatic monopusher chronograph with a patented retrograde
   // regatta module and 64h reserve; kept below the METAS anchor above.
   ["alb01 a", 0.80],
+  // Muehle MU 9419: a Sellita SW500 (the 7750-architecture automatic
+  // chronograph) reworked with the woodpecker-neck regulation, a Glashuette
+  // three-quarter plate and a 62h barrel. Above the bare SW510 below it for
+  // the regulation and the rework, below Tudor's in-house COSC MT5450, which
+  // is a movement rather than a treatment of someone else's.
+  ["mu 9419", 0.75],
   ["sw510", 0.72],
   ["l688", 0.72],
   ["st-1901b", 0.70],

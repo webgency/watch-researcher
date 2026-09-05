@@ -44,8 +44,16 @@ describe("normalizeCaliber", () => {
 
   it("returns the cleaned string when no canonical key matches", () => {
     // Unknown, but recorded — distinguishable from nothing recorded at all.
+    expect(normalizeCaliber("Acme 1234")).toBe("acme 1234");
+    expect(isKnownCaliber("Acme 1234")).toBe(false);
+  });
+
+  it("resolves the two calibers that used to have no tier", () => {
     expect(normalizeCaliber("MU 9419")).toBe("mu 9419");
-    expect(isKnownCaliber("MU 9419")).toBe(false);
+    expect(isKnownCaliber("MU 9419")).toBe(true);
+    // The Rolex arrives with the brand trailing after a comma.
+    expect(normalizeCaliber("3285, Manufacture Rolex")).toBe("3285");
+    expect(isKnownCaliber("3285, Manufacture Rolex")).toBe(true);
   });
 
   it("leaves quartz unrated rather than rating it low", () => {

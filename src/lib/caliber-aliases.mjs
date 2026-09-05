@@ -32,9 +32,11 @@ export const QUARTZ_MOVEMENTS = new Set(["quartz", "solar", "kinetic", "meca-qua
  */
 export const CANONICAL_CALIBERS = [
   "co-axial master chronometer 8800",
+  "3285",
   "mt5450",
   "m100",
   "alb01 a",
+  "mu 9419",
   "sw510",
   "l688",
   "st-1901b",
