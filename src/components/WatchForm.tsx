@@ -35,6 +35,7 @@ interface LinkRow {
   priceAmount: string;
   priceCurrency: string;
   condition: "" | Condition;
+  observedAt: string;
 }
 
 // Derived from the field declarations so a flag added in specs.ts lands in the
@@ -64,6 +65,7 @@ function toLinkRow(link: RetailerLink): LinkRow {
     priceAmount: link.price?.amount != null ? String(link.price.amount) : "",
     priceCurrency: link.price?.currency ?? "USD",
     condition: link.condition ?? "",
+    observedAt: link.observedAt?.slice(0, 10) ?? "",
   };
 }
 
@@ -133,7 +135,7 @@ export default function WatchForm({
   // is unit-tested.
   const [flags, setFlags] = useState<Record<string, string>>(() => qualityFlagsToForm(initial?.qualityFlags));
   const [links, setLinks] = useState<LinkRow[]>(
-    initial?.links?.length ? initial.links.map(toLinkRow) : [{ url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }]
+    initial?.links?.length ? initial.links.map(toLinkRow) : [{ url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "", observedAt: "" }]
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -224,6 +226,7 @@ export default function WatchForm({
           priceAmount: data.price?.amount ? String(data.price.amount) : "",
           priceCurrency: data.price?.currency || "USD",
           condition: "",
+          observedAt: data.price?.amount ? new Date().toISOString().slice(0, 10) : "",
         };
         return rows[0]?.url.trim() ? [...rows, row] : [row, ...rows.slice(1)];
       });
@@ -262,6 +265,7 @@ export default function WatchForm({
         const amount = parseNum(l.priceAmount);
         if (amount !== undefined) link.price = { amount, currency: l.priceCurrency };
         if (l.condition) link.condition = l.condition;
+        if (l.observedAt) link.observedAt = l.observedAt;
         return link;
       });
 
@@ -574,7 +578,7 @@ export default function WatchForm({
             <button
               type="button"
               className="btn-secondary"
-              onClick={() => setLinks((rows) => [...rows, { url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "" }])}
+              onClick={() => setLinks((rows) => [...rows, { url: "", retailer: "", priceAmount: "", priceCurrency: "USD", condition: "", observedAt: "" }])}
             >
               + Add link
             </button>
@@ -586,7 +590,7 @@ export default function WatchForm({
                 <input className="input sm:col-span-2" value={l.url} onChange={(e) => setLink(i, { url: e.target.value })} placeholder="https://retailer.com/product" />
                 <input className="input" value={l.retailer} onChange={(e) => setLink(i, { retailer: e.target.value })} placeholder="Retailer (optional)" />
                 <div className="flex gap-2">
-                  <input className="input" inputMode="decimal" value={l.priceAmount} onChange={(e) => setLink(i, { priceAmount: e.target.value })} placeholder="Price" />
+                  <input className="input" inputMode="decimal" value={l.priceAmount} onChange={(e) => setLink(i, { priceAmount: e.target.value, observedAt: l.observedAt || (e.target.value ? new Date().toISOString().slice(0, 10) : "") })} placeholder="Price" />
                   <select className="input w-24" value={l.priceCurrency} onChange={(e) => setLink(i, { priceCurrency: e.target.value })}>
                     {CURRENCIES.map((c) => (
                       <option key={c} value={c}>
@@ -600,6 +604,10 @@ export default function WatchForm({
                   <option value="new">New</option>
                   <option value="pre-owned">Pre-owned</option>
                 </select>
+                <label className="text-xs text-slate-500">
+                  <span className="mb-1 block">Price observed</span>
+                  <input className="input" type="date" value={l.observedAt} onChange={(e) => setLink(i, { observedAt: e.target.value })} />
+                </label>
               </div>
               <button type="button" className="btn-danger self-start" onClick={() => setLinks((rows) => rows.filter((_, idx) => idx !== i))} aria-label="Remove link">
                 Remove

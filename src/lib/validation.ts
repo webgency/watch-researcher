@@ -186,10 +186,12 @@ function cleanLinks(value: unknown, required: boolean, errors: string[]): Retail
     const retailer = cleanOptionalString(item.retailer, `${path}.retailer`, errors);
     const price = cleanMoney(item.price, `${path}.price`, errors);
     const condition = cleanCondition(item.condition, `${path}.condition`, errors);
+    const observedAt = cleanDateString(item.observedAt, `${path}.observedAt`, errors);
 
     if (retailer) link.retailer = retailer;
     if (price) link.price = price;
     if (condition) link.condition = condition;
+    if (observedAt) link.observedAt = observedAt;
     return [link];
   });
 }

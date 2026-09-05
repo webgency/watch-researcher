@@ -35,6 +35,8 @@ export interface RetailerLink {
   retailer?: string;
   price?: Money;
   condition?: Condition;
+  /** Date this asking price was observed. Required for market comparisons. */
+  observedAt?: string;
 }
 
 /**

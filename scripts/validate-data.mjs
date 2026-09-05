@@ -149,6 +149,7 @@ function checkLinks(value, path, errors) {
     if (link.condition !== undefined && !CONDITIONS.has(link.condition)) {
       errors.push(`${linkPath}.condition must be new or pre-owned`);
     }
+    checkDate(link.observedAt, `${linkPath}.observedAt`, errors);
   });
 }
 

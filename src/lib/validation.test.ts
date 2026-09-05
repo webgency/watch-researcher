@@ -51,3 +51,25 @@ describe("design preference validation", () => {
     expect(result.ok).toBe(false);
   });
 });
+
+describe("market observation validation", () => {
+  it("accepts an observation date on a retailer price", () => {
+    const result = normalizeWatchPatch({
+      links: [{
+        url: "https://example.com/watch",
+        price: { amount: 900, currency: "USD" },
+        condition: "new",
+        observedAt: "2026-09-05",
+      }],
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.data.links?.[0].observedAt).toBe("2026-09-05");
+  });
+
+  it("rejects an invalid observation date", () => {
+    const result = normalizeWatchPatch({
+      links: [{ url: "https://example.com/watch", observedAt: "not-a-date" }],
+    });
+    expect(result.ok).toBe(false);
+  });
+});
