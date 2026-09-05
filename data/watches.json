@@ -2919,7 +2919,11 @@
       "diver"
     ],
     "id": "mssigrvtucx52n",
-    "dateAdded": "2026-08-14T05:33:04.167Z"
+    "dateAdded": "2026-08-14T05:33:04.167Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    }
   },
   {
     "brand": "Naga",
