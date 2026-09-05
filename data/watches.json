@@ -514,7 +514,7 @@
       "complications": "GMT"
     },
     "tags": [
-      "GMT"
+      "gmt"
     ],
     "id": "w11",
     "dateAdded": "2026-06-22T15:22:00Z"
@@ -720,7 +720,7 @@
       "complications": "GMT worldtimer (24 zones)"
     },
     "tags": [
-      "GMT",
+      "gmt",
       "worldtimer"
     ],
     "id": "w15",
@@ -769,7 +769,7 @@
       "dialColor": "Black"
     },
     "tags": [
-      "GMT",
+      "gmt",
       "diver"
     ],
     "notes": "Black & burgundy bezel.",
@@ -1318,7 +1318,7 @@
       "complications": "GMT worldtimer"
     },
     "tags": [
-      "GMT",
+      "gmt",
       "worldtimer"
     ],
     "id": "w30",
@@ -1414,7 +1414,7 @@
     },
     "tags": [
       "diver",
-      "GMT"
+      "gmt"
     ],
     "id": "w32",
     "dateAdded": "2026-06-22T15:01:00Z"
@@ -1511,7 +1511,7 @@
       "complications": "GMT"
     },
     "tags": [
-      "GMT"
+      "gmt"
     ],
     "id": "mqsv1pt079msw4",
     "dateAdded": "2026-06-25T02:05:51.973Z"
@@ -1566,7 +1566,7 @@
       "complications": "GMT"
     },
     "tags": [
-      "GMT"
+      "gmt"
     ],
     "id": "mqsv75d21b7q4i",
     "dateAdded": "2026-06-25T02:10:05.414Z"
@@ -1995,7 +1995,9 @@
       "waterResistanceM": 50,
       "crystal": "Sapphire"
     },
-    "tags": [],
+    "tags": [
+      "dress"
+    ],
     "id": "mqvayw3dxkegdt",
     "dateAdded": "2026-06-26T19:07:06.361Z"
   },
@@ -2471,7 +2473,9 @@
       "waterResistanceM": 100,
       "crystal": "Sapphire"
     },
-    "tags": [],
+    "tags": [
+      "sports"
+    ],
     "id": "mqy0st4lie7fpb",
     "dateAdded": "2026-06-28T16:45:44.949Z"
   },
@@ -2603,7 +2607,9 @@
       "waterResistanceM": 150,
       "crystal": "Sapphire"
     },
-    "tags": [],
+    "tags": [
+      "sports"
+    ],
     "id": "mqzf7gp3vx1tw8",
     "dateAdded": "2026-06-29T16:16:49.479Z"
   },
@@ -2696,7 +2702,7 @@
       "complications": "GMT"
     },
     "tags": [
-      "GMT"
+      "gmt"
     ],
     "id": "mr029cjx2djdu2",
     "dateAdded": "2026-06-30T03:02:08.589Z"
@@ -2749,7 +2755,7 @@
       "complications": "Chronograph, Tachymeter"
     },
     "tags": [
-      "CHRONOGRAPH"
+      "chronograph"
     ],
     "id": "msshvavwg41qiq",
     "dateAdded": "2026-08-14T05:16:22.362Z"
@@ -2858,7 +2864,7 @@
       "complications": "GMT"
     },
     "tags": [
-      "GMT"
+      "gmt"
     ],
     "notes": "the Safari GMT Banff, a timepiece inspired by the breathtaking beauty of Canada's Banff National Park. Reflecting the park's vibrant hues, this SII NH34-powered watch features a captivating contrast GMT hand reminiscent of Banff's turquoise lakes against lush green landscapes. With its precision-engineered functionality, including a prominent date display at 3 o'clock",
     "id": "mssictanrac4ow",
@@ -2963,7 +2969,7 @@
       "complications": "Ore, minuti, ora del giorno, data, secondi cronografo, minuti cronografo"
     },
     "tags": [
-      "Chronograph"
+      "chronograph"
     ],
     "id": "mssxh8iem1cs9b",
     "dateAdded": "2026-08-14T12:33:19.955Z"
@@ -3017,7 +3023,9 @@
       "dialColor": "Blue Dial Textured gradient",
       "braceletStrap": "Italian leather (genuine) with Pin buckle."
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "msszodf01pmo5l",
     "dateAdded": "2026-08-14T13:34:52.138Z"
   },
@@ -3128,7 +3136,9 @@
       "dialColor": "etched dial",
       "braceletStrap": "Silicone"
     },
-    "tags": [],
+    "tags": [
+      "sports"
+    ],
     "id": "mton3fbjnuugz0",
     "dateAdded": "2026-09-05T17:11:17.067Z"
   },
@@ -3182,8 +3192,8 @@
       "complications": "Chronograph, GMT, Moon phase"
     },
     "tags": [
-      "chronograph",
-      "GMT"
+      "gmt",
+      "chronograph"
     ],
     "id": "mtoney22pprfep",
     "dateAdded": "2026-09-05T17:20:14.567Z"
@@ -3233,7 +3243,9 @@
       "braceletStrap": "316L SS with quick adjust clasp Package Includes: Travel Case Steel",
       "complications": "date"
     },
-    "tags": [],
+    "tags": [
+      "diver"
+    ],
     "id": "mtonjpnke21ikb",
     "dateAdded": "2026-09-05T17:23:56.958Z"
   },
@@ -3285,7 +3297,7 @@
       "complications": "date"
     },
     "tags": [
-      "GMT"
+      "gmt"
     ],
     "id": "mtorls8r2gphy0",
     "dateAdded": "2026-09-05T19:17:32.089Z"

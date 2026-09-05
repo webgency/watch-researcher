@@ -98,10 +98,23 @@ describe("agreement with the shipped scoring engine", () => {
     expect(hybridsWithoutExplicit).toEqual([]);
   });
 
-  it("resolves every watch the engine resolves, and no others", () => {
+  it("resolves every watch the engine resolves, apart from sports", () => {
+    // `sports` is the one expected divergence: RUBRICS in rubrics.ts has no
+    // column for it, so deriveCategory() cannot return it and those watches
+    // stay unrated until Phase 1 adds one. Every other category must agree, or
+    // the audit would report a watch as resolved that the engine does not score.
     const disagreements = watches
+      .filter((w) => categoryFor(w) !== "sports")
       .filter((w) => (categoryFor(w) ?? null) !== (deriveCategory(w) ?? null))
       .map((w) => `${w.id}: categories=${categoryFor(w)} scoring=${deriveCategory(w)}`);
     expect(disagreements).toEqual([]);
+  });
+
+  it("leaves sports unscored by the engine, and says so", () => {
+    // Guards the claim above rather than assuming it: if a sports rubric is
+    // added in Phase 1, this fails and the divergence carve-out comes out.
+    const sports = watches.filter((w) => categoryFor(w) === "sports");
+    expect(sports.length).toBeGreaterThan(0);
+    expect(sports.every((w) => deriveCategory(w) === undefined)).toBe(true);
   });
 });
