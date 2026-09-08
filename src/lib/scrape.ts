@@ -174,24 +174,65 @@ function fromMeta(html: string, base: string): Extracted {
 }
 
 // Shopify exposes a clean product JSON at <origin>/products/<handle>.json.
+type ShopifyVariant = {
+  id?: string | number;
+  price?: string;
+  price_currency?: string;
+  available?: boolean;
+  sku?: string;
+  featured_image?: { src?: string } | null;
+};
+
+export function selectShopifyVariant(url: string, variants: ShopifyVariant[]): ShopifyVariant | undefined {
+  let requestedId: string | null = null;
+  try { requestedId = new URL(url).searchParams.get("variant"); } catch { /* use availability fallback */ }
+  return variants.find((variant) => requestedId && String(variant.id) === requestedId)
+    ?? variants.find((variant) => variant.available)
+    ?? variants[0];
+}
+
+export function shopifyProductJsonUrl(url: string): string | undefined {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    const productsIndex = parts.indexOf("products");
+    const handle = productsIndex >= 0 ? parts[productsIndex + 1] : undefined;
+    if (!handle) return undefined;
+    const prefix = parts.slice(0, productsIndex).join("/");
+    return `${parsed.origin}/${prefix ? `${prefix}/` : ""}products/${handle}.json`;
+  } catch {
+    return undefined;
+  }
+}
+
+export function isShopifyCollectionUrl(url: string): boolean {
+  try {
+    const parts = new URL(url).pathname.split("/").filter(Boolean);
+    return parts.includes("collections") && !parts.includes("products");
+  } catch {
+    return false;
+  }
+}
+
 async function fromShopify(url: string) {
-  const m = url.match(/^(https?:\/\/[^/]+)\/products\/([^/?#]+)/i);
-  if (!m) return null;
-  const r = await fetchText(`${m[1]}/products/${m[2]}.json`, true);
+  const jsonUrl = shopifyProductJsonUrl(url);
+  if (!jsonUrl) return null;
+  const r = await fetchText(jsonUrl, true);
   if (!r.ok || !r.body) return null;
   let data: { product?: Record<string, unknown> };
   try { data = JSON.parse(r.body); } catch { return null; }
   const p = data.product;
   if (!p) return null;
-  const variants = (p.variants as { price?: string; price_currency?: string; available?: boolean; sku?: string }[]) || [];
-  const v = variants.find((x) => x.available) || variants[0];
+  const variants = (p.variants as ShopifyVariant[]) || [];
+  const v = selectShopifyVariant(url, variants);
   const out: { vendor?: string; title?: string; ref?: string; price?: Money; image?: string; bodyHtml?: string } = {};
   if (typeof p.vendor === "string") out.vendor = clean(p.vendor);
   if (typeof p.title === "string") out.title = clean(p.title);
   if (v?.sku) out.ref = clean(v.sku);
   if (v?.price != null) out.price = parseMoney(String(v.price), v.price_currency);
   const images = (p.images as { src?: string }[]) || [];
-  if (images[0]?.src) out.image = absolutize(images[0].src, m[1]);
+  const image = v?.featured_image?.src ?? images[0]?.src;
+  if (image) out.image = absolutize(image, new URL(url).origin);
   if (typeof p.body_html === "string") out.bodyHtml = p.body_html;
   return out;
 }
@@ -216,6 +257,16 @@ export function primaryProductText(html: string): string {
   const productTail = text.slice(specStart);
   const end = productTail.search(/\b(?:You may also like|Recently viewed|Customer reviews|FAQs?)\b/i);
   return end > 0 ? productTail.slice(0, end) : productTail;
+}
+
+/**
+ * Shopify's product description is already scoped to the requested product.
+ * Appending the full rendered page reintroduces variant selectors, recommendations,
+ * and hidden quick-view cards whose specs can be mistaken for the primary watch.
+ */
+export function productExtractionText(shopifyBodyHtml: string | undefined, html: string): string {
+  if (shopifyBodyHtml) return stripText(shopifyBodyHtml);
+  return primaryProductText(html);
 }
 
 function num(text: string, re: RegExp): number | undefined {
@@ -346,7 +397,10 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
   const image = ld.image || og.image || shop?.image;
   if (image) out.imageUrl = image;
 
-  const specText = `${shop?.bodyHtml ? stripText(shop.bodyHtml) : ""} ${html ? primaryProductText(html) : ""}`.trim();
+  // A collection landing page contains many product cards and often similarly
+  // named families (for example a three-hand Hudson beside a Hudson GMT).
+  // Returning fewer fields is safer than attaching one sibling's specs to another.
+  const specText = isShopifyCollectionUrl(url) ? "" : productExtractionText(shop?.bodyHtml, html).trim();
   const extracted = await extractWatchDetails(specText);
   if (extracted) {
     // Structured data (JSON-LD/Shopify/OG) wins for identity fields; the model

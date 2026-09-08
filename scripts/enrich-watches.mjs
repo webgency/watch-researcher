@@ -206,19 +206,29 @@ function extractFromMeta(html, baseUrl) {
 
 // Shopify exposes a clean product JSON at <origin>/products/<handle>.json.
 async function tryShopify(url) {
-  const m = url.match(/^(https?:\/\/[^/]+)\/products\/([^/?#]+)/i);
-  if (!m) return null;
-  const r = await fetchText(`${m[1]}/products/${m[2]}.json`, { json: true });
+  let parsed;
+  try { parsed = new URL(url); } catch { return null; }
+  const parts = parsed.pathname.split("/").filter(Boolean);
+  const productsIndex = parts.indexOf("products");
+  const handle = productsIndex >= 0 ? parts[productsIndex + 1] : undefined;
+  if (!handle) return null;
+  const prefix = parts.slice(0, productsIndex).join("/");
+  const jsonUrl = `${parsed.origin}/${prefix ? `${prefix}/` : ""}products/${handle}.json`;
+  const r = await fetchText(jsonUrl, { json: true });
   if (!r.ok) return null;
   let data;
   try { data = JSON.parse(r.body); } catch { return null; }
   const p = data.product;
   if (!p) return null;
   const out = { source: "shopify" };
-  const variant = (p.variants || []).find((v) => v.available) || (p.variants || [])[0];
+  let requestedVariant = null;
+  try { requestedVariant = new URL(url).searchParams.get("variant"); } catch { /* use availability fallback */ }
+  const variant = (p.variants || []).find((v) => requestedVariant && String(v.id) === requestedVariant)
+    || (p.variants || []).find((v) => v.available)
+    || (p.variants || [])[0];
   if (variant?.price != null) out.price = parseMoney(String(variant.price)); // currency unknown here
-  const image = (p.images || [])[0];
-  if (image?.src) out.image = absolutize(image.src, m[1]);
+  const image = variant?.featured_image || (p.images || [])[0];
+  if (image?.src) out.image = absolutize(image.src, parsed.origin);
   return out;
 }
 

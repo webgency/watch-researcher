@@ -7,8 +7,8 @@
     "wishlistTier": "must-have",
     "scoringCategory": "diver",
     "designUniqueness": 5,
-    "designPreferenceElo": 1032.03,
-    "designComparisonCount": 2,
+    "designPreferenceElo": 1030.63,
+    "designComparisonCount": 4,
     "price": {
       "amount": 7100,
       "currency": "USD"
@@ -54,8 +54,8 @@
     "status": "wishlist",
     "wishlistTier": "maybe-later",
     "designUniqueness": 3,
-    "designPreferenceElo": 1013.89,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 997.31,
+    "designComparisonCount": 4,
     "price": {
       "amount": 2230,
       "currency": "USD"
@@ -97,9 +97,11 @@
     "model": "Malachite & Green Sunray (Gold)",
     "status": "wishlist",
     "wishlistTier": "love-it",
+    "scoringCategory": "dress",
     "designUniqueness": 4,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 968,
+    "designComparisonCount": 4,
+    "personalFit": 3,
     "price": {
       "amount": 1020,
       "currency": "USD"
@@ -160,8 +162,8 @@
     "status": "wishlist",
     "wishlistTier": "maybe-later",
     "designUniqueness": 2,
-    "designPreferenceElo": 986.11,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 971.48,
+    "designComparisonCount": 4,
     "price": {
       "amount": 795,
       "currency": "USD"
@@ -201,8 +203,8 @@
     "status": "wishlist",
     "wishlistTier": "pass",
     "designUniqueness": 2,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 999.3,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1640,
       "currency": "USD"
@@ -264,8 +266,8 @@
     "status": "wishlist",
     "wishlistTier": "maybe-later",
     "designUniqueness": 4,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000,
+    "designComparisonCount": 4,
     "price": {
       "amount": 850,
       "currency": "USD"
@@ -282,6 +284,7 @@
     ],
     "imageUrl": "https://echoneutra.com/cdn/shop/collections/Rivanera-cover.jpg?v=1763739166",
     "specs": {
+      "caseDiameterMm": 40,
       "caseThicknessMm": 5.5,
       "lugToLugMm": 40,
       "lugWidthMm": 20,
@@ -290,8 +293,7 @@
       "caliber": "ETA (Peseux) 7001, elaboré grade",
       "powerReserveHours": 42,
       "waterResistanceM": 30,
-      "crystal": "Flat sapphire (with sapphire display caseback)",
-      "caseDiameterMm": 40
+      "crystal": "Flat sapphire (with sapphire display caseback)"
     },
     "tags": [
       "dress"
@@ -307,8 +309,8 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 2,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1030.63,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1538,
       "currency": "USD"
@@ -352,8 +354,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 5,
-    "designPreferenceElo": 984.71,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 968.68,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1680,
       "currency": "USD"
@@ -416,8 +418,8 @@
     "status": "wishlist",
     "wishlistTier": "maybe-later",
     "designUniqueness": 3,
-    "designPreferenceElo": 952,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 968,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1650,
       "currency": "USD"
@@ -466,8 +468,8 @@
     "status": "wishlist",
     "wishlistTier": "pass",
     "designUniqueness": 4,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000,
+    "designComparisonCount": 4,
     "price": {
       "amount": 2458,
       "currency": "USD"
@@ -527,8 +529,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1032,
+    "designComparisonCount": 4,
     "price": {
       "amount": 2200,
       "currency": "USD"
@@ -573,8 +575,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 3,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1032,
+    "designComparisonCount": 4,
     "price": {
       "amount": 3700,
       "currency": "USD"
@@ -614,8 +616,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 3,
-    "designPreferenceElo": 1048,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1064,
+    "designComparisonCount": 4,
     "price": {
       "amount": 7100,
       "currency": "USD"
@@ -688,8 +690,8 @@
     "status": "wishlist",
     "wishlistTier": "must-have",
     "designUniqueness": 4,
-    "designPreferenceElo": 952,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 968,
+    "designComparisonCount": 4,
     "price": {
       "amount": 3495,
       "currency": "USD"
@@ -735,8 +737,8 @@
     "wishlistTier": "must-have",
     "scoringCategory": "gmt",
     "designUniqueness": 3,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000,
+    "designComparisonCount": 4,
     "price": {
       "amount": 4375,
       "currency": "USD"
@@ -783,8 +785,8 @@
     "status": "wishlist",
     "wishlistTier": "must-have",
     "designUniqueness": 1,
-    "designPreferenceElo": 1030.53,
-    "designComparisonCount": 2,
+    "designPreferenceElo": 994.67,
+    "designComparisonCount": 4,
     "price": {
       "amount": 278,
       "currency": "USD"
@@ -827,8 +829,8 @@
     "status": "wishlist",
     "wishlistTier": "maybe-later",
     "designUniqueness": 2,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 968,
+    "designComparisonCount": 4,
     "price": {
       "amount": 2750,
       "currency": "USD"
@@ -874,13 +876,16 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 2,
-    "designPreferenceElo": 1045.13,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1029.26,
+    "designComparisonCount": 4,
     "price": {
       "amount": 999,
       "currency": "USD"
     },
     "priceUpdatedAt": "2026-08-14T04:46:16.329Z",
+    "qualityFlags": {
+      "arCoated": true
+    },
     "links": [
       {
         "url": "https://santurcecollection.store/products/el-submarino-azul",
@@ -902,10 +907,7 @@
       "diver"
     ],
     "id": "w19",
-    "dateAdded": "2026-06-22T15:14:00Z",
-    "qualityFlags": {
-      "arCoated": true
-    }
+    "dateAdded": "2026-06-22T15:14:00Z"
   },
   {
     "brand": "Brew",
@@ -913,8 +915,8 @@
     "status": "wishlist",
     "wishlistTier": "must-have",
     "designUniqueness": 5,
-    "designPreferenceElo": 951.32,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 938.36,
+    "designComparisonCount": 4,
     "price": {
       "amount": 375,
       "currency": "USD"
@@ -956,8 +958,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 2,
-    "designPreferenceElo": 968.76,
-    "designComparisonCount": 2,
+    "designPreferenceElo": 969.39,
+    "designComparisonCount": 4,
     "price": {
       "amount": 758,
       "currency": "USD"
@@ -1002,8 +1004,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 3,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000,
+    "designComparisonCount": 4,
     "price": {
       "amount": 3495,
       "currency": "USD"
@@ -1046,8 +1048,8 @@
     "model": "Fitzroy Auto",
     "status": "owned",
     "designUniqueness": 3,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 998.66,
+    "designComparisonCount": 4,
     "price": {
       "amount": 429,
       "currency": "USD"
@@ -1111,8 +1113,8 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 1,
-    "designPreferenceElo": 969.47,
-    "designComparisonCount": 2,
+    "designPreferenceElo": 1005.33,
+    "designComparisonCount": 4,
     "price": {
       "amount": 375,
       "currency": "USD"
@@ -1154,8 +1156,8 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 3,
-    "designPreferenceElo": 954.87,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 940.21,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1999,
       "currency": "USD"
@@ -1198,8 +1200,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000.64,
+    "designComparisonCount": 4,
     "price": {
       "amount": 3324,
       "currency": "USD"
@@ -1244,8 +1246,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 998.53,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1079,
       "currency": "USD"
@@ -1290,8 +1292,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 952.07,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 937.54,
+    "designComparisonCount": 4,
     "price": {
       "amount": 959,
       "currency": "USD"
@@ -1337,8 +1339,8 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 4,
-    "designPreferenceElo": 1015.93,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 999.9,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1875.3,
       "currency": "USD"
@@ -1385,8 +1387,8 @@
     "wishlistTier": "interested",
     "scoringCategory": "gmt",
     "designUniqueness": 3,
-    "designPreferenceElo": 1045.81,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1060.53,
+    "designComparisonCount": 4,
     "price": {
       "amount": 851,
       "currency": "USD"
@@ -1431,7 +1433,7 @@
     "status": "owned",
     "designUniqueness": 4,
     "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designComparisonCount": 5,
     "price": {
       "amount": 850,
       "currency": "USD"
@@ -1481,7 +1483,7 @@
     "wishlistTier": "love-it",
     "designUniqueness": 3,
     "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designComparisonCount": 5,
     "price": {
       "amount": 5168,
       "currency": "USD"
@@ -1528,7 +1530,7 @@
     "wishlistTier": "maybe-later",
     "designUniqueness": 3,
     "designPreferenceElo": 1048,
-    "designComparisonCount": 3,
+    "designComparisonCount": 5,
     "price": {
       "amount": 899,
       "currency": "USD"
@@ -1583,8 +1585,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1048,
+    "designComparisonCount": 5,
     "price": {
       "amount": 6762,
       "currency": "USD"
@@ -1623,74 +1625,6 @@
     ],
     "id": "mqsvdaxsdr7t5u",
     "dateAdded": "2026-06-25T02:14:52.576Z"
-  },
-  {
-    "brand": "William Wood Watches",
-    "model": "Bronze Sapphire",
-    "status": "wishlist",
-    "wishlistTier": "must-have",
-    "designUniqueness": 4,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
-    "price": {
-      "amount": 920,
-      "currency": "GBP"
-    },
-    "priceUpdatedAt": "2026-09-05T17:57:18.026Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 1214,
-          "currency": "USD"
-        },
-        "date": "2026-06-25T02:24:58.647Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 920,
-          "currency": "GBP"
-        },
-        "date": "2026-09-05T17:57:18.026Z",
-        "source": "manual"
-      }
-    ],
-    "qualityFlags": {
-      "accuracySpecSpd": 40,
-      "sapphireBezelInsert": false,
-      "quickRelease": true,
-      "braceletIncluded": false
-    },
-    "links": [
-      {
-        "url": "https://williamwoodwatches.com/en-us/products/bronzesapphire",
-        "retailer": "williamwoodwatches.com",
-        "price": {
-          "amount": 920,
-          "currency": "GBP"
-        },
-        "observedAt": "2026-09-05"
-      }
-    ],
-    "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/BronzeBlueFront-min.png?v=1683569815&width=1920",
-    "specs": {
-      "caseDiameterMm": 41,
-      "caseThicknessMm": 15.5,
-      "lugToLugMm": 49,
-      "lugWidthMm": 20,
-      "caseMaterial": "CuSn8 bronze (brushed sides and lugs); brass crown",
-      "movement": "automatic",
-      "caliber": "Seiko Group / Time Module NH35",
-      "powerReserveHours": 41,
-      "waterResistanceM": 100,
-      "crystal": "Sapphire",
-      "braceletStrap": "Blue Fire Hose Blue Fire Hose Red Fire Hose Yellow Fire Hose Green Fire Hose Purple Fire Hose Orange"
-    },
-    "tags": [
-      "sports"
-    ],
-    "id": "mqsvqal3ush7w1",
-    "dateAdded": "2026-06-25T02:24:58.647Z"
   },
   {
     "brand": "Mr. Eatwell",
@@ -1774,8 +1708,8 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 5,
-    "designPreferenceElo": 983.97,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 967.97,
+    "designComparisonCount": 4,
     "price": {
       "amount": 910,
       "currency": "USD"
@@ -1796,6 +1730,7 @@
     ],
     "imageUrl": "https://outoforderwatches.com/cdn/shop/files/ooo_forma_Aurum_Noir_Frontale_-_out_of_order.png?v=1781192482&width=1920",
     "specs": {
+      "caseDiameterMm": 30.5,
       "caseThicknessMm": 10.6,
       "lugToLugMm": 41,
       "lugWidthMm": 22,
@@ -1805,8 +1740,7 @@
       "powerReserveHours": 38,
       "waterResistanceM": 50,
       "crystal": "Sapphire",
-      "complications": "GMT",
-      "caseDiameterMm": 30.5
+      "complications": "GMT"
     },
     "tags": [
       "dress"
@@ -1820,8 +1754,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 952,
+    "designComparisonCount": 5,
     "price": {
       "amount": 415,
       "currency": "USD"
@@ -1873,8 +1807,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 952,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 936,
+    "designComparisonCount": 4,
     "price": {
       "amount": 495,
       "currency": "USD"
@@ -1919,8 +1853,8 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 3,
-    "designPreferenceElo": 952,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 936,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1975,
       "currency": "USD"
@@ -1965,8 +1899,8 @@
     "wishlistTier": "pass",
     "scoringCategory": "dress",
     "designUniqueness": 4,
-    "designPreferenceElo": 1048,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1016,
+    "designComparisonCount": 5,
     "price": {
       "amount": 2490,
       "currency": "EUR"
@@ -2015,7 +1949,7 @@
     "wishlistTier": "interested",
     "designUniqueness": 3,
     "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designComparisonCount": 5,
     "price": {
       "amount": 2095,
       "currency": "USD"
@@ -2063,8 +1997,8 @@
     "referenceNumber": "01MCBR_G3_M",
     "status": "owned",
     "designUniqueness": 5,
-    "designPreferenceElo": 1048,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1063.33,
+    "designComparisonCount": 4,
     "price": {
       "amount": 800,
       "currency": "USD"
@@ -2118,7 +2052,7 @@
     "wishlistTier": "love-it",
     "designUniqueness": 2,
     "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designComparisonCount": 5,
     "price": {
       "amount": 889,
       "currency": "USD"
@@ -2163,10 +2097,10 @@
     "brand": "OLTO-8 WATCHES",
     "model": "OLTO-8 Chrono Gate Glacier Blue",
     "status": "wishlist",
-    "wishlistTier": "love-it",
+    "wishlistTier": "pass",
     "designUniqueness": 3,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 968,
+    "designComparisonCount": 4,
     "price": {
       "amount": 589,
       "currency": "USD"
@@ -2210,8 +2144,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 5,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000.03,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1495,
       "currency": "USD"
@@ -2258,8 +2192,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 2,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1032,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1594.7,
       "currency": "USD"
@@ -2304,8 +2238,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000,
+    "designComparisonCount": 4,
     "price": {
       "amount": 499,
       "currency": "USD"
@@ -2356,7 +2290,7 @@
     "wishlistTier": "pass",
     "designUniqueness": 3,
     "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designComparisonCount": 5,
     "price": {
       "amount": 1870,
       "currency": "USD"
@@ -2424,7 +2358,7 @@
     "scoringCategory": "sports",
     "designUniqueness": 2,
     "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designComparisonCount": 5,
     "price": {
       "amount": 2850,
       "currency": "USD"
@@ -2490,8 +2424,8 @@
     "status": "wishlist",
     "wishlistTier": "interested",
     "designUniqueness": 3,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000,
+    "designComparisonCount": 4,
     "price": {
       "amount": 299,
       "currency": "USD"
@@ -2521,53 +2455,6 @@
     ],
     "id": "mqzciq3z036pvx",
     "dateAdded": "2026-06-29T15:01:36.047Z"
-  },
-  {
-    "brand": "Venezianico",
-    "model": "Arsenale Calendario - 6221580C",
-    "referenceNumber": "6221580C",
-    "status": "wishlist",
-    "wishlistTier": "love-it",
-    "designUniqueness": 4,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
-    "price": {
-      "amount": 1400,
-      "currency": "USD"
-    },
-    "priceUpdatedAt": "2026-08-14T04:46:34.525Z",
-    "qualityFlags": {
-      "accuracySpecSpd": 15,
-      "sapphireBezelInsert": false,
-      "braceletIncluded": true
-    },
-    "links": [
-      {
-        "url": "https://us.venezianico.com/products/arsenale-calendario-6221580c",
-        "retailer": "us.venezianico.com",
-        "price": {
-          "amount": 1400,
-          "currency": "USD"
-        }
-      }
-    ],
-    "imageUrl": "https://us.venezianico.com/cdn/shop/files/PackshotArsenaleCalendariobluluna.png?v=1776418888",
-    "specs": {
-      "caseDiameterMm": 40,
-      "caseThicknessMm": 9.6,
-      "lugToLugMm": 44,
-      "caseMaterial": "316L stainless steel, satin finish",
-      "movement": "automatic",
-      "caliber": "Miyota 9100",
-      "waterResistanceM": 50,
-      "crystal": "Sapphire",
-      "complications": "GMT"
-    },
-    "tags": [
-      "dress"
-    ],
-    "id": "mqzd7f4jh8pv3l",
-    "dateAdded": "2026-06-29T15:20:48.211Z"
   },
   {
     "brand": "Baltic",
@@ -2619,60 +2506,14 @@
     "dateAdded": "2026-06-29T16:16:49.479Z"
   },
   {
-    "brand": "FREDERIQUE CONSTANT",
-    "model": "Classics Moneta Moonphase Watch FC-206B3S5",
-    "status": "wishlist",
-    "wishlistTier": "pass",
-    "designUniqueness": 2,
-    "designPreferenceElo": 952,
-    "designComparisonCount": 3,
-    "price": {
-      "amount": 1595,
-      "currency": "USD"
-    },
-    "qualityFlags": {
-      "sapphireBezelInsert": false,
-      "microAdjustClasp": false,
-      "braceletIncluded": false
-    },
-    "links": [
-      {
-        "url": "https://us.frederiqueconstant.com/product/FC-206B3S5.html",
-        "retailer": "us.frederiqueconstant.com",
-        "price": {
-          "amount": 1595,
-          "currency": "USD"
-        }
-      }
-    ],
-    "imageUrl": "https://citizenwatch.widen.net/content/3p7jmzjnny/webp/Moneta+Moonphase.webp?u=41zuoe&width=700&height=1091&quality=80&crop=true&keep=c&color=FFFFFF",
-    "specs": {
-      "caseDiameterMm": 37,
-      "caseThicknessMm": 7.65,
-      "lugToLugMm": 42,
-      "lugWidthMm": 18,
-      "caseMaterial": "Stainless steel",
-      "movement": "quartz",
-      "caliber": "FC-206",
-      "waterResistanceM": 50,
-      "crystal": "Sapphire",
-      "complications": "Moon phase"
-    },
-    "tags": [
-      "dress"
-    ],
-    "id": "mqzfdci0yaegr5",
-    "dateAdded": "2026-06-29T16:21:23.976Z"
-  },
-  {
     "brand": "Venezianico",
     "model": "Nereide GMT 39 - 3521511S",
     "referenceNumber": "3521511S",
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000,
+    "designComparisonCount": 4,
     "price": {
       "amount": 1150,
       "currency": "USD"
@@ -2718,8 +2559,8 @@
     "referenceNumber": "DH62-38M-G1",
     "status": "wishlist",
     "designUniqueness": 2,
-    "designPreferenceElo": 1048,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1063.87,
+    "designComparisonCount": 4,
     "price": {
       "amount": 280,
       "currency": "USD"
@@ -2772,8 +2613,8 @@
     "status": "wishlist",
     "scoringCategory": "diver",
     "designUniqueness": 5,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1000.07,
+    "designComparisonCount": 4,
     "price": {
       "amount": 847,
       "currency": "USD"
@@ -2829,8 +2670,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 3,
-    "designPreferenceElo": 984,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 968,
+    "designComparisonCount": 4,
     "price": {
       "amount": 469,
       "currency": "USD"
@@ -2881,8 +2722,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 3,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1032,
+    "designComparisonCount": 4,
     "price": {
       "amount": 490,
       "currency": "EUR"
@@ -2897,6 +2738,10 @@
         "source": "manual"
       }
     ],
+    "qualityFlags": {
+      "sapphireBezelInsert": false,
+      "braceletIncluded": false
+    },
     "links": [
       {
         "url": "https://leforbansecuritemer.com/en/la-malouine/",
@@ -2926,11 +2771,7 @@
       "diver"
     ],
     "id": "mssigrvtucx52n",
-    "dateAdded": "2026-08-14T05:33:04.167Z",
-    "qualityFlags": {
-      "sapphireBezelInsert": false,
-      "braceletIncluded": false
-    }
+    "dateAdded": "2026-08-14T05:33:04.167Z"
   },
   {
     "brand": "Naga",
@@ -2938,8 +2779,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 5,
-    "designPreferenceElo": 983.97,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 999.97,
+    "designComparisonCount": 4,
     "price": {
       "amount": 660,
       "currency": "USD"
@@ -2991,8 +2832,8 @@
     "wishlistTier": "love-it",
     "scoringCategory": "diver",
     "designUniqueness": 4,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1032,
+    "designComparisonCount": 4,
     "price": {
       "amount": 499,
       "currency": "USD"
@@ -3046,8 +2887,8 @@
     "wishlistTier": "love-it",
     "scoringCategory": "diver",
     "designUniqueness": 5,
-    "designPreferenceElo": 1016,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 999.93,
+    "designComparisonCount": 4,
     "price": {
       "amount": 425,
       "currency": "USD"
@@ -3106,8 +2947,8 @@
     "status": "wishlist",
     "wishlistTier": "love-it",
     "designUniqueness": 4,
-    "designPreferenceElo": 985.4,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 970.07,
+    "designComparisonCount": 4,
     "price": {
       "amount": 399,
       "currency": "GBP"
@@ -3160,8 +3001,8 @@
     "wishlistTier": "love-it",
     "scoringCategory": "gmt",
     "designUniqueness": 4,
-    "designPreferenceElo": 1046.6,
-    "designComparisonCount": 3,
+    "designPreferenceElo": 1045.26,
+    "designComparisonCount": 5,
     "price": {
       "amount": 3800,
       "currency": "EUR"
@@ -3195,12 +3036,12 @@
       "caseMaterial": "stainless steel.",
       "movement": "automatic",
       "caliber": "MU 9419",
+      "powerReserveHours": 62,
       "waterResistanceM": 300,
       "crystal": "Sapphire",
       "dialColor": "Blue with an embossed texture",
       "braceletStrap": "Canvas-rubber strap with pin buckle.",
-      "complications": "Chronograph, GMT, Moon phase",
-      "powerReserveHours": 62
+      "complications": "Chronograph, GMT, Moon phase"
     },
     "tags": [
       "gmt",
@@ -3214,8 +3055,8 @@
     "model": "Thresher 44mm 'Azure'",
     "status": "wishlist",
     "designUniqueness": 3,
-    "designPreferenceElo": 1001.36,
-    "designComparisonCount": 2,
+    "designPreferenceElo": 1003.22,
+    "designComparisonCount": 4,
     "price": {
       "amount": 549,
       "currency": "USD"
@@ -3248,12 +3089,12 @@
       "lugToLugMm": 50,
       "lugWidthMm": 22,
       "caseMaterial": "316L SS",
+      "movement": "automatic",
       "caliber": "Miyota 9015",
       "waterResistanceM": 500,
       "crystal": "Sapphire",
       "braceletStrap": "316L SS with quick adjust clasp Package Includes: Travel Case Steel",
-      "complications": "date",
-      "movement": "automatic"
+      "complications": "date"
     },
     "tags": [
       "diver"
@@ -3269,6 +3110,8 @@
     "wishlistTier": "love-it",
     "scoringCategory": "gmt",
     "designUniqueness": 5,
+    "designPreferenceElo": 1031.03,
+    "designComparisonCount": 4,
     "personalFit": 5,
     "price": {
       "amount": 12000,
@@ -3321,6 +3164,8 @@
     "wishlistTier": "must-have",
     "scoringCategory": "diver",
     "designUniqueness": 4,
+    "designPreferenceElo": 1064.06,
+    "designComparisonCount": 4,
     "price": {
       "amount": 655,
       "currency": "EUR"
@@ -3361,5 +3206,176 @@
     ],
     "id": "mtorvl6lg0fc15",
     "dateAdded": "2026-09-05T19:25:09.498Z"
+  },
+  {
+    "brand": "Farer",
+    "model": "Nevada Pine - 40mm",
+    "referenceNumber": "W-NEV-40-ASV",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "scoringCategory": "gmt",
+    "designUniqueness": 5,
+    "personalFit": 4,
+    "price": {
+      "amount": 1375,
+      "currency": "GBP"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 1375,
+          "currency": "GBP"
+        },
+        "date": "2026-09-06T19:37:32.119Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://farer.com/products/nevada-green-40mm?_pos=3&_fid=d6a141bdd&_ss=c",
+        "retailer": "farer.com",
+        "price": {
+          "amount": 1375,
+          "currency": "GBP"
+        },
+        "observedAt": "2026-09-06"
+      }
+    ],
+    "imageUrl": "https://farer.com/cdn/shop/files/GREEN-MSTV-green.png?v=1779891955&width=1200",
+    "specs": {
+      "caseDiameterMm": 40,
+      "caseThicknessMm": 12.5,
+      "lugToLugMm": 44.8,
+      "lugWidthMm": 20,
+      "caseMaterial": "316L marine-grade stainless steel Water Resistance: 200m / 2",
+      "movement": "automatic",
+      "caliber": "Sellita SW330-2",
+      "powerReserveHours": 56,
+      "waterResistanceM": 200,
+      "crystal": "Sapphire",
+      "dialColor": "Green",
+      "braceletStrap": "Grey Suede Leather Strap",
+      "complications": "GMT"
+    },
+    "tags": [
+      "GMT"
+    ],
+    "id": "mtq7rcuxsgp8m8",
+    "dateAdded": "2026-09-06T19:37:32.119Z"
+  },
+  {
+    "brand": "Vaer Watches",
+    "model": "D5 Meridian Navy Auto - 39mm USA",
+    "referenceNumber": "D5-MN-TRP20BLK-NY20KHA",
+    "status": "wishlist",
+    "wishlistTier": "love-it",
+    "scoringCategory": "diver",
+    "designUniqueness": 3,
+    "price": {
+      "amount": 729,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 729,
+          "currency": "USD"
+        },
+        "date": "2026-09-07T21:45:12.348Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://www.vaerwatches.com/products/d5-meridian-usa-diver?_pos=16&_fid=9d5aaac21&_ss=c",
+        "retailer": "vaerwatches.com",
+        "price": {
+          "amount": 729,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-07"
+      }
+    ],
+    "imageUrl": "https://www.vaerwatches.com/cdn/shop/files/D5-2025-QR-BR-393.jpg?v=1756249179&width=480",
+    "specs": {
+      "caseDiameterMm": 39,
+      "movement": "automatic",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "diver"
+    ],
+    "id": "mtrrre73mhi7py",
+    "dateAdded": "2026-09-07T21:45:12.348Z"
+  },
+  {
+    "brand": "Maen",
+    "model": "HUDSON 38 MK5",
+    "status": "wishlist",
+    "links": [
+      {
+        "url": "https://www.maenwatches.com/en-us/collections/hudson-38-mk5",
+        "retailer": "maenwatches.com"
+      }
+    ],
+    "imageUrl": "https://www.maenwatches.com/cdn/shop/collections/HUDSONMK5_DESKTOP.jpg?v=1768209422",
+    "specs": {
+      "caseDiameterMm": 38,
+      "caseThicknessMm": 11,
+      "lugToLugMm": 47,
+      "movement": "automatic",
+      "waterResistanceM": 300,
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "diver"
+    ],
+    "id": "mtrtsn3qwsgwws",
+    "dateAdded": "2026-09-07T22:42:09.778Z"
+  },
+  {
+    "brand": "Vaer Watches",
+    "model": "D5 Pacific | Anacapa Auto - 39mm USA",
+    "referenceNumber": "D5-POLVG39-TRP20BLK-SPNY20KHA",
+    "status": "wishlist",
+    "price": {
+      "amount": 749,
+      "currency": "USD"
+    },
+    "links": [
+      {
+        "url": "https://www.vaerwatches.com/products/d5-pacific-anacapa-usa-auto-39mm?_pos=3&_fid=43cb5bb16&_ss=c&variant=41255018496134",
+        "retailer": "vaerwatches.com",
+        "price": {
+          "amount": 749,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-07"
+      }
+    ],
+    "imageUrl": "https://www.vaerwatches.com/cdn/shop/files/D5-2025-QR-BR-39_45e9bd0b-8d20-4d27-bbd4-d7c082cb5b9d.jpg?v=1756402295&width=480",
+    "specs": {
+      "caseDiameterMm": 39,
+      "movement": "automatic",
+      "caliber": "Miyota 9015",
+      "waterResistanceM": 200,
+      "crystal": "Sapphire"
+    },
+    "tags": [
+      "diver"
+    ],
+    "id": "mtrtxj2muvufxp",
+    "dateAdded": "2026-09-07T22:45:57.838Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 749,
+          "currency": "USD"
+        },
+        "date": "2026-09-07T22:45:57.838Z",
+        "source": "manual"
+      }
+    ]
   }
 ]
