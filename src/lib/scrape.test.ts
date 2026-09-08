@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { extractSpecs, primaryProductText } from "./scrape";
+import {
+  extractSpecs,
+  isShopifyCollectionUrl,
+  primaryProductText,
+  productExtractionText,
+  selectShopifyVariant,
+  shopifyProductJsonUrl,
+} from "./scrape";
 
 const SPINNAKER_STYLE_PAGE = `
   <header>
@@ -40,6 +47,45 @@ describe("primaryProductText", () => {
     expect(text).not.toContain("Find Your Case Diameter");
     expect(text).not.toContain("Other watches use quartz");
     expect(text).not.toContain("Chronograph collection");
+  });
+});
+
+describe("productExtractionText", () => {
+  it("does not mix a Shopify product description with unrelated rendered-page specs", () => {
+    const body = "D5 Pacific. 39mm automatic movement. 20 ATM water resistance.";
+    const renderedPage = `<main>${body}<section>Related: 36mm quartz chronograph GMT</section></main>`;
+
+    const text = productExtractionText(body, renderedPage);
+
+    expect(text).toContain("39mm automatic");
+    expect(text).not.toContain("36mm quartz chronograph GMT");
+  });
+});
+
+describe("selectShopifyVariant", () => {
+  const variants = [
+    { id: 100, available: true, sku: "FIRST", price: "749.00" },
+    { id: 200, available: true, sku: "REQUESTED", price: "839.00" },
+  ];
+
+  it("honors the variant in the product URL", () => {
+    expect(selectShopifyVariant("https://example.com/products/watch?variant=200", variants)?.sku).toBe("REQUESTED");
+  });
+
+  it("falls back to the first available variant", () => {
+    expect(selectShopifyVariant("https://example.com/products/watch", variants)?.sku).toBe("FIRST");
+  });
+});
+
+describe("Shopify URL classification", () => {
+  it("supports localized product paths", () => {
+    expect(shopifyProductJsonUrl("https://example.com/en-us/products/hudson?variant=200"))
+      .toBe("https://example.com/en-us/products/hudson.json");
+  });
+
+  it("distinguishes collection landing pages from product URLs", () => {
+    expect(isShopifyCollectionUrl("https://example.com/en-us/collections/hudson-38-mk5")).toBe(true);
+    expect(isShopifyCollectionUrl("https://example.com/collections/divers/products/hudson")).toBe(false);
   });
 });
 
