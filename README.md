@@ -4,7 +4,7 @@ A personal app to **track your watch wishlist, judge each watch against its pric
 
 Built with Next.js (App Router) + TypeScript + Tailwind CSS. Your collection lives in a single, version-controlled JSON file (`data/watches.json`) — no database to set up, easy to back up, and you can literally commit your wishlist.
 
-Currently tracking **55 watches** (53 wishlist, 2 owned).
+Currently tracking **67 watches** (64 wishlist, 3 owned).
 
 ---
 
@@ -35,6 +35,7 @@ npm run check
 - **Per-watch detail page** — full specs, retailer links, notes, the peer-band standing panel, and price history.
 - **Price tracking** — set a target price per watch and the collection view flags it once the all-in price drops to it. Every price change is recorded as a history entry, with the latest move and lowest recorded price shown on the detail page.
 - **Dashboard stats** — totals by status and wishlist tier.
+- **Overlap detection** (`/overlap`) — groups entries that would be the same purchase, so a 60-item wishlist becomes a handful of decisions. Each watch's own page warns when it has a twin.
 
 ### Scoring
 
@@ -43,6 +44,7 @@ The app's opinionated half. It answers "is this watch good *for its money*?" whi
 - **Peer-band standing** (`/watch/[id]`) — five dimensions (movement, case & finishing, wearability, durability, bracelet) scored 0–1 against a fixed rubric for the watch's **category** (diver / chronograph / GMT / dress) and **price band** (under $500 → $5000+). Shows which dimensions beat or trail par for that band and how much evidence supports the composite.
 - **Design rank** (`/design`) — your own 1–5 read on how a watch looks. Deliberately the one judgement in the app that is yours rather than calculated.
 - **Value matrix** (`/value`) — value-vs-band on one axis, your design rank on the other, splitting the collection into buy / aspirational / sensible / skip quadrants.
+- **Overlap** (`/overlap`) — entries in the same category, within 1.5mm of case diameter and 1.5x on the all-in price, grouped as one decision. Each group names its value leader and your design leader **separately**, because the useful case is the one where they disagree. A watch missing a category, a diameter, or a price is listed as unchecked with the reason, never grouped on a guessed value.
 
 Three principles hold the model together, and they're worth preserving if you extend it:
 
@@ -156,7 +158,7 @@ npm run build:static && npx serve out
 
 **Phase 3 — Collection management**
 - ⬜ Richer dashboard: total spent, value by brand/movement, size distribution
-- ⬜ Overlap detection ("you already have a 39mm diver")
+- ✅ Overlap detection ("you already have a 39mm diver") — `/overlap`, plus an "also on your list" panel on each detail page
 - ⬜ Service-history reminders; insurance/valuation CSV/PDF export
 
 **Phase 4 — Convenience**
@@ -183,6 +185,7 @@ src/
     page.tsx                 # collection
     compare/page.tsx         # side-by-side comparison
     value/page.tsx           # value matrix (value vs. design rank)
+    overlap/page.tsx         # groups of entries that are the same purchase
     design/page.tsx          # design ranker
     watch/new/page.tsx       # add form
     watch/[id]/page.tsx      # detail + standing panel
@@ -193,6 +196,7 @@ src/
   lib/
     types.ts                 # domain model
     scoring.ts               # standing engine, design score, quadrants
+    overlap.ts               # duplicate-purchase grouping
     rubrics.ts               # dimensions, price bands, per-category rubric tables
     store.ts                 # JSON-file persistence
     validation.ts            # runtime input/data validation

@@ -36,6 +36,13 @@ export default function HeaderNav() {
       >
         Value
       </Link>
+      {/* Read-only, so it ships in the static export alongside Compare and Value. */}
+      <Link
+        href="/overlap"
+        className={`btn-secondary h-9 min-w-0 flex-1 px-2 sm:flex-none sm:px-3 ${pathname === "/overlap" ? "border-slate-900 text-slate-900" : ""}`}
+      >
+        Overlap
+      </Link>
       {!IS_STATIC && (
         <Link
           href="/design"

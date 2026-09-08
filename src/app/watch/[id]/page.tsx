@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { getWatch, getWatches } from "@/lib/store";
 import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { computeStanding } from "@/lib/scoring";
+import { findOverlaps } from "@/lib/overlap";
 import { formatMoney, formatDate, hostname } from "@/lib/format";
 import { IS_STATIC } from "@/lib/config";
 import StatusBadge from "@/components/StatusBadge";
@@ -12,6 +13,7 @@ import WatchActions from "@/components/WatchActions";
 import StandingPanel from "@/components/StandingPanel";
 import PriceHistoryPanel from "@/components/PriceHistoryPanel";
 import MarketValuePanel from "@/components/MarketValuePanel";
+import OverlapNotice from "@/components/OverlapNotice";
 
 // Pre-render a detail page for every watch in the static export. In dynamic
 // mode return nothing so pages render on demand and reflect edits immediately.
@@ -29,6 +31,12 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   const [watch, watches] = await Promise.all([getWatch(id), getWatches()]);
   if (!watch) notFound();
   const standing = computeStanding(watch, watches);
+  // Surface the overlap group this watch belongs to, if any. Recomputed here
+  // rather than passed down: the detail page is reachable directly, and a
+  // stale grouping would be worse than none.
+  const overlapCluster = findOverlaps(watches).clusters.find((cluster) =>
+    cluster.members.some((member) => member.watch.id === watch.id)
+  );
 
   return (
     <div className="space-y-6">
@@ -83,6 +91,8 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
       </div>
 
       <StandingPanel watch={watch} standing={standing} />
+
+      {overlapCluster && <OverlapNotice cluster={overlapCluster} watchId={watch.id} />}
 
       <PriceHistoryPanel watch={watch} />
 
