@@ -112,7 +112,7 @@ node scripts/enrich-watches.mjs --dry
 
 Scrapes price and image from each watch's retailer links. `--dry` reports only; `--force` overwrites existing values; `--id=foo` limits to one watch.
 
-**`--refresh` is what builds price history.** The default run only fills gaps, so it never re-reads a price it already has and therefore never observes a move. Run it on a schedule to accumulate a series:
+**`--refresh` refreshes market asks and builds price history.** It checks every retailer link and writes `price` + `observedAt` only on the exact link that returned that ask, giving deal score and best offer dated evidence without copying the headline price into the market set. An unchanged link price still advances `observedAt` because that field means "last confirmed"; headline `priceHistory` remains moves-only, so an unchanged tracked price never adds a snapshot. The default run only fills headline/image gaps. Run refresh on a schedule to keep offers current and accumulate tracked-price moves:
 
 ```bash
 node scripts/enrich-watches.mjs --refresh
