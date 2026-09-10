@@ -13,6 +13,7 @@ import {
 } from "@/lib/types";
 import { IS_STATIC } from "@/lib/config";
 import { landedPriceUsd, type StandingSummary } from "@/lib/scoring";
+import { bestOffer, FreshnessTier } from "@/lib/valuation";
 import { useCollectionSearch } from "./CollectionSearchContext";
 import WatchCard from "./WatchCard";
 
@@ -20,6 +21,7 @@ type SortKey =
   | "wishlistTier"
   | "valueScore"
   | "qualityScore"
+  | "offerFreshness"
   | "dateAdded"
   | "priceAsc"
   | "priceDesc"
@@ -30,6 +32,7 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "wishlistTier", label: "Wishlist priority" },
   { key: "valueScore", label: "Rubric value" },
   { key: "qualityScore", label: "Quality score" },
+  { key: "offerFreshness", label: "Best-offer freshness" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },
   { key: "priceDesc", label: "Price: high to low" },
@@ -50,6 +53,13 @@ function tierRank(tier?: WishlistTier): number {
   return index === -1 ? Infinity : index;
 }
 
+const FRESHNESS_RANK: Record<FreshnessTier, number> = {
+  fresh: 0,
+  aging: 1,
+  stale: 2,
+  expired: 3,
+};
+
 export default function CollectionView({
   watches,
   scoreSummaries = {},
@@ -61,10 +71,15 @@ export default function CollectionView({
   const { query, setQuery } = useCollectionSearch();
   const [status, setStatus] = useState<WatchStatus | "all">("all");
   const [wishlistTiers, setWishlistTiers] = useState<WishlistTier[]>([]);
+  const [freshOffersOnly, setFreshOffersOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>("wishlistTier");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selectionMessage, setSelectionMessage] = useState<string | null>(null);
   const selectedTierSet = useMemo(() => new Set(wishlistTiers), [wishlistTiers]);
+  const offerByWatch = useMemo(() => {
+    const now = new Date();
+    return new Map(watches.map((watch) => [watch.id, bestOffer(watch, undefined, now)]));
+  }, [watches]);
   const priorityLabel = useMemo(() => {
     if (wishlistTiers.length === 0 || wishlistTiers.length === WISHLIST_TIERS.length) return "All priorities";
     if (wishlistTiers.length === 1) return WISHLIST_TIER_LABELS[wishlistTiers[0]];
@@ -90,6 +105,7 @@ export default function CollectionView({
   function resetFilters() {
     setStatus("all");
     setWishlistTiers([]);
+    setFreshOffersOnly(false);
     setQuery("");
   }
 
@@ -116,6 +132,10 @@ export default function CollectionView({
     let list = watches.filter((w) => {
       if (status !== "all" && w.status !== status) return false;
       if (selectedTierSet.size > 0 && (!w.wishlistTier || !selectedTierSet.has(w.wishlistTier))) return false;
+      if (freshOffersOnly) {
+        const offer = offerByWatch.get(w.id);
+        if (offer?.status !== "available" || offer.offer.freshness !== "fresh") return false;
+      }
       if (!q) return true;
       const haystack = [
         w.brand,
@@ -146,6 +166,15 @@ export default function CollectionView({
             rank(scoreSummaries[b.id]?.standing.qualityScore) - rank(scoreSummaries[a.id]?.standing.qualityScore) ||
             b.dateAdded.localeCompare(a.dateAdded)
           );
+        case "offerFreshness": {
+          const offerA = offerByWatch.get(a.id);
+          const offerB = offerByWatch.get(b.id);
+          const rankA = offerA?.status === "available" ? FRESHNESS_RANK[offerA.offer.freshness] : Infinity;
+          const rankB = offerB?.status === "available" ? FRESHNESS_RANK[offerB.offer.freshness] : Infinity;
+          const ageA = offerA?.status === "available" ? offerA.offer.ageDays : Infinity;
+          const ageB = offerB?.status === "available" ? offerB.offer.ageDays : Infinity;
+          return rankA - rankB || ageA - ageB || b.dateAdded.localeCompare(a.dateAdded);
+        }
         case "priceAsc":
           return (landedPriceUsd(a) ?? Infinity) - (landedPriceUsd(b) ?? Infinity);
         case "priceDesc":
@@ -160,7 +189,7 @@ export default function CollectionView({
       }
     });
     return list;
-  }, [watches, query, status, selectedTierSet, sort, scoreSummaries]);
+  }, [watches, query, status, selectedTierSet, freshOffersOnly, offerByWatch, sort, scoreSummaries]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: watches.length };
@@ -184,7 +213,7 @@ export default function CollectionView({
     router.push(`/compare?ids=${ids.join(",")}`);
   }
 
-  const hasActiveFilters = status !== "all" || wishlistTiers.length > 0 || query.trim() !== "";
+  const hasActiveFilters = status !== "all" || wishlistTiers.length > 0 || freshOffersOnly || query.trim() !== "";
 
   if (watches.length === 0) {
     return (
@@ -257,6 +286,18 @@ export default function CollectionView({
             </div>
           </div>
         </details>
+        <button
+          type="button"
+          aria-pressed={freshOffersOnly}
+          onClick={() => setFreshOffersOnly((current) => !current)}
+          className={`h-[2.375rem] rounded-lg px-3 text-sm font-medium ring-1 transition-colors ${
+            freshOffersOnly
+              ? "bg-emerald-700 text-white ring-emerald-700"
+              : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50"
+          }`}
+        >
+          Fresh offers only
+        </button>
         <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="input sm:ml-auto sm:max-w-[12rem]">
           {SORTS.map((s) => (
             <option key={s.key} value={s.key}>

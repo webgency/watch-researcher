@@ -5,6 +5,8 @@ import { formatMoney } from "@/lib/format";
 import StatusBadge from "./StatusBadge";
 import WishlistTierBadge from "./WishlistTierBadge";
 import { landedPriceUsd } from "@/lib/scoring";
+import { bestOffer } from "@/lib/valuation";
+import FreshnessBadge from "./FreshnessBadge";
 
 /** Indexes of the "best" cells in a row, for highlighting. */
 function bestIndexes(values: (number | undefined)[], prefer: "higher" | "lower"): Set<number> {
@@ -21,6 +23,12 @@ function bestIndexes(values: (number | undefined)[], prefer: "higher" | "lower")
 export default function CompareTable({ watches }: { watches: Watch[] }) {
   const priceBest = bestIndexes(
     watches.map((w) => landedPriceUsd(w)),
+    "lower"
+  );
+  const now = new Date();
+  const offers = watches.map((watch) => bestOffer(watch, undefined, now));
+  const offerBest = bestIndexes(
+    offers.map((result) => result.status === "available" ? result.offer.priceUsd : undefined),
     "lower"
   );
 
@@ -67,6 +75,32 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
             {watches.map((w, i) => (
               <Cell key={w.id} highlight={priceBest.has(i)}>
                 <span className="font-semibold">{formatMoney(w.price)}</span>
+              </Cell>
+            ))}
+          </Row>
+          <Row label="Best dated offer" sticky>
+            {offers.map((result, i) => (
+              <Cell key={watches[i].id} highlight={offerBest.has(i)}>
+                {result.status === "available" ? (
+                  <div className="space-y-1">
+                    <a href={result.offer.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-700 hover:underline">
+                      {formatMoney(result.offer.price)} ↗
+                    </a>
+                    <p className="text-xs text-slate-500">
+                      {result.offer.source} · <span className="capitalize">{result.offer.condition ?? "condition unknown"}</span>
+                    </p>
+                    <FreshnessBadge tier={result.offer.freshness} ageDays={result.offer.ageDays} compact />
+                    {result.conditionMatch !== "matched" && (
+                      <p className="text-xs text-amber-700">
+                        {result.conditionMatch === "fallback" ? "Condition fallback" : "Condition unverified"}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-slate-400">
+                    No dated offers{result.undatedOfferCount ? ` · ${result.undatedOfferCount} undated` : ""}
+                  </span>
+                )}
               </Cell>
             ))}
           </Row>

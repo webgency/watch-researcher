@@ -41,6 +41,11 @@ export function formatDate(iso?: string): string {
   });
 }
 
+export function formatAgeDays(ageDays: number): string {
+  if (ageDays <= 0) return "today";
+  return `${ageDays}d ago`;
+}
+
 /** Hostname only, for displaying a link compactly (e.g. "chrono24.com"). */
 export function hostname(url: string): string {
   try {

@@ -1,5 +1,33 @@
 import { landedPriceUsd, normalizePriceToUsd } from "./scoring";
-import { Condition, RetailerLink, Watch } from "./types";
+import { Condition, Money, RetailerLink, Watch } from "./types";
+
+export type FreshnessTier = "fresh" | "aging" | "stale" | "expired";
+
+export const FRESHNESS_MAX_AGE_DAYS: Record<Exclude<FreshnessTier, "expired">, number> = {
+  fresh: 7,
+  aging: 30,
+  stale: 90,
+};
+
+/** Whole days since an observation, clamped at zero for future-dated records. */
+export function observationAgeDays(observedAt: string, now: Date = new Date()): number | undefined {
+  const observed = new Date(observedAt);
+  if (Number.isNaN(observed.getTime())) return undefined;
+  return Math.max(0, Math.floor((now.getTime() - observed.getTime()) / 86_400_000));
+}
+
+export function freshnessForAge(ageDays: number): FreshnessTier {
+  if (ageDays <= FRESHNESS_MAX_AGE_DAYS.fresh) return "fresh";
+  if (ageDays <= FRESHNESS_MAX_AGE_DAYS.aging) return "aging";
+  if (ageDays <= FRESHNESS_MAX_AGE_DAYS.stale) return "stale";
+  return "expired";
+}
+
+/** Conservative summary: evidence is only as current as its oldest input. */
+export function freshnessForAges(ages: number[]): FreshnessTier | undefined {
+  if (!ages.length) return undefined;
+  return freshnessForAge(Math.max(...ages));
+}
 
 export type MarketConfidence = "insufficient" | "low" | "medium" | "high";
 
@@ -8,12 +36,15 @@ export interface MarketObservation {
   priceUsd: number;
   observedAt: string;
   ageDays: number;
+  freshness: FreshnessTier;
 }
 
 export interface MarketValueSummary {
   condition: Condition;
   observations: MarketObservation[];
   confidence: MarketConfidence;
+  /** Tier of the oldest observation included in the estimate. */
+  freshness?: FreshnessTier;
   medianUsd?: number;
   lowUsd?: number;
   highUsd?: number;
@@ -29,6 +60,8 @@ interface DealScoreBase {
   observationCount: number;
   observationAgesDays: number[];
   observations: MarketObservation[];
+  /** Tier of the oldest observation behind the fair-ask estimate. */
+  freshness?: FreshnessTier;
 }
 
 export interface AvailableDealScore extends DealScoreBase {
@@ -60,6 +93,44 @@ export interface InsufficientDealScore extends DealScoreBase {
 
 export type DealScore = AvailableDealScore | InsufficientDealScore;
 
+export interface DatedOffer {
+  price: Money;
+  priceUsd: number;
+  url: string;
+  source: string;
+  condition?: Condition;
+  observedAt: string;
+  ageDays: number;
+  freshness: FreshnessTier;
+}
+
+export interface AvailableBestOffer {
+  status: "available";
+  offer: DatedOffer;
+  preferredCondition: Condition;
+  conditionMatch: "matched" | "fallback" | "unknown";
+  usedConditionFallback: boolean;
+  undatedOfferCount: number;
+}
+
+export interface InsufficientBestOffer {
+  status: "insufficient";
+  reason: "no-dated-offers";
+  preferredCondition: Condition;
+  undatedOfferCount: number;
+}
+
+export type BestOffer = AvailableBestOffer | InsufficientBestOffer;
+
+export interface BestOfferTargetStatus {
+  target: Money;
+  targetUsd: number;
+  comparisonUsd: number;
+  met: boolean;
+  /** Per-offer shipping and duty are not modeled, so this is always listed. */
+  basis: "listed";
+}
+
 function sourceKey(link: RetailerLink): string {
   try {
     return new URL(link.url).hostname.replace(/^www\./, "").toLowerCase();
@@ -72,6 +143,85 @@ function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   const middle = Math.floor(sorted.length / 2);
   return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+/**
+ * Lowest dated retailer ask, preferring the condition of the tracked/deal
+ * context. The headline price is never injected here: every candidate comes
+ * directly from links[]. If no preferred-condition offer exists, the lowest
+ * remaining dated offer is returned with either fallback or unknown condition
+ * explicitly recorded. Undated prices are counted but cannot win.
+ */
+export function bestOffer(
+  watch: Watch,
+  preferredCondition: Condition = trackedAskCondition(watch),
+  now: Date = new Date()
+): BestOffer {
+  let undatedOfferCount = 0;
+  const offers: DatedOffer[] = [];
+
+  for (const link of watch.links) {
+    if (!link.price) continue;
+    if (!link.observedAt) {
+      undatedOfferCount += 1;
+      continue;
+    }
+    const ageDays = observationAgeDays(link.observedAt, now);
+    if (ageDays === undefined) continue;
+    offers.push({
+      price: link.price,
+      priceUsd: normalizePriceToUsd(link.price),
+      url: link.url,
+      source: link.retailer?.trim() || sourceKey(link),
+      condition: link.condition,
+      observedAt: link.observedAt,
+      ageDays,
+      freshness: freshnessForAge(ageDays),
+    });
+  }
+
+  if (!offers.length) {
+    return { status: "insufficient", reason: "no-dated-offers", preferredCondition, undatedOfferCount };
+  }
+
+  const matching = offers.filter((offer) => offer.condition === preferredCondition);
+  const eligible = matching.length ? matching : offers;
+  const offer = [...eligible].sort((a, b) => a.priceUsd - b.priceUsd || a.ageDays - b.ageDays)[0];
+  const conditionMatch = offer.condition === preferredCondition
+    ? "matched"
+    : offer.condition === undefined
+      ? "unknown"
+      : "fallback";
+
+  return {
+    status: "available",
+    offer,
+    preferredCondition,
+    conditionMatch,
+    usedConditionFallback: conditionMatch === "fallback",
+    undatedOfferCount,
+  };
+}
+
+/**
+ * Compare a best offer with the target without attributing watch-level landed
+ * cost to an individual retailer. The schema has no provenance link between
+ * landedPrice and links[], so every result is explicitly listed-price-only.
+ */
+export function bestOfferTargetStatus(
+  watch: Watch,
+  result: BestOffer = bestOffer(watch)
+): BestOfferTargetStatus | undefined {
+  if (!watch.targetPrice || result.status !== "available") return undefined;
+  const comparisonUsd = result.offer.priceUsd;
+  const targetUsd = normalizePriceToUsd(watch.targetPrice);
+  return {
+    target: watch.targetPrice,
+    targetUsd,
+    comparisonUsd,
+    met: comparisonUsd <= targetUsd,
+    basis: "listed",
+  };
 }
 
 /**
@@ -91,21 +241,23 @@ export function marketValueSummary(
 
   for (const link of watch.links) {
     if (link.condition !== condition || !link.price || !link.observedAt) continue;
-    const observed = new Date(link.observedAt);
-    if (Number.isNaN(observed.getTime())) continue;
+    const ageDays = observationAgeDays(link.observedAt, now);
+    if (ageDays === undefined) continue;
     const key = sourceKey(link);
     const observation: MarketObservation = {
       source: link.retailer?.trim() || key,
       priceUsd: normalizePriceToUsd(link.price),
       observedAt: link.observedAt,
-      ageDays: Math.max(0, Math.floor((now.getTime() - observed.getTime()) / 86_400_000)),
+      ageDays,
+      freshness: freshnessForAge(ageDays),
     };
     const existing = bySource.get(key);
-    if (!existing || new Date(existing.observedAt) < observed) bySource.set(key, observation);
+    if (!existing || new Date(existing.observedAt) < new Date(link.observedAt)) bySource.set(key, observation);
   }
 
   const observations = [...bySource.values()].sort((a, b) => a.priceUsd - b.priceUsd);
-  if (observations.length < 2) return { condition, observations, confidence: "insufficient" };
+  const freshness = freshnessForAges(observations.map((observation) => observation.ageDays));
+  if (observations.length < 2) return { condition, observations, confidence: "insufficient", freshness };
 
   const prices = observations.map((observation) => observation.priceUsd);
   const recent90 = observations.filter((observation) => observation.ageDays <= 90).length;
@@ -121,6 +273,7 @@ export function marketValueSummary(
     condition,
     observations,
     confidence,
+    freshness,
     medianUsd: median(prices),
     lowUsd: Math.min(...prices),
     highUsd: Math.max(...prices),
@@ -180,6 +333,7 @@ export function dealScore(
     observationCount: evidence.observations.length,
     observationAgesDays: evidence.observations.map((observation) => observation.ageDays).sort((a, b) => a - b),
     observations: evidence.observations,
+    freshness: evidence.freshness,
   };
 
   if (askUsd === undefined) {
