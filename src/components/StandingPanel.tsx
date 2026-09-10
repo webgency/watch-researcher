@@ -152,8 +152,8 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
     <section className="card p-5">
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Standing</h2>
-          <p className="mt-1 text-sm text-slate-500">Compared with what the price should buy for {standing.peerLabel}.</p>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Specification standing</h2>
+          <p className="mt-1 text-sm text-slate-500">Rubric comparison with what this exact price should buy for {standing.peerLabel}.</p>
         </div>
         <p className="text-xs text-slate-400 sm:text-right">
           Rated on {ratedCount} of {DIMENSIONS.length} dimensions
@@ -174,14 +174,14 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
               caption={`Across ${ratedCount} rated dimension${ratedCount === 1 ? "" : "s"}`}
             />
             <ScoreTile
-              label="Value"
+              label="Rubric value"
               value={standing.valueScore}
               caption={
                 standing.valueScore === undefined
                   ? standing.peerLabel.startsWith("category unrated")
                     ? "Needs a category"
                     : "Needs a price"
-                  : "Quality for the money"
+                  : "Value vs continuous price expectation"
               }
             />
             <ScoreTile
@@ -218,7 +218,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
           {banded ? (
             <p className="mt-3 flex items-center gap-2 text-xs text-slate-400">
               <span className="inline-block h-3 w-0.5 bg-slate-900/70" />
-              Expected for {standing.peerLabel}
+              Continuous expectation at this price · peer label {standing.peerLabel}
             </p>
           ) : (
             <p className="mt-3 text-xs text-slate-400">

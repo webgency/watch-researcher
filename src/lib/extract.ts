@@ -53,6 +53,7 @@ const ExtractionSchema = z.object({
     quickRelease: z.boolean().nullable(),
     braceletIncluded: z.boolean().nullable(),
     arLayers: z.number().nullable(),
+    arCoated: z.boolean().nullable(),
   }),
   friction: z.object({
     availability: z.enum(["in-stock", "pre-order", "sold-out", "discontinued"]).nullable(),

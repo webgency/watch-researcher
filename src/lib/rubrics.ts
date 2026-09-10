@@ -76,6 +76,9 @@ export const PRICE_BANDS: PriceBand[] = [
   { id: "5000-plus", label: "$5000+", minUsd: 5000, maxUsd: 12000 },
 ];
 
+/** Midpoints anchor the established rubric judgments without preserving cliffs at their edges. */
+export const PRICE_ANCHORS_USD = PRICE_BANDS.map((band) => (band.minUsd + band.maxUsd) / 2);
+
 /** Band containing a USD price. Prices above the last band's edge stay in the last band. */
 export function priceBandFor(usd: number): PriceBand {
   return PRICE_BANDS.find((band) => usd < band.maxUsd) ?? PRICE_BANDS[PRICE_BANDS.length - 1];
@@ -184,4 +187,29 @@ export const RUBRICS: Record<RubricCategory, Record<PriceBandId, RubricReference
 
 export function rubricFor(category: RubricCategory, bandId: PriceBandId): RubricReference {
   return RUBRICS[category][bandId];
+}
+
+/**
+ * Price expectation interpolated between the established rubric midpoints.
+ * Log-price interpolation treats proportional price changes consistently and
+ * makes the reference continuous across display-band boundaries. Prices below
+ * and above the anchor range use the nearest established reference.
+ */
+export function continuousReference(
+  category: RubricCategory,
+  dimension: Dimension,
+  priceUsd: number
+): number {
+  if (priceUsd <= PRICE_ANCHORS_USD[0]) return RUBRICS[category][PRICE_BANDS[0].id][dimension];
+  const last = PRICE_ANCHORS_USD.length - 1;
+  if (priceUsd >= PRICE_ANCHORS_USD[last]) return RUBRICS[category][PRICE_BANDS[last].id][dimension];
+
+  const rightIndex = PRICE_ANCHORS_USD.findIndex((anchor) => priceUsd < anchor);
+  const leftIndex = rightIndex - 1;
+  const leftPrice = PRICE_ANCHORS_USD[leftIndex];
+  const rightPrice = PRICE_ANCHORS_USD[rightIndex];
+  const fraction = (Math.log(priceUsd) - Math.log(leftPrice)) / (Math.log(rightPrice) - Math.log(leftPrice));
+  const left = RUBRICS[category][PRICE_BANDS[leftIndex].id][dimension];
+  const right = RUBRICS[category][PRICE_BANDS[rightIndex].id][dimension];
+  return left + (right - left) * fraction;
 }

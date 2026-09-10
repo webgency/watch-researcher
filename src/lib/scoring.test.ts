@@ -75,6 +75,12 @@ describe("scoreDimensions", () => {
     expect(caliberTier(undefined)).toBeUndefined();
   });
 
+  it("leaves a recorded quartz caliber outside the mechanical tier scale", () => {
+    expect(caliberTier("Ronda 1032", "quartz")).toBeUndefined();
+    expect(scoreDimensions(makeWatch({ specs: { movement: "quartz", caliber: "Ronda 1032" } })).movement)
+      .toBeUndefined();
+  });
+
   it("recognizes every caliber family currently represented in the collection", () => {
     const currentAliases = [
       "ETA (Peseux) 7001, elaboré grade",
@@ -361,8 +367,7 @@ describe("computeStanding", () => {
     ]);
   });
 
-  it("reports beats and trails against the band rubric", () => {
-    // $500-1000 diver rubric: movement par 0.45, durability par 0.80.
+  it("reports beats and trails against the continuous price rubric", () => {
     const watch = makeWatch({
       tags: ["diver"],
       price: { amount: 800, currency: "USD" },
@@ -371,6 +376,33 @@ describe("computeStanding", () => {
     const standing = computeStanding(watch, [watch]);
     expect(standing.beats).toContain("movement");
     expect(standing.trails).toContain("durability");
+  });
+
+  it("keeps production references and value continuous across a display-band edge", () => {
+    const at = (amount: number) => makeWatch({
+      scoringCategory: "diver",
+      price: { amount, currency: "USD" },
+      specs: {
+        caliber: "Miyota 9015",
+        powerReserveHours: 42,
+        caseDiameterMm: 39,
+        caseThicknessMm: 12,
+        waterResistanceM: 200,
+        crystal: "Sapphire",
+      },
+    });
+    const below = at(999);
+    const above = at(1001);
+    const belowStanding = computeStanding(below, [below, above]);
+    const aboveStanding = computeStanding(above, [below, above]);
+
+    // Bands remain useful labels, but no longer select different production references.
+    expect(belowStanding.peerLabel).toContain("$500-1000");
+    expect(aboveStanding.peerLabel).toContain("$1000-2000");
+    expect(Math.abs(
+      belowStanding.dimensions.movement!.reference! - aboveStanding.dimensions.movement!.reference!
+    )).toBeLessThan(0.001);
+    expect(Math.abs(belowStanding.valueScore! - aboveStanding.valueScore!)).toBeLessThan(0.001);
   });
 
   it("does not turn one narrow case flag into a case-quality verdict or value penalty", () => {

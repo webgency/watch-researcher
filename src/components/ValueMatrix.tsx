@@ -125,9 +125,9 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
       <section className="card overflow-hidden p-4 sm:p-5">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Value matrix</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Rubric value matrix</h2>
             <p className="mt-1 text-sm text-slate-500">
-              {rated.length} scored wishlist watch{rated.length === 1 ? "" : "es"} plotted by value for the price.
+              {rated.length} scored wishlist watch{rated.length === 1 ? "" : "es"} plotted by value versus continuous rubric expectations.
             </p>
           </div>
           <div className="text-left text-xs text-slate-500 sm:text-right">
@@ -137,7 +137,7 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
         </div>
 
         <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-          {`Value is compared with fixed expectations for each category and price range, so a score of ${PAR_DISPLAY} means “what that money should buy”. Dimensions without recorded data are left unrated rather than filled with a mid value.`}
+          {`Rubric value compares specifications with a continuous price expectation for each category, so a score of ${PAR_DISPLAY} means “what that money should buy”. Deal vs fair asks is shown separately on watch details. Missing dimensions remain unrated.`}
         </p>
 
         {warnings.length > 0 && (
@@ -191,7 +191,7 @@ export default function ValueMatrix({ watches }: { watches: Watch[] }) {
               <rect x={CHART.left} y={CHART.top} width={plotWidth} height={plotHeight} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
 
               <text x={(CHART.left + plotRight) / 2} y={CHART.height - 18} textAnchor="middle" className="fill-slate-700 text-[12px] font-semibold">
-                Value for the price
+                Rubric value vs price
               </text>
               <text x="20" y={(CHART.top + plotBottom) / 2} textAnchor="middle" transform={`rotate(-90 20 ${(CHART.top + plotBottom) / 2})`} className="fill-slate-700 text-[12px] font-semibold">
                 Design appeal

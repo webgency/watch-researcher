@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calibrationScore, continuousReference } from "./scoring-calibration";
+import { DIMENSIONS, PRICE_ANCHORS_USD, PRICE_BANDS, RUBRIC_CATEGORIES, rubricFor } from "./rubrics";
 import { Watch } from "./types";
 
 const diver: Watch = {
@@ -17,10 +18,29 @@ const diver: Watch = {
 };
 
 describe("scoring calibration", () => {
-  it("changes price expectations smoothly across the old $500 boundary", () => {
-    const at499 = continuousReference("diver", "movement", 499);
-    const at501 = continuousReference("diver", "movement", 501);
-    expect(Math.abs(at501 - at499)).toBeLessThan(0.002);
+  it("changes every category and dimension smoothly across every display-band edge", () => {
+    for (const edge of [500, 1000, 2000, 5000]) {
+      for (const category of RUBRIC_CATEGORIES) {
+        for (const dimension of DIMENSIONS) {
+          const below = continuousReference(category, dimension, edge - 1);
+          const above = continuousReference(category, dimension, edge + 1);
+          expect(Math.abs(above - below)).toBeLessThan(0.002);
+        }
+      }
+    }
+  });
+
+  it("preserves each established band rubric at its midpoint anchor", () => {
+    for (const category of RUBRIC_CATEGORIES) {
+      for (const [index, anchor] of PRICE_ANCHORS_USD.entries()) {
+        for (const dimension of DIMENSIONS) {
+          expect(continuousReference(category, dimension, anchor)).toBeCloseTo(
+            rubricFor(category, PRICE_BANDS[index].id)[dimension],
+            10
+          );
+        }
+      }
+    }
   });
 
   it("gives a diver thickness allowance without making it automatically excellent", () => {

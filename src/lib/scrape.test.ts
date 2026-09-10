@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   extractSpecs,
+  extractQualityFlags,
   isShopifyCollectionUrl,
   primaryProductText,
   productExtractionText,
@@ -60,6 +61,30 @@ describe("productExtractionText", () => {
     expect(text).toContain("39mm automatic");
     expect(text).not.toContain("36mm quartz chronograph GMT");
   });
+
+  it("prefers a bounded technical section over a sparse Shopify description", () => {
+    const body = "A handsome automatic watch.";
+    const renderedPage = `
+      <main>
+        Size guide: 36mm quartz chronograph GMT
+        <section>Technical Details — Japan Miyota 9015 — 42 hour power reserve — 20 ATM</section>
+        <section>Customers Also Love: 44mm solar GMT</section>
+      </main>`;
+
+    const text = productExtractionText(body, renderedPage);
+
+    expect(text).toContain("Miyota 9015");
+    expect(text).not.toContain("36mm quartz chronograph GMT");
+    expect(text).not.toContain("44mm solar GMT");
+  });
+
+  it("allows a collection page only when it has a bounded specification section", () => {
+    const withSpecs = `<main>Other model: GMT Specifications DIAMETER 38mm MOVEMENT La Joux Perret G100 Our Collections GMT</main>`;
+    const withoutSpecs = `<main>Product one: quartz. Product two: automatic GMT.</main>`;
+
+    expect(productExtractionText(undefined, withSpecs, true)).toBe("Specifications DIAMETER 38mm MOVEMENT La Joux Perret G100");
+    expect(productExtractionText(undefined, withoutSpecs, true)).toBe("");
+  });
 });
 
 describe("selectShopifyVariant", () => {
@@ -108,5 +133,54 @@ describe("extractSpecs", () => {
       braceletStrap: "20mm Stainless Steel With Fold Over Buckle",
     });
     expect(specs.complications).toBeUndefined();
+  });
+
+  it("reads standalone caliber names and written-out reserve units", () => {
+    expect(extractSpecs("Automatic — Japan Miyota 9015 — 42 hour power reserve")).toMatchObject({
+      movement: "automatic",
+      caliber: "Miyota 9015",
+      powerReserveHours: 42,
+    });
+    expect(extractSpecs("MOVEMENT La Joux Perret G100 Automatic POWER RESERVE ~68 hours")).toMatchObject({
+      movement: "automatic",
+      caliber: "La Joux Perret G100",
+      powerReserveHours: 68,
+    });
+    expect(extractSpecs("Depth 12.5mm. The case measures 11.9mm in height and 46mm from lug to lug.")).toMatchObject({
+      caseThicknessMm: 12.5,
+      lugToLugMm: 46,
+    });
+  });
+
+  it("prefers an explicit maker and caliber over nearby calibre prose", () => {
+    expect(extractSpecs("Sellita SW330-2 automatic movement. This dependable calibre beats at a smooth rate of 28,800 bph.").caliber)
+      .toBe("Sellita SW330-2");
+  });
+});
+
+describe("extractQualityFlags", () => {
+  it("captures explicit scoring evidence without guessing absent features", () => {
+    expect(extractQualityFlags(
+      "Adjusted for accuracy in 5 positions. Sapphire bezel insert. Lug holes. " +
+      "Internal anti-reflective coating. Quick-release end links and on-the-fly micro-adjust. +/-5 spd.",
+      "7-Link Bracelet"
+    )).toEqual({
+      regulatedPositions: 5,
+      accuracySpecSpd: 5,
+      sapphireBezelInsert: true,
+      drilledLugs: true,
+      arCoated: true,
+      microAdjustClasp: true,
+      quickRelease: true,
+      braceletIncluded: true,
+    });
+  });
+
+  it("marks an explicitly selected strap as no bracelet", () => {
+    expect(extractQualityFlags("Sapphire crystal", "FKM Dive Strap")).toEqual({ braceletIncluded: false });
+  });
+
+  it("recognizes a page that explicitly says the measured watch includes its bracelet", () => {
+    expect(extractQualityFlags("Weight: 160g including bracelet")).toEqual({ braceletIncluded: true });
   });
 });
