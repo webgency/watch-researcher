@@ -33,7 +33,7 @@ npm run check
 - **Add / edit watches** — one form covering basics, URL autofill, specs, image, multiple retailer links, tags, and notes.
 - **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table, with the best value in each row highlighted.
 - **Per-watch detail page** — full specs, retailer links, notes, specification standing, deal-vs-market evidence, and price history.
-- **Price tracking** — set a target price per watch and the collection view flags it once the all-in price drops to it. Every price change is recorded as a history entry, with the latest move and lowest recorded price shown on the detail page.
+- **Price tracking and alerts** — set a target price per watch; the collection flags it in-app, and the local notifier can send a webhook when a fresh tracked, landed, or best-offer price reaches it. Every price change is recorded as a history entry, with the latest move and lowest recorded price shown on the detail page.
 - **Dashboard stats** — totals by status and wishlist tier.
 
 ### Scoring
@@ -126,6 +126,31 @@ Use repeatable `--id=` arguments for a shortlist dry run. A failed targeted extr
 node scripts/enrich-watches.mjs --refresh --dry --id=watch-id --verbose
 ```
 
+### Target-price notifications
+
+Set `targetPrice` in the add/edit form, refresh the dated evidence, then preview exactly what would be sent:
+
+```bash
+node scripts/enrich-watches.mjs --refresh
+npm run notify:targets -- --dry
+```
+
+For delivery, set a webhook URL and run without `--dry`. Generic JSON is the default; Slack and Discord payload shapes are also supported:
+
+```bash
+WATCH_NOTIFY_WEBHOOK_URL=https://hooks.example/your-webhook npm run notify:targets
+WATCH_NOTIFY_WEBHOOK_FORMAT=slack WATCH_NOTIFY_WEBHOOK_URL=https://hooks.slack.com/... npm run notify:targets
+WATCH_NOTIFY_WEBHOOK_FORMAT=discord WATCH_NOTIFY_WEBHOOK_URL=https://discord.com/api/webhooks/... npm run notify:targets
+```
+
+`npm run notify:targets -- --refresh` runs the enrich refresh first, then evaluates the saved data. Repeatable `--id=watch-id` arguments limit both steps to a shortlist. The optional `WATCH_APP_BASE_URL` changes the detail-page link in the message; it defaults to the GitHub Pages site.
+
+The notifier evaluates tracked/landed and best-dated-offer signals separately and labels each trigger. Every signal must be dated and at or below the target: current-price freshness comes from `priceUpdatedAt` (or the matching latest tracked-price history entry), while an offer uses its own `observedAt`. Fresh (≤7d), aging (8–30d), and stale (31–90d) evidence can alert; expired evidence (>90d) is skipped by default. `--include-stale` is an explicit override that also admits expired evidence. An undated link is never promoted to an alert, and a retailer's listed price is not described as landed because offer-specific shipping and duty are unknown.
+
+Successful sends are deduplicated by watch + trigger + exact price in the gitignored `data/notify-state.json`; a changed price can notify again. The file is written atomically only after a successful webhook response. [`data/notify-state.example.json`](data/notify-state.example.json) documents its small, local shape. Preserve the state file between scheduled runs—on a CI runner, restore/save it with a cache or artifact—to avoid repeat alerts.
+
+A local cron or launchd job can run the refresh-and-notify command on a schedule with `WATCH_NOTIFY_WEBHOOK_URL` in its environment. CI can do the same with the URL in repository secrets and outbound access to retailer sites, provided it persists notification state. GitHub Pages itself is static and read-only: it cannot scrape, retain dedup state, or push a notification.
+
 ```bash
 node scripts/backfill-specs.mjs --dry --limit=5
 ```
@@ -170,9 +195,8 @@ npm run build:static && npx serve out
 - ✅ Continuous exact-price rubric value scoring and a value matrix
 - ✅ Condition-aware deal comparison against dated independent asking prices, with an explicit insufficient state
 - ✅ USD normalization for scoring, covering every currency the form offers — rates are a dated snapshot in `src/lib/currency-rates.mjs`, refreshed by hand (the file says how); a live rate source would remove the drift entirely
-- ✅ Price-history snapshots per watch + a target-price flag ("ping me under $X")
+- ✅ Price-history snapshots per watch + webhook target-price alerts with freshness and deduplication
 - ✅ Best dated offer across retailer links, with condition fallback, freshness, and target-price cues
-- ⬜ Actual notification when a target is met — today the collection view flags it, but nothing pushes
 
 **Phase 3 — Collection management**
 - ⬜ Richer dashboard: total spent, value by brand/movement, size distribution
