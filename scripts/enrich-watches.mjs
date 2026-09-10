@@ -23,6 +23,11 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { recordOfferObservation } from "../src/lib/offer-observation.mjs";
+import {
+  extractRetailOffer,
+  inferRetailCondition,
+  offerFailure,
+} from "../src/lib/retailer-offer.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 
@@ -240,20 +245,30 @@ async function enrichLink(url) {
   const page = await fetchText(url);
   if (page.ok) {
     const base = page.finalUrl || url;
+    const retailOffer = extractRetailOffer(page.body, base);
     const ld = extractFromJsonLd(page.body, base);
     const meta = extractFromMeta(page.body, base);
     result.image = result.image || ld.image || meta.image;
-    result.price = result.price || ld.price || meta.price;
+    result.price = result.price || retailOffer?.price || ld.price || meta.price;
+    result.condition = retailOffer?.condition;
     // Backfill currency for a Shopify amount that came without one.
     if (result.price && !result.price.currency) {
-      result.price.currency = ld.price?.currency || meta.price?.currency;
+      result.price.currency = retailOffer?.price?.currency || ld.price?.currency || meta.price?.currency;
     }
-    result.source = result.source || (ld.price || ld.image ? "json-ld" : meta.price || meta.image ? "og-meta" : undefined);
+    result.source = result.source || retailOffer?.source || (ld.price || ld.image ? "json-ld" : meta.price || meta.image ? "og-meta" : undefined);
   } else if (!result.price && !result.image) {
     return { error: page.status ? `HTTP ${page.status}` : page.error };
   }
 
-  if (result.price && !result.price.currency) result.price.currency = "USD"; // last resort
+  if (result.price && !result.price.currency) {
+    delete result.price;
+    result.priceError = {
+      code: "missing-price-currency",
+      message: "found an amount but no page-stated currency; refusing to assume USD",
+    };
+  } else if (!result.price) {
+    result.priceError = offerFailure(url);
+  }
   return result;
 }
 
@@ -266,6 +281,7 @@ async function main() {
   let priceN = 0, offerN = 0, imageN = 0, changed = 0;
   const misses = [];
   const currencySkips = [];
+  const offerCurrencyChanges = [];
 
   for (const w of targets) {
     const name = `${w.brand} ${w.model}`;
@@ -273,66 +289,102 @@ async function main() {
     const needImage = FORCE || !w.imageUrl;
     if (!needPrice && !needImage) { if (VERBOSE) console.log(`· skip  ${name}`); continue; }
 
-    let got = null;
+    let gotPrice = null;
+    let gotImage = null;
     const observedAt = new Date().toISOString();
     let watchOfferN = 0;
+    const refreshedConditions = new Set();
+    const linkFailures = [];
     const links = w.links || [];
     for (const [index, link] of links.entries()) {
       const r = await enrichLink(link.url);
       if (r && (r.price || r.image)) {
-        got ||= r;
+        if (r.price && !gotPrice) gotPrice = r;
+        if (r.image && !gotImage) gotImage = r;
 
         // A retailer observation belongs only to the exact URL that returned
         // it. Never copy the headline watch price into links: deal scoring
         // relies on each link being independent, dated market evidence.
         if (REFRESH && r.price) {
-          const result = recordOfferObservation(link, r.price, observedAt, {
-            allowCurrencyChange: ALLOW_CURRENCY_CHANGE,
+          const condition = inferRetailCondition({
+            url: link.url,
+            brand: w.brand,
+            explicitCondition: r.condition,
           });
-          if (result === "currency") {
-            currencySkips.push(
-              `${name} (${short(link.url, 36)}): stored ${link.price.amount} ${link.price.currency}, site quotes ${r.price.amount} ${r.price.currency}`,
+          const result = recordOfferObservation(link, r.price, observedAt, {
+            condition,
+          });
+          if (result === "currency-updated") {
+            offerCurrencyChanges.push(
+              `${name} (${short(link.url, 36)}): retailer ask stored as ${r.price.amount} ${r.price.currency}`,
             );
-          } else {
-            offerN++;
-            watchOfferN++;
           }
+          offerN++;
+          watchOfferN++;
+          refreshedConditions.add(link.condition || "condition unknown");
         }
 
         // The default gap-filling pass keeps its original first-result
         // behavior. An explicit refresh checks every link so best-offer and
         // deal evidence can be refreshed independently.
-        if (!REFRESH) break;
+        if (!REFRESH && (!needPrice || gotPrice) && (!needImage || gotImage)) break;
       }
-      if (VERBOSE && r?.error) console.log(`    ${short(link.url, 48)} -> ${r.error}`);
+      if (r?.error || r?.priceError) {
+        const failure = r.error
+          ? { code: "fetch-failed", message: r.error }
+          : r.priceError;
+        linkFailures.push(`[${failure.code}] ${failure.message}`);
+        if (VERBOSE || ONLY.length) {
+          console.log(`    ${short(link.url, 48)} -> [${failure.code}] ${failure.message}`);
+        }
+      }
       if (index < links.length - 1) {
         await new Promise((res) => setTimeout(res, 250)); // be polite between hosts
       }
     }
 
-    if (!got) { misses.push(name); console.log(`✗ miss  ${name}`); continue; }
+    if (!gotPrice && !gotImage) {
+      misses.push(name);
+      const reason = linkFailures.length ? ` — ${Array.from(new Set(linkFailures)).join("; ")}` : "";
+      console.log(`✗ miss  ${name}${reason}`);
+      continue;
+    }
     const did = [];
-    if (needPrice && got.price) {
-      const result = recordPrice(w, got.price, "scrape");
+    if (needPrice && gotPrice?.price) {
+      const result = recordPrice(w, gotPrice.price, "scrape");
       if (result === "currency") {
-        currencySkips.push(`${name}: stored ${w.price.amount} ${w.price.currency}, site quotes ${got.price.amount} ${got.price.currency}`);
+        currencySkips.push(`${name}: stored ${w.price.amount} ${w.price.currency}, site quotes ${gotPrice.price.amount} ${gotPrice.price.currency}`);
       } else {
         priceN++;
-        did.push(result ? `${got.price.amount} ${got.price.currency}` : `${got.price.amount} ${got.price.currency} (unchanged)`);
+        did.push(result ? `${gotPrice.price.amount} ${gotPrice.price.currency}` : `${gotPrice.price.amount} ${gotPrice.price.currency} (unchanged)`);
       }
     }
-    if (needImage && got.image) { w.imageUrl = got.image; imageN++; did.push("image"); }
-    if (watchOfferN) did.push(`${watchOfferN} dated offer${watchOfferN === 1 ? "" : "s"}`);
-    if (did.length) { changed++; console.log(`✓ ${String(got.source || "?").padEnd(8)}${name.padEnd(34)} ${did.join(", ")}`); }
-    else { misses.push(name); console.log(`✗ miss  ${name} (nothing usable)`); }
+    if (needImage && gotImage?.image) { w.imageUrl = gotImage.image; imageN++; did.push("image"); }
+    if (watchOfferN) {
+      did.push(`${watchOfferN} dated offer${watchOfferN === 1 ? "" : "s"} (${Array.from(refreshedConditions).join("/")})`);
+    }
+    if (did.length) {
+      changed++;
+      const source = gotPrice?.source || gotImage?.source || "?";
+      console.log(`✓ ${String(source).padEnd(19)}${name.padEnd(34)} ${did.join(", ")}`);
+    }
+    else {
+      misses.push(name);
+      const reason = linkFailures.length ? ` — ${Array.from(new Set(linkFailures)).join("; ")}` : " (nothing usable)";
+      console.log(`✗ miss  ${name}${reason}`);
+    }
   }
 
   console.log(`\nPrices: ${priceN}  ·  Dated offers: ${offerN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
   if (misses.length) console.log(`Missing (${misses.length}): ${misses.map((m) => short(m, 22)).join("; ")}`);
   if (currencySkips.length) {
-    console.log(`\nSkipped — site quotes a different currency than we track (${currencySkips.length}).`);
-    console.log(`Rewriting these would rescore them through the hardcoded rates. Use --allow-currency-change to accept:`);
+    console.log(`\nHeadline prices preserved — site quotes a different currency (${currencySkips.length}).`);
+    console.log(`Native retailer asks were still recorded on their exact links. Use --allow-currency-change to update tracked headlines too:`);
     for (const skip of currencySkips) console.log(`  · ${skip}`);
+  }
+  if (offerCurrencyChanges.length) {
+    console.log(`\nRetailer asks moved from stored conversions to page-native currency (${offerCurrencyChanges.length}):`);
+    for (const change of offerCurrencyChanges) console.log(`  · ${change}`);
   }
 
   if (DRY) return console.log("\n--dry: nothing written.");

@@ -133,7 +133,7 @@ function DealSummary({ deal }: { deal: DealScore }) {
         <p className="mt-2 text-sm text-slate-600">
           {deal.reason === "missing-ask"
             ? "Add a tracked or landed price before comparing this watch with fair asks."
-            : `Add at least two dated prices from independent ${deal.preferredCondition === "new" ? "new" : "pre-owned"} sellers.`}
+            : `Add at least two dated, condition-tagged prices from distinct ${deal.preferredCondition === "new" ? "new" : "pre-owned"} retailer hostnames. The tracked headline price does not count.`}
         </p>
         <p className="mt-1 text-xs text-slate-400">
           {deal.observationCount} qualifying source{deal.observationCount === 1 ? "" : "s"} · no discount percentage calculated

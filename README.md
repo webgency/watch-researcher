@@ -55,6 +55,8 @@ Three principles hold the model together, and they're worth preserving if you ex
 
 Offer freshness is based on whole days since `observedAt`: **fresh** ≤7 days, **aging** 8–30, **stale** 31–90, and **expired** >90. A market median takes the tier of its oldest included observation so aging evidence cannot hide behind one recent source. Best-offer target cues compare the listed retailer price only; per-offer shipping and duty are not stored, so the UI never attributes the watch-level `landedPrice` to a retailer without provenance.
 
+To move a deal score out of **insufficient**, record at least two `links[]` asks with `price`, `observedAt`, and the same `condition`, each from a distinct hostname. A manufacturer, authorized dealer, retailer, or public asking-price listing can qualify; a sold comp is neither required nor scraped. Repeated links from one hostname count once, condition-unknown links do not enter a condition median, and the headline tracked `price` never counts as another source. The add/edit form supports recording these sources manually when a retailer blocks extraction.
+
 ---
 
 ## Data model
@@ -112,10 +114,16 @@ node scripts/enrich-watches.mjs --dry
 
 Scrapes price and image from each watch's retailer links. `--dry` reports only; `--force` overwrites existing values; `--id=foo` limits to one watch.
 
-**`--refresh` refreshes market asks and builds price history.** It checks every retailer link and writes `price` + `observedAt` only on the exact link that returned that ask, giving deal score and best offer dated evidence without copying the headline price into the market set. An unchanged link price still advances `observedAt` because that field means "last confirmed"; headline `priceHistory` remains moves-only, so an unchanged tracked price never adds a snapshot. The default run only fills headline/image gaps. Run refresh on a schedule to keep offers current and accumulate tracked-price moves:
+**`--refresh` refreshes market asks and builds price history.** It checks every retailer link and writes `price` + `observedAt` only on the exact link that returned that ask, giving deal score and best offer dated evidence without copying the headline price into the market set. Explicit schema condition wins; a clearly first-party manufacturer hostname is tagged `new`, a pre-owned URL/structured condition is tagged `pre-owned`, and everything else remains unknown for manual review. Retailer asks are stored in the page's native currency and normalized through the documented rate snapshot; an unexpected currency does not rewrite the headline tracked price unless `--allow-currency-change` is passed. An unchanged link price still advances `observedAt` because that field means "last confirmed"; headline `priceHistory` remains moves-only, so an unchanged tracked price never adds a snapshot. The default run only fills headline/image gaps. Run refresh on a schedule to keep offers current and accumulate tracked-price moves:
 
 ```bash
 node scripts/enrich-watches.mjs --refresh
+```
+
+Use repeatable `--id=` arguments for a shortlist dry run. A failed targeted extraction prints a structured reason such as `no-priced-product-data`, `no-unambiguous-collection-price`, or `missing-price-currency` instead of silently dating an assumed value:
+
+```bash
+node scripts/enrich-watches.mjs --refresh --dry --id=watch-id --verbose
 ```
 
 ```bash
