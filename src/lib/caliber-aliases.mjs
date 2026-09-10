@@ -46,6 +46,8 @@ export const CANONICAL_CALIBERS = [
   "sw330",
   "ne88",
   "ne86",
+  "la joux-perret g100",
+  "la joux-perret g101",
   "la joux-perret",
   "miyota 9075",
   "powermatic 80",
@@ -83,6 +85,9 @@ export const CANONICAL_CALIBERS = [
  * so "Sellita SW200-1 (COSC)" is found under "sellita sw200-1".
  */
 export const CALIBER_ALIASES = {
+  // Some retailer copy omits the hyphens in the manufacturer's name.
+  "la joux perret g100": "la joux-perret g100",
+  "la joux perret g101": "la joux-perret g101",
   // "SW510 BH M" and "SW510 M b" are the same hand-wound chronograph as
   // "SW510-M"; the letters are the execution grade, not a different caliber.
   "sellita sw510 bh m": "sw510",

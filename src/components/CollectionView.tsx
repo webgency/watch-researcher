@@ -28,7 +28,7 @@ type SortKey =
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "wishlistTier", label: "Wishlist priority" },
-  { key: "valueScore", label: "Value for the price" },
+  { key: "valueScore", label: "Rubric value" },
   { key: "qualityScore", label: "Quality score" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },

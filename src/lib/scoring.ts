@@ -1,14 +1,14 @@
 import { TAG_TO_CATEGORY } from "./categories";
-import { Money, QualityFlags, Watch } from "./types";
+import { normalizeCaliber } from "./calibers";
+import { Money, MovementType, QualityFlags, Watch } from "./types";
 import {
   CATEGORY_EXPECTATION,
+  continuousReference,
   Dimension,
   DIMENSIONS,
   PriceBand,
   priceBandFor,
   RubricCategory,
-  RubricReference,
-  rubricFor,
 } from "./rubrics";
 
 export type { Dimension } from "./rubrics";
@@ -171,6 +171,11 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["sw330", 0.65],
   ["ne88", 0.65],
   ["ne86", 0.62],
+  // G100 and its G101 small-seconds sibling use the same 4 Hz, long-reserve
+  // platform. Keep both explicit so a future generic LJP string cannot hide
+  // whether these known calibers are covered. Reserve is scored separately.
+  ["la joux-perret g100", 0.65],
+  ["la joux-perret g101", 0.65],
   ["la joux-perret", 0.65],
   ["miyota 9075", 0.62],
   ["powermatic 80", 0.60],
@@ -200,8 +205,11 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
 ];
 
 /** Base movement tier for a caliber string, or undefined when unrecognized. */
-export function caliberTier(caliber: string | undefined): number | undefined {
-  const key = caliber?.toLowerCase().trim();
+export function caliberTier(
+  caliber: string | undefined,
+  movement?: MovementType | string
+): number | undefined {
+  const key = normalizeCaliber(caliber, movement);
   if (!key) return undefined;
   return CALIBER_TIER_PATTERNS.find(([pattern]) => key.includes(pattern))?.[1];
 }
@@ -314,7 +322,7 @@ export function scoreDimensionEvidence(watch: Watch): Partial<Record<Dimension, 
 
   const out: Partial<Record<Dimension, DimensionEvidence>> = {};
 
-  const caliberBase = caliberTier(s.caliber);
+  const caliberBase = caliberTier(s.caliber, s.movement);
   if (caliberBase !== undefined) {
     // Regulation is expensive and almost nobody at this price point does it.
     const regBonus = f.regulatedPositions ? Math.min(0.2, f.regulatedPositions * 0.05) : 0;
@@ -487,32 +495,28 @@ export const MIN_REFERENCE_COVERAGE: Record<Dimension, number> = {
   bracelet: 0.5,
 };
 
-// How strongly within-band price position tilts the value score.
-export const VALUE_PRICE_TILT = 0.3;
-
 export interface Standing {
   peerLabel: string;
   peerCount: number;
   /**
-   * Per rated dimension: the score, the band it was scored against, and that
-   * band's rubric reference. `reference` is undefined only for an unbanded
-   * watch, i.e. one with no price.
+   * Per rated dimension: the score, display band, and continuous price
+   * reference. `reference` is undefined only when price/category is missing.
    */
   dimensions: Partial<Record<Dimension, { raw: number; coverage: number; knownInputs: number; totalInputs: number; rubricBand: string; reference?: number }>>;
   /** Dimensions with missing source data — display "unrated", never 0. */
   unrated: Dimension[];
   /** Composite of rated dimensions only. Undefined when nothing is rated. */
   qualityScore?: number;
-  /** Quality relative to landed price within the band. Needs a price and a rated dimension. */
+  /** Quality relative to the continuous landed-price expectation. */
   valueScore?: number;
   /** How much applicable source evidence is recorded, from 0-1. */
   evidenceCoverage: number;
   confidence: "low" | "medium" | "high";
   /** Rank of qualityScore within the peer group; only when the group has n >= 6. */
   qualityPercentile?: number;
-  /** Dimensions above the band's rubric reference. */
+  /** Dimensions above the continuous price reference. */
   beats: Dimension[];
-  /** Dimensions below the band's rubric reference. */
+  /** Dimensions below the continuous price reference. */
   trails: Dimension[];
   /** Human-readable friction chips. Never numeric, never part of any score. */
   frictions: string[];
@@ -560,18 +564,16 @@ function frictionChips(watch: Watch): string[] {
 }
 
 /**
- * Full peer-band standing for one watch. Scores come from the fixed rubric for
- * the watch's category and price band; the peer group contributes only the
- * label, the count, and (when n >= 6) a percentile.
+ * Full standing for one watch. Rubric references interpolate continuously from
+ * the fixed band-midpoint anchors; the discrete band contributes only the peer
+ * label, membership, and (when n >= 6) percentile ranking.
  */
 export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   const peerGroup = derivePeerGroup(watch, allWatches);
   const raw = scoreDimensionEvidence(watch);
   const usd = landedPriceUsd(watch);
   const band = peerGroup.band;
-  const rubric: RubricReference | undefined = band
-    && peerGroup.category ? rubricFor(peerGroup.category, band.id)
-    : undefined;
+  const category = peerGroup.category;
 
   const dimensions: Standing["dimensions"] = {};
   const beats: Dimension[] = [];
@@ -579,29 +581,33 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   for (const dimension of DIMENSIONS) {
     const value = raw[dimension];
     if (value === undefined) continue;
+    const reference = category !== undefined && usd !== undefined
+      ? continuousReference(category, dimension, usd)
+      : undefined;
     dimensions[dimension] = {
       raw: value.raw,
       coverage: value.coverage,
       knownInputs: value.knownInputs,
       totalInputs: value.totalInputs,
       rubricBand: band?.id ?? "unbanded",
-      reference: rubric?.[dimension],
+      reference,
     };
-    if (rubric && value.coverage >= MIN_REFERENCE_COVERAGE[dimension]) {
-      if (value.raw > rubric[dimension] + RUBRIC_TOLERANCE) beats.push(dimension);
-      else if (value.raw < rubric[dimension] - RUBRIC_TOLERANCE) trails.push(dimension);
+    if (reference !== undefined && value.coverage >= MIN_REFERENCE_COVERAGE[dimension]) {
+      if (value.raw > reference + RUBRIC_TOLERANCE) beats.push(dimension);
+      else if (value.raw < reference - RUBRIC_TOLERANCE) trails.push(dimension);
     }
   }
 
   const qualityScore = compositeQuality(raw);
 
-  // Par quality at the band's midpoint price scores 0.5: beating the rubric on
-  // the rated dimensions raises it, sitting cheap within the band raises it.
+  // Par quality at every price scores 0.5: beating the continuously interpolated
+  // reference on the rated dimensions raises it. This removes the old boundary
+  // cliff without adding a second within-band price adjustment.
   // Price-relative value uses only dimensions with enough evidence to support
   // a comparison. Tentative scores can still inform Quality at reduced weight,
   // but cannot manufacture an above/below expectation verdict.
   let valueScore: number | undefined;
-  if (qualityScore !== undefined && rubric && band && usd !== undefined) {
+  if (qualityScore !== undefined && category !== undefined && usd !== undefined) {
     const ratedDimensions = DIMENSIONS.filter(
       (dimension) => raw[dimension] !== undefined && raw[dimension]!.coverage >= MIN_REFERENCE_COVERAGE[dimension]
     );
@@ -613,12 +619,12 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
         ratedDimensions.reduce((sum, dimension) => sum + raw[dimension]!.raw * raw[dimension]!.coverage, 0) /
         evidenceWeight;
       const referenceQuality =
-        ratedDimensions.reduce((sum, dimension) => sum + rubric[dimension] * raw[dimension]!.coverage, 0) /
+        ratedDimensions.reduce(
+          (sum, dimension) => sum + continuousReference(category, dimension, usd) * raw[dimension]!.coverage,
+          0
+        ) /
         evidenceWeight;
-      const pricePosition = clamp01((usd - band.minUsd) / (band.maxUsd - band.minUsd));
-      valueScore = clamp01(
-        0.5 + (comparableQuality - referenceQuality) - VALUE_PRICE_TILT * (pricePosition - 0.5)
-      );
+      valueScore = clamp01(0.5 + comparableQuality - referenceQuality);
     }
   }
 

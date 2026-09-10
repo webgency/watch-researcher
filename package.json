@@ -7,11 +7,12 @@
     "dev": "next dev",
     "build": "next build",
     "build:static": "node scripts/build-static.mjs",
-    "check": "npm run validate:data && npm run audit:data && npm run lint && npm run build",
+    "check": "npm run validate:data && npm run audit:data && npm run audit:calibers && npm run lint && npm run build",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
     "audit:data": "node scripts/audit-data.mjs",
+    "audit:calibers": "node scripts/audit-calibers.mjs",
     "validate:data": "node scripts/validate-data.mjs",
     "calibrate:scoring": "jiti scripts/calibrate-scoring.ts"
   },

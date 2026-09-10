@@ -1,8 +1,8 @@
-import { DIMENSIONS, Dimension, PRICE_BANDS, RUBRICS, RubricCategory } from "./rubrics";
+import { continuousReference, DIMENSIONS, RubricCategory } from "./rubrics";
 import { caseProfileEvidence, deriveCategory, landedPriceUsd, MIN_REFERENCE_COVERAGE, scoreDimensionEvidence } from "./scoring";
 import { Watch } from "./types";
 
-const PRICE_ANCHORS_USD = PRICE_BANDS.map((range) => (range.minUsd + range.maxUsd) / 2);
+export { continuousReference } from "./rubrics";
 
 /** Experimental allowance for the extra case stack associated with each category. */
 export const CATEGORY_THICKNESS_ALLOWANCE_MM: Record<RubricCategory, number> = {
@@ -19,36 +19,6 @@ function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
 
-function interpolate(left: number, right: number, fraction: number): number {
-  return left + (right - left) * fraction;
-}
-
-/**
- * Experimental price expectation interpolated between rubric range midpoints.
- * Log-price interpolation reflects proportional buying-power changes and avoids
- * a discontinuity when a watch moves from, for example, $499 to $501.
- */
-export function continuousReference(
-  category: RubricCategory,
-  dimension: Dimension,
-  priceUsd: number
-): number {
-  if (priceUsd <= PRICE_ANCHORS_USD[0]) return RUBRICS[category][PRICE_BANDS[0].id][dimension];
-  const last = PRICE_ANCHORS_USD.length - 1;
-  if (priceUsd >= PRICE_ANCHORS_USD[last]) return RUBRICS[category][PRICE_BANDS[last].id][dimension];
-
-  const rightIndex = PRICE_ANCHORS_USD.findIndex((anchor) => priceUsd < anchor);
-  const leftIndex = rightIndex - 1;
-  const leftPrice = PRICE_ANCHORS_USD[leftIndex];
-  const rightPrice = PRICE_ANCHORS_USD[rightIndex];
-  const fraction = (Math.log(priceUsd) - Math.log(leftPrice)) / (Math.log(rightPrice) - Math.log(leftPrice));
-  return interpolate(
-    RUBRICS[category][PRICE_BANDS[leftIndex].id][dimension],
-    RUBRICS[category][PRICE_BANDS[rightIndex].id][dimension],
-    fraction
-  );
-}
-
 export interface CalibrationResult {
   qualityScore?: number;
   valueScore?: number;
@@ -56,7 +26,11 @@ export interface CalibrationResult {
   referenceQuality?: number;
 }
 
-/** Proposed scoring for comparison reports only; production uses computeStanding(). */
+/**
+ * Comparison report for the remaining category-thickness experiment. Production
+ * now uses the same continuous references, but deliberately keeps the established
+ * wearability formula until the allowance has stronger calibration coverage.
+ */
 export function calibrationScore(watch: Watch): CalibrationResult {
   const category = deriveCategory(watch);
   const priceUsd = landedPriceUsd(watch);

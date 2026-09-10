@@ -56,6 +56,13 @@ describe("normalizeCaliber", () => {
     expect(isKnownCaliber("3285, Manufacture Rolex")).toBe(true);
   });
 
+  it("resolves G100 and G101 specifically instead of through the generic LJP family", () => {
+    expect(normalizeCaliber("La Joux-Perret G100")).toBe("la joux-perret g100");
+    expect(normalizeCaliber("La Joux Perret G101")).toBe("la joux-perret g101");
+    expect(caliberTier("La Joux-Perret G100")).toBe(0.65);
+    expect(caliberTier("La Joux Perret G101")).toBe(0.65);
+  });
+
   it("leaves quartz unrated rather than rating it low", () => {
     // A quartz caliber has no position on a scale anchored on hacking, beat
     // rate and power reserve. Unrated is the honest answer; a low tier would

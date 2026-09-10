@@ -18,7 +18,7 @@ Make every value comparison explainable and honest about the evidence behind it,
 
 - Acquisition friction remains descriptive and never enters a score.
 - Design rank remains subjective and separate from value.
-- Price-band expectations remain absolute in this phase; continuous price interpolation is a later change.
+- The category-thickness calibration experiment remains out of production until collection-level tests justify it.
 - No live exchange-rate or notification service is introduced.
 
 ## Scoring contract
@@ -33,7 +33,18 @@ Confidence is derived from evidence coverage across applicable dimensions:
 - Medium: at least 50%
 - Low: below 50%
 
-A strap-only watch excludes bracelet from the applicable evidence denominator. A watch without a scoring category can still show raw technical dimensions, but it cannot receive a price-band value score.
+A strap-only watch excludes bracelet from the applicable evidence denominator. A watch without a scoring category can still show raw technical dimensions, but it cannot receive a rubric value score.
+
+## P0 value-scoring additions
+
+Rubric value and deal quality answer different questions and stay separate:
+
+- **Rubric value** asks whether the recorded specifications beat the category expectation at this exact price. Production uses log-price interpolation between the established band-midpoint rubrics. Bands remain peer labels and percentile groupings; they no longer create score cliffs.
+- **Deal vs fair asks** compares the tracked or landed USD ask with the median of dated retailer observations. Evidence is condition-matched and deduplicated by seller domain. Two independent sources are required, the tracked headline price is never counted as an observation, and source age still determines confidence.
+
+The preferred market condition is inferred from a retailer link carrying the tracked price, otherwise it defaults to new. If that condition has fewer than two observations but the other condition has enough, the other-condition estimate may be shown only with an explicit fallback label. Conditions are never pooled. An insufficient result contains no `discountPct` or `ratioToMedian`, which prevents the UI from formatting fake precision.
+
+G100 and G101 have specific caliber keys before the generic La Joux-Perret family pattern. `npm run audit:calibers` reports every missing or unrecognized mechanical caliber; unknown movements remain unrated rather than receiving a fallback tier.
 
 ## Acceptance criteria
 
@@ -49,7 +60,7 @@ A strap-only watch excludes bracelet from the applicable evidence denominator. A
 
 ## Follow-up phases
 
-1. Replace price-band steps with continuous price interpolation.
+1. Evaluate category-specific thickness allowances with collection-level regression tests before promoting that calibration experiment.
 2. Redesign the mobile header and progressively disclose the watch form.
 3. Make the value matrix filterable and reduce point collisions.
-4. Add best-offer, landed-cost, price-freshness, and target-notification workflows.
+4. Add sold-comps ingestion and target notifications without treating asking prices as completed sales.

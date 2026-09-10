@@ -134,12 +134,12 @@ function StandingBlock({ summary }: { summary: StandingSummary }) {
     <div className="space-y-1.5 text-xs">
       <div className="flex flex-wrap gap-1">
         <span
-          title={`Quality against what ${standing.peerLabel} should buy, adjusted for its position within the price range. 50 is expected.`}
+          title={`Rubric value against the continuous expectation at this price. Peer label: ${standing.peerLabel}. 50 is expected.`}
           className="rounded-full bg-slate-900 px-2 py-1 font-medium text-white"
         >
           {standing.valueScore === undefined
-            ? "Value unrated"
-            : `Value ${Math.round(toDisplayScore(standing.valueScore))}`}
+            ? "Rubric value unrated"
+            : `Rubric value ${Math.round(toDisplayScore(standing.valueScore))}`}
         </span>
         <span
           title={`${standing.confidence} confidence from recorded scoring inputs`}

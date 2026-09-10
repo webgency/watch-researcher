@@ -1,10 +1,10 @@
 # ⌚ Watch Researcher
 
-A personal app to **track your watch wishlist, judge each watch against its price band, and grow your collection** over time.
+A personal app to **track your watch wishlist, judge each watch against its price, and grow your collection** over time.
 
 Built with Next.js (App Router) + TypeScript + Tailwind CSS. Your collection lives in a single, version-controlled JSON file (`data/watches.json`) — no database to set up, easy to back up, and you can literally commit your wishlist.
 
-Currently tracking **55 watches** (53 wishlist, 2 owned).
+The collection is stored in `data/watches.json`; the current count changes as the wishlist grows.
 
 ---
 
@@ -28,11 +28,11 @@ npm run check
 
 ### Browsing and editing
 
-- **Collection view** — every watch as a card, with search, status/priority filters, and sorting by wishlist priority, value vs. band, quality score, recently added, price, brand, or case size.
+- **Collection view** — every watch as a card, with search, status/priority filters, and sorting by wishlist priority, rubric value, quality score, recently added, price, brand, or case size.
 - **Wishlist tiers** — Next purchase, Must have, Love it, Interested, Maybe later, or Pass.
 - **Add / edit watches** — one form covering basics, URL autofill, specs, image, multiple retailer links, tags, and notes.
 - **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table, with the best value in each row highlighted.
-- **Per-watch detail page** — full specs, retailer links, notes, the peer-band standing panel, and price history.
+- **Per-watch detail page** — full specs, retailer links, notes, specification standing, deal-vs-market evidence, and price history.
 - **Price tracking** — set a target price per watch and the collection view flags it once the all-in price drops to it. Every price change is recorded as a history entry, with the latest move and lowest recorded price shown on the detail page.
 - **Dashboard stats** — totals by status and wishlist tier.
 
@@ -40,15 +40,17 @@ npm run check
 
 The app's opinionated half. It answers "is this watch good *for its money*?" while keeping your taste separate from the arithmetic.
 
-- **Peer-band standing** (`/watch/[id]`) — five dimensions (movement, case & finishing, wearability, durability, bracelet) scored 0–1 against a fixed rubric for the watch's **category** (diver / chronograph / GMT / dress) and **price band** (under $500 → $5000+). Shows which dimensions beat or trail par for that band and how much evidence supports the composite.
+- **Rubric value / specification standing** (`/watch/[id]`) — five dimensions (movement, case features, wearability, durability, bracelet) scored 0–1 against a continuous expectation for the watch's exact USD-normalized price and category (diver / chronograph / GMT / dress / sports). The fixed price-band rubrics are log-price interpolation anchors; bands remain useful peer labels, but crossing an edge no longer changes the expectation abruptly.
+- **Deal vs fair asks** (`/watch/[id]`) — compares the tracked or landed ask with the median of at least two dated, independent, condition-matched retailer asks. It reports the fair range, source ages, and confidence. Thin evidence is explicitly insufficient and never produces a discount percentage. If only the other condition has enough evidence, the UI identifies that fallback instead of pooling conditions.
 - **Design rank** (`/design`) — your own 1–5 read on how a watch looks. Deliberately the one judgement in the app that is yours rather than calculated.
-- **Value matrix** (`/value`) — value-vs-band on one axis, your design rank on the other, splitting the collection into buy / aspirational / sensible / skip quadrants.
+- **Value matrix** (`/value`) — rubric value on one axis, your design rank on the other, splitting the collection into buy / aspirational / sensible / skip quadrants. Deal score remains a separate market-evidence concept.
 
 Three principles hold the model together, and they're worth preserving if you extend it:
 
 1. **Missing data is never a zero.** A dimension without source data comes back `undefined` and is excluded from the composite — the UI shows "unrated" with the reason, rather than a score the data doesn't support.
 2. **Friction is never numeric.** Availability, bracelet upcharges, and thin secondary markets render as text chips and never enter a score.
-3. **Par is absolute, not relative.** A watch at exactly its band's rubric reference scores 0.5, so the split doesn't drift as you add watches. Peer groups here are small (2–4 watches), so percentile ranking only appears once a group has n ≥ 6.
+3. **Par is absolute, not relative.** A watch at the continuously interpolated rubric expectation for its exact price scores 0.5, so the split neither drifts as watches are added nor cliffs at a band edge. Peer groups here are small (2–4 watches), so percentile ranking only appears once a group has n ≥ 6.
+4. **Market evidence is never invented.** The headline tracked price is the subject of the deal comparison, not another market observation. Fewer than two independent dated asks returns `insufficient` rather than a precise-looking estimate.
 
 ---
 
@@ -68,7 +70,7 @@ Each watch (`src/lib/types.ts`):
 | `priceHistory[]` | every distinct price seen, oldest first — appended to only when the price actually moves |
 | `targetPrice` | "ping me under $X"; compared against the all-in landed price |
 | `landedPrice` | all-in cost (base + bracelet delta + shipping + duty); falls back to `price` |
-| `links[]` | retailer links, each with optional price + `new`/`pre-owned` condition |
+| `links[]` | retailer links, each with optional dated price + `new`/`pre-owned` condition; qualifying independent links provide market evidence |
 | `specs` | case diameter, thickness, lug-to-lug, lug width, material, movement, caliber, power reserve, water resistance, crystal, dial, bracelet/strap, complications |
 | `qualityFlags` | verifiable engineering details feeding the score — regulation, accuracy spec, coating hardness, antimagnetism, sapphire bezel, drilled lugs, micro-adjust clasp, quick-release, bracelet included, AR layers |
 | `friction` | availability, expected ship date, bracelet upcharge, brand liquidity — **never** folded into a score |
@@ -88,6 +90,12 @@ npm run validate:data
 ```
 
 This checks enum values, types, and **spec plausibility** (`src/lib/spec-ranges.mjs`) — it will reject a 200mm case or a lug-to-lug shorter than the diameter.
+
+To list missing and unrecognized mechanical calibers without assigning guessed tiers:
+
+```bash
+npm run audit:calibers
+```
 
 ---
 
@@ -148,7 +156,8 @@ npm run build:static && npx serve out
 ## Roadmap
 
 **Phase 2 — Price & value** *(partly done)*
-- ✅ Per-band value scoring and a value matrix
+- ✅ Continuous exact-price rubric value scoring and a value matrix
+- ✅ Condition-aware deal comparison against dated independent asking prices, with an explicit insufficient state
 - ✅ USD normalization for scoring, covering every currency the form offers — rates are a dated snapshot in `src/lib/currency-rates.mjs`, refreshed by hand (the file says how); a live rate source would remove the drift entirely
 - ✅ Price-history snapshots per watch + a target-price flag ("ping me under $X")
 - ⬜ Best-price surfacing across multiple retailer links
@@ -170,8 +179,8 @@ npm run build:static && npx serve out
 
 - **Auto-fetching specs from links:** the add form scrapes the retailer page when you paste a URL. Needs open outbound network access, so it works best on your own machine.
 - **Editing online (instead of read-only Pages):** the JSON-file store writes to disk, which works locally and on a long-running server but **not** on serverless/static hosts. For a fully editable online version, deploy to a server host (Render / Fly / a VPS) or swap `src/lib/store.ts` for a database (SQLite / Postgres / Turso) — the function signatures stay the same, so nothing else changes.
-- **Exchange rates go stale:** `src/lib/currency-rates.mjs` is a dated snapshot, not a feed. A few percent of drift can move a watch across a price band and change the rubric it's scored against. `npm run validate:data` warns once the snapshot passes `RATES_STALE_AFTER_DAYS` (90) *and* you hold something priced in a non-USD currency — it stays quiet otherwise, since drift can't affect an all-USD collection. The file documents the one-liner to refresh.
-- **Caliber coverage:** `CALIBER_TIER_PATTERNS` in `src/lib/scoring.ts` is a hand-maintained substring table. An unrecognized caliber leaves `movement` unrated rather than guessing, so adding watches from new movement families means adding entries there.
+- **Exchange rates go stale:** `src/lib/currency-rates.mjs` is a dated snapshot, not a feed. Drift changes the exact USD price used by the continuous rubric and deal comparison. `npm run validate:data` warns once the snapshot passes `RATES_STALE_AFTER_DAYS` (90) *and* you hold something priced in a non-USD currency — it stays quiet otherwise, since drift can't affect an all-USD collection. The file documents the one-liner to refresh.
+- **Caliber coverage:** `CALIBER_TIER_PATTERNS` in `src/lib/scoring.ts` is a hand-maintained substring table, with shared naming aliases in `src/lib/caliber-aliases.mjs`. An unrecognized mechanical caliber leaves `movement` unrated rather than guessing. Run `npm run audit:calibers` after adding watches; missing calibers are listed as research work, while recorded-but-unrecognized calibers fail the audit.
 
 ---
 
