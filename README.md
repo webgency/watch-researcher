@@ -42,6 +42,7 @@ The app's opinionated half. It answers "is this watch good *for its money*?" whi
 
 - **Rubric value / specification standing** (`/watch/[id]`) — five dimensions (movement, case features, wearability, durability, bracelet) scored 0–1 against a continuous expectation for the watch's exact USD-normalized price and category (diver / chronograph / GMT / dress / sports). The fixed price-band rubrics are log-price interpolation anchors; bands remain useful peer labels, but crossing an edge no longer changes the expectation abruptly.
 - **Deal vs fair asks** (`/watch/[id]`) — compares the tracked or landed ask with the median of at least two dated, independent, condition-matched retailer asks. It reports the fair range, source ages, and confidence. Thin evidence is explicitly insufficient and never produces a discount percentage. If only the other condition has enough evidence, the UI identifies that fallback instead of pooling conditions.
+- **Best dated offer** — selects the lowest USD-normalized dated retailer ask after preferring the tracked/deal condition. Detail, collection cards, and comparisons show the source, condition, age, and freshness. Undated prices never win; a fallback or unknown condition is labeled rather than assumed.
 - **Design rank** (`/design`) — your own 1–5 read on how a watch looks. Deliberately the one judgement in the app that is yours rather than calculated.
 - **Value matrix** (`/value`) — rubric value on one axis, your design rank on the other, splitting the collection into buy / aspirational / sensible / skip quadrants. Deal score remains a separate market-evidence concept.
 
@@ -51,6 +52,8 @@ Three principles hold the model together, and they're worth preserving if you ex
 2. **Friction is never numeric.** Availability, bracelet upcharges, and thin secondary markets render as text chips and never enter a score.
 3. **Par is absolute, not relative.** A watch at the continuously interpolated rubric expectation for its exact price scores 0.5, so the split neither drifts as watches are added nor cliffs at a band edge. Peer groups here are small (2–4 watches), so percentile ranking only appears once a group has n ≥ 6.
 4. **Market evidence is never invented.** The headline tracked price is the subject of the deal comparison, not another market observation. Fewer than two independent dated asks returns `insufficient` rather than a precise-looking estimate.
+
+Offer freshness is based on whole days since `observedAt`: **fresh** ≤7 days, **aging** 8–30, **stale** 31–90, and **expired** >90. A market median takes the tier of its oldest included observation so aging evidence cannot hide behind one recent source. Best-offer target cues compare the listed retailer price only; per-offer shipping and duty are not stored, so the UI never attributes the watch-level `landedPrice` to a retailer without provenance.
 
 ---
 
@@ -160,7 +163,7 @@ npm run build:static && npx serve out
 - ✅ Condition-aware deal comparison against dated independent asking prices, with an explicit insufficient state
 - ✅ USD normalization for scoring, covering every currency the form offers — rates are a dated snapshot in `src/lib/currency-rates.mjs`, refreshed by hand (the file says how); a live rate source would remove the drift entirely
 - ✅ Price-history snapshots per watch + a target-price flag ("ping me under $X")
-- ⬜ Best-price surfacing across multiple retailer links
+- ✅ Best dated offer across retailer links, with condition fallback, freshness, and target-price cues
 - ⬜ Actual notification when a target is met — today the collection view flags it, but nothing pushes
 
 **Phase 3 — Collection management**

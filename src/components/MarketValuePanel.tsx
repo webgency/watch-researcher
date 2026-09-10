@@ -1,6 +1,16 @@
-import { formatMoney } from "@/lib/format";
+import { formatAgeDays, formatMoney } from "@/lib/format";
 import { Watch } from "@/lib/types";
-import { dealScore, DealScore, marketValueSummary, MarketValueSummary } from "@/lib/valuation";
+import {
+  bestOffer,
+  BestOffer,
+  bestOfferTargetStatus,
+  BestOfferTargetStatus,
+  dealScore,
+  DealScore,
+  marketValueSummary,
+  MarketValueSummary,
+} from "@/lib/valuation";
+import FreshnessBadge from "./FreshnessBadge";
 
 const CONFIDENCE_STYLE = {
   insufficient: "bg-slate-100 text-slate-600",
@@ -13,11 +23,14 @@ function ConditionSummary({ summary }: { summary: MarketValueSummary }) {
   const label = summary.condition === "new" ? "New" : "Pre-owned";
   return (
     <div className="rounded-lg border border-slate-200 p-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="font-semibold text-slate-900">{label}</h3>
-        <span className={`rounded-full px-2 py-1 text-xs font-semibold capitalize ${CONFIDENCE_STYLE[summary.confidence]}`}>
-          {summary.confidence === "insufficient" ? "Needs more data" : `${summary.confidence} confidence`}
-        </span>
+        <div className="flex flex-wrap gap-1">
+          <span className={`rounded-full px-2 py-1 text-xs font-semibold capitalize ${CONFIDENCE_STYLE[summary.confidence]}`}>
+            {summary.confidence === "insufficient" ? "Needs more data" : `${summary.confidence} confidence`}
+          </span>
+          {summary.freshness && <FreshnessBadge tier={summary.freshness} />}
+        </div>
       </div>
 
       {summary.medianUsd === undefined ? (
@@ -31,7 +44,14 @@ function ConditionSummary({ summary }: { summary: MarketValueSummary }) {
           <p className="text-xs text-slate-500">
             Median asking price · range {formatMoney({ amount: summary.lowUsd!, currency: "USD" })}–{formatMoney({ amount: summary.highUsd!, currency: "USD" })}
           </p>
-          <p className="mt-2 text-xs text-slate-400">Based on {summary.observations.length} independent, condition-matched sources</p>
+          <p className="mt-2 text-xs text-slate-400">
+            {summary.observations.length} independent, condition-matched sources · {ageSummary(summary.observations.map((item) => item.ageDays))}
+          </p>
+          {(summary.freshness === "stale" || summary.freshness === "expired") && (
+            <p className="mt-2 text-xs font-medium text-amber-800">
+              This median includes {summary.freshness} evidence; refresh the retailer asks before relying on it.
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -40,8 +60,65 @@ function ConditionSummary({ summary }: { summary: MarketValueSummary }) {
 
 function ageSummary(ages: number[]): string {
   if (!ages.length) return "No dated observations";
-  if (ages.length === 1) return `${ages[0]} days old`;
-  return `Newest ${ages[0]}d · oldest ${ages[ages.length - 1]}d`;
+  const sorted = [...ages].sort((a, b) => a - b);
+  if (sorted.length === 1) return formatAgeDays(sorted[0]);
+  return `newest ${formatAgeDays(sorted[0])} · oldest ${formatAgeDays(sorted[sorted.length - 1])}`;
+}
+
+function BestOfferSummary({ result, target }: { result: BestOffer; target?: BestOfferTargetStatus }) {
+  if (result.status === "insufficient") {
+    return (
+      <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+        <h3 className="font-semibold text-slate-900">No dated offers</h3>
+        <p className="mt-1 text-sm text-slate-600">
+          Add a retailer price with an observation date before ranking a best offer.
+        </p>
+        {result.undatedOfferCount > 0 && (
+          <p className="mt-1 text-xs text-slate-400">
+            {result.undatedOfferCount} undated priced link{result.undatedOfferCount === 1 ? " is" : "s are"} excluded from ranking.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  const { offer } = result;
+  const condition = offer.condition ?? "condition unknown";
+  return (
+    <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Best dated offer</p>
+          <p className="mt-1 text-2xl font-bold text-slate-900">{formatMoney(offer.price)}</p>
+          <a href={offer.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-700 hover:underline">
+            {offer.source} ↗
+          </a>
+        </div>
+        <FreshnessBadge tier={offer.freshness} ageDays={offer.ageDays} compact />
+      </div>
+      <p className="mt-2 text-xs capitalize text-slate-500">{condition}</p>
+      {result.conditionMatch === "fallback" && (
+        <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
+          No dated {result.preferredCondition} offer was available, so this uses a {offer.condition} offer instead.
+        </p>
+      )}
+      {result.conditionMatch === "unknown" && (
+        <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
+          No dated {result.preferredCondition} offer was available; this retailer did not record a condition.
+        </p>
+      )}
+      {target?.met && (
+        <p className="mt-2 rounded bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">
+          Best listed offer is at target; shipping and duty are not recorded for this offer.
+        </p>
+      )}
+      {result.undatedOfferCount > 0 && (
+        <p className="mt-2 text-xs text-slate-400">
+          {result.undatedOfferCount} additional undated price{result.undatedOfferCount === 1 ? "" : "s"} excluded from ranking.
+        </p>
+      )}
+    </div>
+  );
 }
 
 function DealSummary({ deal }: { deal: DealScore }) {
@@ -79,9 +156,12 @@ function DealSummary({ deal }: { deal: DealScore }) {
           <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Deal vs fair asks</p>
           <p className="mt-1 text-2xl font-bold text-slate-900">{verdict}</p>
         </div>
-        <span className={`rounded-full px-2 py-1 text-xs font-semibold capitalize ${CONFIDENCE_STYLE[deal.confidence]}`}>
-          {deal.confidence} confidence
-        </span>
+        <div className="flex flex-wrap gap-1">
+          <span className={`rounded-full px-2 py-1 text-xs font-semibold capitalize ${CONFIDENCE_STYLE[deal.confidence]}`}>
+            {deal.confidence} confidence
+          </span>
+          {deal.freshness && <FreshnessBadge tier={deal.freshness} />}
+        </div>
       </div>
       <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
         <p>
@@ -102,6 +182,11 @@ function DealSummary({ deal }: { deal: DealScore }) {
           Matching {deal.preferredCondition} evidence was insufficient, so this comparison uses {condition} asks instead.
         </p>
       )}
+      {(deal.freshness === "stale" || deal.freshness === "expired") && (
+        <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
+          The fair-ask comparison includes {deal.freshness} evidence; refresh sources before treating the percentage as current.
+        </p>
+      )}
     </div>
   );
 }
@@ -109,15 +194,18 @@ function DealSummary({ deal }: { deal: DealScore }) {
 export default function MarketValuePanel({ watch }: { watch: Watch }) {
   const summaries = [marketValueSummary(watch, "new"), marketValueSummary(watch, "pre-owned")];
   const deal = dealScore(watch);
+  const offer = bestOffer(watch);
+  const offerTarget = bestOfferTargetStatus(watch, offer);
   return (
     <section className="card p-5">
       <div className="mb-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Deal and market evidence</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Best offer, deal and market evidence</h2>
         <p className="mt-1 text-sm text-slate-500">
           The deal comparison uses independent asking prices and is distinct from rubric value based on specifications.
         </p>
       </div>
-      <DealSummary deal={deal} />
+      <BestOfferSummary result={offer} target={offerTarget} />
+      <div className="mt-3"><DealSummary deal={deal} /></div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {summaries.map((summary) => <ConditionSummary key={summary.condition} summary={summary} />)}
       </div>
