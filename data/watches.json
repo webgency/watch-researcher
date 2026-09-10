@@ -13,7 +13,7 @@
       "amount": 7100,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:05.776Z",
+    "priceUpdatedAt": "2026-09-10T21:29:41.432Z",
     "qualityFlags": {
       "antimagneticAm": 1200000,
       "sapphireBezelInsert": false,
@@ -23,7 +23,12 @@
       {
         "url": "https://www.omegawatches.com/en-us/watch-omega-seamaster-diver-300m-co-axial-master-chronometer-42-mm-21030422003003",
         "retailer": "omegawatches.com",
-        "condition": "new"
+        "condition": "new",
+        "price": {
+          "amount": 7100,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:40.898Z"
       }
     ],
     "imageUrl": "https://img.chrono24.com/images/uhren/mzvkgpu91xkq-8j7fajs0uwzizuh3vs6y9vr5-ExtraLarge.jpg",
@@ -106,7 +111,7 @@
       "amount": 1020,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:06.968Z",
+    "priceUpdatedAt": "2026-09-10T21:29:42.447Z",
     "priceHistory": [
       {
         "price": {
@@ -132,7 +137,13 @@
     "links": [
       {
         "url": "https://dennisonwatch.com/products/malachite-green-sunray-in-gold?variant=51048191295790",
-        "retailer": "dennisonwatch.com"
+        "retailer": "dennisonwatch.com",
+        "price": {
+          "amount": 1020,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:42.016Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0888/4918/7118/files/ALD-DT01-G-ELBK-R-GBKL.jpg?v=1756878544",
@@ -209,7 +220,7 @@
       "amount": 1640,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:08.679Z",
+    "priceUpdatedAt": "2026-09-10T21:29:44.037Z",
     "priceHistory": [
       {
         "price": {
@@ -236,7 +247,13 @@
     "links": [
       {
         "url": "https://www.christopherward.com/int/C60-Sapphire-Edge/C60-42ADA31S0KW3-B0.html",
-        "retailer": "christopherward.com"
+        "retailer": "christopherward.com",
+        "price": {
+          "amount": 1640,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:43.015Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.christopherward.com/dw/image/v2/BDWD_PRD/on/demandware.static/-/Sites-cw-master-catalog/default/dw2e263a46/images/WATCHES/C60-42ADA31-S0KW3-B0/C60-42ADA31-S0KW3-B0_Picture_1.jpg",
@@ -269,17 +286,23 @@
     "designPreferenceElo": 1000,
     "designComparisonCount": 6,
     "price": {
-      "amount": 850,
+      "amount": 1810,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-06-23T03:23:35.877Z",
+    "priceUpdatedAt": "2026-09-10T21:29:44.286Z",
     "qualityFlags": {
       "braceletIncluded": false
     },
     "links": [
       {
         "url": "https://echoneutra.com/collections/rivanera",
-        "retailer": "echoneutra.com"
+        "retailer": "echoneutra.com",
+        "price": {
+          "amount": 1810,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:44.037Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://echoneutra.com/cdn/shop/collections/Rivanera-cover.jpg?v=1763739166",
@@ -300,7 +323,25 @@
     ],
     "notes": "Collection link — pick the exact variant.",
     "id": "w07",
-    "dateAdded": "2026-06-22T15:26:00Z"
+    "dateAdded": "2026-06-22T15:26:00Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 850,
+          "currency": "USD"
+        },
+        "date": "2026-06-23T03:23:35.877Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 1810,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T21:29:44.286Z",
+        "source": "scrape"
+      }
+    ]
   },
   {
     "brand": "Furlan Marri",
@@ -324,7 +365,13 @@
     "links": [
       {
         "url": "https://www.furlanmarri.com/products/white-sector-2161-a",
-        "retailer": "furlanmarri.com"
+        "retailer": "furlanmarri.com",
+        "price": {
+          "amount": 1250,
+          "currency": "CHF"
+        },
+        "observedAt": "2026-09-10T21:29:44.286Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0558/4024/3844/files/Blue_Sector_Header_6e779320-f31c-41a5-a8d9-4ba874c03a6a.png?v=1762271062",
@@ -357,10 +404,10 @@
     "designPreferenceElo": 1000.66,
     "designComparisonCount": 6,
     "price": {
-      "amount": 1680,
+      "amount": 1695,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:10.869Z",
+    "priceUpdatedAt": "2026-09-10T21:29:45.814Z",
     "priceHistory": [
       {
         "price": {
@@ -377,6 +424,14 @@
         },
         "date": "2026-08-14T04:46:10.869Z",
         "source": "scrape"
+      },
+      {
+        "price": {
+          "amount": 1695,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:01.470Z",
+        "source": "scrape"
       }
     ],
     "qualityFlags": {
@@ -388,7 +443,13 @@
     "links": [
       {
         "url": "https://beaubleu-paris.com/products/seconde-francaise-vert-imperial",
-        "retailer": "beaubleu-paris.com"
+        "retailer": "beaubleu-paris.com",
+        "price": {
+          "amount": 1695,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:44.921Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0844/2573/6468/files/SF_19.24_vert_vnoir.webp?v=1715781306",
@@ -424,7 +485,7 @@
       "amount": 1650,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:11.436Z",
+    "priceUpdatedAt": "2026-09-10T21:29:46.424Z",
     "qualityFlags": {
       "regulatedPositions": 4,
       "accuracySpecSpd": 20,
@@ -437,7 +498,13 @@
     "links": [
       {
         "url": "https://www.traskawatch.com/products/chronograph-tungsten-gray",
-        "retailer": "traskawatch.com"
+        "retailer": "traskawatch.com",
+        "price": {
+          "amount": 1650,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:45.814Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0643/5464/8287/files/Traska_Chronograph_tungsten_grey.jpg?v=1771687019",
@@ -471,10 +538,10 @@
     "designPreferenceElo": 968,
     "designComparisonCount": 6,
     "price": {
-      "amount": 2458,
+      "amount": 2450,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:11.853Z",
+    "priceUpdatedAt": "2026-09-10T21:29:47.371Z",
     "priceHistory": [
       {
         "price": {
@@ -491,6 +558,14 @@
         },
         "date": "2026-08-14T04:46:11.853Z",
         "source": "scrape"
+      },
+      {
+        "price": {
+          "amount": 2450,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:02.275Z",
+        "source": "scrape"
       }
     ],
     "qualityFlags": {
@@ -499,7 +574,13 @@
     "links": [
       {
         "url": "https://serica-watches.com/en/products/8315-2-travel-chronometer",
-        "retailer": "serica-watches.com"
+        "retailer": "serica-watches.com",
+        "price": {
+          "amount": 2450,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:46.424Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://serica-watches.com/cdn/shop/files/8315-2-3h-expediton-packshot_web_01.jpg?v=1764169327&width=1920",
@@ -535,7 +616,7 @@
       "amount": 2200,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:12.162Z",
+    "priceUpdatedAt": "2026-09-10T21:29:47.908Z",
     "qualityFlags": {
       "antimagneticAm": 4800,
       "sapphireBezelInsert": false,
@@ -545,7 +626,13 @@
     "links": [
       {
         "url": "https://www.longines.com/en-us/p/watch-hydroconquest-l3-788-4-96-6",
-        "retailer": "longines.com"
+        "retailer": "longines.com",
+        "price": {
+          "amount": 2200,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:47.371Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://api.ecom.longines.com/media/catalog/product/w/a/watch-collection-hydroconquest-l3-788-4-96-6-225bb5-hero.png",
@@ -581,14 +668,20 @@
       "amount": 3700,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:12.397Z",
+    "priceUpdatedAt": "2026-09-10T21:29:48.434Z",
     "qualityFlags": {
       "sapphireBezelInsert": false
     },
     "links": [
       {
         "url": "https://www.longines.com/en-us/p/watch-longines-spirit-chronograph-l3-820-4-93-0",
-        "retailer": "longines.com"
+        "retailer": "longines.com",
+        "price": {
+          "amount": 3700,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:47.908Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://api.ecom.longines.com/media/catalog/product/w/a/watch-collection-longines-spirit-chronograph-l3-820-4-93-0-8c1449-hero.png",
@@ -610,81 +703,6 @@
     "dateAdded": "2026-06-22T15:20:00Z"
   },
   {
-    "brand": "Omega",
-    "model": "Seamaster Diver 300M — Blue",
-    "referenceNumber": "210.32.42.20.03.001",
-    "status": "wishlist",
-    "wishlistTier": "love-it",
-    "designUniqueness": 3,
-    "designPreferenceElo": 1058.18,
-    "designComparisonCount": 6,
-    "price": {
-      "amount": 7100,
-      "currency": "USD"
-    },
-    "priceUpdatedAt": "2026-09-05T17:37:45.716Z",
-    "priceHistory": [
-      {
-        "price": {
-          "amount": 4700,
-          "currency": "USD"
-        },
-        "date": "2026-06-23T03:08:16.990Z",
-        "source": "manual"
-      },
-      {
-        "price": {
-          "amount": 3650,
-          "currency": "USD"
-        },
-        "date": "2026-08-14T04:46:12.707Z",
-        "source": "scrape"
-      },
-      {
-        "price": {
-          "amount": 7100,
-          "currency": "USD"
-        },
-        "date": "2026-09-05T17:37:45.716Z",
-        "source": "manual"
-      }
-    ],
-    "qualityFlags": {
-      "accuracySpecSpd": 5,
-      "antimagneticAm": 1200000,
-      "sapphireBezelInsert": false,
-      "braceletIncluded": false
-    },
-    "links": [
-      {
-        "url": "https://www.omegawatches.com/en-us/watch-omega-seamaster-diver-300m-co-axial-master-chronometer-42-mm-21030422003003",
-        "retailer": "omegawatches.com",
-        "condition": "new"
-      }
-    ],
-    "imageUrl": "https://www.watchfinder.com/media/catalog/product/W/a/Watch-1-Omega-SeamasterDiver300m-210_32_42_20_03_001-429028-260619-140235488.jpg",
-    "specs": {
-      "caseDiameterMm": 42,
-      "caseThicknessMm": 13.49,
-      "lugToLugMm": 49.9,
-      "lugWidthMm": 20,
-      "caseMaterial": "Stainless steel",
-      "movement": "automatic",
-      "caliber": "Co-Axial Master Chronometer 8800",
-      "powerReserveHours": 55,
-      "waterResistanceM": 300,
-      "crystal": "Sapphire",
-      "dialColor": "Blue",
-      "braceletStrap": "Rubber strap",
-      "complications": "date"
-    },
-    "tags": [
-      "diver"
-    ],
-    "id": "w14",
-    "dateAdded": "2026-06-22T15:19:00Z"
-  },
-  {
     "brand": "Raymond Weil",
     "model": "Freelancer GMT Worldtimer — Green",
     "status": "wishlist",
@@ -696,7 +714,7 @@
       "amount": 3495,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:13.769Z",
+    "priceUpdatedAt": "2026-09-10T21:29:49.157Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "braceletIncluded": false
@@ -704,7 +722,13 @@
     "links": [
       {
         "url": "https://www.raymond-weil.com/en-us/products/freelancer-mens-gmt-worldtimer-green-leather-watch-41mm",
-        "retailer": "raymond-weil.com"
+        "retailer": "raymond-weil.com",
+        "price": {
+          "amount": 3495,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:48.434Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.raymond-weil.com/cdn/shop/files/RW_FREELANCER_2765-SBC-52001_FRONT_WEB.png?v=1755000750&width=1920",
@@ -791,7 +815,7 @@
       "amount": 278,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:14.967Z",
+    "priceUpdatedAt": "2026-09-10T21:29:50.585Z",
     "qualityFlags": {
       "accuracySpecSpd": 40,
       "braceletIncluded": false,
@@ -800,7 +824,13 @@
     "links": [
       {
         "url": "https://sheffieldwatches.com/products/1a-scr-ii-blue?variant=53248824705324",
-        "retailer": "sheffieldwatches.com"
+        "retailer": "sheffieldwatches.com",
+        "price": {
+          "amount": 278,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:49.897Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0771/3174/3532/files/2026-05-23_13-42-03_B_R8_S4_B.png?v=1779983994",
@@ -835,7 +865,7 @@
       "amount": 2750,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:15.669Z",
+    "priceUpdatedAt": "2026-09-10T21:29:51.109Z",
     "qualityFlags": {
       "accuracySpecSpd": 5,
       "sapphireBezelInsert": false,
@@ -847,7 +877,13 @@
     "links": [
       {
         "url": "https://lorcawatches.com/products/model-no-2-chronograph?variant=45434209108203",
-        "retailer": "lorcawatches.com"
+        "retailer": "lorcawatches.com",
+        "price": {
+          "amount": 2750,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:50.585Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0661/9493/1947/files/Model_No.2___Chronograph_Golden_Gray.jpg?v=1726845666",
@@ -882,14 +918,20 @@
       "amount": 999,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:16.329Z",
+    "priceUpdatedAt": "2026-09-10T21:29:51.874Z",
     "qualityFlags": {
       "arCoated": true
     },
     "links": [
       {
         "url": "https://santurcecollection.store/products/el-submarino-azul",
-        "retailer": "santurcecollection.store"
+        "retailer": "santurcecollection.store",
+        "price": {
+          "amount": 999,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:51.109Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0750/1375/1024/files/El_submarino_azul.png?v=1781101662",
@@ -921,14 +963,20 @@
       "amount": 375,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:16.570Z",
+    "priceUpdatedAt": "2026-09-10T21:29:52.430Z",
     "qualityFlags": {
       "quickRelease": true
     },
     "links": [
       {
         "url": "https://www.brew-watches.com/collections/retrograph/products/retrograph-brew-rosegold-espresso-chocolate",
-        "retailer": "brew-watches.com"
+        "retailer": "brew-watches.com",
+        "price": {
+          "amount": 375,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:51.874Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.brew-watches.com/cdn/shop/files/BREWRETROGRAPHFRONTESPRESSODIAL-SD_450x450.jpg?v=1700672997",
@@ -964,7 +1012,7 @@
       "amount": 758,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:16.758Z",
+    "priceUpdatedAt": "2026-09-10T21:29:52.570Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "braceletIncluded": false,
@@ -973,7 +1021,13 @@
     "links": [
       {
         "url": "https://magrette.com/shop/moana-pacific-professional-titanium-2?in=155914174544",
-        "retailer": "magrette.com"
+        "retailer": "magrette.com",
+        "price": {
+          "amount": 758,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:52.430Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/1833/5921/products/magrette_mpp-blue-dial-4.jpg?v=1585500305",
@@ -1010,7 +1064,7 @@
       "amount": 3495,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:17.249Z",
+    "priceUpdatedAt": "2026-09-10T21:29:53.322Z",
     "qualityFlags": {
       "microAdjustClasp": false,
       "braceletIncluded": false
@@ -1018,7 +1072,13 @@
     "links": [
       {
         "url": "https://massenalab.com/products/uni-racer-white",
-        "retailer": "massenalab.com"
+        "retailer": "massenalab.com",
+        "price": {
+          "amount": 3495,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:52.570Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0585/2849/7851/products/Massena-LAB-Uni-Racer-White-Front-image-web-size.jpg?v=1626289939",
@@ -1051,10 +1111,10 @@
     "designPreferenceElo": 966.67,
     "designComparisonCount": 6,
     "price": {
-      "amount": 429,
+      "amount": 435,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:17.587Z",
+    "priceUpdatedAt": "2026-09-10T21:29:53.763Z",
     "priceHistory": [
       {
         "price": {
@@ -1071,6 +1131,14 @@
         },
         "date": "2026-08-14T04:46:17.587Z",
         "source": "scrape"
+      },
+      {
+        "price": {
+          "amount": 435,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:08.754Z",
+        "source": "scrape"
       }
     ],
     "qualityFlags": {
@@ -1081,7 +1149,13 @@
     "links": [
       {
         "url": "https://www.melbournewatch.com.au/products/fitzroy-auto-brown",
-        "retailer": "melbournewatch.com.au"
+        "retailer": "melbournewatch.com.au",
+        "price": {
+          "amount": 435,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:53.322Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.melbournewatch.com.au/cdn/shop/files/WEB_FitzroyHeroBrown-Old.jpg?v=1726639356&width=800",
@@ -1119,7 +1193,7 @@
       "amount": 375,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:18.897Z",
+    "priceUpdatedAt": "2026-09-10T21:29:54.259Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "microAdjustClasp": false,
@@ -1128,7 +1202,13 @@
     "links": [
       {
         "url": "https://spinnaker-watches.com/products/hull-arctic-blue-sp-5088-02",
-        "retailer": "spinnaker-watches.com"
+        "retailer": "spinnaker-watches.com",
+        "price": {
+          "amount": 375,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:53.763Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0573/7569/files/SP-5088-02-Q.png?v=1717476802",
@@ -1162,7 +1242,7 @@
       "amount": 1999,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:19.280Z",
+    "priceUpdatedAt": "2026-09-10T21:29:54.627Z",
     "qualityFlags": {
       "microAdjustClasp": true,
       "braceletIncluded": true
@@ -1170,7 +1250,13 @@
     "links": [
       {
         "url": "https://zeloswatches.com/products/comet-39-vulcan",
-        "retailer": "zeloswatches.com"
+        "retailer": "zeloswatches.com",
+        "price": {
+          "amount": 1999,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:29:54.259Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0387/4989/files/5A_v2.jpg?v=1761230249",
@@ -1216,7 +1302,13 @@
     "links": [
       {
         "url": "https://williamwoodwatches.com/en-us/products/heatedition?variant=43831723917561",
-        "retailer": "williamwoodwatches.com"
+        "retailer": "williamwoodwatches.com",
+        "price": {
+          "amount": 2525,
+          "currency": "GBP"
+        },
+        "observedAt": "2026-09-10T21:29:54.628Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/Triumph_Red_Orange_Strap_Front.png?v=1757633137&width=1920",
@@ -1262,7 +1354,13 @@
     "links": [
       {
         "url": "https://williamwoodwatches.com/en-us/products/theredwatch",
-        "retailer": "williamwoodwatches.com"
+        "retailer": "williamwoodwatches.com",
+        "price": {
+          "amount": 820,
+          "currency": "GBP"
+        },
+        "observedAt": "2026-09-10T21:29:55.058Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://williamwoodwatches.com/cdn/shop/files/ValiantRedFront-min_829eda8d-346b-4965-9158-572fdffac07a.png?v=1683571549&width=1920",
@@ -1308,7 +1406,13 @@
     "links": [
       {
         "url": "https://baltic-watches.com/en/products/heures-du-monde-worldtimer-tiger-eye",
-        "retailer": "baltic-watches.com"
+        "retailer": "baltic-watches.com",
+        "price": {
+          "amount": 1300,
+          "currency": "EUR"
+        },
+        "observedAt": "2026-09-10T21:29:55.322Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.baltic-watches.com/f/73554/2657x3543/7e7a1975c8/heure-du-monde-closeup-face-oeil-de-tigre.jpg?width=1920",
@@ -1355,7 +1459,13 @@
     "links": [
       {
         "url": "https://baltic-watches.com/en/products/scalegraph-classic-panda",
-        "retailer": "baltic-watches.com"
+        "retailer": "baltic-watches.com",
+        "price": {
+          "amount": 1585,
+          "currency": "EUR"
+        },
+        "observedAt": "2026-09-10T21:29:56.079Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.baltic-watches.com/f/73554/2000x2000/0e9f21ce7e/tricompax-panda-zoom.jpg?width=1080",
@@ -1438,7 +1548,7 @@
       "amount": 850,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:22.599Z",
+    "priceUpdatedAt": "2026-09-10T21:29:59.424Z",
     "qualityFlags": {
       "arLayers": 1,
       "sapphireBezelInsert": false,
@@ -1453,7 +1563,9 @@
         "price": {
           "amount": 850,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:29:58.349Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dwc5be96fe/product-pictures/d0874d32-cd20-485d-a326-81c78afd70d1_T165-807-11-091-00_shadow.png?sm=fit&sw=1680&sh=1680,gravity=center",
@@ -1500,9 +1612,11 @@
         "url": "https://laventure.swiss/en/the-watches/transatlantique-ii-gmt-collection/laventure-transatlantique-ii-gmt-steel-black",
         "retailer": "laventure.swiss",
         "price": {
-          "amount": 5168,
-          "currency": "USD"
-        }
+          "amount": 4200,
+          "currency": "CHF"
+        },
+        "observedAt": "2026-09-10T21:29:59.425Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://arlingtonwatchworks.com/cdn/shop/files/DSC_0032_49565026-2e97-41fb-a808-9b054d843753.jpg",
@@ -1535,7 +1649,7 @@
       "amount": 899,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:24.183Z",
+    "priceUpdatedAt": "2026-09-10T21:30:01.322Z",
     "priceHistory": [
       {
         "price": {
@@ -1555,7 +1669,13 @@
     "links": [
       {
         "url": "https://www.traffordwatchco.com/products/touring-gmt-lefty",
-        "retailer": "traffordwatchco.com"
+        "retailer": "traffordwatchco.com",
+        "price": {
+          "amount": 899,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:30:00.637Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.prod.website-files.com/6702f7eacc80ac9600304e88/6a1dfac56ed6f4debed17892_TWC_TouringGMT2_Lefty_3c9a4875-adfe-495b-9316-a2a1eba0c736.avif",
@@ -1601,9 +1721,11 @@
         "url": "https://albishorn-watches.ch/en/collections/water-collection/maxigraph",
         "retailer": "albishorn-watches.ch",
         "price": {
-          "amount": 6762,
-          "currency": "USD"
-        }
+          "amount": 5495,
+          "currency": "CHF"
+        },
+        "observedAt": "2026-09-10T21:30:01.322Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://albishorn-watches.ch/content/4b12aa5b51d6e6cb57ca0e34dcb800e1/alb-maxigraph-face-rouge.png",
@@ -1636,10 +1758,10 @@
     "designPreferenceElo": 968.07,
     "designComparisonCount": 6,
     "price": {
-      "amount": 316,
+      "amount": 395,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-09-05T17:56:56.078Z",
+    "priceUpdatedAt": "2026-09-10T21:30:02.899Z",
     "priceHistory": [
       {
         "price": {
@@ -1664,6 +1786,14 @@
         },
         "date": "2026-09-05T17:56:56.078Z",
         "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 395,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:18.302Z",
+        "source": "scrape"
       }
     ],
     "qualityFlags": {
@@ -1677,10 +1807,11 @@
         "url": "https://mreatwell.com/shop/submeloner",
         "retailer": "mreatwell.com",
         "price": {
-          "amount": 316,
+          "amount": 395,
           "currency": "USD"
         },
-        "observedAt": "2026-09-05"
+        "observedAt": "2026-09-10T21:30:02.599Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0408/7837/5065/files/2026.03.21_submeloner_jubilee_blackslate_bg.jpg?v=1774210554",
@@ -1723,9 +1854,11 @@
         "url": "https://outoforderwatches.com/products/forma-venti-aurum?utm_source=googleads&utm_medium=search&utm_id=paid+ads&utm_content=HG&gad_source=1&gad_campaignid=20642507036&gbraid=0AAAAABvFOdnczvWNQ-PRHtYxqny_uLWxv&gclid=EAIaIQobChMIis-ErOWilQMVU5taBR1MZjZNEAAYASAAEgIRu_D_BwE",
         "retailer": "outoforderwatches.com",
         "price": {
-          "amount": 910,
-          "currency": "USD"
-        }
+          "amount": 780,
+          "currency": "EUR"
+        },
+        "observedAt": "2026-09-10T21:30:02.899Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://outoforderwatches.com/cdn/shop/files/ooo_forma_Aurum_Noir_Frontale_-_out_of_order.png?v=1781192482&width=1920",
@@ -1757,10 +1890,10 @@
     "designPreferenceElo": 984,
     "designComparisonCount": 7,
     "price": {
-      "amount": 415,
+      "amount": 395,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:26.499Z",
+    "priceUpdatedAt": "2026-09-10T21:30:05.164Z",
     "priceHistory": [
       {
         "price": {
@@ -1777,12 +1910,26 @@
         },
         "date": "2026-08-14T04:46:26.499Z",
         "source": "scrape"
+      },
+      {
+        "price": {
+          "amount": 395,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:18.743Z",
+        "source": "scrape"
       }
     ],
     "links": [
       {
         "url": "https://mreatwell.com/shop/sublime",
-        "retailer": "mreatwell.com"
+        "retailer": "mreatwell.com",
+        "price": {
+          "amount": 395,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:30:05.046Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://mreatwell.com/_next/image?url=https%3A%2F%2Fcdn.shopify.com%2Fs%2Ffiles%2F1%2F0408%2F7837%2F5065%2Ffiles%2F2025.06.20SubLimeOverheadJubileeOnCounter_258cf200-6ef9-4e38-86b3-dc2aa91a595a.png%3Fv%3D1773428909&w=2048&q=75&dpl=dpl_AEnoZeYhMXjFcyygDcXaHQo3ntpb",
@@ -1813,7 +1960,7 @@
       "amount": 495,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:26.741Z",
+    "priceUpdatedAt": "2026-09-10T21:30:05.641Z",
     "qualityFlags": {
       "braceletIncluded": false
     },
@@ -1824,7 +1971,9 @@
         "price": {
           "amount": 495,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:05.164Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://depancel.com/cdn/shop/files/allure-mono-eye-green-face-rubber.jpg?v=1775722343&width=1024",
@@ -1905,7 +2054,7 @@
       "amount": 2490,
       "currency": "EUR"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:27.855Z",
+    "priceUpdatedAt": "2026-09-10T21:30:06.939Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "microAdjustClasp": false,
@@ -1919,7 +2068,8 @@
         "price": {
           "amount": 2490,
           "currency": "EUR"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:06.189Z"
       }
     ],
     "imageUrl": "https://awakewatches.com/cdn/shop/files/SonMai2-JURASSICWATCHgreenWebproduit.jpg?v=1744735759&width=1920",
@@ -1954,7 +2104,7 @@
       "amount": 2095,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:28.214Z",
+    "priceUpdatedAt": "2026-09-10T21:30:07.608Z",
     "qualityFlags": {
       "arLayers": 7,
       "sapphireBezelInsert": false,
@@ -1968,7 +2118,8 @@
         "price": {
           "amount": 2095,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:06.939Z"
       }
     ],
     "imageUrl": "https://usd.farer.com/cdn/shop/files/VOLANTE-RUBBER_0ecde3e2-0b1a-46f3-b31a-65005f9833b8.png?v=1782478304&width=2048",
@@ -2003,7 +2154,7 @@
       "amount": 800,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:28.818Z",
+    "priceUpdatedAt": "2026-09-10T21:30:07.961Z",
     "qualityFlags": {
       "regulatedPositions": 3,
       "accuracySpecSpd": 15,
@@ -2018,7 +2169,7 @@
           "currency": "USD"
         },
         "condition": "new",
-        "observedAt": "2026-09-05"
+        "observedAt": "2026-09-10T21:30:07.608Z"
       }
     ],
     "imageUrl": "https://underd0g.com/cdn/shop/files/01MCBR_Product_Card_52168231-a0b0-4495-9049-ce5e2e103119.png?v=1783351280",
@@ -2057,7 +2208,7 @@
       "amount": 889,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:29.212Z",
+    "priceUpdatedAt": "2026-09-10T21:30:08.302Z",
     "qualityFlags": {
       "accuracySpecSpd": 30,
       "microAdjustClasp": true,
@@ -2071,7 +2222,8 @@
         "price": {
           "amount": 889,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:07.961Z"
       }
     ],
     "imageUrl": "https://static.wixstatic.com/media/0820ab_9ab36cb39a6e4065ac6b673f9b1d2f60~mv2.png/v1/fill/w_996,h_996,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/0820ab_9ab36cb39a6e4065ac6b673f9b1d2f60~mv2.png",
@@ -2105,7 +2257,7 @@
       "amount": 589,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:29.765Z",
+    "priceUpdatedAt": "2026-09-10T21:30:09.065Z",
     "qualityFlags": {
       "quickRelease": true,
       "braceletIncluded": false
@@ -2117,7 +2269,9 @@
         "price": {
           "amount": 589,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:08.302Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://olto-8.com/cdn/shop/files/20251212-113438_1024x1024.jpg?v=1771142927",
@@ -2150,7 +2304,7 @@
       "amount": 1495,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:30.261Z",
+    "priceUpdatedAt": "2026-09-10T21:30:09.499Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "braceletIncluded": false
@@ -2162,7 +2316,9 @@
         "price": {
           "amount": 1495,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:09.065Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://us.venezianico.com/cdn/shop/files/1_3b6e106b-fea3-4ff9-9408-e43fb5494aee.png?v=1744730988",
@@ -2209,7 +2365,9 @@
         "price": {
           "amount": 258000,
           "currency": "JPY"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:09.499Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://en.knot-designs.com/cdn/shop/files/ATC-40SVJRBL-R_01.webp?v=1779845955&width=1920",
@@ -2244,7 +2402,7 @@
       "amount": 499,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:31.951Z",
+    "priceUpdatedAt": "2026-09-10T21:30:11.324Z",
     "qualityFlags": {
       "arLayers": 3,
       "sapphireBezelInsert": false,
@@ -2258,7 +2416,9 @@
         "price": {
           "amount": 499,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:10.094Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn11.bigcommerce.com/s-i3bu0g146r/images/stencil/1280x1280/products/448/3839/PY057B_1__04223.1738913513.jpg?c=2",
@@ -2292,10 +2452,10 @@
     "designPreferenceElo": 968,
     "designComparisonCount": 6,
     "price": {
-      "amount": 1870,
+      "amount": 1850,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:32.685Z",
+    "priceUpdatedAt": "2026-09-10T21:30:12.062Z",
     "priceHistory": [
       {
         "price": {
@@ -2312,6 +2472,14 @@
         },
         "date": "2026-08-14T04:46:32.685Z",
         "source": "scrape"
+      },
+      {
+        "price": {
+          "amount": 1850,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:25.278Z",
+        "source": "scrape"
       }
     ],
     "qualityFlags": {
@@ -2325,9 +2493,11 @@
         "url": "https://serica-watches.com/en/products/5303-2-diving-chronometer",
         "retailer": "serica-watches.com",
         "price": {
-          "amount": 1848,
+          "amount": 1850,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:11.324Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://serica-watches.com/cdn/shop/files/5303-white-3h-packshot-01.jpg?v=1754553586&width=1920",
@@ -2363,7 +2533,7 @@
       "amount": 2850,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:33.319Z",
+    "priceUpdatedAt": "2026-09-10T21:30:12.847Z",
     "priceHistory": [
       {
         "price": {
@@ -2394,9 +2564,11 @@
         "url": "https://straum.co/products/jan-mayen-titanium-aurora-sky",
         "retailer": "straum.co",
         "price": {
-          "amount": 2500,
+          "amount": 2850,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:12.062Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://straum.co/cdn/shop/files/WATCH-JANMAYEN-CPL-02-TI5-AURORASKY-39-RUBBER-BLACK.webp?v=1775045210&width=1434",
@@ -2466,7 +2638,7 @@
     "designPreferenceElo": 1000,
     "designComparisonCount": 6,
     "price": {
-      "amount": 550,
+      "amount": 600,
       "currency": "EUR"
     },
     "qualityFlags": {
@@ -2483,7 +2655,9 @@
         "price": {
           "amount": 600,
           "currency": "EUR"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:13.364Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.baltic-watches.com/f/73554/2433x3041/57b5a3a3fe/hermetique-tourer-green-2.jpg?width=1920",
@@ -2503,7 +2677,26 @@
       "sports"
     ],
     "id": "mqzf7gp3vx1tw8",
-    "dateAdded": "2026-06-29T16:16:49.479Z"
+    "dateAdded": "2026-06-29T16:16:49.479Z",
+    "priceUpdatedAt": "2026-09-10T21:30:14.434Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 550,
+          "currency": "EUR"
+        },
+        "date": "2026-06-29T16:16:49.479Z",
+        "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 600,
+          "currency": "EUR"
+        },
+        "date": "2026-09-10T21:30:14.434Z",
+        "source": "scrape"
+      }
+    ]
   },
   {
     "brand": "Venezianico",
@@ -2518,7 +2711,7 @@
       "amount": 1150,
       "currency": "USD"
     },
-    "priceUpdatedAt": "2026-08-14T04:46:35.753Z",
+    "priceUpdatedAt": "2026-09-10T21:30:14.958Z",
     "qualityFlags": {
       "sapphireBezelInsert": false,
       "braceletIncluded": true
@@ -2531,7 +2724,8 @@
           "amount": 1150,
           "currency": "USD"
         },
-        "condition": "new"
+        "condition": "new",
+        "observedAt": "2026-09-10T21:30:14.434Z"
       }
     ],
     "imageUrl": "https://us.venezianico.com/cdn/shop/files/NereideGMT39BLU.png?v=1775137685",
@@ -2562,7 +2756,7 @@
     "designPreferenceElo": 1092.89,
     "designComparisonCount": 6,
     "price": {
-      "amount": 280,
+      "amount": 300,
       "currency": "USD"
     },
     "priceHistory": [
@@ -2573,6 +2767,14 @@
         },
         "date": "2026-08-14T05:16:22.362Z",
         "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 300,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:28.839Z",
+        "source": "scrape"
       }
     ],
     "links": [
@@ -2580,9 +2782,11 @@
         "url": "https://danhenrywatches.com/products/1962-racing-chronograph?variant=29246494638162",
         "retailer": "danhenrywatches.com",
         "price": {
-          "amount": 280,
+          "amount": 300,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:14.958Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://danhenrywatches.com/cdn/shop/files/Dan_Henry_1962_Racing_Chronograph_Blue_No_Date.png?v=1614301267&width=1946",
@@ -2604,7 +2808,8 @@
       "chronograph"
     ],
     "id": "msshvavwg41qiq",
-    "dateAdded": "2026-08-14T05:16:22.362Z"
+    "dateAdded": "2026-08-14T05:16:22.362Z",
+    "priceUpdatedAt": "2026-09-10T21:30:15.566Z"
   },
   {
     "brand": "Henry Archer",
@@ -2639,7 +2844,9 @@
         "price": {
           "amount": 847,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:15.566Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://henryarcher.com/cdn/shop/files/Tidevand-Kosmos_00003.jpg?v=1748961942&width=1080",
@@ -2662,7 +2869,8 @@
     ],
     "notes": "4 BILLION YEARS IN THE MAKING\nThe meteorite stone used on TIDEVAND METEORITE comes from the Swedish “Muonionalusta” meteorite.\n\nThe Muonionalusta meteorite was found in 1906 at the Swedish/Finnish border, near the village of “Kitkiöjärvi.”\n\nIsotope readings show that the Muonionalusta meteorite is more than 4 billion years old, and hit earth around 1 million years ago.",
     "id": "mssi4ugd8wfp1r",
-    "dateAdded": "2026-08-14T05:23:47.627Z"
+    "dateAdded": "2026-08-14T05:23:47.627Z",
+    "priceUpdatedAt": "2026-09-10T21:30:16.291Z"
   },
   {
     "brand": "BOLDR Supply Co",
@@ -2693,7 +2901,9 @@
         "price": {
           "amount": 469,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:16.292Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.boldrsupply.co/cdn/shop/files/SafariBanff_1024x1024.jpg?v=1733718957",
@@ -2714,7 +2924,8 @@
     ],
     "notes": "the Safari GMT Banff, a timepiece inspired by the breathtaking beauty of Canada's Banff National Park. Reflecting the park's vibrant hues, this SII NH34-powered watch features a captivating contrast GMT hand reminiscent of Banff's turquoise lakes against lush green landscapes. With its precision-engineered functionality, including a prominent date display at 3 o'clock",
     "id": "mssictanrac4ow",
-    "dateAdded": "2026-08-14T05:29:59.373Z"
+    "dateAdded": "2026-08-14T05:29:59.373Z",
+    "priceUpdatedAt": "2026-09-10T21:30:16.834Z"
   },
   {
     "brand": "Le Forban Sécurité Mer",
@@ -2749,7 +2960,9 @@
         "price": {
           "amount": 490,
           "currency": "EUR"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:16.834Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://leforbansecuritemer.com/wp-content/themes/leforban/img/v2/products/malouine/PACKSHOTS_COMMANDE_MALOUINE_BLEUE_2.webp",
@@ -2771,7 +2984,8 @@
       "diver"
     ],
     "id": "mssigrvtucx52n",
-    "dateAdded": "2026-08-14T05:33:04.167Z"
+    "dateAdded": "2026-08-14T05:33:04.167Z",
+    "priceUpdatedAt": "2026-09-10T21:30:18.882Z"
   },
   {
     "brand": "Naga",
@@ -2782,7 +2996,7 @@
     "designPreferenceElo": 1002.3,
     "designComparisonCount": 6,
     "price": {
-      "amount": 660,
+      "amount": 662,
       "currency": "USD"
     },
     "priceHistory": [
@@ -2793,6 +3007,14 @@
         },
         "date": "2026-08-14T12:33:19.955Z",
         "source": "manual"
+      },
+      {
+        "price": {
+          "amount": 662,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T20:53:33.329Z",
+        "source": "scrape"
       }
     ],
     "links": [
@@ -2800,9 +3022,11 @@
         "url": "https://nagawatches.com/collections/granturismo-chronograph-39/products/naga-granturismo-chronograph-39-amalfi",
         "retailer": "nagawatches.com",
         "price": {
-          "amount": 660,
+          "amount": 662,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:18.882Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://nagawatches.com/cdn/shop/files/1086525.jpg?v=1786462007&width=900",
@@ -2822,7 +3046,8 @@
       "chronograph"
     ],
     "id": "mssxh8iem1cs9b",
-    "dateAdded": "2026-08-14T12:33:19.955Z"
+    "dateAdded": "2026-08-14T12:33:19.955Z",
+    "priceUpdatedAt": "2026-09-10T21:30:19.302Z"
   },
   {
     "brand": "AV86",
@@ -2855,7 +3080,9 @@
         "price": {
           "amount": 499,
           "currency": "USD"
-        }
+        },
+        "observedAt": "2026-09-10T21:30:19.302Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://av86.com/cdn/shop/files/1956-Marine_Steel_BlueFade_003906-862404_Dark_Grey_Vintage_Leather.png?v=1773060578&width=1920",
@@ -2877,7 +3104,8 @@
       "diver"
     ],
     "id": "msszodf01pmo5l",
-    "dateAdded": "2026-08-14T13:34:52.138Z"
+    "dateAdded": "2026-08-14T13:34:52.138Z",
+    "priceUpdatedAt": "2026-09-10T21:30:20.211Z"
   },
   {
     "brand": "Spinnaker",
@@ -2915,7 +3143,8 @@
           "amount": 425,
           "currency": "USD"
         },
-        "condition": "new"
+        "condition": "new",
+        "observedAt": "2026-09-10T21:30:20.211Z"
       }
     ],
     "imageUrl": "https://spinnaker-watches.com/cdn/shop/files/SP-5177-22-Q.png?v=1782209285&width=2000",
@@ -2938,7 +3167,8 @@
       "diver"
     ],
     "id": "mtok1joku7s7dc",
-    "dateAdded": "2026-09-05T15:45:50.562Z"
+    "dateAdded": "2026-09-05T15:45:50.562Z",
+    "priceUpdatedAt": "2026-09-10T21:30:21.299Z"
   },
   {
     "brand": "Marloe Watch Company",
@@ -2971,7 +3201,8 @@
           "amount": 399,
           "currency": "GBP"
         },
-        "observedAt": "2026-09-05"
+        "observedAt": "2026-09-10T21:30:21.299Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.marloewatchcompany.com/cdn/shop/files/SCEPTRE_S2_RUST_SILICONE_BLUE.png",
@@ -2991,7 +3222,8 @@
       "sports"
     ],
     "id": "mton3fbjnuugz0",
-    "dateAdded": "2026-09-05T17:11:17.067Z"
+    "dateAdded": "2026-09-05T17:11:17.067Z",
+    "priceUpdatedAt": "2026-09-10T21:30:22.036Z"
   },
   {
     "brand": "Muehle Glashuette",
@@ -3025,7 +3257,8 @@
           "amount": 3800,
           "currency": "EUR"
         },
-        "observedAt": "2026-09-05"
+        "observedAt": "2026-09-10T21:30:22.036Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.muehle-glashuette.de/wp-content/uploads/Sportivo_Active_Chronograph_M1-52-02-LK_Freisteller.png",
@@ -3048,7 +3281,8 @@
       "chronograph"
     ],
     "id": "mtoney22pprfep",
-    "dateAdded": "2026-09-05T17:20:14.567Z"
+    "dateAdded": "2026-09-05T17:20:14.567Z",
+    "priceUpdatedAt": "2026-09-10T21:30:22.180Z"
   },
   {
     "brand": "Zelos Watches",
@@ -3079,7 +3313,8 @@
           "amount": 549,
           "currency": "USD"
         },
-        "observedAt": "2026-09-05"
+        "observedAt": "2026-09-10T21:30:22.180Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://zeloswatches.com/cdn/shop/files/2A_V6_1024x.jpg?v=1754486312",
@@ -3100,7 +3335,8 @@
       "diver"
     ],
     "id": "mtonjpnke21ikb",
-    "dateAdded": "2026-09-05T17:23:56.958Z"
+    "dateAdded": "2026-09-05T17:23:56.958Z",
+    "priceUpdatedAt": "2026-09-10T21:30:22.865Z"
   },
   {
     "brand": "Rolex",
@@ -3135,7 +3371,8 @@
           "amount": 12000,
           "currency": "USD"
         },
-        "observedAt": "2026-09-05"
+        "observedAt": "2026-09-10T21:30:22.867Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://media.rolex.com/image/upload/q_auto/f_auto/t_v7-cover-majesty-landscape/c_limit,w_1920/v1/a677b2c664f6/catalogue/2026/upright-c/m126710blnr-0002",
@@ -3155,7 +3392,8 @@
       "gmt"
     ],
     "id": "mtorls8r2gphy0",
-    "dateAdded": "2026-09-05T19:17:32.089Z"
+    "dateAdded": "2026-09-05T19:17:32.089Z",
+    "priceUpdatedAt": "2026-09-10T21:30:23.197Z"
   },
   {
     "brand": "Baltic",
@@ -3183,7 +3421,13 @@
     "links": [
       {
         "url": "https://baltic-watches.com/en/products/aquascaphe-mk2-blue?variant=58510363722112",
-        "retailer": "baltic-watches.com"
+        "retailer": "baltic-watches.com",
+        "price": {
+          "amount": 655,
+          "currency": "EUR"
+        },
+        "observedAt": "2026-09-10T21:30:23.197Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://cdn.shopify.com/s/files/1/0012/9299/2583/files/MK2_Date_39_Blue_FKM_Face_1353x2000_fa97eeac-6427-49cd-afce-9e5c216dba9a.png?v=1784706849&width=2000",
@@ -3206,7 +3450,8 @@
       "diver"
     ],
     "id": "mtorvl6lg0fc15",
-    "dateAdded": "2026-09-05T19:25:09.498Z"
+    "dateAdded": "2026-09-05T19:25:09.498Z",
+    "priceUpdatedAt": "2026-09-10T21:30:24.416Z"
   },
   {
     "brand": "Maen",
@@ -3215,7 +3460,13 @@
     "links": [
       {
         "url": "https://www.maenwatches.com/en-us/collections/hudson-38-mk5",
-        "retailer": "maenwatches.com"
+        "retailer": "maenwatches.com",
+        "price": {
+          "amount": 852,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-10T21:30:24.417Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.maenwatches.com/cdn/shop/collections/HUDSONMK5_DESKTOP.jpg?v=1768209422",
@@ -3231,7 +3482,22 @@
       "diver"
     ],
     "id": "mtrtsn3qwsgwws",
-    "dateAdded": "2026-09-07T22:42:09.778Z"
+    "dateAdded": "2026-09-07T22:42:09.778Z",
+    "price": {
+      "amount": 852,
+      "currency": "USD"
+    },
+    "priceUpdatedAt": "2026-09-10T21:30:24.653Z",
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 852,
+          "currency": "USD"
+        },
+        "date": "2026-09-10T21:30:24.653Z",
+        "source": "scrape"
+      }
+    ]
   },
   {
     "brand": "Vaer Watches",
@@ -3260,7 +3526,8 @@
           "amount": 749,
           "currency": "USD"
         },
-        "observedAt": "2026-09-07"
+        "observedAt": "2026-09-10T21:30:24.654Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.vaerwatches.com/cdn/shop/files/D5-2025-QR-BR-39_45e9bd0b-8d20-4d27-bbd4-d7c082cb5b9d.jpg?v=1756402295&width=480",
@@ -3275,7 +3542,8 @@
       "diver"
     ],
     "id": "mtrtxj2muvufxp",
-    "dateAdded": "2026-09-07T22:45:57.838Z"
+    "dateAdded": "2026-09-07T22:45:57.838Z",
+    "priceUpdatedAt": "2026-09-10T21:30:25.537Z"
   },
   {
     "brand": "Jack Mason",
@@ -3315,7 +3583,8 @@
           "amount": 1149,
           "currency": "USD"
         },
-        "observedAt": "2026-09-09"
+        "observedAt": "2026-09-10T21:30:25.537Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://jackmasonbrand.com/cdn/shop/files/JM-D303-105-1_7-Link.png?v=1759335047",
@@ -3337,7 +3606,8 @@
       "GMT"
     ],
     "id": "mttevag8jtilmy",
-    "dateAdded": "2026-09-09T01:19:51.462Z"
+    "dateAdded": "2026-09-09T01:19:51.462Z",
+    "priceUpdatedAt": "2026-09-10T21:30:26.078Z"
   },
   {
     "brand": "Vaer Watches",
@@ -3376,7 +3646,8 @@
           "amount": 729,
           "currency": "USD"
         },
-        "observedAt": "2026-09-09"
+        "observedAt": "2026-09-10T21:30:26.078Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://www.vaerwatches.com/cdn/shop/files/D5-2025-QR-BR-393.jpg?v=1756249179&width=480",
@@ -3397,7 +3668,8 @@
       "diver"
     ],
     "id": "mttf0ck7nj9e3z",
-    "dateAdded": "2026-09-09T01:23:47.479Z"
+    "dateAdded": "2026-09-09T01:23:47.479Z",
+    "priceUpdatedAt": "2026-09-10T21:30:26.321Z"
   },
   {
     "brand": "Farer",
@@ -3433,7 +3705,8 @@
           "amount": 1575,
           "currency": "USD"
         },
-        "observedAt": "2026-09-09"
+        "observedAt": "2026-09-10T21:30:26.322Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://usd.farer.com/cdn/shop/files/GREEN-MSTV-green.png?v=1779798861&width=2048",
@@ -3456,7 +3729,8 @@
       "GMT"
     ],
     "id": "mttf1yphipi49w",
-    "dateAdded": "2026-09-09T01:25:02.837Z"
+    "dateAdded": "2026-09-09T01:25:02.837Z",
+    "priceUpdatedAt": "2026-09-10T21:30:26.884Z"
   },
   {
     "brand": "Mr Jones Watches",
@@ -3490,7 +3764,8 @@
           "amount": 245,
           "currency": "USD"
         },
-        "observedAt": "2026-09-10"
+        "observedAt": "2026-09-10T21:30:26.885Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://us.mrjoneswatches.com/cdn/shop/files/M1-menu.jpg?crop=center&height=1024&v=1761897510&width=1024",
@@ -3500,7 +3775,8 @@
     },
     "tags": [],
     "id": "mtvyq3xz47mjcj",
-    "dateAdded": "2026-09-10T20:11:14.423Z"
+    "dateAdded": "2026-09-10T20:11:14.423Z",
+    "priceUpdatedAt": "2026-09-10T21:30:27.310Z"
   },
   {
     "brand": "Mr Jones Watches",
@@ -3534,7 +3810,8 @@
           "amount": 1100,
           "currency": "USD"
         },
-        "observedAt": "2026-09-10"
+        "observedAt": "2026-09-10T21:30:27.310Z",
+        "condition": "new"
       }
     ],
     "imageUrl": "https://us.mrjoneswatches.com/cdn/shop/products/121-V2-Web-menu.jpg?crop=center&height=1024&v=1663663760&width=1024",
@@ -3544,6 +3821,7 @@
     },
     "tags": [],
     "id": "mtvyvp64okbj79",
-    "dateAdded": "2026-09-10T20:15:35.209Z"
+    "dateAdded": "2026-09-10T20:15:35.209Z",
+    "priceUpdatedAt": "2026-09-10T21:30:27.539Z"
   }
 ]
