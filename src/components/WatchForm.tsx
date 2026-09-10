@@ -97,6 +97,7 @@ interface AutofillResult {
   tags?: string[];
   qualityFlags?: QualityFlags;
   retailer?: string;
+  condition?: Condition;
 }
 
 export default function WatchForm({
@@ -229,6 +230,7 @@ export default function WatchForm({
             retailer: data.retailer || row.retailer || hostname(url),
             priceAmount: data.price?.amount ? String(data.price.amount) : row.priceAmount,
             priceCurrency: data.price?.currency || row.priceCurrency,
+            condition: data.condition || row.condition,
             observedAt: observedAt || row.observedAt,
           } : row);
         }
@@ -237,7 +239,7 @@ export default function WatchForm({
           retailer: data.retailer || hostname(url),
           priceAmount: data.price?.amount ? String(data.price.amount) : "",
           priceCurrency: data.price?.currency || "USD",
-          condition: "",
+          condition: data.condition || "",
           observedAt,
         };
         return rows[0]?.url.trim() ? [...rows, row] : [row, ...rows.slice(1)];
@@ -613,13 +615,16 @@ export default function WatchForm({
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
           <span>
             <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Retailer links</span>
-            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Optional sources, prices, and condition</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Deal score needs 2 dated, same-condition links from different hostnames</span>
           </span>
           <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
           <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
         </summary>
         <div className="space-y-4 border-t border-slate-100 p-5">
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="max-w-2xl text-xs text-slate-500">
+              Add an independent AD, retailer, or public asking-price listing. The tracked headline price does not count as market evidence, and duplicate links from one hostname count once.
+            </p>
             <button
               type="button"
               className="btn-secondary"

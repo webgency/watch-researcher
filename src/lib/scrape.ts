@@ -9,7 +9,8 @@
 // page — it just returns whatever it managed to extract.
 
 import { extractWatchDetails } from "./extract";
-import { Friction, Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
+import { extractRetailOffer, inferRetailCondition } from "./retailer-offer.mjs";
+import { Condition, Friction, Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
 
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
@@ -24,6 +25,7 @@ export type ScrapeResult = Partial<
   Pick<WatchInput, "brand" | "model" | "referenceNumber" | "price" | "imageUrl" | "specs" | "tags">
 > & {
   retailer?: string;
+  condition?: Condition;
   foundNothing?: boolean;
   qualityFlags?: QualityFlags;
   /** brandLiquidity is a user judgment call, so scraped friction is partial. */
@@ -73,7 +75,7 @@ function parseMoney(raw: unknown, fallback?: string): Money | undefined {
   else if (num.includes(",")) num = /,\d{2}$/.test(num) ? num.replace(",", ".") : num.replace(/,/g, "");
   const amount = Number(num);
   if (!Number.isFinite(amount) || amount <= 0) return undefined;
-  return { amount, currency: currency || "USD" };
+  return currency ? { amount, currency } : undefined;
 }
 
 function absolutize(u: string | undefined, base: string): string | undefined {
@@ -449,6 +451,7 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
 
   const ld = html ? fromJsonLd(html, base) : {};
   const og = html ? fromMeta(html, base) : {};
+  const retailerOffer = html ? extractRetailOffer(html, base) : undefined;
 
   const out: ScrapeResult = { retailer: hostnameOf(base) };
 
@@ -467,12 +470,16 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
   if (model) out.model = model;
   if (shop?.ref || ld.ref) out.referenceNumber = shop?.ref || ld.ref;
 
-  const price = ld.price || og.price || shop?.price;
+  const price = retailerOffer?.price || ld.price || og.price || shop?.price;
   if (price) {
-    // Backfill a Shopify amount (no currency) from a currency we did find.
-    if (!price.currency || price.currency === "USD") price.currency = ld.price?.currency || og.price?.currency || price.currency || "USD";
     out.price = price;
   }
+  const condition = inferRetailCondition({
+    url: base,
+    brand: out.brand,
+    explicitCondition: retailerOffer?.condition,
+  });
+  if (condition) out.condition = condition;
 
   const image = ld.image || og.image || shop?.image;
   if (image) out.imageUrl = image;
