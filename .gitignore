@@ -32,3 +32,6 @@ next-env.d.ts
 
 # local duplicate/checkouts
 /watch-researcher/
+
+# local target-alert delivery history (copy the committed example to inspect the shape)
+/data/notify-state.json

@@ -1,32 +1,32 @@
 import { landedPriceUsd, normalizePriceToUsd } from "./scoring";
 import { Condition, Money, RetailerLink, Watch } from "./types";
+import {
+  bestDatedOffer,
+  FRESHNESS_MAX_AGE_DAYS as SHARED_FRESHNESS_MAX_AGE_DAYS,
+  freshnessForAge as sharedFreshnessForAge,
+  freshnessForAges as sharedFreshnessForAges,
+  observationAgeDays as sharedObservationAgeDays,
+  trackedAskCondition as sharedTrackedAskCondition,
+} from "./offer-signals.mjs";
 
 export type FreshnessTier = "fresh" | "aging" | "stale" | "expired";
 
 export const FRESHNESS_MAX_AGE_DAYS: Record<Exclude<FreshnessTier, "expired">, number> = {
-  fresh: 7,
-  aging: 30,
-  stale: 90,
+  ...SHARED_FRESHNESS_MAX_AGE_DAYS,
 };
 
 /** Whole days since an observation, clamped at zero for future-dated records. */
 export function observationAgeDays(observedAt: string, now: Date = new Date()): number | undefined {
-  const observed = new Date(observedAt);
-  if (Number.isNaN(observed.getTime())) return undefined;
-  return Math.max(0, Math.floor((now.getTime() - observed.getTime()) / 86_400_000));
+  return sharedObservationAgeDays(observedAt, now);
 }
 
 export function freshnessForAge(ageDays: number): FreshnessTier {
-  if (ageDays <= FRESHNESS_MAX_AGE_DAYS.fresh) return "fresh";
-  if (ageDays <= FRESHNESS_MAX_AGE_DAYS.aging) return "aging";
-  if (ageDays <= FRESHNESS_MAX_AGE_DAYS.stale) return "stale";
-  return "expired";
+  return sharedFreshnessForAge(ageDays);
 }
 
 /** Conservative summary: evidence is only as current as its oldest input. */
 export function freshnessForAges(ages: number[]): FreshnessTier | undefined {
-  if (!ages.length) return undefined;
-  return freshnessForAge(Math.max(...ages));
+  return sharedFreshnessForAges(ages);
 }
 
 export type MarketConfidence = "insufficient" | "low" | "medium" | "high";
@@ -157,50 +157,7 @@ export function bestOffer(
   preferredCondition: Condition = trackedAskCondition(watch),
   now: Date = new Date()
 ): BestOffer {
-  let undatedOfferCount = 0;
-  const offers: DatedOffer[] = [];
-
-  for (const link of watch.links) {
-    if (!link.price) continue;
-    if (!link.observedAt) {
-      undatedOfferCount += 1;
-      continue;
-    }
-    const ageDays = observationAgeDays(link.observedAt, now);
-    if (ageDays === undefined) continue;
-    offers.push({
-      price: link.price,
-      priceUsd: normalizePriceToUsd(link.price),
-      url: link.url,
-      source: link.retailer?.trim() || sourceKey(link),
-      condition: link.condition,
-      observedAt: link.observedAt,
-      ageDays,
-      freshness: freshnessForAge(ageDays),
-    });
-  }
-
-  if (!offers.length) {
-    return { status: "insufficient", reason: "no-dated-offers", preferredCondition, undatedOfferCount };
-  }
-
-  const matching = offers.filter((offer) => offer.condition === preferredCondition);
-  const eligible = matching.length ? matching : offers;
-  const offer = [...eligible].sort((a, b) => a.priceUsd - b.priceUsd || a.ageDays - b.ageDays)[0];
-  const conditionMatch = offer.condition === preferredCondition
-    ? "matched"
-    : offer.condition === undefined
-      ? "unknown"
-      : "fallback";
-
-  return {
-    status: "available",
-    offer,
-    preferredCondition,
-    conditionMatch,
-    usedConditionFallback: conditionMatch === "fallback",
-    undatedOfferCount,
-  };
+  return bestDatedOffer(watch, preferredCondition, now) as BestOffer;
 }
 
 /**
@@ -290,17 +247,7 @@ function otherCondition(condition: Condition): Condition {
  * can override this when they know the tracked configuration is pre-owned.
  */
 export function trackedAskCondition(watch: Watch): Condition {
-  if (watch.price) {
-    const matches = watch.links
-      .filter((link) =>
-        link.condition !== undefined &&
-        link.price?.amount === watch.price?.amount &&
-        link.price?.currency === watch.price?.currency
-      )
-      .sort((a, b) => (b.observedAt ?? "").localeCompare(a.observedAt ?? ""));
-    if (matches[0]?.condition) return matches[0].condition;
-  }
-  return "new";
+  return sharedTrackedAskCondition(watch);
 }
 
 /**
