@@ -11,16 +11,18 @@
 // Usage:
 //   node scripts/enrich-watches.mjs           # fetch + write (skips fields already set)
 //   node scripts/enrich-watches.mjs --dry     # report only, write nothing
-//   node scripts/enrich-watches.mjs --refresh # re-check prices already set, recording any move
+//   node scripts/enrich-watches.mjs --refresh # refresh dated link asks + record headline moves
 //   node scripts/enrich-watches.mjs --force   # overwrite existing price/imageUrl
 //   node scripts/enrich-watches.mjs --id=foo  # only this watch id (repeatable)
 //   node scripts/enrich-watches.mjs --verbose # show per-link failures
 //
 // Price history accumulates only from runs that actually re-read a price, so
-// use --refresh on a schedule if you want a series to build up; the default run
-// fills gaps and will never observe a move.
+// use --refresh on a schedule if you want a series to build up. Refresh also
+// checks every retailer link and dates only asks actually read from that link;
+// the default run fills headline gaps and will never observe a move.
 
 import { readFile, writeFile } from "node:fs/promises";
+import { recordOfferObservation } from "../src/lib/offer-observation.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 
@@ -261,7 +263,7 @@ async function main() {
   const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
   const targets = ONLY.length ? watches.filter((w) => ONLY.includes(w.id)) : watches;
 
-  let priceN = 0, imageN = 0, changed = 0;
+  let priceN = 0, offerN = 0, imageN = 0, changed = 0;
   const misses = [];
   const currencySkips = [];
 
@@ -272,11 +274,40 @@ async function main() {
     if (!needPrice && !needImage) { if (VERBOSE) console.log(`· skip  ${name}`); continue; }
 
     let got = null;
-    for (const link of w.links || []) {
+    const observedAt = new Date().toISOString();
+    let watchOfferN = 0;
+    const links = w.links || [];
+    for (const [index, link] of links.entries()) {
       const r = await enrichLink(link.url);
-      if (r && (r.price || r.image)) { got = r; break; }
+      if (r && (r.price || r.image)) {
+        got ||= r;
+
+        // A retailer observation belongs only to the exact URL that returned
+        // it. Never copy the headline watch price into links: deal scoring
+        // relies on each link being independent, dated market evidence.
+        if (REFRESH && r.price) {
+          const result = recordOfferObservation(link, r.price, observedAt, {
+            allowCurrencyChange: ALLOW_CURRENCY_CHANGE,
+          });
+          if (result === "currency") {
+            currencySkips.push(
+              `${name} (${short(link.url, 36)}): stored ${link.price.amount} ${link.price.currency}, site quotes ${r.price.amount} ${r.price.currency}`,
+            );
+          } else {
+            offerN++;
+            watchOfferN++;
+          }
+        }
+
+        // The default gap-filling pass keeps its original first-result
+        // behavior. An explicit refresh checks every link so best-offer and
+        // deal evidence can be refreshed independently.
+        if (!REFRESH) break;
+      }
       if (VERBOSE && r?.error) console.log(`    ${short(link.url, 48)} -> ${r.error}`);
-      await new Promise((res) => setTimeout(res, 250)); // be polite between hosts
+      if (index < links.length - 1) {
+        await new Promise((res) => setTimeout(res, 250)); // be polite between hosts
+      }
     }
 
     if (!got) { misses.push(name); console.log(`✗ miss  ${name}`); continue; }
@@ -291,11 +322,12 @@ async function main() {
       }
     }
     if (needImage && got.image) { w.imageUrl = got.image; imageN++; did.push("image"); }
+    if (watchOfferN) did.push(`${watchOfferN} dated offer${watchOfferN === 1 ? "" : "s"}`);
     if (did.length) { changed++; console.log(`✓ ${String(got.source || "?").padEnd(8)}${name.padEnd(34)} ${did.join(", ")}`); }
     else { misses.push(name); console.log(`✗ miss  ${name} (nothing usable)`); }
   }
 
-  console.log(`\nPrices: ${priceN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
+  console.log(`\nPrices: ${priceN}  ·  Dated offers: ${offerN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
   if (misses.length) console.log(`Missing (${misses.length}): ${misses.map((m) => short(m, 22)).join("; ")}`);
   if (currencySkips.length) {
     console.log(`\nSkipped — site quotes a different currency than we track (${currencySkips.length}).`);
