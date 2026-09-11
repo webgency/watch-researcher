@@ -44,7 +44,9 @@ The app's opinionated half. It answers "is this watch good *for its money*?" whi
 - **Deal vs fair asks** (`/watch/[id]`) — compares the tracked or landed ask with the median of at least two dated, independent, condition-matched retailer asks. It reports the fair range, source ages, and confidence. Thin evidence is explicitly insufficient and never produces a discount percentage. If only the other condition has enough evidence, the UI identifies that fallback instead of pooling conditions.
 - **Best dated offer** — selects the lowest USD-normalized dated retailer ask after preferring the tracked/deal condition. Detail, collection cards, and comparisons show the source, condition, age, and freshness. Undated prices never win; a fallback or unknown condition is labeled rather than assumed.
 - **Design rank** (`/design`) — your own 1–5 read on how a watch looks. Deliberately the one judgement in the app that is yours rather than calculated.
-- **Value matrix** (`/value`) — rubric value on one axis, your design rank on the other, splitting the collection into buy / aspirational / sensible / skip quadrants. Deal score remains a separate market-evidence concept.
+- **Value-for-money ranking** (`/value`) — a sortable, filterable list led by rubric value. Confidence shows how much applicable scoring evidence is recorded; low coverage reads as limited evidence, never bad value. Deal score and design remain separate columns and filters rather than inputs to the ranking.
+
+The former design × value quadrants were removed from `/value`: they let a subjective design axis create headline purchase labels even when rubric evidence was thin. Design still has its own ranker and remains visible and sortable, but it does not change rubric value, deal percentage, or the value-for-money call. Wishlist priority is likewise context and a filter only.
 
 Three principles hold the model together, and they're worth preserving if you extend it:
 
@@ -69,7 +71,7 @@ Each watch (`src/lib/types.ts`):
 | `referenceNumber` | optional |
 | `status` | `wishlist` \| `owned` \| `sold` |
 | `wishlistTier` | next purchase, must have, love it, interested, maybe later, pass |
-| `designUniqueness` | your 1–5 design rank; drives the value matrix's vertical axis |
+| `designUniqueness` | your separate 1–5 design rank; visible and filterable on the value list but never mixed into rubric value |
 | `price` | `{ amount, currency }` — the headline price you're tracking |
 | `priceUpdatedAt` | ISO timestamp, set by the enrich script |
 | `priceHistory[]` | every distinct price seen, oldest first — appended to only when the price actually moves |
@@ -192,7 +194,7 @@ npm run build:static && npx serve out
 ## Roadmap
 
 **Phase 2 — Price & value** *(partly done)*
-- ✅ Continuous exact-price rubric value scoring and a value matrix
+- ✅ Continuous exact-price rubric value scoring and a sortable value-for-money ranking
 - ✅ Condition-aware deal comparison against dated independent asking prices, with an explicit insufficient state
 - ✅ USD normalization for scoring, covering every currency the form offers — rates are a dated snapshot in `src/lib/currency-rates.mjs`, refreshed by hand (the file says how); a live rate source would remove the drift entirely
 - ✅ Price-history snapshots per watch + webhook target-price alerts with freshness and deduplication
@@ -226,17 +228,17 @@ src/
   app/
     page.tsx                 # collection
     compare/page.tsx         # side-by-side comparison
-    value/page.tsx           # value matrix (value vs. design rank)
+    value/page.tsx           # sortable value-for-money ranking
     design/page.tsx          # design ranker
     watch/new/page.tsx       # add form
     watch/[id]/page.tsx      # detail + standing panel
     watch/[id]/edit/page.tsx # edit
     api/watches/...          # REST API (GET/POST/PUT/DELETE) + /scrape
   components/                # CollectionView, WatchCard, CompareTable, WatchForm,
-                             # ValueMatrix, DesignRanker, StandingPanel, ...
+                             # ValueList, DesignRanker, StandingPanel, ...
   lib/
     types.ts                 # domain model
-    scoring.ts               # standing engine, design score, quadrants
+    scoring.ts               # standing engine, design score, legacy quadrant helper
     rubrics.ts               # dimensions, price bands, per-category rubric tables
     store.ts                 # JSON-file persistence
     validation.ts            # runtime input/data validation
