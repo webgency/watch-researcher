@@ -47,5 +47,5 @@ Both are conservative: they fill gaps and never overwrite. Keep it that way.
 ## Conventions
 
 - Comments explain *why*, especially in the scoring code, where several constants encode a decision that a plausible-looking alternative got wrong. Match that density — don't strip the rationale comments.
-- Work on a branch off `claude/epic-sagan-reqnic` (the default branch here), not directly on it.
-- `.github/workflows/deploy-pages.yml` triggers on `main` and `claude/epic-sagan-reqnic`. Renaming the default branch means updating that trigger.
+- Work on a branch off `main` (the default branch), not directly on it.
+- `.github/workflows/deploy-pages.yml` triggers on `main` alone — it is the single branch that publishes. Renaming the default branch means updating that trigger.
