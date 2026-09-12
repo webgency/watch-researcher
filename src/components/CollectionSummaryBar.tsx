@@ -4,7 +4,7 @@ import { formatMoney } from "@/lib/format";
 function Stat({ label, value, hint, tone }: { label: string; value: string; hint?: string; tone?: "good" }) {
   return (
     <div className="min-w-0" title={hint}>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-cocoa-400">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-400">{label}</p>
       <p className={`mt-0.5 text-lg font-bold tabular-nums ${tone === "good" ? "text-emerald-700" : "text-cocoa-900"}`}>
         {value}
       </p>
@@ -20,7 +20,7 @@ function Stat({ label, value, hint, tone }: { label: string; value: string; hint
  */
 export default function CollectionSummaryBar({ summary }: { summary: CollectionSummary }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-3 sm:gap-x-8">
       <Stat label="Tracked" value={String(summary.tracked)} />
       <Stat
         label="Wishlist value"
