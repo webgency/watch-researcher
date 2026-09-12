@@ -1,12 +1,16 @@
 // Best-effort scraper that turns a retailer/product URL into a partial watch.
 // Used by the /api/scrape route to pre-fill the add form. Pulls price/image/
 // brand/model from structured data (Shopify JSON, JSON-LD, OpenGraph) and the
-// remaining specs from the page text. Whatever it can't find, the user fills in.
+// remaining details from the page text — via the Claude API when
+// ANTHROPIC_API_KEY is configured (see extract.ts), else the legacy regex
+// extractor. Whatever it can't find, the user fills in.
 //
 // Runs server-side only (needs open outbound network). Never throws on a bad
 // page — it just returns whatever it managed to extract.
 
-import { Money, MovementType, WatchInput, WatchSpecs } from "./types";
+import { extractWatchDetails } from "./extract";
+import { extractRetailOffer, inferRetailCondition } from "./retailer-offer.mjs";
+import { Condition, Friction, Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
 
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
@@ -18,8 +22,15 @@ const SYMBOL_TO_ISO: Record<string, string> = {
 };
 
 export type ScrapeResult = Partial<
-  Pick<WatchInput, "brand" | "model" | "referenceNumber" | "price" | "imageUrl" | "specs">
-> & { retailer?: string; foundNothing?: boolean };
+  Pick<WatchInput, "brand" | "model" | "referenceNumber" | "price" | "imageUrl" | "specs" | "tags">
+> & {
+  retailer?: string;
+  condition?: Condition;
+  foundNothing?: boolean;
+  qualityFlags?: QualityFlags;
+  /** brandLiquidity is a user judgment call, so scraped friction is partial. */
+  friction?: Partial<Friction>;
+};
 
 async function fetchText(url: string, json = false) {
   const ctrl = new AbortController();
@@ -64,7 +75,7 @@ function parseMoney(raw: unknown, fallback?: string): Money | undefined {
   else if (num.includes(",")) num = /,\d{2}$/.test(num) ? num.replace(",", ".") : num.replace(/,/g, "");
   const amount = Number(num);
   if (!Number.isFinite(amount) || amount <= 0) return undefined;
-  return { amount, currency: currency || "USD" };
+  return currency ? { amount, currency } : undefined;
 }
 
 function absolutize(u: string | undefined, base: string): string | undefined {
@@ -89,6 +100,14 @@ function stripText(html: string): string {
 }
 
 type Extracted = { brand?: string; name?: string; ref?: string; price?: Money; image?: string };
+
+// Some direct-to-consumer Shopify stores use the vendor field for a collection
+// name rather than the manufacturer. Keep verified exceptions narrow: on a
+// marketplace, replacing a real product brand with the retailer would be worse.
+const DOMAIN_BRANDS: Record<string, string> = {
+  "maenwatches.com": "Maen",
+  "spinnaker-watches.com": "Spinnaker",
+};
 
 function fromJsonLd(html: string, base: string): Extracted {
   const out: Extracted = {};
@@ -158,25 +177,129 @@ function fromMeta(html: string, base: string): Extracted {
 }
 
 // Shopify exposes a clean product JSON at <origin>/products/<handle>.json.
+type ShopifyVariant = {
+  id?: string | number;
+  title?: string;
+  price?: string;
+  price_currency?: string;
+  available?: boolean;
+  sku?: string;
+  featured_image?: { src?: string } | null;
+};
+
+export function selectShopifyVariant(url: string, variants: ShopifyVariant[]): ShopifyVariant | undefined {
+  let requestedId: string | null = null;
+  try { requestedId = new URL(url).searchParams.get("variant"); } catch { /* use availability fallback */ }
+  return variants.find((variant) => requestedId && String(variant.id) === requestedId)
+    ?? variants.find((variant) => variant.available)
+    ?? variants[0];
+}
+
+export function shopifyProductJsonUrl(url: string): string | undefined {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    const productsIndex = parts.indexOf("products");
+    const handle = productsIndex >= 0 ? parts[productsIndex + 1] : undefined;
+    if (!handle) return undefined;
+    const prefix = parts.slice(0, productsIndex).join("/");
+    return `${parsed.origin}/${prefix ? `${prefix}/` : ""}products/${handle}.json`;
+  } catch {
+    return undefined;
+  }
+}
+
+export function isShopifyCollectionUrl(url: string): boolean {
+  try {
+    const parts = new URL(url).pathname.split("/").filter(Boolean);
+    return parts.includes("collections") && !parts.includes("products");
+  } catch {
+    return false;
+  }
+}
+
 async function fromShopify(url: string) {
-  const m = url.match(/^(https?:\/\/[^/]+)\/products\/([^/?#]+)/i);
-  if (!m) return null;
-  const r = await fetchText(`${m[1]}/products/${m[2]}.json`, true);
+  const jsonUrl = shopifyProductJsonUrl(url);
+  if (!jsonUrl) return null;
+  const r = await fetchText(jsonUrl, true);
   if (!r.ok || !r.body) return null;
   let data: { product?: Record<string, unknown> };
   try { data = JSON.parse(r.body); } catch { return null; }
   const p = data.product;
   if (!p) return null;
-  const variants = (p.variants as { price?: string; available?: boolean }[]) || [];
-  const v = variants.find((x) => x.available) || variants[0];
-  const out: { vendor?: string; title?: string; price?: Money; image?: string; bodyHtml?: string } = {};
+  const variants = (p.variants as ShopifyVariant[]) || [];
+  const v = selectShopifyVariant(url, variants);
+  const out: { vendor?: string; title?: string; variantTitle?: string; ref?: string; price?: Money; image?: string; bodyHtml?: string } = {};
   if (typeof p.vendor === "string") out.vendor = clean(p.vendor);
   if (typeof p.title === "string") out.title = clean(p.title);
-  if (v?.price != null) out.price = parseMoney(String(v.price)); // currency unknown here
+  if (v?.title) out.variantTitle = clean(v.title);
+  if (v?.sku) out.ref = clean(v.sku);
+  if (v?.price != null) out.price = parseMoney(String(v.price), v.price_currency);
   const images = (p.images as { src?: string }[]) || [];
-  if (images[0]?.src) out.image = absolutize(images[0].src, m[1]);
+  const image = v?.featured_image?.src ?? images[0]?.src;
+  if (image) out.image = absolutize(image, new URL(url).origin);
   if (typeof p.body_html === "string") out.bodyHtml = p.body_html;
   return out;
+}
+
+function firstHeading(html: string): string | undefined {
+  const match = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+  return match ? clean(stripText(match[1])) : undefined;
+}
+
+/**
+ * Prefer the product's main/specification content over the entire storefront.
+ * Header navigation, size guides, cross-sells and footer copy routinely contain
+ * other diameters, movements and complications that look like product specs.
+ */
+const TECHNICAL_SECTION_ANCHORS = [
+  /\bSpecifications?\b/i,
+  /\bTechnical Details\b/i,
+  /\bDetails\s+Price\b/i,
+  /\bTech Specs\b/i,
+];
+
+function technicalSectionStart(text: string): number {
+  for (const anchor of TECHNICAL_SECTION_ANCHORS) {
+    const start = text.search(anchor);
+    if (start >= 0) return start;
+  }
+  return -1;
+}
+
+export function primaryProductText(html: string): string {
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? html;
+  const text = stripText(main);
+  const specStart = technicalSectionStart(text);
+  if (specStart === -1) return text;
+  // Keep later product feature panels: brands often state the caliber and
+  // power reserve below shipping accordions rather than in the spec table.
+  const productTail = text.slice(specStart);
+  const end = productTail.search(/\b(?:You may also like|Customers? Also Love|Recently viewed|Customer reviews|FAQs?|Our Collections)\b/i);
+  return (end > 0 ? productTail.slice(0, end) : productTail).trim();
+}
+
+/**
+ * Shopify's product description is already scoped to the requested product.
+ * Appending the full rendered page reintroduces variant selectors, recommendations,
+ * and hidden quick-view cards whose specs can be mistaken for the primary watch.
+ */
+export function productExtractionText(
+  shopifyBodyHtml: string | undefined,
+  html: string,
+  collectionPage = false
+): string {
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? html;
+  const mainText = stripText(main);
+  const hasTechnicalSection = technicalSectionStart(mainText) >= 0;
+
+  // A collection is safe only when the page exposes a dedicated, bounded
+  // technical section for that family. Otherwise its product cards are
+  // inseparable and returning no specs is more honest than mixing models.
+  if (collectionPage) return hasTechnicalSection ? primaryProductText(html) : "";
+  if (hasTechnicalSection) return primaryProductText(html);
+  if (shopifyBodyHtml) return stripText(shopifyBodyHtml);
+  return mainText;
 }
 
 function num(text: string, re: RegExp): number | undefined {
@@ -184,27 +307,31 @@ function num(text: string, re: RegExp): number | undefined {
   return m ? Number(m[1]) : undefined;
 }
 
-function extractSpecs(text: string): WatchSpecs {
+export function extractSpecs(text: string): WatchSpecs {
   const t = text.replace(/\s+/g, " ");
   const low = t.toLowerCase();
   const s: WatchSpecs = {};
 
   s.caseDiameterMm =
+    num(t, /(?:case\s*)?(?:diameter|case size|case width)\s*\(\s*mm\s*\)\s*[:\-]?\s*(\d{2}(?:\.\d{1,2})?)/i) ??
     num(t, /(?:case\s*)?(?:diameter|case size|case width)[^0-9]{0,12}(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
     num(t, /Ø\s?(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
     num(t, /\b(\d{2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,18}(?:case|diameter))/i);
   s.caseThicknessMm =
-    num(t, /(?:thickness|case height|thick)[^0-9]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
-    num(t, /\b(\d{1,2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,14}(?:thick))/i);
+    num(t, /(?:thickness|case height|case depth|depth|thick(?:ness)?)\s*\(\s*mm\s*\)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i) ??
+    num(t, /(?:thickness|case height|case depth|depth|thick)[^0-9]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
+    num(t, /\b(\d{1,2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,14}(?:thick|height|depth))/i);
   s.lugToLugMm =
-    num(t, /lug[\s-]*to[\s-]*lug[^0-9)]{0,8}(\d{2}(?:\.\d{1,2})?)\s?mm/i) ?? // "lug to lug 47mm"
-    num(t, /(\d{2}(?:\.\d{1,2})?)\s?mm[\s)]{0,3}lug[\s-]*to[\s-]*lug/i); // "(47mm lug to lug)"
+    num(t, /lug[\s-]*to[\s-]*lug[^0-9]{0,16}(\d{2}(?:\.\d{1,2})?)(?:\s?mm)?/i) ?? // "lug to lug (mm): 47"
+    num(t, /(\d{2}(?:\.\d{1,2})?)\s?mm[^.]{0,12}(?:from\s+)?lug[\s-]*to[\s-]*lug/i); // "measures 46mm from lug to lug"
   s.lugWidthMm =
     num(t, /lug[\s-]*width[^0-9]{0,14}(\d{2})\s?mm/i) ??
-    num(t, /strap[\s-]*width[^0-9]{0,12}(\d{2})\s?mm/i);
+    num(t, /strap[\s-]*width[^0-9]{0,12}(\d{2})\s?mm/i) ??
+    num(t, /\bband\b[^0-9]{0,8}(\d{2})\s?mm/i);
   s.powerReserveHours =
     num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s?h\b/i) ??
-    num(t, /(\d{2,3})\s?h(?:ours)?\s*(?:of\s*)?power\s*reserve/i);
+    num(t, /(\d{2,3})\s?h(?:ours?)?\s*(?:of\s*)?power\s*reserve/i) ??
+    num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s*hours?\b/i);
 
   const wm = t.match(/water[\s-]*resist[a-z]*[^0-9]{0,16}(\d{2,4})\s?m\b/i) || t.match(/(\d{2,4})\s?m(?:eters)?\s*(?:of\s*)?water/i);
   const atm = t.match(/(\d{1,3})\s?(?:atm|bar)\b/i);
@@ -220,11 +347,19 @@ function extractSpecs(text: string): WatchSpecs {
     [/solar/, "solar"],
     [/kinetic/, "kinetic"],
   ];
-  for (const [re, val] of moves) if (re.test(low)) { s.movement = val; break; }
+  // A labeled spec wins over later page copy such as "instruction manual" or
+  // generic collection descriptions mentioning other movement types.
+  const labeledMovement = t.match(/\bmovement\s*:\s*([^.;]{2,100})/i)?.[1]?.toLowerCase();
+  const movementSource = labeledMovement || low;
+  for (const [re, val] of moves) if (re.test(movementSource)) { s.movement = val; break; }
 
   const cal = t.match(/cali(?:ber|bre)\s*[:\-]?\s*([A-Za-z0-9][\w .\-\/]{1,30})/i);
-  if (cal) {
-    let c = cal[1].split(/\s+(?:automatic|manual|self|swiss|cosc|movement|winding|finishe?s?|with|hand|\d+\s?jewel)/i)[0].trim();
+  const namedMovement = t.match(/\b((?:Miyota|Seiko|Sellita|ETA|Ronda|Soprod|La Joux[ -]Perret|Seagull)\s+[A-Z0-9][A-Z0-9.\-]{1,15})(?=\s|$)/i);
+  if (cal || namedMovement) {
+    // A maker + caliber token is stronger than a loose "calibre" label,
+    // which marketing prose sometimes follows with "beats at 28,800...".
+    const match = namedMovement ?? cal!;
+    let c = match[1].split(/\s+(?:automatic|manual|self|swiss|cosc|movement|winding|finishe?s?|with|hand|\d+\s?jewel)/i)[0].trim();
     c = c.replace(/[.,;:]+$/, "").trim();
     if (c.length >= 2 && /\d/.test(c)) s.caliber = c; // require a digit to avoid grabbing prose
   }
@@ -233,6 +368,19 @@ function extractSpecs(text: string): WatchSpecs {
   else if (/acrylic|hesalite|plexi/.test(low)) s.crystal = "Acrylic";
   else if (/mineral/.test(low)) s.crystal = "Mineral";
   else if (/hardlex/.test(low)) s.crystal = "Hardlex";
+
+  const caseMaterial = t.match(/case material\s*[:\-]?\s*([^.;]{3,60})/i);
+  if (caseMaterial) s.caseMaterial = clean(caseMaterial[1]).split(/\s+(?:case finish|case size|diameter|thickness|bezel|crystal)\b/i)[0].trim();
+  const dialColor = t.match(/dial colou?r\s*[:\-]?\s*([A-Za-z][A-Za-z /\-]{1,30})/i);
+  if (dialColor) s.dialColor = clean(dialColor[1]).split(/\s+(?:index|lens|crystal|case)\b/i)[0].trim();
+  const band = t.match(/\b(?:band|bracelet|strap)\s*:\s*([^.;]{3,100})/i);
+  if (band) {
+    const value = clean(band[1]).split(/\s+(?:extra band|water resistance|weight|warranty)\b/i)[0].trim();
+    // Repeated option-picker prose is not a material/specification.
+    const firstHalf = value.slice(0, Math.floor(value.length / 2)).toLowerCase();
+    const secondHalf = value.slice(Math.floor(value.length / 2)).toLowerCase();
+    if (value.length < 90 && !secondHalf.includes(firstHalf.slice(0, 20))) s.braceletStrap = value;
+  }
 
   const comps: string[] = [];
   const compMap: [RegExp, string][] = [
@@ -247,6 +395,54 @@ function extractSpecs(text: string): WatchSpecs {
   return s;
 }
 
+export function extractQualityFlags(text: string, variantTitle?: string): QualityFlags {
+  const t = text.replace(/\s+/g, " ");
+  const flags: QualityFlags = {};
+
+  const positions = t.match(/(?:adjusted|regulated)[^.;]{0,40}\b(?:in\s+)?(\d+)\s+positions?\b/i);
+  if (positions) flags.regulatedPositions = Number(positions[1]);
+
+  const asymmetricAccuracy = t.match(/([+-]?\d+(?:\.\d+)?)\s*\/\s*([+-]?\d+(?:\.\d+)?)\s*(?:sec(?:onds?)?|s)\s*(?:\/|per\s*)?(?:day|d)\b/i);
+  const symmetricAccuracy = t.match(/(?:\+\s*\/\s*-|±)\s*(\d+(?:\.\d+)?)\s*(?:sec(?:onds?)?|s|spd)\b/i);
+  if (asymmetricAccuracy) {
+    flags.accuracySpecSpd = Math.max(Math.abs(Number(asymmetricAccuracy[1])), Math.abs(Number(asymmetricAccuracy[2])));
+  } else if (symmetricAccuracy) {
+    flags.accuracySpecSpd = Number(symmetricAccuracy[1]);
+  }
+
+  if (/\bsapphire\s+(?:crystal\s+)?(?:bezel|insert)\b|\bbezel[^.;]{0,50}\bsapphire\s+insert\b/i.test(t)) {
+    flags.sapphireBezelInsert = true;
+  }
+  if (/\bdrilled\s+lugs?\b|\blug holes?\b/i.test(t)) flags.drilledLugs = true;
+  if (/\banti[- ]reflective\s+(?:coating|coated)\b|\bAR coating\b/i.test(t)) flags.arCoated = true;
+  if (/\bmicro[- ]?adjust(?:ment)?\b|\bon[- ]the[- ]fly adjustment clasp\b|\bquick[- ]adjust clasp\b/i.test(t)) {
+    flags.microAdjustClasp = true;
+  }
+  if (/\bquick[- ]release\b|\bquick[- ]change strap/i.test(t)) flags.quickRelease = true;
+
+  if (variantTitle) {
+    if (/\bbracelet\b/i.test(variantTitle)) flags.braceletIncluded = true;
+    else if (/\bstrap\b/i.test(variantTitle)) flags.braceletIncluded = false;
+  }
+  if (flags.braceletIncluded === undefined && /\b(?:including|includes?)\s+(?:a\s+)?bracelet\b/i.test(t)) {
+    flags.braceletIncluded = true;
+  }
+
+  return flags;
+}
+
+function fallbackTags(text: string, specs: WatchSpecs): string[] {
+  const tags: string[] = [];
+  if (
+    (/\b(?:diver|diving watch|dive watch)\b/i.test(text) || /\buni-directional\s+(?:rotating\s+)?(?:ceramic\s+)?bezel\b/i.test(text)) &&
+    (specs.waterResistanceM ?? 0) >= 100
+  ) tags.push("diver");
+  if (/\bchronograph\b/i.test(text)) tags.push("chronograph");
+  if (/\bGMT\b/.test(text)) tags.push("GMT");
+  if (/\bworld[ -]?timer\b/i.test(text)) tags.push("worldtimer");
+  return tags;
+}
+
 export async function scrapeWatch(url: string): Promise<ScrapeResult> {
   const shop = await fromShopify(url).catch(() => null);
   const page = await fetchText(url);
@@ -255,32 +451,65 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
 
   const ld = html ? fromJsonLd(html, base) : {};
   const og = html ? fromMeta(html, base) : {};
+  const retailerOffer = html ? extractRetailOffer(html, base) : undefined;
 
   const out: ScrapeResult = { retailer: hostnameOf(base) };
 
-  const brand = shop?.vendor || ld.brand;
-  let model = ld.name || shop?.title || og.name;
+  const domainBrand = DOMAIN_BRANDS[hostnameOf(base)];
+  const heading = html ? firstHeading(html) : undefined;
+  const brand = domainBrand || shop?.vendor || ld.brand;
+  const headingIdentifiesProduct = hostnameOf(base) === "spinnaker-watches.com";
+  let model =
+    headingIdentifiesProduct && heading
+      ? [heading, shop?.title && shop.title !== heading ? shop.title : undefined].filter(Boolean).join(" — ")
+      : ld.name || shop?.title || og.name;
   if (model && brand && model.toLowerCase().startsWith(brand.toLowerCase())) {
     model = model.slice(brand.length).replace(/^[\s\-–—:|]+/, "").trim();
   }
   if (brand) out.brand = brand.replace(/_/g, " ");
   if (model) out.model = model;
-  if (ld.ref) out.referenceNumber = ld.ref;
+  if (shop?.ref || ld.ref) out.referenceNumber = shop?.ref || ld.ref;
 
-  const price = ld.price || og.price || shop?.price;
+  const price = retailerOffer?.price || ld.price || og.price || shop?.price;
   if (price) {
-    // Backfill a Shopify amount (no currency) from a currency we did find.
-    if (!price.currency || price.currency === "USD") price.currency = ld.price?.currency || og.price?.currency || price.currency || "USD";
     out.price = price;
   }
+  const condition = inferRetailCondition({
+    url: base,
+    brand: out.brand,
+    explicitCondition: retailerOffer?.condition,
+  });
+  if (condition) out.condition = condition;
 
   const image = ld.image || og.image || shop?.image;
   if (image) out.imageUrl = image;
 
-  const specText = `${shop?.bodyHtml ? stripText(shop.bodyHtml) : ""} ${html ? stripText(html) : ""}`.trim();
-  const specs = extractSpecs(specText);
-  if (Object.keys(specs).length) out.specs = specs;
+  // A collection landing page contains many product cards and often similarly
+  // named families (for example a three-hand Hudson beside a Hudson GMT).
+  // Returning fewer fields is safer than attaching one sibling's specs to another.
+  const specText = productExtractionText(shop?.bodyHtml, html, isShopifyCollectionUrl(url)).trim();
+  const extracted = await extractWatchDetails(specText);
+  if (extracted) {
+    // Structured data (JSON-LD/Shopify/OG) wins for identity fields; the model
+    // fills whatever those missed.
+    if (!out.brand && extracted.brand) out.brand = extracted.brand;
+    if (!out.model && extracted.model) out.model = extracted.model;
+    if (!out.referenceNumber && extracted.referenceNumber) out.referenceNumber = extracted.referenceNumber;
+    if (Object.keys(extracted.specs).length) out.specs = extracted.specs;
+    if (extracted.tags.length) out.tags = extracted.tags;
+    if (extracted.qualityFlags) out.qualityFlags = extracted.qualityFlags;
+    if (extracted.friction) out.friction = extracted.friction;
+  } else {
+    const specs = extractSpecs(specText);
+    if (shop?.variantTitle) specs.braceletStrap = shop.variantTitle;
+    if (Object.keys(specs).length) out.specs = specs;
+    const tags = fallbackTags(specText, specs);
+    if (tags.length) out.tags = tags;
+    const qualityFlags = extractQualityFlags(specText, shop?.variantTitle);
+    if (Object.keys(qualityFlags).length) out.qualityFlags = qualityFlags;
+  }
 
-  out.foundNothing = !out.brand && !out.model && !out.price && !out.imageUrl && !out.specs;
+  out.foundNothing =
+    !out.brand && !out.model && !out.price && !out.imageUrl && !out.specs && !out.tags;
   return out;
 }

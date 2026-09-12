@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { brandReputationMap, getBrands } from "@/lib/brands";
 import WatchForm from "@/components/WatchForm";
 
-export default function NewWatchPage() {
+export default async function NewWatchPage() {
+  const brands = await getBrands();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -10,7 +13,7 @@ export default function NewWatchPage() {
           ← Back
         </Link>
       </div>
-      <WatchForm />
+      <WatchForm brandReputations={brandReputationMap(brands)} />
     </div>
   );
 }

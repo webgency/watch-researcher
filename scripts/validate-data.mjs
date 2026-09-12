@@ -1,19 +1,33 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
+import { SPEC_RANGES, inSpecRange } from "../src/lib/spec-ranges.mjs";
+import { plausibilityIssues } from "../src/lib/spec-plausibility.mjs";
+import {
+  CURRENCY_TO_USD,
+  RATES_AS_OF,
+  RATES_STALE_AFTER_DAYS,
+  ratesAgeDays,
+  ratesAreStale,
+} from "../src/lib/currency-rates.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
+const BRANDS_URL = new URL("../data/brands.json", import.meta.url);
 
 const STATUSES = new Set(["wishlist", "owned", "sold"]);
 const WISHLIST_TIERS = new Set(["next-purchase", "must-have", "love-it", "interested", "maybe-later", "pass"]);
 const MOVEMENTS = new Set(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"]);
 const CONDITIONS = new Set(["new", "pre-owned"]);
-const CURRENCIES = new Set(["USD", "EUR", "GBP", "CHF", "JPY", "AUD", "CAD", "SGD", "SEK", "NOK", "DKK", "HKD", "NZD"]);
+const SCORING_CATEGORIES = new Set(["diver", "chronograph", "gmt", "dress", "sports"]);
+// Derived from the shared table rather than restated, so adding a currency in
+// one place cannot leave the validator warning about a rate that now exists.
+const KNOWN_CURRENCIES = new Set(Object.keys(CURRENCY_TO_USD));
 
 const SPEC_TYPES = {
   caseDiameterMm: "number",
   caseThicknessMm: "number",
   lugToLugMm: "number",
   lugWidthMm: "number",
+  caseMaterial: "string",
   movement: "movement",
   caliber: "string",
   powerReserveHours: "number",
@@ -58,6 +72,16 @@ function checkPositiveNumber(value, path, errors, { required = false, integer = 
   if (integer && !Number.isInteger(value)) errors.push(`${path} must be a whole number`);
 }
 
+function checkIntegerRange(value, path, errors, { required = false, min = 1, max = 5 } = {}) {
+  if (value === undefined || value === null || value === "") {
+    if (required) errors.push(`${path} is required`);
+    return;
+  }
+  if (typeof value !== "number" || !Number.isInteger(value) || value < min || value > max) {
+    errors.push(`${path} must be a whole number from ${min} to ${max}`);
+  }
+}
+
 function checkMoney(value, path, errors) {
   if (value === undefined || value === null) return;
   if (!isRecord(value)) {
@@ -65,9 +89,48 @@ function checkMoney(value, path, errors) {
     return;
   }
   checkPositiveNumber(value.amount, `${path}.amount`, errors, { required: true });
-  if (typeof value.currency !== "string" || !CURRENCIES.has(value.currency)) {
-    errors.push(`${path}.currency must be one of ${Array.from(CURRENCIES).join(", ")}`);
+  if (typeof value.currency !== "string" || !/^[A-Z]{3}$/.test(value.currency)) {
+    errors.push(`${path}.currency must be a 3-letter currency code`);
+  } else if (!KNOWN_CURRENCIES.has(value.currency)) {
+    warnings.push(`${path}.currency ${value.currency} is not in the known currency list; scoring will use its fallback rate.`);
   }
+}
+
+function checkPriceHistory(value, path, errors) {
+  if (value === undefined || value === null) return;
+  if (!Array.isArray(value)) {
+    errors.push(`${path} must be an array`);
+    return;
+  }
+  value.forEach((snapshot, index) => {
+    const snapshotPath = `${path}[${index}]`;
+    if (!isRecord(snapshot)) {
+      errors.push(`${snapshotPath} must be an object`);
+      return;
+    }
+    if (snapshot.price === undefined || snapshot.price === null) {
+      errors.push(`${snapshotPath}.price is required`);
+    } else {
+      checkMoney(snapshot.price, `${snapshotPath}.price`, errors);
+    }
+    checkDate(snapshot.date, `${snapshotPath}.date`, errors, { required: true });
+    checkString(snapshot.source, `${snapshotPath}.source`, errors);
+
+    // Oldest first, moves only — the invariant every reader relies on when it
+    // treats the last entry as the current price.
+    const previous = value[index - 1];
+    if (index > 0 && isRecord(previous) && isRecord(previous.price) && isRecord(snapshot.price)) {
+      if (new Date(snapshot.date).getTime() < new Date(previous.date).getTime()) {
+        errors.push(`${snapshotPath}.date is earlier than the entry before it`);
+      }
+      if (
+        snapshot.price.amount === previous.price.amount &&
+        snapshot.price.currency === previous.price.currency
+      ) {
+        errors.push(`${snapshotPath} repeats the previous price; the series records moves only`);
+      }
+    }
+  });
 }
 
 function checkLinks(value, path, errors) {
@@ -87,10 +150,11 @@ function checkLinks(value, path, errors) {
     if (link.condition !== undefined && !CONDITIONS.has(link.condition)) {
       errors.push(`${linkPath}.condition must be new or pre-owned`);
     }
+    checkDate(link.observedAt, `${linkPath}.observedAt`, errors);
   });
 }
 
-function checkSpecs(value, path, errors) {
+function checkSpecs(value, path, errors, warnings) {
   if (!isRecord(value)) {
     errors.push(`${path} must be an object`);
     return;
@@ -102,6 +166,35 @@ function checkSpecs(value, path, errors) {
     if (type === "number") checkPositiveNumber(specValue, specPath, errors);
     else if (type === "movement" && !MOVEMENTS.has(specValue)) errors.push(`${specPath} must be a known movement type`);
     else if (type === "string") checkString(specValue, specPath, errors);
+  }
+  checkSpecPlausibility(value, path, errors, warnings);
+}
+
+/**
+ * The same physical bounds sanitizeSpecs applies to incoming data, enforced
+ * against what is already on disk. sanitizeSpecs only runs on scraped and
+ * backfilled values, so a swapped or duplicated measurement entering by any
+ * other path used to sit in the file unnoticed and quietly distort scoring —
+ * a 15mm case diameter with a 15.5mm thickness, for instance.
+ *
+ * The per-field ranges live in spec-ranges.mjs; the rules that compare fields
+ * against each other live in spec-plausibility.mjs, shared with the write path
+ * so both judge a record the same way. Warn-level rules never fail the run.
+ */
+function checkSpecPlausibility(specs, path, errors, warnings) {
+  for (const key of Object.keys(SPEC_RANGES)) {
+    const value = specs[key];
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    if (!inSpecRange(key, value)) {
+      const [min, max] = SPEC_RANGES[key];
+      errors.push(`${path}.${key} is ${value}, outside the plausible range ${min}-${max}`);
+    }
+  }
+
+  for (const issue of plausibilityIssues(specs)) {
+    const line = `${path} ${issue.message}`;
+    if (issue.severity === "error") errors.push(line);
+    else warnings.push(line);
   }
 }
 
@@ -123,9 +216,27 @@ function checkTransaction(value, path, errors) {
   checkDate(value.date, `${path}.date`, errors);
 }
 
-const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
 const errors = [];
+const warnings = [];
 const ids = new Set();
+const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
+const brands = JSON.parse(await readFile(BRANDS_URL, "utf8"));
+const normalizedBrandNames = new Set();
+
+if (!isRecord(brands)) {
+  errors.push("data/brands.json must contain an object");
+} else {
+  for (const [brand, info] of Object.entries(brands)) {
+    const path = `brands.${brand}`;
+    if (!brand.trim()) errors.push(`${path} brand name is required`);
+    normalizedBrandNames.add(brand.trim().toLowerCase());
+    if (!isRecord(info)) {
+      errors.push(`${path} must be an object`);
+      continue;
+    }
+    checkIntegerRange(info.reputationTier, `${path}.reputationTier`, errors, { required: true });
+  }
+}
 
 if (!Array.isArray(watches)) {
   errors.push("data/watches.json must contain an array");
@@ -149,17 +260,83 @@ if (!Array.isArray(watches)) {
     if (watch.wishlistTier !== undefined && !WISHLIST_TIERS.has(watch.wishlistTier)) {
       errors.push(`${path}.wishlistTier must be one of ${Array.from(WISHLIST_TIERS).join(", ")}`);
     }
+    if (watch.scoringCategory !== undefined && !SCORING_CATEGORIES.has(watch.scoringCategory)) {
+      errors.push(`${path}.scoringCategory must be one of ${Array.from(SCORING_CATEGORIES).join(", ")}`);
+    }
+    checkIntegerRange(watch.designUniqueness, `${path}.designUniqueness`, errors);
+    checkIntegerRange(watch.personalFit, `${path}.personalFit`, errors);
+    if (watch.designPreferenceElo !== undefined && (!Number.isFinite(watch.designPreferenceElo) || watch.designPreferenceElo < 0)) {
+      errors.push(`${path}.designPreferenceElo must be a non-negative number`);
+    }
+    checkIntegerRange(watch.designComparisonCount, `${path}.designComparisonCount`, errors, {
+      min: 0,
+      max: Number.MAX_SAFE_INTEGER,
+    });
     checkMoney(watch.price, `${path}.price`, errors);
     checkDate(watch.priceUpdatedAt, `${path}.priceUpdatedAt`, errors);
+    checkPriceHistory(watch.priceHistory, `${path}.priceHistory`, errors);
+    checkMoney(watch.targetPrice, `${path}.targetPrice`, errors);
     checkLinks(watch.links, `${path}.links`, errors);
+
+    // A history whose newest entry disagrees with the tracked price means one
+    // of the two was hand-edited without the other. Not fatal — the price is
+    // still the source of truth — but the series has a gap worth knowing about.
+    const newest = Array.isArray(watch.priceHistory) && watch.priceHistory.length
+      ? watch.priceHistory[watch.priceHistory.length - 1]
+      : undefined;
+    if (newest && isRecord(newest.price) && isRecord(watch.price)) {
+      if (newest.price.amount !== watch.price.amount || newest.price.currency !== watch.price.currency) {
+        warnings.push(
+          `${path}.priceHistory ends at ${newest.price.amount} ${newest.price.currency} but price is ${watch.price.amount} ${watch.price.currency}; the latest move was not recorded.`
+        );
+      }
+    }
     checkString(watch.imageUrl, `${path}.imageUrl`, errors);
-    checkSpecs(watch.specs, `${path}.specs`, errors);
+    checkSpecs(watch.specs, `${path}.specs`, errors, warnings);
     checkTags(watch.tags, `${path}.tags`, errors);
     checkString(watch.notes, `${path}.notes`, errors);
     checkDate(watch.dateAdded, `${path}.dateAdded`, errors, { required: true });
     checkTransaction(watch.purchase, `${path}.purchase`, errors);
     checkTransaction(watch.sale, `${path}.sale`, errors);
+
+    const normalizedBrand = typeof watch.brand === "string" ? watch.brand.trim().toLowerCase() : "";
+    if (normalizedBrand && !normalizedBrandNames.has(normalizedBrand)) {
+      warnings.push(`${path}.brand ${watch.brand} is not present in data/brands.json; desirability scoring will use neutral reputation.`);
+    }
   });
+}
+
+// Stale rates only matter if something actually needs converting. A collection
+// priced entirely in USD is unaffected by drift, so staying quiet there keeps
+// the warning meaningful when it does appear.
+const foreignCurrencies = new Set();
+for (const watch of watches) {
+  const monies = [
+    watch.price,
+    watch.landedPrice,
+    watch.targetPrice,
+    ...(watch.links ?? []).map((link) => link.price),
+    ...(watch.priceHistory ?? []).map((snapshot) => snapshot.price),
+  ];
+  for (const money of monies) {
+    if (isRecord(money) && typeof money.currency === "string" && money.currency !== "USD") {
+      foreignCurrencies.add(money.currency);
+    }
+  }
+}
+
+if (foreignCurrencies.size && ratesAreStale()) {
+  const age = ratesAgeDays();
+  warnings.push(
+    `Exchange rates in src/lib/currency-rates.mjs are ${age} days old (taken ${RATES_AS_OF}, stale after ${RATES_STALE_AFTER_DAYS}). ` +
+      `${foreignCurrencies.size} non-USD currenc${foreignCurrencies.size === 1 ? "y is" : "ies are"} in use (${[...foreignCurrencies].sort().join(", ")}), ` +
+      `so scoring converts at rates that have had time to drift across a price band. Refresh with: curl -s "https://api.frankfurter.dev/v1/latest?base=USD"`
+  );
+}
+
+if (warnings.length) {
+  console.warn(`Watch data validation completed with ${warnings.length} warning${warnings.length === 1 ? "" : "s"}:`);
+  for (const warning of warnings) console.warn(`- ${warning}`);
 }
 
 if (errors.length) {

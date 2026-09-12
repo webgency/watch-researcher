@@ -10,6 +10,7 @@ const serverOnlyRoutes = [
   "src/app/api",
   "src/app/watch/new",
   "src/app/watch/[id]/edit",
+  "src/app/calibration",
 ];
 
 for (const path of serverOnlyRoutes) {

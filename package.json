@@ -7,15 +7,22 @@
     "dev": "next dev",
     "build": "next build",
     "build:static": "node scripts/build-static.mjs",
-    "check": "npm run validate:data && npm run lint && npm run build",
+    "check": "npm run validate:data && npm run audit:data && npm run audit:calibers && npm run lint && npm run build",
     "start": "next start",
     "lint": "eslint .",
-    "validate:data": "node scripts/validate-data.mjs"
+    "test": "vitest run",
+    "audit:data": "node scripts/audit-data.mjs",
+    "audit:calibers": "node scripts/audit-calibers.mjs",
+    "validate:data": "node scripts/validate-data.mjs",
+    "notify:targets": "node scripts/notify-targets.mjs",
+    "calibrate:scoring": "jiti scripts/calibrate-scoring.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
     "next": "^16.2.9",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
@@ -27,9 +34,10 @@
     "postcss": "^8.5.15",
     "puppeteer": "^25.2.0",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^4.1.10"
   },
   "overrides": {
-    "postcss": "$postcss"
+    "postcss": "^8.5.15"
   }
 }

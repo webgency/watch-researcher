@@ -11,18 +11,78 @@
 // Usage:
 //   node scripts/enrich-watches.mjs           # fetch + write (skips fields already set)
 //   node scripts/enrich-watches.mjs --dry     # report only, write nothing
+//   node scripts/enrich-watches.mjs --refresh # refresh dated link asks + record headline moves
 //   node scripts/enrich-watches.mjs --force   # overwrite existing price/imageUrl
 //   node scripts/enrich-watches.mjs --id=foo  # only this watch id (repeatable)
 //   node scripts/enrich-watches.mjs --verbose # show per-link failures
+//
+// Price history accumulates only from runs that actually re-read a price, so
+// use --refresh on a schedule if you want a series to build up. Refresh also
+// checks every retailer link and dates only asks actually read from that link;
+// the default run fills headline gaps and will never observe a move.
 
 import { readFile, writeFile } from "node:fs/promises";
+import { recordOfferObservation } from "../src/lib/offer-observation.mjs";
+import {
+  extractRetailOffer,
+  inferRetailCondition,
+  offerFailure,
+} from "../src/lib/retailer-offer.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
 
 const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
 const FORCE = args.includes("--force");
+const REFRESH = args.includes("--refresh");
+const ALLOW_CURRENCY_CHANGE = args.includes("--allow-currency-change");
 const VERBOSE = args.includes("--verbose");
+
+/**
+ * Set the tracked price and record the move in priceHistory. Mirrors
+ * appendSnapshot in src/lib/price-history.ts — the series records moves only,
+ * so re-reading an unchanged price leaves the history alone and keeps its
+ * existing date, which is what makes that date mean "unchanged since".
+ *
+ * Returns true when the price actually moved.
+ */
+function recordPrice(watch, price, source) {
+  const observedAt = new Date().toISOString();
+  const current = watch.price;
+
+  // A scrape that returns a different currency is not a price change, it is a
+  // change of units: several watches are stored as pre-converted USD, and
+  // rewriting them to the retailer's native currency silently rescores them
+  // through the hardcoded CURRENCY_TO_USD rates. That moved one watch across a
+  // price band and so changed the rubric it was judged against. Skip by
+  // default; --allow-currency-change opts in.
+  if (current && current.currency !== price.currency && !ALLOW_CURRENCY_CHANGE) {
+    return "currency";
+  }
+
+  const moved = !current || current.amount !== price.amount || current.currency !== price.currency;
+
+  // Compare against the tracked price, NOT against the tail of priceHistory.
+  // Comparing against the series meant a watch with no history recorded every
+  // scrape as a move, stamping a price that had been stable for months as
+  // "first seen today" and destroying what the dates mean.
+  if (!moved) {
+    watch.priceUpdatedAt = observedAt;
+    return false;
+  }
+
+  let history = Array.isArray(watch.priceHistory) ? watch.priceHistory : [];
+  // Seed the outgoing price so the first recorded move shows what it moved
+  // from, dated to when that price was last known. Mirrors updateWatch.
+  if (!history.length && current) {
+    history = [{ price: current, date: watch.priceUpdatedAt ?? watch.dateAdded, source: "manual" }];
+  }
+
+  watch.price = price;
+  watch.priceUpdatedAt = observedAt;
+  watch.priceHistory = [...history, { price, date: observedAt, source }];
+  return true;
+}
 const ONLY = args.filter((a) => a.startsWith("--id=")).map((a) => a.slice(5));
 
 const UA =
@@ -153,19 +213,29 @@ function extractFromMeta(html, baseUrl) {
 
 // Shopify exposes a clean product JSON at <origin>/products/<handle>.json.
 async function tryShopify(url) {
-  const m = url.match(/^(https?:\/\/[^/]+)\/products\/([^/?#]+)/i);
-  if (!m) return null;
-  const r = await fetchText(`${m[1]}/products/${m[2]}.json`, { json: true });
+  let parsed;
+  try { parsed = new URL(url); } catch { return null; }
+  const parts = parsed.pathname.split("/").filter(Boolean);
+  const productsIndex = parts.indexOf("products");
+  const handle = productsIndex >= 0 ? parts[productsIndex + 1] : undefined;
+  if (!handle) return null;
+  const prefix = parts.slice(0, productsIndex).join("/");
+  const jsonUrl = `${parsed.origin}/${prefix ? `${prefix}/` : ""}products/${handle}.json`;
+  const r = await fetchText(jsonUrl, { json: true });
   if (!r.ok) return null;
   let data;
   try { data = JSON.parse(r.body); } catch { return null; }
   const p = data.product;
   if (!p) return null;
   const out = { source: "shopify" };
-  const variant = (p.variants || []).find((v) => v.available) || (p.variants || [])[0];
+  let requestedVariant = null;
+  try { requestedVariant = new URL(url).searchParams.get("variant"); } catch { /* use availability fallback */ }
+  const variant = (p.variants || []).find((v) => requestedVariant && String(v.id) === requestedVariant)
+    || (p.variants || []).find((v) => v.available)
+    || (p.variants || [])[0];
   if (variant?.price != null) out.price = parseMoney(String(variant.price)); // currency unknown here
-  const image = (p.images || [])[0];
-  if (image?.src) out.image = absolutize(image.src, m[1]);
+  const image = variant?.featured_image || (p.images || [])[0];
+  if (image?.src) out.image = absolutize(image.src, parsed.origin);
   return out;
 }
 
@@ -175,20 +245,30 @@ async function enrichLink(url) {
   const page = await fetchText(url);
   if (page.ok) {
     const base = page.finalUrl || url;
+    const retailOffer = extractRetailOffer(page.body, base);
     const ld = extractFromJsonLd(page.body, base);
     const meta = extractFromMeta(page.body, base);
     result.image = result.image || ld.image || meta.image;
-    result.price = result.price || ld.price || meta.price;
+    result.price = result.price || retailOffer?.price || ld.price || meta.price;
+    result.condition = retailOffer?.condition;
     // Backfill currency for a Shopify amount that came without one.
     if (result.price && !result.price.currency) {
-      result.price.currency = ld.price?.currency || meta.price?.currency;
+      result.price.currency = retailOffer?.price?.currency || ld.price?.currency || meta.price?.currency;
     }
-    result.source = result.source || (ld.price || ld.image ? "json-ld" : meta.price || meta.image ? "og-meta" : undefined);
+    result.source = result.source || retailOffer?.source || (ld.price || ld.image ? "json-ld" : meta.price || meta.image ? "og-meta" : undefined);
   } else if (!result.price && !result.image) {
     return { error: page.status ? `HTTP ${page.status}` : page.error };
   }
 
-  if (result.price && !result.price.currency) result.price.currency = "USD"; // last resort
+  if (result.price && !result.price.currency) {
+    delete result.price;
+    result.priceError = {
+      code: "missing-price-currency",
+      message: "found an amount but no page-stated currency; refusing to assume USD",
+    };
+  } else if (!result.price) {
+    result.priceError = offerFailure(url);
+  }
   return result;
 }
 
@@ -198,33 +278,114 @@ async function main() {
   const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
   const targets = ONLY.length ? watches.filter((w) => ONLY.includes(w.id)) : watches;
 
-  let priceN = 0, imageN = 0, changed = 0;
+  let priceN = 0, offerN = 0, imageN = 0, changed = 0;
   const misses = [];
+  const currencySkips = [];
+  const offerCurrencyChanges = [];
 
   for (const w of targets) {
     const name = `${w.brand} ${w.model}`;
-    const needPrice = FORCE || !w.price;
+    const needPrice = FORCE || REFRESH || !w.price;
     const needImage = FORCE || !w.imageUrl;
     if (!needPrice && !needImage) { if (VERBOSE) console.log(`· skip  ${name}`); continue; }
 
-    let got = null;
-    for (const link of w.links || []) {
+    let gotPrice = null;
+    let gotImage = null;
+    const observedAt = new Date().toISOString();
+    let watchOfferN = 0;
+    const refreshedConditions = new Set();
+    const linkFailures = [];
+    const links = w.links || [];
+    for (const [index, link] of links.entries()) {
       const r = await enrichLink(link.url);
-      if (r && (r.price || r.image)) { got = r; break; }
-      if (VERBOSE && r?.error) console.log(`    ${short(link.url, 48)} -> ${r.error}`);
-      await new Promise((res) => setTimeout(res, 250)); // be polite between hosts
+      if (r && (r.price || r.image)) {
+        if (r.price && !gotPrice) gotPrice = r;
+        if (r.image && !gotImage) gotImage = r;
+
+        // A retailer observation belongs only to the exact URL that returned
+        // it. Never copy the headline watch price into links: deal scoring
+        // relies on each link being independent, dated market evidence.
+        if (REFRESH && r.price) {
+          const condition = inferRetailCondition({
+            url: link.url,
+            brand: w.brand,
+            explicitCondition: r.condition,
+          });
+          const result = recordOfferObservation(link, r.price, observedAt, {
+            condition,
+          });
+          if (result === "currency-updated") {
+            offerCurrencyChanges.push(
+              `${name} (${short(link.url, 36)}): retailer ask stored as ${r.price.amount} ${r.price.currency}`,
+            );
+          }
+          offerN++;
+          watchOfferN++;
+          refreshedConditions.add(link.condition || "condition unknown");
+        }
+
+        // The default gap-filling pass keeps its original first-result
+        // behavior. An explicit refresh checks every link so best-offer and
+        // deal evidence can be refreshed independently.
+        if (!REFRESH && (!needPrice || gotPrice) && (!needImage || gotImage)) break;
+      }
+      if (r?.error || r?.priceError) {
+        const failure = r.error
+          ? { code: "fetch-failed", message: r.error }
+          : r.priceError;
+        linkFailures.push(`[${failure.code}] ${failure.message}`);
+        if (VERBOSE || ONLY.length) {
+          console.log(`    ${short(link.url, 48)} -> [${failure.code}] ${failure.message}`);
+        }
+      }
+      if (index < links.length - 1) {
+        await new Promise((res) => setTimeout(res, 250)); // be polite between hosts
+      }
     }
 
-    if (!got) { misses.push(name); console.log(`✗ miss  ${name}`); continue; }
+    if (!gotPrice && !gotImage) {
+      misses.push(name);
+      const reason = linkFailures.length ? ` — ${Array.from(new Set(linkFailures)).join("; ")}` : "";
+      console.log(`✗ miss  ${name}${reason}`);
+      continue;
+    }
     const did = [];
-    if (needPrice && got.price) { w.price = got.price; w.priceUpdatedAt = new Date().toISOString(); priceN++; did.push(`${got.price.amount} ${got.price.currency}`); }
-    if (needImage && got.image) { w.imageUrl = got.image; imageN++; did.push("image"); }
-    if (did.length) { changed++; console.log(`✓ ${String(got.source || "?").padEnd(8)}${name.padEnd(34)} ${did.join(", ")}`); }
-    else { misses.push(name); console.log(`✗ miss  ${name} (nothing usable)`); }
+    if (needPrice && gotPrice?.price) {
+      const result = recordPrice(w, gotPrice.price, "scrape");
+      if (result === "currency") {
+        currencySkips.push(`${name}: stored ${w.price.amount} ${w.price.currency}, site quotes ${gotPrice.price.amount} ${gotPrice.price.currency}`);
+      } else {
+        priceN++;
+        did.push(result ? `${gotPrice.price.amount} ${gotPrice.price.currency}` : `${gotPrice.price.amount} ${gotPrice.price.currency} (unchanged)`);
+      }
+    }
+    if (needImage && gotImage?.image) { w.imageUrl = gotImage.image; imageN++; did.push("image"); }
+    if (watchOfferN) {
+      did.push(`${watchOfferN} dated offer${watchOfferN === 1 ? "" : "s"} (${Array.from(refreshedConditions).join("/")})`);
+    }
+    if (did.length) {
+      changed++;
+      const source = gotPrice?.source || gotImage?.source || "?";
+      console.log(`✓ ${String(source).padEnd(19)}${name.padEnd(34)} ${did.join(", ")}`);
+    }
+    else {
+      misses.push(name);
+      const reason = linkFailures.length ? ` — ${Array.from(new Set(linkFailures)).join("; ")}` : " (nothing usable)";
+      console.log(`✗ miss  ${name}${reason}`);
+    }
   }
 
-  console.log(`\nPrices: ${priceN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
+  console.log(`\nPrices: ${priceN}  ·  Dated offers: ${offerN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
   if (misses.length) console.log(`Missing (${misses.length}): ${misses.map((m) => short(m, 22)).join("; ")}`);
+  if (currencySkips.length) {
+    console.log(`\nHeadline prices preserved — site quotes a different currency (${currencySkips.length}).`);
+    console.log(`Native retailer asks were still recorded on their exact links. Use --allow-currency-change to update tracked headlines too:`);
+    for (const skip of currencySkips) console.log(`  · ${skip}`);
+  }
+  if (offerCurrencyChanges.length) {
+    console.log(`\nRetailer asks moved from stored conversions to page-native currency (${offerCurrencyChanges.length}):`);
+    for (const change of offerCurrencyChanges) console.log(`  · ${change}`);
+  }
 
   if (DRY) return console.log("\n--dry: nothing written.");
   if (changed) {
