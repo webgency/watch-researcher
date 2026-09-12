@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -71,6 +71,7 @@ export default function CollectionView({
   const { query, setQuery } = useCollectionSearch();
   const [status, setStatus] = useState<WatchStatus | "all">("all");
   const [wishlistTiers, setWishlistTiers] = useState<WishlistTier[]>([]);
+  const [priorityOpen, setPriorityOpen] = useState(false);
   const [freshOffersOnly, setFreshOffersOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>("wishlistTier");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -85,6 +86,31 @@ export default function CollectionView({
     if (wishlistTiers.length === 1) return WISHLIST_TIER_LABELS[wishlistTiers[0]];
     return `${wishlistTiers.length} priorities`;
   }, [wishlistTiers]);
+
+  const priorityRef = useRef<HTMLDivElement>(null);
+  const priorityTriggerRef = useRef<HTMLButtonElement>(null);
+
+  // The panel is multi-select, so it stays open while the user ticks boxes and
+  // closes only on an explicit dismissal. pointerdown rather than click so a
+  // drag that starts outside still counts, and so the trigger's own click
+  // toggles instead of racing a close.
+  useEffect(() => {
+    if (!priorityOpen) return;
+    function dismissOnOutsidePointer(event: PointerEvent) {
+      if (!priorityRef.current?.contains(event.target as Node)) setPriorityOpen(false);
+    }
+    function dismissOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setPriorityOpen(false);
+      priorityTriggerRef.current?.focus();
+    }
+    document.addEventListener("pointerdown", dismissOnOutsidePointer);
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOnOutsidePointer);
+      document.removeEventListener("keydown", dismissOnEscape);
+    };
+  }, [priorityOpen]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -256,36 +282,58 @@ export default function CollectionView({
             </button>
           ))}
         </div>
-        <details className="relative sm:w-56">
-          <summary className="input flex h-[2.375rem] cursor-pointer list-none items-center justify-between gap-2 py-1.5 [&::-webkit-details-marker]:hidden">
+        <div ref={priorityRef} className="relative sm:w-56">
+          <button
+            type="button"
+            ref={priorityTriggerRef}
+            onClick={() => setPriorityOpen((current) => !current)}
+            aria-expanded={priorityOpen}
+            aria-haspopup="true"
+            className="input flex h-[2.375rem] cursor-pointer items-center justify-between gap-2 py-1.5 text-left"
+          >
             <span className="truncate">{priorityLabel}</span>
-            <span aria-hidden className="text-slate-400">▾</span>
-          </summary>
-          <div className="absolute z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-lg">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Priority</span>
-              <button type="button" className="text-xs font-medium text-slate-500 hover:text-slate-900" onClick={() => setWishlistTiers([])}>
-                Clear
-              </button>
+            <span aria-hidden className={`text-slate-400 transition-transform ${priorityOpen ? "rotate-180" : ""}`}>
+              &#9662;
+            </span>
+          </button>
+          {priorityOpen && (
+            <div
+              role="group"
+              aria-label="Priority"
+              className="absolute z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-lg"
+            >
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Priority</span>
+                <button
+                  type="button"
+                  className="text-xs font-medium text-slate-500 hover:text-slate-900"
+                  onClick={() => setWishlistTiers([])}
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="space-y-1">
+                {WISHLIST_TIERS.map((tier) => (
+                  <label
+                    key={tier}
+                    className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-slate-50"
+                  >
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedTierSet.has(tier)}
+                        onChange={() => toggleWishlistTier(tier)}
+                        className="h-4 w-4 accent-slate-900"
+                      />
+                      <span>{WISHLIST_TIER_LABELS[tier]}</span>
+                    </span>
+                    <span className="text-xs text-slate-400">{wishlistTierCounts[tier]}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-            <div className="space-y-1">
-              {WISHLIST_TIERS.map((tier) => (
-                <label key={tier} className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-slate-50">
-                  <span className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedTierSet.has(tier)}
-                      onChange={() => toggleWishlistTier(tier)}
-                      className="h-4 w-4 accent-slate-900"
-                    />
-                    <span>{WISHLIST_TIER_LABELS[tier]}</span>
-                  </span>
-                  <span className="text-xs text-slate-400">{wishlistTierCounts[tier]}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </details>
+          )}
+        </div>
         <button
           type="button"
           aria-pressed={freshOffersOnly}
