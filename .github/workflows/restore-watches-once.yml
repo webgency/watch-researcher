@@ -1,0 +1,45 @@
+name: restore-watches-once
+on:
+  push:
+    branches: [watch/manual-wishlist-fetches-2026-09-12]
+    paths:
+      - scripts/four_new_watches.json
+      - scripts/restore_watches_from_main.py
+      - .github/workflows/restore-watches-once.yml
+  workflow_dispatch:
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: watch/manual-wishlist-fetches-2026-09-12
+      - name: Fetch main and rebuild watches.json
+        run: |
+          git fetch origin main
+          python3 scripts/restore_watches_from_main.py
+      - name: Commit restored watches.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/watches.json
+          if git diff --cached --quiet; then
+            echo "no change to commit"
+          else
+            git commit -m "fix: restore full watches.json (Lima, Ferro, NOMOS, FIYTA)"
+            git push origin HEAD:watch/manual-wishlist-fetches-2026-09-12
+          fi
+      - name: Ensure pull request exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing=$(gh pr list --repo webgency/watch-researcher --head webgency:watch/manual-wishlist-fetches-2026-09-12 --base main --state open --json url --jq '.[0].url // empty')
+          if [ -n "$existing" ]; then
+            echo "PR already open: $existing"
+          else
+            gh pr create --repo webgency/watch-researcher --base main --head watch/manual-wishlist-fetches-2026-09-12 --title "data: add manual wishlist fetches (Lima, Ferro, NOMOS, FIYTA)" --body "Adds four manually fetched wishlist watches to data/watches.json: Lima GMT Transit Teal, Ferro Race Master Chronograph Nitro, NOMOS Club Sport neomatik Worldtimer blue 790, FIYTA Interstellar Space Capsule DGA35005.WLW.A."
+          fi
