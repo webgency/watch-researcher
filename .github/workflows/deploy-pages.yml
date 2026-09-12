@@ -1,11 +1,13 @@
 name: Deploy to GitHub Pages
 
 # Publishes a read-only static export of the collection.
-# Runs on push to main or the working branch, or via a manual run. Once the PR
-# is merged you can drop the feature branch and deploy from main only.
+# main is the only branch that publishes. It shared this trigger with the
+# claude/epic-sagan-reqnic working branch for a while, which meant the live site
+# showed whichever of the two happened to build last — and the two had drifted
+# 111 commits apart.
 on:
   push:
-    branches: [main, claude/epic-sagan-reqnic]
+    branches: [main]
   workflow_dispatch:
 
 # Permissions required by the GitHub Pages deployment.

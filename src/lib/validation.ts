@@ -1,10 +1,18 @@
 import { SPEC_FIELDS } from "./specs";
+import { plausibilityIssues } from "./spec-plausibility.mjs";
 import {
-  CURRENCIES,
+  Availability,
+  AVAILABILITY_STATES,
+  BrandCatalog,
   Condition,
+  Friction,
   Money,
   MOVEMENT_TYPES,
+  PriceSnapshot,
+  QualityFlags,
   RetailerLink,
+  ScoringCategory,
+  SCORING_CATEGORIES,
   Watch,
   WatchInput,
   WatchSpecs,
@@ -17,7 +25,14 @@ import {
 type RecordValue = Record<string, unknown>;
 
 type ValidationResult<T> =
-  | { ok: true; data: T }
+  /**
+   * `warnings` carries plausibility problems that must not block the write.
+   * The add form's URL autofill is where most bad values came from in the
+   * first place, and rejecting a half-scraped record would lose the good
+   * fields with the bad. npm run validate:data is the gate that actually
+   * refuses them, so nothing implausible reaches a commit.
+   */
+  | { ok: true; data: T; warnings: string[] }
   | { ok: false; errors: string[] };
 
 export class DataValidationError extends Error {
@@ -60,14 +75,49 @@ function cleanPositiveNumber(value: unknown, path: string, errors: string[]): nu
   return number;
 }
 
+function cleanNonNegativeNumber(value: unknown, path: string, errors: string[]): number | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(number) || number < 0) {
+    errors.push(`${path} must be a non-negative number`);
+    return undefined;
+  }
+  return number;
+}
+
+function cleanBoolean(value: unknown, path: string, errors: string[]): boolean | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "boolean") {
+    errors.push(`${path} must be a boolean`);
+    return undefined;
+  }
+  return value;
+}
+
+function cleanIntegerRange(
+  value: unknown,
+  path: string,
+  errors: string[],
+  min: number,
+  max: number
+): number | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    errors.push(`${path} must be a whole number from ${min} to ${max}`);
+    return undefined;
+  }
+  return number;
+}
+
 function cleanCurrency(value: unknown, path: string, errors: string[]): string | undefined {
   if (typeof value !== "string" || !value.trim()) {
     errors.push(`${path} is required`);
     return undefined;
   }
   const currency = value.trim().toUpperCase();
-  if (!CURRENCIES.includes(currency)) {
-    errors.push(`${path} must be one of ${CURRENCIES.join(", ")}`);
+  if (!/^[A-Z]{3}$/.test(currency)) {
+    errors.push(`${path} must be a 3-letter currency code`);
     return undefined;
   }
   return currency;
@@ -105,6 +155,15 @@ function cleanWishlistTier(value: unknown, errors: string[]): WishlistTier | und
   return value as WishlistTier;
 }
 
+function cleanScoringCategory(value: unknown, errors: string[]): ScoringCategory | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string" || !SCORING_CATEGORIES.includes(value as ScoringCategory)) {
+    errors.push(`scoringCategory must be one of ${SCORING_CATEGORIES.join(", ")}`);
+    return undefined;
+  }
+  return value as ScoringCategory;
+}
+
 function cleanCondition(value: unknown, path: string, errors: string[]): Condition | undefined {
   if (value === undefined || value === null || value === "") return undefined;
   if (value !== "new" && value !== "pre-owned") {
@@ -135,12 +194,63 @@ function cleanLinks(value: unknown, required: boolean, errors: string[]): Retail
     const retailer = cleanOptionalString(item.retailer, `${path}.retailer`, errors);
     const price = cleanMoney(item.price, `${path}.price`, errors);
     const condition = cleanCondition(item.condition, `${path}.condition`, errors);
+    const observedAt = cleanDateString(item.observedAt, `${path}.observedAt`, errors);
 
     if (retailer) link.retailer = retailer;
     if (price) link.price = price;
     if (condition) link.condition = condition;
+    if (observedAt) link.observedAt = observedAt;
     return [link];
   });
+}
+
+function cleanPriceHistory(value: unknown, errors: string[]): PriceSnapshot[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!Array.isArray(value)) {
+    errors.push("priceHistory must be an array");
+    return undefined;
+  }
+
+  const history = value.flatMap((item, index) => {
+    const path = `priceHistory[${index}]`;
+    if (!isRecord(item)) {
+      errors.push(`${path} must be an object`);
+      return [];
+    }
+
+    const price = cleanMoney(item.price, `${path}.price`, errors);
+    if (!price) {
+      errors.push(`${path}.price is required`);
+      return [];
+    }
+    const date = cleanDateString(item.date, `${path}.date`, errors);
+    if (!date) {
+      errors.push(`${path}.date is required`);
+      return [];
+    }
+
+    const snapshot: PriceSnapshot = { price, date };
+    const source = cleanOptionalString(item.source, `${path}.source`, errors);
+    if (source) snapshot.source = source;
+    return [snapshot];
+  });
+
+  // The series is meant to be a list of moves, oldest first. Catching an
+  // out-of-order or duplicated entry here keeps every consumer free to treat
+  // the last element as "current" without re-sorting or de-duplicating.
+  for (let i = 1; i < history.length; i++) {
+    if (new Date(history[i].date).getTime() < new Date(history[i - 1].date).getTime()) {
+      errors.push(`priceHistory[${i}].date is earlier than the entry before it`);
+    }
+    if (
+      history[i].price.amount === history[i - 1].price.amount &&
+      history[i].price.currency === history[i - 1].price.currency
+    ) {
+      errors.push(`priceHistory[${i}] repeats the previous price; the series records moves only`);
+    }
+  }
+
+  return history;
 }
 
 function cleanSpecs(value: unknown, required: boolean, errors: string[]): WatchSpecs | undefined {
@@ -172,6 +282,86 @@ function cleanSpecs(value: unknown, required: boolean, errors: string[]): WatchS
     (specs[field.key] as string) = text;
   }
   return specs;
+}
+
+function cleanQualityFlags(value: unknown, errors: string[]): QualityFlags | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!isRecord(value)) {
+    errors.push("qualityFlags must be an object");
+    return undefined;
+  }
+
+  const flags: QualityFlags = {};
+  const numbers: Array<{ key: "regulatedPositions" | "accuracySpecSpd" | "hardenedCoatingHv" | "antimagneticAm" | "arLayers"; integer?: boolean }> = [
+    { key: "regulatedPositions", integer: true },
+    { key: "accuracySpecSpd" },
+    { key: "hardenedCoatingHv" },
+    { key: "antimagneticAm" },
+    { key: "arLayers", integer: true },
+  ];
+  for (const { key, integer } of numbers) {
+    const cleaned = cleanNonNegativeNumber(value[key], `qualityFlags.${key}`, errors);
+    if (cleaned === undefined) continue;
+    if (integer && !Number.isInteger(cleaned)) {
+      errors.push(`qualityFlags.${key} must be a whole number`);
+      continue;
+    }
+    flags[key] = cleaned;
+  }
+
+  const booleans = [
+    "sapphireBezelInsert",
+    "drilledLugs",
+    "microAdjustClasp",
+    "quickRelease",
+    "braceletIncluded",
+    "arCoated",
+  ] as const;
+  for (const key of booleans) {
+    const cleaned = cleanBoolean(value[key], `qualityFlags.${key}`, errors);
+    if (cleaned !== undefined) flags[key] = cleaned;
+  }
+
+  return flags;
+}
+
+function cleanFriction(value: unknown, errors: string[]): Friction | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!isRecord(value)) {
+    errors.push("friction must be an object");
+    return undefined;
+  }
+
+  const availability = value.availability;
+  if (typeof availability !== "string" || !AVAILABILITY_STATES.includes(availability as Availability)) {
+    errors.push(`friction.availability must be one of ${AVAILABILITY_STATES.join(", ")}`);
+  }
+  const brandLiquidity = cleanIntegerRange(value.brandLiquidity, "friction.brandLiquidity", errors, 1, 5);
+  if (brandLiquidity === undefined) {
+    errors.push("friction.brandLiquidity is required");
+  }
+  const expectedShipDate = cleanDateString(value.expectedShipDate, "friction.expectedShipDate", errors);
+  const braceletUpchargeUsd = cleanNonNegativeNumber(
+    value.braceletUpchargeUsd,
+    "friction.braceletUpchargeUsd",
+    errors
+  );
+
+  if (
+    typeof availability !== "string" ||
+    !AVAILABILITY_STATES.includes(availability as Availability) ||
+    brandLiquidity === undefined
+  ) {
+    return undefined;
+  }
+
+  const friction: Friction = {
+    availability: availability as Availability,
+    brandLiquidity: brandLiquidity as Friction["brandLiquidity"],
+  };
+  if (expectedShipDate) friction.expectedShipDate = expectedShipDate;
+  if (braceletUpchargeUsd !== undefined) friction.braceletUpchargeUsd = braceletUpchargeUsd;
+  return friction;
 }
 
 function cleanTags(value: unknown, required: boolean, errors: string[]): string[] | undefined {
@@ -226,6 +416,17 @@ function assignIfPresent<T extends RecordValue, K extends keyof WatchInput>(
   }
 }
 
+/**
+ * Plausibility problems in a spec block, as human-readable strings.
+ *
+ * Both severities are returned here. On the write path everything is advisory:
+ * the distinction between "cannot be right" and "unlikely" only decides which
+ * of them fails npm run validate:data.
+ */
+export function specPlausibilityWarnings(specs: WatchSpecs | undefined): string[] {
+  return plausibilityIssues(specs).map((issue: { message: string }) => issue.message);
+}
+
 export function normalizeWatchInput(body: unknown): ValidationResult<WatchInput> {
   return normalizeWatchShape(body, false) as ValidationResult<WatchInput>;
 }
@@ -253,8 +454,18 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "referenceNumber", cleanOptionalString(body.referenceNumber, "referenceNumber", errors));
   assignIfPresent(output, body, "status", cleanStatus(body.status, !partial, errors));
   assignIfPresent(output, body, "wishlistTier", cleanWishlistTier(body.wishlistTier, errors));
+  assignIfPresent(output, body, "scoringCategory", cleanScoringCategory(body.scoringCategory, errors));
+  assignIfPresent(output, body, "designUniqueness", cleanIntegerRange(body.designUniqueness, "designUniqueness", errors, 1, 5));
+  assignIfPresent(output, body, "designPreferenceElo", cleanNonNegativeNumber(body.designPreferenceElo, "designPreferenceElo", errors));
+  assignIfPresent(output, body, "designComparisonCount", cleanIntegerRange(body.designComparisonCount, "designComparisonCount", errors, 0, Number.MAX_SAFE_INTEGER));
+  assignIfPresent(output, body, "personalFit", cleanIntegerRange(body.personalFit, "personalFit", errors, 1, 5));
   assignIfPresent(output, body, "price", cleanMoney(body.price, "price", errors));
   assignIfPresent(output, body, "priceUpdatedAt", cleanDateString(body.priceUpdatedAt, "priceUpdatedAt", errors));
+  assignIfPresent(output, body, "priceHistory", cleanPriceHistory(body.priceHistory, errors));
+  assignIfPresent(output, body, "targetPrice", cleanMoney(body.targetPrice, "targetPrice", errors));
+  assignIfPresent(output, body, "landedPrice", cleanMoney(body.landedPrice, "landedPrice", errors));
+  assignIfPresent(output, body, "qualityFlags", cleanQualityFlags(body.qualityFlags, errors));
+  assignIfPresent(output, body, "friction", cleanFriction(body.friction, errors));
   assignIfPresent(output, body, "links", cleanLinks(body.links, !partial, errors));
   assignIfPresent(output, body, "imageUrl", cleanOptionalString(body.imageUrl, "imageUrl", errors));
   assignIfPresent(output, body, "specs", cleanSpecs(body.specs, !partial, errors));
@@ -272,7 +483,12 @@ function normalizeWatchShape(
     output.tags ??= [];
   }
 
-  return errors.length ? { ok: false, errors } : { ok: true, data: output as WatchInput | Partial<WatchInput> };
+  if (errors.length) return { ok: false, errors };
+  return {
+    ok: true,
+    data: output as WatchInput | Partial<WatchInput>,
+    warnings: specPlausibilityWarnings(output.specs),
+  };
 }
 
 export function validateWatchCollection(value: unknown): Watch[] {
@@ -313,4 +529,33 @@ export function validateWatchCollection(value: unknown): Watch[] {
   }
 
   return watches;
+}
+
+export function validateBrandCatalog(value: unknown): BrandCatalog {
+  if (!isRecord(value)) {
+    throw new DataValidationError("Brand data must be an object.", ["data/brands.json must contain an object"]);
+  }
+
+  const errors: string[] = [];
+  const brands: BrandCatalog = {};
+
+  for (const [brand, info] of Object.entries(value)) {
+    const path = `brands.${brand}`;
+    if (!brand.trim()) {
+      errors.push(`${path} brand name is required`);
+      continue;
+    }
+    if (!isRecord(info)) {
+      errors.push(`${path} must be an object`);
+      continue;
+    }
+    const reputationTier = cleanIntegerRange(info.reputationTier, `${path}.reputationTier`, errors, 1, 5);
+    if (reputationTier !== undefined) brands[brand] = { reputationTier };
+  }
+
+  if (errors.length) {
+    throw new DataValidationError("Brand data is invalid.", errors);
+  }
+
+  return brands;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -12,11 +12,16 @@ import {
   WISHLIST_TIER_LABELS,
 } from "@/lib/types";
 import { IS_STATIC } from "@/lib/config";
+import { landedPriceUsd, type StandingSummary } from "@/lib/scoring";
+import { bestOffer, FreshnessTier } from "@/lib/valuation";
 import { useCollectionSearch } from "./CollectionSearchContext";
 import WatchCard from "./WatchCard";
 
 type SortKey =
   | "wishlistTier"
+  | "valueScore"
+  | "qualityScore"
+  | "offerFreshness"
   | "dateAdded"
   | "priceAsc"
   | "priceDesc"
@@ -24,7 +29,10 @@ type SortKey =
   | "caseSize";
 
 const SORTS: { key: SortKey; label: string }[] = [
-  { key: "wishlistTier", label: "Desirability" },
+  { key: "wishlistTier", label: "Wishlist priority" },
+  { key: "valueScore", label: "Rubric value" },
+  { key: "qualityScore", label: "Quality score" },
+  { key: "offerFreshness", label: "Best-offer freshness" },
   { key: "dateAdded", label: "Recently added" },
   { key: "priceAsc", label: "Price: low to high" },
   { key: "priceDesc", label: "Price: high to low" },
@@ -32,27 +40,99 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "caseSize", label: "Case size" },
 ];
 
+/** Sort key for an optional score. Unrated sorts last; -1 rather than -Infinity
+ *  so that two unrated watches subtract to 0 and fall through to the tiebreak
+ *  instead of producing NaN. */
+function rank(score: number | null | undefined): number {
+  return score ?? -1;
+}
+
 function tierRank(tier?: WishlistTier): number {
   if (!tier) return Infinity;
   const index = WISHLIST_TIERS.indexOf(tier);
   return index === -1 ? Infinity : index;
 }
 
-export default function CollectionView({ watches }: { watches: Watch[] }) {
+const FRESHNESS_RANK: Record<FreshnessTier, number> = {
+  fresh: 0,
+  aging: 1,
+  stale: 2,
+  expired: 3,
+};
+
+export default function CollectionView({
+  watches,
+  scoreSummaries = {},
+}: {
+  watches: Watch[];
+  scoreSummaries?: Record<string, StandingSummary>;
+}) {
   const router = useRouter();
-  const { query } = useCollectionSearch();
+  const { query, setQuery } = useCollectionSearch();
   const [status, setStatus] = useState<WatchStatus | "all">("all");
-  const [wishlistTier, setWishlistTier] = useState<WishlistTier | "all">("all");
+  const [wishlistTiers, setWishlistTiers] = useState<WishlistTier[]>([]);
+  const [priorityOpen, setPriorityOpen] = useState(false);
+  const [freshOffersOnly, setFreshOffersOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>("wishlistTier");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selectionMessage, setSelectionMessage] = useState<string | null>(null);
+  const selectedTierSet = useMemo(() => new Set(wishlistTiers), [wishlistTiers]);
+  const offerByWatch = useMemo(() => {
+    const now = new Date();
+    return new Map(watches.map((watch) => [watch.id, bestOffer(watch, undefined, now)]));
+  }, [watches]);
+  const priorityLabel = useMemo(() => {
+    if (wishlistTiers.length === 0 || wishlistTiers.length === WISHLIST_TIERS.length) return "All priorities";
+    if (wishlistTiers.length === 1) return WISHLIST_TIER_LABELS[wishlistTiers[0]];
+    return `${wishlistTiers.length} priorities`;
+  }, [wishlistTiers]);
+
+  const priorityRef = useRef<HTMLDivElement>(null);
+  const priorityTriggerRef = useRef<HTMLButtonElement>(null);
+
+  // The panel is multi-select, so it stays open while the user ticks boxes and
+  // closes only on an explicit dismissal. pointerdown rather than click so a
+  // drag that starts outside still counts, and so the trigger's own click
+  // toggles instead of racing a close.
+  useEffect(() => {
+    if (!priorityOpen) return;
+    function dismissOnOutsidePointer(event: PointerEvent) {
+      if (!priorityRef.current?.contains(event.target as Node)) setPriorityOpen(false);
+    }
+    function dismissOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setPriorityOpen(false);
+      priorityTriggerRef.current?.focus();
+    }
+    document.addEventListener("pointerdown", dismissOnOutsidePointer);
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOnOutsidePointer);
+      document.removeEventListener("keydown", dismissOnEscape);
+    };
+  }, [priorityOpen]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+        setSelectionMessage(null);
+      } else if (next.size < 4) {
+        next.add(id);
+        setSelectionMessage(null);
+      } else {
+        setSelectionMessage("Compare up to four watches at a time.");
+      }
       return next;
     });
+  }
+
+  function resetFilters() {
+    setStatus("all");
+    setWishlistTiers([]);
+    setFreshOffersOnly(false);
+    setQuery("");
   }
 
   async function changeWishlistTier(id: string, next: WishlistTier | "") {
@@ -65,21 +145,30 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       if (!res.ok) throw new Error();
       router.refresh();
     } catch {
-      alert("Couldn't update desirability. Please try again.");
+      alert("Couldn't update wishlist priority. Please try again.");
     }
+  }
+
+  function toggleWishlistTier(tier: WishlistTier) {
+    setWishlistTiers((current) => (current.includes(tier) ? current.filter((item) => item !== tier) : [...current, tier]));
   }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = watches.filter((w) => {
       if (status !== "all" && w.status !== status) return false;
-      if (wishlistTier !== "all" && w.wishlistTier !== wishlistTier) return false;
+      if (selectedTierSet.size > 0 && (!w.wishlistTier || !selectedTierSet.has(w.wishlistTier))) return false;
+      if (freshOffersOnly) {
+        const offer = offerByWatch.get(w.id);
+        if (offer?.status !== "available" || offer.offer.freshness !== "fresh") return false;
+      }
       if (!q) return true;
       const haystack = [
         w.brand,
         w.model,
         w.referenceNumber,
         w.wishlistTier ? WISHLIST_TIER_LABELS[w.wishlistTier] : null,
+        scoreSummaries[w.id]?.standing.peerLabel,
         ...w.tags,
       ]
         .filter(Boolean)
@@ -92,10 +181,30 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       switch (sort) {
         case "wishlistTier":
           return tierRank(a.wishlistTier) - tierRank(b.wishlistTier) || b.dateAdded.localeCompare(a.dateAdded);
+        case "valueScore":
+          return (
+            rank(scoreSummaries[b.id]?.standing.valueScore) - rank(scoreSummaries[a.id]?.standing.valueScore) ||
+            rank(scoreSummaries[b.id]?.designScore) - rank(scoreSummaries[a.id]?.designScore) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
+        case "qualityScore":
+          return (
+            rank(scoreSummaries[b.id]?.standing.qualityScore) - rank(scoreSummaries[a.id]?.standing.qualityScore) ||
+            b.dateAdded.localeCompare(a.dateAdded)
+          );
+        case "offerFreshness": {
+          const offerA = offerByWatch.get(a.id);
+          const offerB = offerByWatch.get(b.id);
+          const rankA = offerA?.status === "available" ? FRESHNESS_RANK[offerA.offer.freshness] : Infinity;
+          const rankB = offerB?.status === "available" ? FRESHNESS_RANK[offerB.offer.freshness] : Infinity;
+          const ageA = offerA?.status === "available" ? offerA.offer.ageDays : Infinity;
+          const ageB = offerB?.status === "available" ? offerB.offer.ageDays : Infinity;
+          return rankA - rankB || ageA - ageB || b.dateAdded.localeCompare(a.dateAdded);
+        }
         case "priceAsc":
-          return (a.price?.amount ?? Infinity) - (b.price?.amount ?? Infinity);
+          return (landedPriceUsd(a) ?? Infinity) - (landedPriceUsd(b) ?? Infinity);
         case "priceDesc":
-          return (b.price?.amount ?? -Infinity) - (a.price?.amount ?? -Infinity);
+          return (landedPriceUsd(b) ?? -Infinity) - (landedPriceUsd(a) ?? -Infinity);
         case "brand":
           return `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`);
         case "caseSize":
@@ -106,7 +215,7 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       }
     });
     return list;
-  }, [watches, query, status, wishlistTier, sort]);
+  }, [watches, query, status, selectedTierSet, freshOffersOnly, offerByWatch, sort, scoreSummaries]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: watches.length };
@@ -122,11 +231,16 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
     return c;
   }, [watches]);
 
+
   function startCompare() {
     if (selected.size < 2) return;
-    const ids = filtered.filter((w) => selected.has(w.id)).map((w) => w.id);
+    // Selection survives filtering, so use the source collection rather than
+    // the currently visible subset when building the comparison URL.
+    const ids = watches.filter((w) => selected.has(w.id)).map((w) => w.id);
     router.push(`/compare?ids=${ids.join(",")}`);
   }
+
+  const hasActiveFilters = status !== "all" || wishlistTiers.length > 0 || freshOffersOnly || query.trim() !== "";
 
   if (watches.length === 0) {
     return (
@@ -147,50 +261,122 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-4 gap-3">
-        <Stat label="Total" value={String(counts.all)} />
-        <Stat label="Next purchase" value={String(wishlistTierCounts["next-purchase"])} />
-        <Stat label="Must have" value={String(wishlistTierCounts["must-have"])} />
-        <Stat label="Owned" value={String(counts.owned)} />
-      </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex flex-wrap gap-2">
-          {(["all", "owned", "sold"] as const).map((s) => (
+      {/* One segmented control rather than four free-floating pills: status is a
+          single-choice question, and as loose pills it competed for attention
+          with the three independent controls beside it and wrapped unpredictably
+          at tablet widths. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex w-full rounded-lg bg-white p-0.5 ring-1 ring-slate-200 sm:w-auto">
+          {(["all", ...WATCH_STATUSES] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatus(s)}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
-                status === s ? "bg-slate-900 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+              aria-pressed={status === s}
+              className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors sm:flex-none ${
+                status === s ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
-              {s} ({counts[s] ?? 0})
+              {s} <span className="tabular-nums opacity-60">{counts[s] ?? 0}</span>
             </button>
           ))}
         </div>
-        <select
-          value={wishlistTier}
-          onChange={(e) => setWishlistTier(e.target.value as WishlistTier | "all")}
-          className="input sm:max-w-[13rem]"
+        <div ref={priorityRef} className="relative sm:w-56">
+          <button
+            type="button"
+            ref={priorityTriggerRef}
+            onClick={() => setPriorityOpen((current) => !current)}
+            aria-expanded={priorityOpen}
+            aria-haspopup="true"
+            className="input flex h-[2.375rem] cursor-pointer items-center justify-between gap-2 py-1.5 text-left"
+          >
+            <span className="truncate">{priorityLabel}</span>
+            <span aria-hidden className={`text-slate-400 transition-transform ${priorityOpen ? "rotate-180" : ""}`}>
+              &#9662;
+            </span>
+          </button>
+          {priorityOpen && (
+            <div
+              role="group"
+              aria-label="Priority"
+              className="absolute z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-lg"
+            >
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Priority</span>
+                <button
+                  type="button"
+                  className="text-xs font-medium text-slate-500 hover:text-slate-900"
+                  onClick={() => setWishlistTiers([])}
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="space-y-1">
+                {WISHLIST_TIERS.map((tier) => (
+                  <label
+                    key={tier}
+                    className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-slate-50"
+                  >
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedTierSet.has(tier)}
+                        onChange={() => toggleWishlistTier(tier)}
+                        className="h-4 w-4 accent-slate-900"
+                      />
+                      <span>{WISHLIST_TIER_LABELS[tier]}</span>
+                    </span>
+                    <span className="text-xs text-slate-400">{wishlistTierCounts[tier]}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          aria-pressed={freshOffersOnly}
+          onClick={() => setFreshOffersOnly((current) => !current)}
+          className={`h-[2.375rem] rounded-lg px-3 text-sm font-medium ring-1 transition-colors ${
+            freshOffersOnly
+              ? "bg-emerald-700 text-white ring-emerald-700"
+              : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50"
+          }`}
         >
-          <option value="all">All desirability</option>
-          {WISHLIST_TIERS.map((tier) => (
-            <option key={tier} value={tier}>
-              {WISHLIST_TIER_LABELS[tier]} ({wishlistTierCounts[tier]})
-            </option>
-          ))}
-        </select>
-        <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="input sm:ml-auto sm:max-w-[12rem]">
+          Fresh offers only
+        </button>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortKey)}
+          // Right-aligned only when the whole toolbar fits one row; once it wraps,
+          // an ml-auto would strand the sort alone against the right edge.
+          className="input w-full sm:w-auto sm:min-w-[12rem] lg:ml-auto"
+        >
           {SORTS.map((s) => (
             <option key={s.key} value={s.key}>
-              {s.label}
+              Sort: {s.label}
             </option>
           ))}
         </select>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500" aria-live="polite">
+        <p>
+          Showing <span className="font-semibold text-slate-700">{filtered.length}</span> of {watches.length} watches
+        </p>
+        {hasActiveFilters && filtered.length > 0 && (
+          <button type="button" className="font-medium text-slate-700 underline-offset-4 hover:underline" onClick={resetFilters}>
+            Clear search and filters
+          </button>
+        )}
+      </div>
+
       {filtered.length === 0 ? (
-        <p className="py-12 text-center text-sm text-slate-500">No watches match your filters.</p>
+        <div className="card flex flex-col items-center gap-3 px-4 py-12 text-center">
+          <p className="text-sm font-medium text-slate-700">No watches match your search and filters.</p>
+          <p className="text-xs text-slate-500">Clear them to return to the full collection.</p>
+          <button type="button" className="btn-secondary" onClick={resetFilters}>Clear search and filters</button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((watch) => (
@@ -198,6 +384,8 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
               key={watch.id}
               watch={watch}
               selected={selected.has(watch.id)}
+              selectionDisabled={!selected.has(watch.id) && selected.size >= 4}
+              scoreSummary={scoreSummaries[watch.id]}
               onToggleSelect={toggleSelect}
               onChangeWishlistTier={IS_STATIC ? undefined : changeWishlistTier}
             />
@@ -206,25 +394,25 @@ export default function CollectionView({ watches }: { watches: Watch[] }) {
       )}
 
       {selected.size > 0 && (
-        <div className="sticky bottom-4 z-10 mx-auto flex w-fit items-center gap-3 rounded-full bg-slate-900 px-5 py-3 text-sm text-white shadow-lg">
-          <span>{selected.size} selected</span>
-          <button onClick={startCompare} disabled={selected.size < 2} className="rounded-full bg-white px-3 py-1 font-medium text-slate-900 disabled:opacity-50">
-            Compare →
-          </button>
-          <button onClick={() => setSelected(new Set())} className="text-slate-300 hover:text-white">
-            Clear
-          </button>
+        <div className="sticky bottom-4 z-30 mx-auto w-fit max-w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-xl sm:rounded-full sm:px-5">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <span>{selected.size} of 4 selected{selected.size < 2 ? " · choose one more" : ""}</span>
+            <button onClick={startCompare} disabled={selected.size < 2} className="rounded-full bg-white px-3 py-1 font-medium text-slate-900 disabled:opacity-50">
+              Compare →
+            </button>
+            <button
+              onClick={() => {
+                setSelected(new Set());
+                setSelectionMessage(null);
+              }}
+              className="text-slate-300 hover:text-white"
+            >
+              Clear
+            </button>
+          </div>
+          {selectionMessage && <p className="mt-1 text-center text-xs text-amber-200" role="status">{selectionMessage}</p>}
         </div>
       )}
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="card min-w-0 px-3 py-3 sm:px-4">
-      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-400 sm:text-xs">{label}</p>
-      <p className="mt-1 truncate text-lg font-bold">{value}</p>
     </div>
   );
 }
