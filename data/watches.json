@@ -878,12 +878,13 @@
       "caseThicknessMm": 10.4,
       "lugToLugMm": 41.5,
       "lugWidthMm": 22,
-      "caseMaterial": "ROSEGOLD PVD PLATED, STAINLESS STEEL 316L CASEBACK: ROSEGOLD",
+      "caseMaterial": "Rose gold PVD plated stainless steel 316L",
       "movement": "quartz",
+      "caliber": "Meca-quartz",
       "waterResistanceM": 50,
       "crystal": "Sapphire",
       "dialColor": "Espresso / chocolate",
-      "braceletStrap": "Leather",
+      "braceletStrap": "Brown leather (quick-release)",
       "complications": "Chronograph"
     },
     "tags": [
