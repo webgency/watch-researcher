@@ -149,6 +149,13 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["3285", 0.95],
   ["mt5450", 0.80],
   ["m100", 0.80],
+  // NOMOS DUW 3202. An in-house neomatik automatic running NOMOS's own swing
+  // system — an escapement they build rather than buy, which is the rarer
+  // thing at any price. Level with the MT5450 above rather than below it: its
+  // 42h barrel and its lack of COSC are both already scored elsewhere (the
+  // power-reserve bonus, and regulatedPositions), so docking the base tier for
+  // either would count them twice — the same reasoning as the Rolex/Omega pair.
+  ["duw 3202", 0.80],
   // Proprietary automatic monopusher chronograph with a patented retrograde
   // regatta module and 64h reserve; kept below the METAS anchor above.
   ["alb01 a", 0.80],
@@ -196,6 +203,10 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["ot.g102", 0.45],
   ["st1721", 0.45],
   ["miyota 8215", 0.38],
+  // Miyota 8N24 is the open-heart variant of the 8-series base above: the same
+  // 21,600 vph architecture and the same non-hacking seconds, with a cut-away
+  // dial. Same tier, because the dial is not the movement.
+  ["miyota 8n24", 0.38],
   ["nh38", 0.35],
   ["nh34", 0.32],
   ["nh35", 0.30],
