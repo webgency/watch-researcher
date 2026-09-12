@@ -231,6 +231,7 @@ export default function CollectionView({
     return c;
   }, [watches]);
 
+
   function startCompare() {
     if (selected.size < 2) return;
     // Selection survives filtering, so use the source collection rather than
@@ -260,25 +261,23 @@ export default function CollectionView({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-4 gap-3">
-        <Stat label="Total" value={String(counts.all)} />
-        <Stat label="Next purchase" value={String(wishlistTierCounts["next-purchase"])} />
-        <Stat label="Must have" value={String(wishlistTierCounts["must-have"])} />
-        <Stat label="Owned" value={String(counts.owned)} />
-      </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex flex-wrap gap-2">
+      {/* One segmented control rather than four free-floating pills: status is a
+          single-choice question, and as loose pills it competed for attention
+          with the three independent controls beside it and wrapped unpredictably
+          at tablet widths. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex w-full rounded-lg bg-white p-0.5 ring-1 ring-slate-200 sm:w-auto">
           {(["all", ...WATCH_STATUSES] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatus(s)}
               aria-pressed={status === s}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
-                status === s ? "bg-slate-900 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+              className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors sm:flex-none ${
+                status === s ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
-              {s} ({counts[s] ?? 0})
+              {s} <span className="tabular-nums opacity-60">{counts[s] ?? 0}</span>
             </button>
           ))}
         </div>
@@ -346,7 +345,13 @@ export default function CollectionView({
         >
           Fresh offers only
         </button>
-        <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="input sm:ml-auto sm:max-w-[12rem]">
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortKey)}
+          // Right-aligned only when the whole toolbar fits one row; once it wraps,
+          // an ml-auto would strand the sort alone against the right edge.
+          className="input w-full sm:w-auto sm:min-w-[12rem] lg:ml-auto"
+        >
           {SORTS.map((s) => (
             <option key={s.key} value={s.key}>
               Sort: {s.label}
@@ -408,15 +413,6 @@ export default function CollectionView({
           {selectionMessage && <p className="mt-1 text-center text-xs text-amber-200" role="status">{selectionMessage}</p>}
         </div>
       )}
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="card min-w-0 px-3 py-3 sm:px-4">
-      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-400 sm:text-xs">{label}</p>
-      <p className="mt-1 truncate text-lg font-bold">{value}</p>
     </div>
   );
 }

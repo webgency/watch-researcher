@@ -66,9 +66,20 @@ export default function WatchCard({
       </div>
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
+          {/* Fixed height, because only 41 of 69 watches carry a reference
+              number — without it the price row sits a line higher on the cards
+              that have none, and nothing in a grid row lines up. */}
+          <div className="min-h-[5rem] min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{watch.brand}</p>
-            <Link href={href} className="block truncate font-semibold group-hover:underline">
+            {/* Two lines, not one: model names carry their differentiator at the
+                end ("D5 Pacific | Anacapa Auto — 39mm USA"), so a single-line
+                truncate hides the part that tells two variants apart. The
+                min-height reserves the second line so the price rows of a grid
+                row stay aligned whether a title wraps or not. */}
+            <Link
+              href={href}
+              className="block min-h-[2.75rem] font-semibold leading-snug line-clamp-2 group-hover:underline"
+            >
               {watch.model}
             </Link>
             {watch.referenceNumber && (

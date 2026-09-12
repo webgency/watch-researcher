@@ -3,6 +3,8 @@ import { getWatches } from "@/lib/store";
 import { standingSummaries } from "@/lib/scoring";
 import { IS_STATIC } from "@/lib/config";
 import CollectionView from "@/components/CollectionView";
+import CollectionSummaryBar from "@/components/CollectionSummaryBar";
+import { collectionSummary } from "@/lib/collection-summary";
 
 export default async function HomePage() {
   // Stay dynamic locally so edits show immediately; allow static prerender for
@@ -14,9 +16,15 @@ export default async function HomePage() {
   const summaries = standingSummaries(watches, watches);
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Your collection</h1>
-        <p className="text-sm text-slate-500">Track your wishlist, compare specs and prices, and grow your collection.</p>
+      {/* Side by side only once the toolbar below also fits one row. Below that the
+          stats get the full width and stay on a single line instead of wrapping
+          into a two-line block beside the heading. */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Your collection</h1>
+          <p className="text-sm text-slate-500">Track your wishlist, compare specs and prices, and grow your collection.</p>
+        </div>
+        {watches.length > 0 && <CollectionSummaryBar summary={collectionSummary(watches)} />}
       </div>
       <CollectionView watches={watches} scoreSummaries={summaries} />
     </div>
