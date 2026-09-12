@@ -4,8 +4,8 @@ import { formatMoney } from "@/lib/format";
 function Stat({ label, value, hint, tone }: { label: string; value: string; hint?: string; tone?: "good" }) {
   return (
     <div className="min-w-0" title={hint}>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-      <p className={`mt-0.5 text-lg font-bold tabular-nums ${tone === "good" ? "text-emerald-700" : "text-slate-900"}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-cocoa-400">{label}</p>
+      <p className={`mt-0.5 text-lg font-bold tabular-nums ${tone === "good" ? "text-emerald-700" : "text-cocoa-900"}`}>
         {value}
       </p>
     </div>

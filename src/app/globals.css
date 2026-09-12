@@ -7,7 +7,17 @@
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-cocoa-50 font-sans text-cocoa-950 antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  @apply bg-azalea text-cocoa-950;
+}
+
+/* A dark outline remains visible on both white and pink surfaces. */
+:focus-visible {
+  @apply outline outline-2 outline-offset-4 outline-cocoa-900;
 }
 
 @layer components {
@@ -15,21 +25,21 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-slate-900 text-white hover:bg-slate-700;
+    @apply btn bg-cocoa-900 text-white hover:bg-cocoa-700;
   }
   .btn-secondary {
-    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-100;
+    @apply btn border border-cocoa-300 bg-white text-cocoa-700 hover:bg-cocoa-100;
   }
   .btn-danger {
     @apply btn border border-red-300 bg-white text-red-600 hover:bg-red-50;
   }
   .input {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200;
+    @apply w-full rounded-lg border border-cocoa-300 bg-white px-3 py-2 text-sm shadow-sm outline-none placeholder:text-cocoa-400 focus:border-cocoa-900 focus:ring-2 focus:ring-cocoa-900;
   }
   .label {
-    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-cocoa-500;
   }
   .card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+    @apply rounded-xl border border-cocoa-200 bg-white shadow-sm;
   }
 }

@@ -15,7 +15,7 @@ export default async function EditWatchPage({ params }: { params: Promise<{ id: 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">
-          Edit <span className="text-slate-400">·</span> {watch.brand} {watch.model}
+          Edit <span className="text-cocoa-400">·</span> {watch.brand} {watch.model}
         </h1>
         <Link href={`/watch/${watch.id}`} className="btn-secondary">
           ← Back

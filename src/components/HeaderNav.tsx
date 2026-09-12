@@ -10,10 +10,18 @@ export default function HeaderNav() {
   const { query, setQuery } = useCollectionSearch();
   const showSearch = pathname === "/";
 
+  function navClass(active: boolean) {
+    return `relative flex h-10 min-w-0 flex-1 items-center justify-center rounded-md px-2 text-xs font-semibold transition-colors sm:flex-none sm:px-3 sm:text-sm ${
+      active
+        ? "text-cocoa-900 after:absolute after:inset-x-3 after:bottom-0 after:h-1 after:rounded-full after:bg-azalea"
+        : "text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900"
+    }`;
+  }
+
   return (
-    <nav className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-1 sm:justify-end">
+    <nav aria-label="Main navigation" className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-1 lg:justify-end">
       {showSearch && (
-        <label className="order-last w-full sm:order-none sm:min-w-0 sm:flex-1 sm:max-w-xs">
+        <label className="order-last w-full lg:order-none lg:min-w-0 lg:flex-1 lg:max-w-xs">
           <span className="sr-only">Search collection</span>
           <input
             type="search"
@@ -24,28 +32,34 @@ export default function HeaderNav() {
           />
         </label>
       )}
+      <Link href="/" aria-current={pathname === "/" ? "page" : undefined} className={navClass(pathname === "/")}>
+        Collection
+      </Link>
       <Link
         href="/compare"
-        className={`btn-secondary h-9 min-w-0 flex-1 px-2 sm:flex-none sm:px-3 ${pathname === "/compare" ? "border-slate-900 text-slate-900" : ""}`}
+        aria-current={pathname === "/compare" ? "page" : undefined}
+        className={navClass(pathname === "/compare")}
       >
         Compare
       </Link>
       <Link
         href="/value"
-        className={`btn-secondary h-9 min-w-0 flex-1 px-2 sm:flex-none sm:px-3 ${pathname === "/value" ? "border-slate-900 text-slate-900" : ""}`}
+        aria-current={pathname === "/value" ? "page" : undefined}
+        className={navClass(pathname === "/value")}
       >
         Value
       </Link>
       {!IS_STATIC && (
         <Link
           href="/design"
-          className={`btn-secondary h-9 min-w-0 flex-1 px-2 sm:flex-none sm:px-3 ${pathname === "/design" ? "border-slate-900 text-slate-900" : ""}`}
+          aria-current={pathname === "/design" ? "page" : undefined}
+          className={navClass(pathname === "/design")}
         >
           Design
         </Link>
       )}
       {!IS_STATIC && (
-        <Link href="/watch/new" className="btn-primary min-w-0 flex-1 px-2 sm:flex-none sm:px-4">
+        <Link href="/watch/new" className="btn-primary absolute right-4 top-5 whitespace-nowrap px-3 lg:static sm:px-4">
           + Add<span className="hidden sm:inline"> watch</span>
         </Link>
       )}

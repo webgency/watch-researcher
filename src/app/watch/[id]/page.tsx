@@ -42,45 +42,45 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
       </div>
 
       <div className="grid gap-6 md:grid-cols-[2fr_3fr]">
-        <div className="card flex h-72 items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+        <div className="card flex h-72 items-center justify-center overflow-hidden bg-gradient-to-br from-cocoa-100 to-cocoa-200">
           {watch.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={watch.imageUrl} alt={`${watch.brand} ${watch.model}`} className="h-full w-full object-cover" />
           ) : (
-            <span className="text-5xl font-bold text-slate-300">{(watch.brand[0] ?? "?").toUpperCase()}</span>
+            <span className="text-5xl font-bold text-cocoa-300">{(watch.brand[0] ?? "?").toUpperCase()}</span>
           )}
         </div>
 
         <div className="space-y-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">{watch.brand}</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-cocoa-400">{watch.brand}</p>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight">{watch.model}</h1>
               <WishlistTierBadge tier={watch.wishlistTier} />
               <StatusBadge status={watch.status} />
             </div>
-            {watch.referenceNumber && <p className="text-sm text-slate-500">Ref. {watch.referenceNumber}</p>}
+            {watch.referenceNumber && <p className="text-sm text-cocoa-500">Ref. {watch.referenceNumber}</p>}
           </div>
 
           <p className="text-3xl font-bold">{formatMoney(watch.price)}</p>
           {watch.priceUpdatedAt && (
-            <p className="text-xs text-slate-400">Price updated {formatDate(watch.priceUpdatedAt)}</p>
+            <p className="text-xs text-cocoa-400">Price updated {formatDate(watch.priceUpdatedAt)}</p>
           )}
           {watch.personalFit && (
-            <p className="text-sm font-medium text-slate-600">Fit for me: {watch.personalFit}/5</p>
+            <p className="text-sm font-medium text-cocoa-600">Fit for me: {watch.personalFit}/5</p>
           )}
 
           {watch.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {watch.tags.map((t) => (
-                <span key={t} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                <span key={t} className="rounded-full bg-cocoa-100 px-2.5 py-1 text-xs font-medium text-cocoa-600">
                   {t}
                 </span>
               ))}
             </div>
           )}
 
-          <p className="text-xs text-slate-400">Added {formatDate(watch.dateAdded)}</p>
+          <p className="text-xs text-cocoa-400">Added {formatDate(watch.dateAdded)}</p>
         </div>
       </div>
 
@@ -91,11 +91,11 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
       <MarketValuePanel watch={watch} />
 
       <section className="card p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Specifications</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cocoa-500">Specifications</h2>
         <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
           {SPEC_FIELDS.map((f) => (
-            <div key={String(f.key)} className="flex justify-between gap-4 border-b border-slate-100 pb-2">
-              <dt className="text-sm text-slate-500">{f.label}</dt>
+            <div key={String(f.key)} className="flex justify-between gap-4 border-b border-cocoa-100 pb-2">
+              <dt className="text-sm text-cocoa-500">{f.label}</dt>
               <dd className="text-sm font-medium capitalize">{formatSpecValue(f, watch.specs[f.key])}</dd>
             </div>
           ))}
@@ -104,20 +104,20 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
 
       {watch.links.length > 0 && (
         <section className="card p-5">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Where to buy</h2>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cocoa-500">Where to buy</h2>
           <ul className="space-y-2">
             {watch.links.map((l, i) => {
               const ageDays = l.observedAt ? observationAgeDays(l.observedAt) : undefined;
               return (
-                <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-100 p-3">
-                  <a href={l.url} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cocoa-100 p-3">
+                  <a href={l.url} target="_blank" rel="noopener noreferrer" className="font-medium text-azalea-700 hover:underline">
                     {l.retailer || hostname(l.url)}
                   </a>
                   <div className="flex flex-wrap items-center gap-3 text-sm">
-                    {l.condition && <span className="rounded bg-slate-100 px-2 py-0.5 text-xs capitalize text-slate-600">{l.condition}</span>}
-                    {l.observedAt && <span className="text-xs text-slate-400">Observed {formatDate(l.observedAt)}</span>}
+                    {l.condition && <span className="rounded bg-cocoa-100 px-2 py-0.5 text-xs capitalize text-cocoa-600">{l.condition}</span>}
+                    {l.observedAt && <span className="text-xs text-cocoa-400">Observed {formatDate(l.observedAt)}</span>}
                     {l.price && ageDays !== undefined && <FreshnessBadge tier={freshnessForAge(ageDays)} />}
-                    {l.price && ageDays === undefined && <span className="text-xs font-medium text-slate-400">Freshness unknown</span>}
+                    {l.price && ageDays === undefined && <span className="text-xs font-medium text-cocoa-400">Freshness unknown</span>}
                     <span className="font-semibold">{formatMoney(l.price)}</span>
                   </div>
                 </li>
@@ -129,8 +129,8 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
 
       {watch.notes && (
         <section className="card p-5">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Notes</h2>
-          <p className="whitespace-pre-wrap text-sm text-slate-700">{watch.notes}</p>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-cocoa-500">Notes</h2>
+          <p className="whitespace-pre-wrap text-sm text-cocoa-700">{watch.notes}</p>
         </section>
       )}
     </div>

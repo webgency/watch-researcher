@@ -23,7 +23,7 @@ function CompareInner({ allWatches }: { allWatches: Watch[] }) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Compare</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-cocoa-500">
             {watches.length} watch{watches.length === 1 ? "" : "es"} side by side · best value in each row highlighted.
           </p>
         </div>
@@ -33,7 +33,7 @@ function CompareInner({ allWatches }: { allWatches: Watch[] }) {
       </div>
 
       {watches.length < 2 ? (
-        <div className="card p-8 text-center text-sm text-slate-500">
+        <div className="card p-8 text-center text-sm text-cocoa-500">
           Select at least two watches from your collection to compare them.
           <div className="mt-4">
             <Link href="/" className="btn-primary">
@@ -52,7 +52,7 @@ function CompareInner({ allWatches }: { allWatches: Watch[] }) {
 
 export default function CompareClient({ allWatches }: { allWatches: Watch[] }) {
   return (
-    <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
+    <Suspense fallback={<p className="text-sm text-cocoa-500">Loading…</p>}>
       <CompareInner allWatches={allWatches} />
     </Suspense>
   );

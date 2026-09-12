@@ -1,4 +1,4 @@
-# ⌚ Watch Researcher
+# Vitrine
 
 A personal app to **track your watch wishlist, judge each watch against its price, and grow your collection** over time.
 

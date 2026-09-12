@@ -132,26 +132,26 @@ export default function ValueList({
           </Filter>
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <label className="flex items-center gap-2 text-sm text-slate-600">
+          <label className="flex items-center gap-2 text-sm text-cocoa-600">
             <input type="checkbox" checked={hasDealEvidence} onChange={(event) => setHasDealEvidence(event.target.checked)} />
             Has sufficient deal evidence
           </label>
-          <button type="button" onClick={resetFilters} className="text-sm font-medium text-blue-600 hover:underline">Reset filters</button>
+          <button type="button" onClick={resetFilters} className="text-sm font-medium text-azalea-700 hover:underline">Reset filters</button>
         </div>
       </section>
 
-      <p className="text-sm text-slate-500">Showing {visible.length} of {rows.length} wishlist or owned watches. Rubric value is the ranking; deal evidence and design stay separate.</p>
+      <p className="text-sm text-cocoa-500">Showing {visible.length} of {rows.length} wishlist or owned watches. Rubric value is the ranking; deal evidence and design stay separate.</p>
 
       <section className="card overflow-hidden">
         {visible.length === 0 ? (
-          <p className="p-8 text-center text-sm text-slate-500">No watches match these filters.</p>
+          <p className="p-8 text-center text-sm text-cocoa-500">No watches match these filters.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+              <thead className="border-b border-cocoa-200 bg-cocoa-50 text-xs uppercase tracking-wide text-cocoa-500">
                 <tr><th className="px-4 py-3">Watch</th><th className="px-3 py-3">Rubric value</th><th className="px-3 py-3">Deal vs fair asks</th><th className="px-3 py-3">Price</th><th className="px-3 py-3">Best dated offer</th><th className="px-3 py-3">Specs</th><th className="px-3 py-3">Design</th><th className="px-3 py-3">Target</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-cocoa-100">
                 {visible.map((row, index) => <ValueTableRow key={row.watch.id} row={row} rank={sort === "value" ? index + 1 : undefined} />)}
               </tbody>
             </table>
@@ -174,26 +174,26 @@ function ValueTableRow({ row, rank }: { row: ValueRow; rank?: number }) {
   return (
     <tr className="align-top">
       <td className="px-4 py-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{rank ? `#${rank} · ` : ""}{watch.brand}</p>
-        <Link href={`/watch/${watch.id}`} className="font-semibold text-slate-900 hover:underline">{watch.model}</Link>
-        <p className="mt-1 text-xs text-slate-500">{watch.status === "wishlist" && watch.wishlistTier ? WISHLIST_TIER_LABELS[watch.wishlistTier] : titleCase(watch.status)}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-400">{rank ? `#${rank} · ` : ""}{watch.brand}</p>
+        <Link href={`/watch/${watch.id}`} className="font-semibold text-cocoa-900 hover:underline">{watch.model}</Link>
+        <p className="mt-1 text-xs text-cocoa-500">{watch.status === "wishlist" && watch.wishlistTier ? WISHLIST_TIER_LABELS[watch.wishlistTier] : titleCase(watch.status)}</p>
       </td>
       <td className="px-3 py-4">
-        {standing.valueScore === undefined ? <p className="font-semibold text-slate-500">Not scored</p> : <p className="text-lg font-bold text-slate-900">{Math.round(toDisplayScore(standing.valueScore))}</p>}
+        {standing.valueScore === undefined ? <p className="font-semibold text-cocoa-500">Not scored</p> : <p className="text-lg font-bold text-cocoa-900">{Math.round(toDisplayScore(standing.valueScore))}</p>}
         <span title={`${Math.round(standing.evidenceCoverage * 100)}% of applicable scoring inputs recorded`} className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${CONFIDENCE_STYLE[standing.confidence]}`}>
           {limited ? "Limited evidence" : `${titleCase(standing.confidence)} confidence`} · {Math.round(standing.evidenceCoverage * 100)}%
         </span>
       </td>
       <td className="px-3 py-4">
-        {deal.status === "available" ? <><p className="font-semibold">{formatDiscount(deal.discountPct)}</p><p className="text-xs text-slate-500">Fair {formatMoney({ amount: deal.fairLowUsd, currency: "USD" })}–{formatMoney({ amount: deal.fairHighUsd, currency: "USD" })}</p></> : <><p className="font-semibold text-slate-500">Insufficient</p><p className="text-xs text-slate-400">No discount calculated</p></>}
+        {deal.status === "available" ? <><p className="font-semibold">{formatDiscount(deal.discountPct)}</p><p className="text-xs text-cocoa-500">Fair {formatMoney({ amount: deal.fairLowUsd, currency: "USD" })}–{formatMoney({ amount: deal.fairHighUsd, currency: "USD" })}</p></> : <><p className="font-semibold text-cocoa-500">Insufficient</p><p className="text-xs text-cocoa-400">No discount calculated</p></>}
       </td>
-      <td className="px-3 py-4"><p className="font-semibold">{formatMoney(watch.landedPrice ?? watch.price)}</p><p className="text-xs text-slate-500">{watch.landedPrice ? "Landed" : watch.price ? "Tracked" : "No price"}</p></td>
+      <td className="px-3 py-4"><p className="font-semibold">{formatMoney(watch.landedPrice ?? watch.price)}</p><p className="text-xs text-cocoa-500">{watch.landedPrice ? "Landed" : watch.price ? "Tracked" : "No price"}</p></td>
       <td className="px-3 py-4">
-        {offer.status === "available" ? <><a href={offer.offer.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-700 hover:underline">{formatMoney(offer.offer.price)} ↗</a><p className="mt-1 text-xs text-slate-500">{offer.offer.source}</p><div className="mt-1"><FreshnessBadge tier={offer.offer.freshness} ageDays={offer.offer.ageDays} compact /></div></> : <p className="text-slate-500">No dated offer</p>}
+        {offer.status === "available" ? <><a href={offer.offer.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-azalea-700 hover:underline">{formatMoney(offer.offer.price)} ↗</a><p className="mt-1 text-xs text-cocoa-500">{offer.offer.source}</p><div className="mt-1"><FreshnessBadge tier={offer.offer.freshness} ageDays={offer.offer.ageDays} compact /></div></> : <p className="text-cocoa-500">No dated offer</p>}
       </td>
-      <td className="px-3 py-4 text-xs"><p>{row.category ? titleCase(row.category) : "Category unrated"}</p><p className="text-slate-500">{watch.specs.caseDiameterMm ? `${watch.specs.caseDiameterMm} mm` : "Size unrated"}</p><p className="text-slate-500">{watch.specs.caliber ?? watch.specs.movement ?? "Movement unrated"}{movementTier !== undefined ? ` · tier ${Math.round(movementTier * 100)}` : ""}</p></td>
-      <td className="px-3 py-4"><p className="font-semibold">{watch.designUniqueness ? `${watch.designUniqueness} / 5` : "Unrated"}</p>{summary.designScore !== null && <p className="text-xs text-slate-500">Score {Math.round(summary.designScore)}</p>}</td>
-      <td className="px-3 py-4">{row.targetMet ? <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">Target met</span> : watch.targetPrice ? <span className="text-xs text-slate-500">Target {formatMoney(watch.targetPrice)}</span> : <span className="text-slate-400">—</span>}</td>
+      <td className="px-3 py-4 text-xs"><p>{row.category ? titleCase(row.category) : "Category unrated"}</p><p className="text-cocoa-500">{watch.specs.caseDiameterMm ? `${watch.specs.caseDiameterMm} mm` : "Size unrated"}</p><p className="text-cocoa-500">{watch.specs.caliber ?? watch.specs.movement ?? "Movement unrated"}{movementTier !== undefined ? ` · tier ${Math.round(movementTier * 100)}` : ""}</p></td>
+      <td className="px-3 py-4"><p className="font-semibold">{watch.designUniqueness ? `${watch.designUniqueness} / 5` : "Unrated"}</p>{summary.designScore !== null && <p className="text-xs text-cocoa-500">Score {Math.round(summary.designScore)}</p>}</td>
+      <td className="px-3 py-4">{row.targetMet ? <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">Target met</span> : watch.targetPrice ? <span className="text-xs text-cocoa-500">Target {formatMoney(watch.targetPrice)}</span> : <span className="text-cocoa-400">—</span>}</td>
     </tr>
   );
 }

@@ -248,7 +248,7 @@ export default function CollectionView({
         <span className="text-4xl">⌚</span>
         <div>
           <h2 className="text-lg font-semibold">No watches yet</h2>
-          <p className="text-sm text-slate-500">Add your first watch to start tracking and comparing.</p>
+          <p className="text-sm text-cocoa-500">Add your first watch to start tracking and comparing.</p>
         </div>
         {!IS_STATIC && (
           <Link href="/watch/new" className="btn-primary">
@@ -267,17 +267,17 @@ export default function CollectionView({
           with the three independent controls beside it and wrapped unpredictably
           at tablet widths. */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex w-full rounded-lg bg-white p-0.5 ring-1 ring-slate-200 sm:w-auto">
+        <div className="flex w-full rounded-lg bg-white p-0.5 ring-1 ring-cocoa-200 sm:w-auto">
           {(["all", ...WATCH_STATUSES] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatus(s)}
               aria-pressed={status === s}
-              className={`flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors sm:flex-none ${
-                status === s ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
+              className={`flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium capitalize transition-colors sm:flex-none sm:px-3 sm:text-sm ${
+                status === s ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-cocoa-100"
               }`}
             >
-              {s} <span className="tabular-nums opacity-60">{counts[s] ?? 0}</span>
+              {s} <span className="tabular-nums">{counts[s] ?? 0}</span>
             </button>
           ))}
         </div>
@@ -291,7 +291,7 @@ export default function CollectionView({
             className="input flex h-[2.375rem] cursor-pointer items-center justify-between gap-2 py-1.5 text-left"
           >
             <span className="truncate">{priorityLabel}</span>
-            <span aria-hidden className={`text-slate-400 transition-transform ${priorityOpen ? "rotate-180" : ""}`}>
+            <span aria-hidden className={`text-cocoa-400 transition-transform ${priorityOpen ? "rotate-180" : ""}`}>
               &#9662;
             </span>
           </button>
@@ -299,13 +299,13 @@ export default function CollectionView({
             <div
               role="group"
               aria-label="Priority"
-              className="absolute z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-lg"
+              className="absolute z-20 mt-2 w-64 rounded-lg border border-cocoa-200 bg-white p-3 text-sm shadow-lg"
             >
               <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Priority</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-cocoa-500">Priority</span>
                 <button
                   type="button"
-                  className="text-xs font-medium text-slate-500 hover:text-slate-900"
+                  className="text-xs font-medium text-cocoa-500 hover:text-cocoa-900"
                   onClick={() => setWishlistTiers([])}
                 >
                   Clear
@@ -315,18 +315,18 @@ export default function CollectionView({
                 {WISHLIST_TIERS.map((tier) => (
                   <label
                     key={tier}
-                    className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-slate-50"
+                    className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-cocoa-50"
                   >
                     <span className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={selectedTierSet.has(tier)}
                         onChange={() => toggleWishlistTier(tier)}
-                        className="h-4 w-4 accent-slate-900"
+                        className="h-4 w-4 accent-cocoa-900"
                       />
                       <span>{WISHLIST_TIER_LABELS[tier]}</span>
                     </span>
-                    <span className="text-xs text-slate-400">{wishlistTierCounts[tier]}</span>
+                    <span className="text-xs text-cocoa-400">{wishlistTierCounts[tier]}</span>
                   </label>
                 ))}
               </div>
@@ -340,7 +340,7 @@ export default function CollectionView({
           className={`h-[2.375rem] rounded-lg px-3 text-sm font-medium ring-1 transition-colors ${
             freshOffersOnly
               ? "bg-emerald-700 text-white ring-emerald-700"
-              : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50"
+              : "bg-white text-cocoa-600 ring-cocoa-200 hover:bg-cocoa-50"
           }`}
         >
           Fresh offers only
@@ -360,12 +360,12 @@ export default function CollectionView({
         </select>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-cocoa-500" aria-live="polite">
         <p>
-          Showing <span className="font-semibold text-slate-700">{filtered.length}</span> of {watches.length} watches
+          Showing <span className="font-semibold text-cocoa-700">{filtered.length}</span> of {watches.length} watches
         </p>
         {hasActiveFilters && filtered.length > 0 && (
-          <button type="button" className="font-medium text-slate-700 underline-offset-4 hover:underline" onClick={resetFilters}>
+          <button type="button" className="font-medium text-cocoa-700 underline-offset-4 hover:underline" onClick={resetFilters}>
             Clear search and filters
           </button>
         )}
@@ -373,8 +373,8 @@ export default function CollectionView({
 
       {filtered.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 px-4 py-12 text-center">
-          <p className="text-sm font-medium text-slate-700">No watches match your search and filters.</p>
-          <p className="text-xs text-slate-500">Clear them to return to the full collection.</p>
+          <p className="text-sm font-medium text-cocoa-700">No watches match your search and filters.</p>
+          <p className="text-xs text-cocoa-500">Clear them to return to the full collection.</p>
           <button type="button" className="btn-secondary" onClick={resetFilters}>Clear search and filters</button>
         </div>
       ) : (
@@ -394,10 +394,10 @@ export default function CollectionView({
       )}
 
       {selected.size > 0 && (
-        <div className="sticky bottom-4 z-30 mx-auto w-fit max-w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-xl sm:rounded-full sm:px-5">
+        <div className="sticky bottom-4 z-30 mx-auto w-fit max-w-full rounded-2xl bg-cocoa-900 px-4 py-3 text-sm text-white shadow-xl sm:rounded-full sm:px-5">
           <div className="flex flex-wrap items-center justify-center gap-3">
             <span>{selected.size} of 4 selected{selected.size < 2 ? " · choose one more" : ""}</span>
-            <button onClick={startCompare} disabled={selected.size < 2} className="rounded-full bg-white px-3 py-1 font-medium text-slate-900 disabled:opacity-50">
+            <button onClick={startCompare} disabled={selected.size < 2} className="rounded-full bg-white px-3 py-1 font-medium text-cocoa-900 disabled:opacity-50">
               Compare →
             </button>
             <button
@@ -405,7 +405,7 @@ export default function CollectionView({
                 setSelected(new Set());
                 setSelectionMessage(null);
               }}
-              className="text-slate-300 hover:text-white"
+              className="text-cocoa-300 hover:text-white"
             >
               Clear
             </button>
