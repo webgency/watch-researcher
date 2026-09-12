@@ -93,7 +93,7 @@ export default function ImageDropzone({
           }
         }}
         className={`relative flex min-h-[10rem] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-dashed p-4 text-center transition-colors ${
-          dragOver ? "border-slate-900 bg-slate-50" : "border-slate-300 hover:border-slate-400"
+          dragOver ? "border-cocoa-900 bg-cocoa-50" : "border-cocoa-300 hover:border-cocoa-400"
         }`}
       >
         {value ? (
@@ -106,7 +106,7 @@ export default function ImageDropzone({
                 e.stopPropagation();
                 onChange("");
               }}
-              className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-white"
+              className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-cocoa-700 shadow-sm hover:bg-white"
             >
               Remove
             </button>
@@ -116,10 +116,10 @@ export default function ImageDropzone({
             <span className="text-2xl" aria-hidden>
               🖼️
             </span>
-            <p className="text-sm font-medium text-slate-600">
+            <p className="text-sm font-medium text-cocoa-600">
               {busy ? "Processing…" : "Drag & drop an image, or click to choose"}
             </p>
-            <p className="text-xs text-slate-400">JPG, PNG or WebP — downscaled and saved with the watch</p>
+            <p className="text-xs text-cocoa-400">JPG, PNG or WebP — downscaled and saved with the watch</p>
           </>
         )}
         <input
@@ -146,7 +146,7 @@ export default function ImageDropzone({
           <button
             type="button"
             onClick={() => setShowUrl(true)}
-            className="text-slate-500 underline hover:text-slate-700"
+            className="text-cocoa-500 underline hover:text-cocoa-700"
           >
             …or paste an image URL instead
           </button>

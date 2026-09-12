@@ -351,8 +351,8 @@ export default function WatchForm({
       {!isEdit && (
         <section className="card space-y-3 p-5">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Autofill from a link</h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">Autofill from a link</h2>
+            <p className="mt-1 text-xs text-cocoa-500">
               Paste a product or retailer URL and we&apos;ll try to fill the brand, price, image, and specs from the page.
             </p>
           </div>
@@ -373,14 +373,14 @@ export default function WatchForm({
               {fetching ? "Fetching..." : "Fetch details"}
             </button>
           </div>
-          {fetchMsg && <p className="text-xs text-slate-600">{fetchMsg}</p>}
+          {fetchMsg && <p className="text-xs text-cocoa-600">{fetchMsg}</p>}
         </section>
       )}
       {isEdit && links.some((link) => link.url.trim()) && (
         <section className="card space-y-3 p-5">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Refresh from retailer</h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">Refresh from retailer</h2>
+            <p className="mt-1 text-xs text-cocoa-500">
               Re-fetch a saved product page to check its current price and specifications. Review the changes below before saving.
             </p>
           </div>
@@ -397,11 +397,11 @@ export default function WatchForm({
               </button>
             ))}
           </div>
-          {fetchMsg && <p className="text-xs text-slate-600" role="status">{fetchMsg}</p>}
+          {fetchMsg && <p className="text-xs text-cocoa-600" role="status">{fetchMsg}</p>}
         </section>
       )}
       <section className="card space-y-4 p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Basics</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">Basics</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label">Brand *</label>
@@ -446,7 +446,7 @@ export default function WatchForm({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-slate-400">1 leaves you cold; 5 is a design you would keep staring at.</p>
+            <p className="mt-1 text-xs text-cocoa-400">1 leaves you cold; 5 is a design you would keep staring at.</p>
           </div>
           <div>
             <label className="label">Fit for me</label>
@@ -454,7 +454,7 @@ export default function WatchForm({
               <option value="">Not rated</option>
               {[1, 2, 3, 4, 5].map((rating) => <option key={rating} value={rating}>{rating}</option>)}
             </select>
-            <p className="mt-1 text-xs text-slate-400">Your firsthand fit rating. Personal only; it does not change specification value.</p>
+            <p className="mt-1 text-xs text-cocoa-400">Your firsthand fit rating. Personal only; it does not change specification value.</p>
           </div>
           <div>
             <label className="label">Value-scoring category</label>
@@ -470,13 +470,13 @@ export default function WatchForm({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-cocoa-400">
               Choose explicitly for hybrid watches. Ambiguous tags leave value unrated.
             </p>
           </div>
           <div>
             <label className="label">Brand reputation</label>
-            <div className="input flex h-[2.625rem] items-center bg-slate-50 text-slate-600">
+            <div className="input flex h-[2.625rem] items-center bg-cocoa-50 text-cocoa-600">
               {brand.trim() ? `${resolvedBrandReputation ?? 3} / 5${resolvedBrandReputation === undefined ? " neutral" : ""}` : "—"}
             </div>
           </div>
@@ -492,7 +492,7 @@ export default function WatchForm({
                 ))}
               </select>
             </div>
-            <p className="mt-1 text-xs text-slate-400">Changing this records a price-history entry.</p>
+            <p className="mt-1 text-xs text-cocoa-400">Changing this records a price-history entry.</p>
           </div>
           <div>
             <label className="label">Target price</label>
@@ -506,7 +506,7 @@ export default function WatchForm({
                 ))}
               </select>
             </div>
-            <p className="mt-1 text-xs text-slate-400">Flags the watch once the all-in price drops to this. Leave blank for none.</p>
+            <p className="mt-1 text-xs text-cocoa-400">Flags the watch once the all-in price drops to this. Leave blank for none.</p>
           </div>
         </div>
         <div>
@@ -522,13 +522,13 @@ export default function WatchForm({
       <details className="card group" open={specsOpen} onToggle={(event) => setSpecsOpen(event.currentTarget.open)}>
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
           <span>
-            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Specifications</span>
-            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Dimensions, movement, materials, and functions</span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-cocoa-500">Specifications</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-cocoa-400">Dimensions, movement, materials, and functions</span>
           </span>
-          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
-          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+          <span className="text-xs font-medium text-cocoa-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-cocoa-500 group-open:inline">Hide</span>
         </summary>
-        <div className="grid gap-4 border-t border-slate-100 p-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 border-t border-cocoa-100 p-5 sm:grid-cols-2 lg:grid-cols-3">
           {SPEC_FIELDS.map((f) => (
             <div key={String(f.key)}>
               <label className="label">
@@ -560,14 +560,14 @@ export default function WatchForm({
       <details className="card group" open={qualityOpen} onToggle={(event) => setQualityOpen(event.currentTarget.open)}>
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
           <span>
-            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Quality evidence</span>
-            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Optional details that improve scoring confidence</span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-cocoa-500">Quality evidence</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-cocoa-400">Optional details that improve scoring confidence</span>
           </span>
-          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
-          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+          <span className="text-xs font-medium text-cocoa-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-cocoa-500 group-open:inline">Hide</span>
         </summary>
-        <div className="space-y-4 border-t border-slate-100 p-5">
-          <p className="text-xs text-slate-400">
+        <div className="space-y-4 border-t border-cocoa-100 p-5">
+          <p className="text-xs text-cocoa-400">
             What the scoring engine reads for case features, bracelet, and regulation. Leave a field blank when
             you don&apos;t know — a dimension with nothing recorded stays unrated rather than scoring badly.
           </p>
@@ -602,7 +602,7 @@ export default function WatchForm({
                         onChange={(e) => setFlags((s) => ({ ...s, [f.key]: e.target.value }))}
                       />
                     )}
-                    {f.hint ? <p className="mt-1 text-xs text-slate-400">{f.hint}</p> : null}
+                    {f.hint ? <p className="mt-1 text-xs text-cocoa-400">{f.hint}</p> : null}
                   </div>
                 ))}
               </div>
@@ -614,15 +614,15 @@ export default function WatchForm({
       <details className="card group" open={linksOpen} onToggle={(event) => setLinksOpen(event.currentTarget.open)}>
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
           <span>
-            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Retailer links</span>
-            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Deal score needs 2 dated, same-condition links from different hostnames</span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-cocoa-500">Retailer links</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-cocoa-400">Deal score needs 2 dated, same-condition links from different hostnames</span>
           </span>
-          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
-          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+          <span className="text-xs font-medium text-cocoa-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-cocoa-500 group-open:inline">Hide</span>
         </summary>
-        <div className="space-y-4 border-t border-slate-100 p-5">
+        <div className="space-y-4 border-t border-cocoa-100 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="max-w-2xl text-xs text-slate-500">
+            <p className="max-w-2xl text-xs text-cocoa-500">
               Add an independent AD, retailer, or public asking-price listing. The tracked headline price does not count as market evidence, and duplicate links from one hostname count once.
             </p>
             <button
@@ -635,7 +635,7 @@ export default function WatchForm({
           </div>
           <div className="space-y-3">
             {links.map((l, i) => (
-            <div key={i} className="grid gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-[1fr_auto]">
+            <div key={i} className="grid gap-2 rounded-lg border border-cocoa-200 p-3 sm:grid-cols-[1fr_auto]">
               <div className="grid gap-2 sm:grid-cols-2">
                 <input className="input sm:col-span-2" value={l.url} onChange={(e) => setLink(i, { url: e.target.value })} placeholder="https://retailer.com/product" />
                 <input className="input" value={l.retailer} onChange={(e) => setLink(i, { retailer: e.target.value })} placeholder="Retailer (optional)" />
@@ -654,7 +654,7 @@ export default function WatchForm({
                   <option value="new">New</option>
                   <option value="pre-owned">Pre-owned</option>
                 </select>
-                <label className="text-xs text-slate-500">
+                <label className="text-xs text-cocoa-500">
                   <span className="mb-1 block">Price observed</span>
                   <input className="input" type="date" value={l.observedAt} onChange={(e) => setLink(i, { observedAt: e.target.value })} />
                 </label>
@@ -671,13 +671,13 @@ export default function WatchForm({
       <details className="card group" open={notesOpen} onToggle={(event) => setNotesOpen(event.currentTarget.open)}>
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
           <span>
-            <span className="block text-sm font-semibold uppercase tracking-wide text-slate-500">Notes</span>
-            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-slate-400">Optional context, observations, and deal history</span>
+            <span className="block text-sm font-semibold uppercase tracking-wide text-cocoa-500">Notes</span>
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-cocoa-400">Optional context, observations, and deal history</span>
           </span>
-          <span className="text-xs font-medium text-slate-500 group-open:hidden">Show</span>
-          <span className="hidden text-xs font-medium text-slate-500 group-open:inline">Hide</span>
+          <span className="text-xs font-medium text-cocoa-500 group-open:hidden">Show</span>
+          <span className="hidden text-xs font-medium text-cocoa-500 group-open:inline">Hide</span>
         </summary>
-        <div className="border-t border-slate-100 p-5">
+        <div className="border-t border-cocoa-100 p-5">
           <label className="sr-only">Notes</label>
           <textarea className="input min-h-[6rem]" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Why you want it, condition observations, deal history…" />
         </div>

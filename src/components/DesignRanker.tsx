@@ -231,18 +231,18 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
     <div className="space-y-4">
       <section className="card p-4 sm:p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-sm font-medium text-slate-700">
+          <p className="text-sm font-medium text-cocoa-700">
             {counts.ranked} of {counts.all} rated
           </p>
-          <p className="text-xs text-slate-500">
-            Press <kbd className="rounded border border-slate-300 px-1">1</kbd>–
-            <kbd className="rounded border border-slate-300 px-1">5</kbd> to rate and advance,{" "}
-            <kbd className="rounded border border-slate-300 px-1">↑</kbd>
-            <kbd className="rounded border border-slate-300 px-1">↓</kbd> to move.
+          <p className="text-xs text-cocoa-500">
+            Press <kbd className="rounded border border-cocoa-300 px-1">1</kbd>–
+            <kbd className="rounded border border-cocoa-300 px-1">5</kbd> to rate and advance,{" "}
+            <kbd className="rounded border border-cocoa-300 px-1">↑</kbd>
+            <kbd className="rounded border border-cocoa-300 px-1">↓</kbd> to move.
           </p>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-          <div className="h-full rounded-full bg-slate-900 transition-all" style={{ width: `${progress}%` }} />
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-cocoa-200">
+          <div className="h-full rounded-full bg-cocoa-900 transition-all" style={{ width: `${progress}%` }} />
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {(["unranked", "ranked", "all"] as const).map((key) => (
@@ -251,8 +251,8 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
               onClick={() => applyFilter(key)}
               className={`rounded-full px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
                 filter === key
-                  ? "bg-slate-900 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+                  ? "bg-cocoa-900 text-white"
+                  : "bg-white text-cocoa-600 ring-1 ring-cocoa-200 hover:bg-cocoa-100"
               }`}
             >
               {key === "ranked" ? "rated" : key} ({counts[key]})
@@ -264,12 +264,12 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
       <section className="card p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Refine tied ratings</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">Refine tied ratings</h2>
+            <p className="mt-1 text-sm text-cocoa-500">
               Optional head-to-head choices spread similarly rated designs inside their existing 1–5 band.
             </p>
             {completedComparisons > 0 && (
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-cocoa-400">
                 {completedComparisons} comparison{completedComparisons === 1 ? "" : "s"} recorded
               </p>
             )}
@@ -280,10 +280,10 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
         </div>
 
         {refining && (
-          <div className="mt-5 border-t border-slate-100 pt-5">
+          <div className="mt-5 border-t border-cocoa-100 pt-5">
             {activePair ? (
               <>
-                <p className="mb-3 text-center text-sm font-medium text-slate-700">
+                <p className="mb-3 text-center text-sm font-medium text-cocoa-700">
                   Both rated {ranks[activePair[0].id]}. Which design do you prefer?
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -293,18 +293,18 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
                       type="button"
                       disabled={comparing}
                       onClick={() => void recordPreference(index === 0 ? "left" : "right")}
-                      className="overflow-hidden rounded-xl border border-slate-200 bg-white text-left transition hover:border-slate-400 hover:shadow-md disabled:opacity-60"
+                      className="overflow-hidden rounded-xl border border-cocoa-200 bg-white text-left transition hover:border-cocoa-400 hover:shadow-md disabled:opacity-60"
                     >
-                      <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200">
+                      <div className="aspect-square bg-gradient-to-br from-cocoa-100 to-cocoa-200">
                         {watch.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={watch.imageUrl} alt="" className="h-full w-full object-cover" />
                         ) : null}
                       </div>
                       <span className="block p-3">
-                        <span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">{watch.brand}</span>
-                        <span className="mt-0.5 block font-semibold text-slate-800">{watch.model}</span>
-                        <span className="mt-2 block text-xs font-medium text-blue-600">Prefer this design</span>
+                        <span className="block text-xs font-semibold uppercase tracking-wide text-cocoa-400">{watch.brand}</span>
+                        <span className="mt-0.5 block font-semibold text-cocoa-800">{watch.model}</span>
+                        <span className="mt-2 block text-xs font-medium text-azalea-700">Prefer this design</span>
                       </span>
                     </button>
                   ))}
@@ -315,7 +315,7 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
                   </button>
                   <button
                     type="button"
-                    className="px-3 py-2 text-sm font-medium text-slate-500 hover:text-slate-900"
+                    className="px-3 py-2 text-sm font-medium text-cocoa-500 hover:text-cocoa-900"
                     disabled={comparing}
                     onClick={() => setPairOffset((current) => current + 1)}
                   >
@@ -324,7 +324,7 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
                 </div>
               </>
             ) : (
-              <p className="rounded-lg bg-slate-50 px-3 py-6 text-center text-sm text-slate-500">
+              <p className="rounded-lg bg-cocoa-50 px-3 py-6 text-center text-sm text-cocoa-500">
                 Rate at least two watches with the same appeal score to compare them.
               </p>
             )}
@@ -339,7 +339,7 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
       )}
 
       {visible.length === 0 ? (
-        <p className="card p-12 text-center text-sm text-slate-500">
+        <p className="card p-12 text-center text-sm text-cocoa-500">
           {filter === "unranked" ? "Everything is rated." : "Nothing to show."}
         </p>
       ) : (
@@ -352,11 +352,11 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
               }}
               onMouseDown={() => setFocused(index)}
               className={`card flex flex-col gap-3 p-3 transition-shadow sm:flex-row sm:items-center sm:gap-4 ${
-                index === focused ? "ring-2 ring-slate-900" : ""
+                index === focused ? "ring-2 ring-cocoa-900" : ""
               }`}
             >
               <div className="flex w-full min-w-0 items-center gap-3 sm:flex-1 sm:gap-4">
-                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 sm:h-24 sm:w-24">
+                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-cocoa-100 to-cocoa-200 sm:h-24 sm:w-24">
                   {watch.imageUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -368,18 +368,18 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{watch.brand}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-400">{watch.brand}</p>
                   <Link href={`/watch/${watch.id}`} className="font-semibold hover:underline">
                     {watch.model}
                   </Link>
-                  <p className="text-sm text-slate-500">{formatMoney(watch.price)}</p>
+                  <p className="text-sm text-cocoa-500">{formatMoney(watch.price)}</p>
                 </div>
               </div>
 
               <div
                 role="radiogroup"
                 aria-label={`Design appeal for ${watch.brand} ${watch.model}`}
-                className="flex w-full flex-shrink-0 items-center justify-center gap-1 border-t border-slate-100 pt-3 sm:w-auto sm:justify-start sm:border-0 sm:pt-0"
+                className="flex w-full flex-shrink-0 items-center justify-center gap-1 border-t border-cocoa-100 pt-3 sm:w-auto sm:justify-start sm:border-0 sm:pt-0"
               >
                 {RANKS.map((rank) => {
                   const active = ranks[watch.id] === rank;
@@ -397,8 +397,8 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
                       onClick={() => void setRank(watch, rank)}
                       className={`h-9 w-9 rounded-lg text-sm font-semibold transition-colors ${
                         active
-                          ? "bg-slate-900 text-white"
-                          : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+                          ? "bg-cocoa-900 text-white"
+                          : "bg-white text-cocoa-600 ring-1 ring-cocoa-200 hover:bg-cocoa-100"
                       }`}
                     >
                       {rank}
@@ -409,7 +409,7 @@ export default function DesignRanker({ watches }: { watches: Watch[] }) {
                   onClick={() => void setRank(watch, undefined)}
                   disabled={ranks[watch.id] === undefined}
                   title="Clear rank"
-                  className="ml-1 px-2 text-xs font-medium text-slate-400 hover:text-slate-900 disabled:opacity-0"
+                  className="ml-1 px-2 text-xs font-medium text-cocoa-400 hover:text-cocoa-900 disabled:opacity-0"
                 >
                   Clear
                 </button>

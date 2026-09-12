@@ -45,20 +45,20 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
         </colgroup>
         <thead>
           <tr>
-            <th className="sticky left-0 z-10 bg-slate-50 p-3 text-left align-bottom" />
+            <th className="sticky left-0 z-10 bg-cocoa-50 p-3 text-left align-bottom" />
             {watches.map((w) => (
-              <th key={w.id} className="border-b border-slate-200 p-3 text-left align-bottom">
-                <div className="flex h-24 items-center justify-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-200">
+              <th key={w.id} className="border-b border-cocoa-200 p-3 text-left align-bottom">
+                <div className="flex h-24 items-center justify-center rounded-lg bg-gradient-to-br from-cocoa-100 to-cocoa-200">
                   {w.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={w.imageUrl} alt={`${w.brand} ${w.model}`} className="h-full w-full rounded-lg object-cover" />
                   ) : (
-                    <span className="text-2xl font-bold text-slate-400">
+                    <span className="text-2xl font-bold text-cocoa-400">
                       {(w.brand[0] ?? "?").toUpperCase()}
                     </span>
                   )}
                 </div>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{w.brand}</p>
+                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-cocoa-400">{w.brand}</p>
                 <Link href={`/watch/${w.id}`} className="font-semibold hover:underline">
                   {w.model}
                 </Link>
@@ -83,10 +83,10 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
               <Cell key={watches[i].id} highlight={offerBest.has(i)}>
                 {result.status === "available" ? (
                   <div className="space-y-1">
-                    <a href={result.offer.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-700 hover:underline">
+                    <a href={result.offer.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-azalea-700 hover:underline">
                       {formatMoney(result.offer.price)} ↗
                     </a>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-cocoa-500">
                       {result.offer.source} · <span className="capitalize">{result.offer.condition ?? "condition unknown"}</span>
                     </p>
                     <FreshnessBadge tier={result.offer.freshness} ageDays={result.offer.ageDays} compact />
@@ -97,7 +97,7 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
                     )}
                   </div>
                 ) : (
-                  <span className="text-slate-400">
+                  <span className="text-cocoa-400">
                     No dated offers{result.undatedOfferCount ? ` · ${result.undatedOfferCount} undated` : ""}
                   </span>
                 )}
@@ -142,7 +142,7 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
                 <div className="flex flex-wrap gap-1">
                   {w.tags.length ? (
                     w.tags.map((t) => (
-                      <span key={t} className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
+                      <span key={t} className="rounded bg-cocoa-100 px-1.5 py-0.5 text-xs text-cocoa-600">
                         {t}
                       </span>
                     ))
@@ -161,10 +161,10 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
 
 function Row({ label, sticky, children }: { label: string; sticky?: boolean; children: React.ReactNode }) {
   return (
-    <tr className="even:bg-slate-50/60">
+    <tr className="even:bg-cocoa-50/60">
       <th
         scope="row"
-        className={`p-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 ${
+        className={`p-3 text-left text-xs font-semibold uppercase tracking-wide text-cocoa-500 ${
           sticky ? "sticky left-0 z-10 bg-inherit" : ""
         }`}
       >
@@ -177,7 +177,7 @@ function Row({ label, sticky, children }: { label: string; sticky?: boolean; chi
 
 function Cell({ highlight, children }: { highlight?: boolean; children: React.ReactNode }) {
   return (
-    <td className={`border-l border-slate-100 p-3 ${highlight ? "bg-emerald-50 font-medium text-emerald-900" : ""}`}>
+    <td className={`border-l border-cocoa-100 p-3 ${highlight ? "bg-emerald-50 font-medium text-emerald-900" : ""}`}>
       {children}
     </td>
   );

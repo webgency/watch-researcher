@@ -16,9 +16,9 @@ const VERDICT: Record<Verdict, { label: string; fill: string; track: string; tex
   },
   par: {
     label: "As expected",
-    fill: "bg-slate-500",
-    track: "bg-slate-200",
-    text: "text-slate-600",
+    fill: "bg-cocoa-500",
+    track: "bg-cocoa-200",
+    text: "text-cocoa-600",
   },
   trails: {
     label: "Below expected",
@@ -28,17 +28,17 @@ const VERDICT: Record<Verdict, { label: string; fill: string; track: string; tex
   },
   limited: {
     label: "Limited evidence",
-    fill: "bg-slate-400",
-    track: "bg-slate-200",
-    text: "text-slate-500",
+    fill: "bg-cocoa-400",
+    track: "bg-cocoa-200",
+    text: "text-cocoa-500",
   },
   // A watch with no price has no band, so there is no reference to be at, above
   // or below. Saying "As expected" there would be a claim the engine never made.
   unbanded: {
     label: "No benchmark",
-    fill: "bg-slate-400",
-    track: "bg-slate-200",
-    text: "text-slate-400",
+    fill: "bg-cocoa-400",
+    track: "bg-cocoa-200",
+    text: "text-cocoa-400",
   },
 };
 
@@ -80,7 +80,7 @@ function DimensionMeter({
 
   return (
     <div className="grid grid-cols-[9rem_1fr_auto] items-center gap-x-3 py-2 sm:grid-cols-[11rem_1fr_auto]">
-      <p className="truncate text-sm font-medium capitalize text-slate-700" title={DIMENSION_BLURBS[dimension]}>
+      <p className="truncate text-sm font-medium capitalize text-cocoa-700" title={DIMENSION_BLURBS[dimension]}>
         {DIMENSION_LABELS[dimension]}
       </p>
 
@@ -100,18 +100,18 @@ function DimensionMeter({
           // Par marker. Sits above the fill so it stays visible when the fill
           // runs past it.
           <div
-            className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-slate-900/70"
+            className="absolute inset-y-0 w-0.5 -trancocoa-x-1/2 bg-cocoa-900/70"
             style={{ left: `${pct(reference)}%` }}
           />
         )}
       </div>
 
       <div className="flex items-baseline justify-end gap-2 whitespace-nowrap">
-        <span className="text-sm font-semibold tabular-nums text-slate-800">{pct(raw)}</span>
+        <span className="text-sm font-semibold tabular-nums text-cocoa-800">{pct(raw)}</span>
         <span className={`w-20 text-right text-xs font-medium ${style.text}`}>{style.label}</span>
       </div>
       {coverage < 1 && (
-        <p className="col-span-3 mt-1 text-xs text-slate-400">
+        <p className="col-span-3 mt-1 text-xs text-cocoa-400">
           Based on {knownInputs} of {totalInputs} recorded inputs; missing inputs are excluded.
         </p>
       )}
@@ -122,22 +122,22 @@ function DimensionMeter({
 function UnratedRow({ dimension, watch }: { dimension: Dimension; watch: Watch }) {
   return (
     <div className="grid grid-cols-[9rem_1fr_auto] items-center gap-x-3 py-2 sm:grid-cols-[11rem_1fr_auto]">
-      <p className="truncate text-sm font-medium capitalize text-slate-400" title={DIMENSION_BLURBS[dimension]}>
+      <p className="truncate text-sm font-medium capitalize text-cocoa-400" title={DIMENSION_BLURBS[dimension]}>
         {DIMENSION_LABELS[dimension]}
       </p>
-      <div className="h-2.5 rounded-full bg-[repeating-linear-gradient(45deg,#f1f5f9_0_6px,#e2e8f0_6px_12px)]" />
-      <span className="w-20 text-right text-xs font-medium text-slate-400">Unrated</span>
-      <p className="col-span-3 text-xs text-slate-400">{unratedReason(watch, dimension)}</p>
+      <div className="h-2.5 rounded-full bg-[repeating-linear-gradient(45deg,#F3EAE5_0_6px,#E6DAD5_6px_12px)]" />
+      <span className="w-20 text-right text-xs font-medium text-cocoa-400">Unrated</span>
+      <p className="col-span-3 text-xs text-cocoa-400">{unratedReason(watch, dimension)}</p>
     </div>
   );
 }
 
 function ScoreTile({ label, value, caption }: { label: string; value?: number; caption: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-0.5 text-2xl font-bold text-slate-900">{value === undefined ? "—" : pct(value)}</p>
-      <p className="mt-0.5 text-xs text-slate-500">{caption}</p>
+    <div className="rounded-lg border border-cocoa-200 bg-cocoa-50 px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-500">{label}</p>
+      <p className="mt-0.5 text-2xl font-bold text-cocoa-900">{value === undefined ? "—" : pct(value)}</p>
+      <p className="mt-0.5 text-xs text-cocoa-500">{caption}</p>
     </div>
   );
 }
@@ -152,17 +152,17 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
     <section className="card p-5">
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Specification standing</h2>
-          <p className="mt-1 text-sm text-slate-500">Rubric comparison with what this exact price should buy for {standing.peerLabel}.</p>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">Specification standing</h2>
+          <p className="mt-1 text-sm text-cocoa-500">Rubric comparison with what this exact price should buy for {standing.peerLabel}.</p>
         </div>
-        <p className="text-xs text-slate-400 sm:text-right">
+        <p className="text-xs text-cocoa-400 sm:text-right">
           Rated on {ratedCount} of {DIMENSIONS.length} dimensions
           {standing.peerCount > 1 && <> · {standing.peerCount} similar watches</>}
         </p>
       </div>
 
       {ratedCount === 0 ? (
-        <p className="rounded-lg bg-slate-50 px-3 py-6 text-center text-sm text-slate-500">
+        <p className="rounded-lg bg-cocoa-50 px-3 py-6 text-center text-sm text-cocoa-500">
           Nothing recorded for this watch can be scored yet.
         </p>
       ) : (
@@ -198,7 +198,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
             </p>
           )}
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-cocoa-100">
             {rated.map((dimension) => (
               <DimensionMeter
                 key={dimension}
@@ -216,18 +216,18 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
           </div>
 
           {banded ? (
-            <p className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-              <span className="inline-block h-3 w-0.5 bg-slate-900/70" />
+            <p className="mt-3 flex items-center gap-2 text-xs text-cocoa-400">
+              <span className="inline-block h-3 w-0.5 bg-cocoa-900/70" />
               Continuous expectation at this price · peer label {standing.peerLabel}
             </p>
           ) : (
-            <p className="mt-3 text-xs text-slate-400">
+            <p className="mt-3 text-xs text-cocoa-400">
               No price recorded, so there is no band to score against — the numbers above are raw scores only.
             </p>
           )}
 
           {standing.qualityPercentile !== undefined && (
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-cocoa-500">
               Ranks above {pct(standing.qualityPercentile)}% of {standing.peerCount} similar watches in this price range.
             </p>
           )}

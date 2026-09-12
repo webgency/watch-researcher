@@ -6,7 +6,7 @@ const STYLES: Record<WishlistTier, string> = {
   "love-it": "bg-rose-100 text-rose-800 ring-rose-200",
   interested: "bg-sky-100 text-sky-800 ring-sky-200",
   "maybe-later": "bg-amber-100 text-amber-800 ring-amber-200",
-  pass: "bg-slate-100 text-slate-600 ring-slate-200",
+  pass: "bg-cocoa-100 text-cocoa-600 ring-cocoa-200",
 };
 
 export default function WishlistTierBadge({ tier }: { tier?: WishlistTier }) {

@@ -16,7 +16,7 @@ export default async function ValuePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Value</h1>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-cocoa-500">
           Rank what each watch delivers for its price. Deal evidence and design are shown separately and never alter rubric value.
         </p>
       </div>
