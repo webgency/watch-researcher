@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { toDisplayScore, type StandingSummary } from "@/lib/scoring";
 import { DIMENSION_LABELS } from "@/lib/rubrics";
-import { Watch, WishlistTier, WISHLIST_TIERS, WISHLIST_TIER_LABELS } from "@/lib/types";
+import { Watch, WishlistTier } from "@/lib/types";
 import { formatMoney, formatOrdinal } from "@/lib/format";
 import { targetStatus } from "@/lib/price-history";
 import { bestOffer, bestOfferTargetStatus } from "@/lib/valuation";
 import FreshnessBadge from "./FreshnessBadge";
 import StatusBadge from "./StatusBadge";
 import WishlistTierBadge from "./WishlistTierBadge";
+import PriorityMenu from "./PriorityMenu";
 
 function initials(watch: Watch): string {
   const a = watch.brand?.trim()?.[0] ?? "?";
@@ -30,7 +31,7 @@ export default function WatchCard({
   selectionDisabled?: boolean;
   scoreSummary?: StandingSummary;
   onToggleSelect: (id: string) => void;
-  onChangeWishlistTier?: (id: string, next: WishlistTier | "") => void;
+  onChangeWishlistTier?: (id: string, next: WishlistTier | "") => Promise<boolean>;
 }) {
   const { specs } = watch;
   const target = targetStatus(watch);
@@ -38,10 +39,10 @@ export default function WatchCard({
   const offerTarget = bestOfferTargetStatus(watch, offer);
   const href = `/watch/${watch.id}`;
   return (
-    <div className={`card group relative overflow-hidden transition-shadow hover:shadow-md ${selected ? "ring-2 ring-cocoa-900 bg-azalea-50" : ""}`}>
-      <div className="relative flex h-64 items-center justify-center bg-gradient-to-br from-cocoa-100 to-cocoa-200">
+    <div className={`card group relative transition-shadow hover:shadow-md ${selected ? "ring-2 ring-cocoa-900 bg-azalea-50" : ""}`}>
+      <div className="relative flex h-64 overflow-hidden rounded-t-xl items-center justify-center bg-gradient-to-br from-cocoa-100 to-cocoa-200">
         {/* Image and title are the navigation. A stretched overlay link would
-            cover the Compare checkbox and the priority select, which then need
+            cover the Compare checkbox and the priority menu, which then need
             z-index and click-stopping to claw their way back out. */}
         <Link href={href} tabIndex={-1} aria-hidden className="absolute inset-0">
           {watch.imageUrl ? (
@@ -58,38 +59,34 @@ export default function WatchCard({
             type="checkbox"
             checked={selected}
             disabled={selectionDisabled}
+            aria-label={`Compare ${watch.brand} ${watch.model}`}
+            aria-describedby={selectionDisabled ? "comparison-limit" : undefined}
             onChange={() => onToggleSelect(watch.id)}
             className="h-3.5 w-3.5 accent-cocoa-900"
           />
-          {selectionDisabled ? "Limit reached" : "Compare"}
+          Compare
         </label>
       </div>
       <div className="space-y-3 p-4">
-        <div className="flex items-start justify-between gap-2">
-          {/* Fixed height, because only 41 of 69 watches carry a reference
-              number — without it the price row sits a line higher on the cards
-              that have none, and nothing in a grid row lines up. */}
-          <div className="min-h-[5rem] min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-400">{watch.brand}</p>
-            {/* Two lines, not one: model names carry their differentiator at the
-                end ("D5 Pacific | Anacapa Auto — 39mm USA"), so a single-line
-                truncate hides the part that tells two variants apart. The
-                min-height reserves the second line so the price rows of a grid
-                row stay aligned whether a title wraps or not. */}
-            <Link
-              href={href}
-              className="block min-h-[2.75rem] font-semibold leading-snug line-clamp-2 group-hover:underline"
-            >
-              {watch.model}
-            </Link>
-            {watch.referenceNumber && (
-              <p className="truncate text-xs text-cocoa-400">Ref. {watch.referenceNumber}</p>
-            )}
+        {/* Keep the model full-width: priority is secondary and must not steal
+            the space that distinguishes similarly named watch variants. Reserve
+            two model lines and a reference line so prices align within a row. */}
+        <div className="min-h-[6rem] min-w-0">
+          <div className="flex min-h-8 items-center justify-between gap-2">
+            <p className="min-w-0 text-xs font-semibold uppercase tracking-wide text-cocoa-500">{watch.brand}</p>
+            <div className="flex shrink-0 items-center gap-1">
+              {onChangeWishlistTier ? (
+                <PriorityMenu tier={watch.wishlistTier} watchName={`${watch.brand} ${watch.model}`} onChange={next => onChangeWishlistTier(watch.id, next)} />
+              ) : <WishlistTierBadge tier={watch.wishlistTier} />}
+              <StatusBadge status={watch.status} />
+            </div>
           </div>
-          <div className="flex flex-shrink-0 flex-wrap justify-end gap-1">
-            <WishlistTierBadge tier={watch.wishlistTier} />
-            <StatusBadge status={watch.status} />
-          </div>
+          <Link href={href} title={watch.model} className="line-clamp-2 min-h-[2.75rem] font-semibold leading-snug hover:underline">
+            {watch.model}
+          </Link>
+          {watch.referenceNumber && (
+            <p className="truncate text-xs text-cocoa-400">Ref. {watch.referenceNumber}</p>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-2">
@@ -133,7 +130,7 @@ export default function WatchCard({
           </div>
         )}
         {offer.status === "insufficient" && (
-          <p className="rounded-lg border border-dashed border-cocoa-200 bg-cocoa-50 px-2.5 py-2 text-xs text-cocoa-400">
+          <p className="py-1 text-xs text-cocoa-500">
             No dated offers{offer.undatedOfferCount ? ` · ${offer.undatedOfferCount} undated price${offer.undatedOfferCount === 1 ? "" : "s"} excluded` : ""}
           </p>
         )}
@@ -150,21 +147,7 @@ export default function WatchCard({
           </div>
         )}
 
-        {onChangeWishlistTier && (
-          <select
-            value={watch.wishlistTier ?? ""}
-            onChange={(e) => onChangeWishlistTier(watch.id, e.target.value as WishlistTier | "")}
-            aria-label={`Set wishlist priority for ${watch.brand} ${watch.model}`}
-            className="input h-8 py-1 text-xs"
-          >
-            <option value="">Set priority</option>
-            {WISHLIST_TIERS.map((tier) => (
-              <option key={tier} value={tier}>
-                {WISHLIST_TIER_LABELS[tier]}
-              </option>
-            ))}
-          </select>
-        )}
+
       </div>
     </div>
   );

@@ -28,6 +28,8 @@ type SortKey =
   | "brand"
   | "caseSize";
 
+const STATUS_LABELS: Record<WatchStatus | "all", string> = { all: "All", wishlist: "Wishlist", owned: "Owned", sold: "Sold" };
+
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "wishlistTier", label: "Wishlist priority" },
   { key: "valueScore", label: "Rubric value" },
@@ -144,8 +146,9 @@ export default function CollectionView({
       });
       if (!res.ok) throw new Error();
       router.refresh();
+      return true;
     } catch {
-      alert("Couldn't update wishlist priority. Please try again.");
+      return false;
     }
   }
 
@@ -262,102 +265,101 @@ export default function CollectionView({
   return (
     <div className="space-y-6">
 
-      {/* One segmented control rather than four free-floating pills: status is a
-          single-choice question, and as loose pills it competed for attention
-          with the three independent controls beside it and wrapped unpredictably
-          at tablet widths. */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex w-full rounded-lg bg-white p-0.5 ring-1 ring-cocoa-200 sm:w-auto">
+      {/* Status and the control cluster keep their own rows until both fit
+          comfortably. A deliberate breakpoint avoids ragged intermediate wraps. */}
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+        <div role="group" aria-label="Watch status" className="flex w-full rounded-lg bg-white p-0.5 ring-1 ring-cocoa-200 sm:w-auto sm:self-start xl:self-auto">
           {(["all", ...WATCH_STATUSES] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatus(s)}
               aria-pressed={status === s}
-              className={`flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium capitalize transition-colors sm:flex-none sm:px-3 sm:text-sm ${
+              className={`flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:flex-none sm:px-3 sm:text-sm ${
                 status === s ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-cocoa-100"
               }`}
             >
-              {s} <span className="tabular-nums">{counts[s] ?? 0}</span>
+              {STATUS_LABELS[s]} <span className="tabular-nums">{counts[s] ?? 0}</span>
             </button>
           ))}
         </div>
-        <div ref={priorityRef} className="relative sm:w-56">
+        <div className="grid grid-cols-2 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.25fr)] xl:flex xl:flex-1">
+          <div ref={priorityRef} className="relative min-w-0 xl:w-48">
+            <button
+              type="button"
+              ref={priorityTriggerRef}
+              onClick={() => setPriorityOpen((current) => !current)}
+              aria-expanded={priorityOpen}
+              aria-haspopup="true"
+              className="input flex h-[2.375rem] cursor-pointer items-center justify-between gap-2 py-1.5 text-left"
+            >
+              <span className="truncate">{priorityLabel}</span>
+              <span aria-hidden className={`text-cocoa-400 transition-transform ${priorityOpen ? "rotate-180" : ""}`}>
+                &#9662;
+              </span>
+            </button>
+            {priorityOpen && (
+              <div
+                role="group"
+                aria-label="Priority"
+                className="absolute z-20 mt-2 w-64 rounded-lg border border-cocoa-200 bg-white p-3 text-sm shadow-lg"
+              >
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-cocoa-500">Priority</span>
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-cocoa-500 hover:text-cocoa-900"
+                    onClick={() => setWishlistTiers([])}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div className="space-y-1">
+                  {WISHLIST_TIERS.map((tier) => (
+                    <label
+                      key={tier}
+                      className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-cocoa-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedTierSet.has(tier)}
+                          onChange={() => toggleWishlistTier(tier)}
+                          className="h-4 w-4 accent-cocoa-900"
+                        />
+                        <span>{WISHLIST_TIER_LABELS[tier]}</span>
+                      </span>
+                      <span className="text-xs text-cocoa-400">{wishlistTierCounts[tier]}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <button
             type="button"
-            ref={priorityTriggerRef}
-            onClick={() => setPriorityOpen((current) => !current)}
-            aria-expanded={priorityOpen}
-            aria-haspopup="true"
-            className="input flex h-[2.375rem] cursor-pointer items-center justify-between gap-2 py-1.5 text-left"
+            aria-pressed={freshOffersOnly}
+            onClick={() => setFreshOffersOnly((current) => !current)}
+            className={`h-[2.375rem] whitespace-nowrap rounded-lg px-2 text-xs sm:px-3 sm:text-sm font-medium ring-1 transition-colors ${
+              freshOffersOnly
+                ? "bg-emerald-700 text-white ring-emerald-700"
+                : "bg-white text-cocoa-600 ring-cocoa-200 hover:bg-cocoa-50"
+            }`}
           >
-            <span className="truncate">{priorityLabel}</span>
-            <span aria-hidden className={`text-cocoa-400 transition-transform ${priorityOpen ? "rotate-180" : ""}`}>
-              &#9662;
-            </span>
+            Fresh offers only
           </button>
-          {priorityOpen && (
-            <div
-              role="group"
-              aria-label="Priority"
-              className="absolute z-20 mt-2 w-64 rounded-lg border border-cocoa-200 bg-white p-3 text-sm shadow-lg"
-            >
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-cocoa-500">Priority</span>
-                <button
-                  type="button"
-                  className="text-xs font-medium text-cocoa-500 hover:text-cocoa-900"
-                  onClick={() => setWishlistTiers([])}
-                >
-                  Clear
-                </button>
-              </div>
-              <div className="space-y-1">
-                {WISHLIST_TIERS.map((tier) => (
-                  <label
-                    key={tier}
-                    className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-cocoa-50"
-                  >
-                    <span className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedTierSet.has(tier)}
-                        onChange={() => toggleWishlistTier(tier)}
-                        className="h-4 w-4 accent-cocoa-900"
-                      />
-                      <span>{WISHLIST_TIER_LABELS[tier]}</span>
-                    </span>
-                    <span className="text-xs text-cocoa-400">{wishlistTierCounts[tier]}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            aria-label="Sort collection"
+            className="input col-span-2 min-w-0 sm:col-span-1 xl:ml-auto xl:w-auto"
+          >
+            {SORTS.map((s) => (
+              <option key={s.key} value={s.key}>
+                Sort: {s.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <button
-          type="button"
-          aria-pressed={freshOffersOnly}
-          onClick={() => setFreshOffersOnly((current) => !current)}
-          className={`h-[2.375rem] rounded-lg px-3 text-sm font-medium ring-1 transition-colors ${
-            freshOffersOnly
-              ? "bg-emerald-700 text-white ring-emerald-700"
-              : "bg-white text-cocoa-600 ring-cocoa-200 hover:bg-cocoa-50"
-          }`}
-        >
-          Fresh offers only
-        </button>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortKey)}
-          // Right-aligned only when the whole toolbar fits one row; once it wraps,
-          // an ml-auto would strand the sort alone against the right edge.
-          className="input w-full sm:w-auto sm:min-w-[12rem] lg:ml-auto"
-        >
-          {SORTS.map((s) => (
-            <option key={s.key} value={s.key}>
-              Sort: {s.label}
-            </option>
-          ))}
-        </select>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-cocoa-500" aria-live="polite">
@@ -410,7 +412,11 @@ export default function CollectionView({
               Clear
             </button>
           </div>
-          {selectionMessage && <p className="mt-1 text-center text-xs text-amber-200" role="status">{selectionMessage}</p>}
+          {(selected.size === 4 || selectionMessage) && (
+            <p id="comparison-limit" className="mt-1 text-center text-xs text-white" role="status">
+              {selected.size === 4 ? "Four watches selected. Deselect one to choose another." : selectionMessage}
+            </p>
+          )}
         </div>
       )}
     </div>

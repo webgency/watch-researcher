@@ -22,6 +22,7 @@ export default async function HomePage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Your collection</h1>
+          {IS_STATIC && <p className="mt-1 text-xs text-cocoa-500">Viewing published collection · read-only</p>}
           <p className="text-sm text-cocoa-500">Track your wishlist, compare specs and prices, and grow your collection.</p>
         </div>
         {watches.length > 0 && <CollectionSummaryBar summary={collectionSummary(watches)} />}
