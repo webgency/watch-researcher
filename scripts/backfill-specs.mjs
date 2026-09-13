@@ -266,7 +266,6 @@ console.log(`${queue.length} watch(es) with gaps${DRY ? " (dry run)" : ""}\n`);
 
 let totalFilled = 0;
 let failures = 0;
-const usage = { input: 0, output: 0 };
 
 for (const { watch, missing } of queue) {
   const label = `${watch.id} ${watch.brand} ${watch.model}`;
