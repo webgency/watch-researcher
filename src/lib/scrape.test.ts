@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,6 +10,8 @@ import {
   selectShopifyVariant,
   shopifyProductJsonUrl,
 } from "./scrape";
+
+const nomosPage = readFileSync(new URL("./fixtures/nomos-club-campus.html", import.meta.url), "utf8");
 
 const SPINNAKER_STYLE_PAGE = `
   <header>
@@ -182,5 +185,32 @@ describe("extractQualityFlags", () => {
 
   it("recognizes a page that explicitly says the measured watch includes its bracelet", () => {
     expect(extractQualityFlags("Weight: 160g including bracelet")).toEqual({ braceletIncluded: true });
+  });
+});
+
+describe("NOMOS definition-list specifications", () => {
+  it("reaches the actual specs past navigation and FAQ links, retaining labeled values", () => {
+    const text = productExtractionText(undefined, nomosPage);
+    expect(text).not.toContain("coordinates with");
+    expect(text).not.toContain("Other watch");
+    expect(extractSpecs(text)).toMatchObject({
+      caseDiameterMm: 36,
+      caseThicknessMm: 8.2,
+      lugToLugMm: 44.3,
+      lugWidthMm: 18,
+      caseMaterial: "stainless steel, screwed stainless steel back",
+      crystal: "Sapphire",
+      movement: "manual",
+      dialColor: "dark blue",
+      braceletStrap: "Vegan velour remborde velvet gray",
+      caliber: "DUW 4001",
+      powerReserveHours: 53,
+      waterResistanceM: 100,
+    });
+    expect(extractSpecs(text).complications).toBeUndefined();
+  });
+
+  it("does not treat dial-color marketing prose as a labeled color", () => {
+    expect(extractSpecs("This dial color coordinates with all other tones.").dialColor).toBeUndefined();
   });
 });

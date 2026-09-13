@@ -8,7 +8,7 @@
 // Runs server-side only (needs open outbound network). Never throws on a bad
 // page — it just returns whatever it managed to extract.
 
-import { extractWatchDetails } from "./extract";
+import { extractWatchDetails, sanitizeSpecs } from "./extract";
 import { extractRetailOffer, inferRetailCondition } from "./retailer-offer.mjs";
 import { Condition, Friction, Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
 
@@ -89,6 +89,15 @@ function hostnameOf(url: string): string {
 
 function stripText(html: string): string {
   return html
+    // Keep definition-list labels and boundaries: flattening them loses the
+    // difference between a specification and surrounding marketing prose.
+    .replace(/<dt\b[^>]*>([\s\S]*?)<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/gi, (_, label: string, value: string) => {
+      const key = stripText(label);
+      const names: Record<string, string> = { case: "Case material", dial: "Dial color", winding: "Movement" };
+      const body = key.toLowerCase() === "dimensions"
+        ? value.replace(/\bheight\b/gi, "case height") : value;
+      return ` ${names[key.toLowerCase()] ?? key}: ${stripText(body)}; `;
+    })
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
@@ -269,13 +278,17 @@ function technicalSectionStart(text: string): number {
 
 export function primaryProductText(html: string): string {
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? html;
-  const text = stripText(main);
+  // Prefer a real section heading to anchor-navigation text. A nav link named
+  // "Specifications" may precede a FAQ link that would truncate the entire page.
+  const heading = Array.from(main.matchAll(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi))
+    .find(match => /^(?:Specifications?|Technical Details|Tech Specs)$/i.test(stripText(match[1])));
+  const text = stripText(heading ? main.slice(heading.index) : main);
   const specStart = technicalSectionStart(text);
   if (specStart === -1) return text;
   // Keep later product feature panels: brands often state the caliber and
   // power reserve below shipping accordions rather than in the spec table.
   const productTail = text.slice(specStart);
-  const end = productTail.search(/\b(?:You may also like|Customers? Also Love|Recently viewed|Customer reviews|FAQs?|Our Collections)\b/i);
+  const end = productTail.search(/\b(?:You may also like|Customers? Also Love|Recently viewed|Customer reviews|FAQs?|Our Collections|Discover next)\b/i);
   return (end > 0 ? productTail.slice(0, end) : productTail).trim();
 }
 
@@ -351,9 +364,10 @@ export function extractSpecs(text: string): WatchSpecs {
   // generic collection descriptions mentioning other movement types.
   const labeledMovement = t.match(/\bmovement\s*:\s*([^.;]{2,100})/i)?.[1]?.toLowerCase();
   const movementSource = labeledMovement || low;
-  for (const [re, val] of moves) if (re.test(movementSource)) { s.movement = val; break; }
+  if (/^manual\b/i.test(labeledMovement ?? "")) s.movement = "manual";
+  for (const [re, val] of moves) if (!s.movement && re.test(movementSource)) { s.movement = val; break; }
 
-  const cal = t.match(/cali(?:ber|bre)\s*[:\-]?\s*([A-Za-z0-9][\w .\-\/]{1,30})/i);
+  const cal = t.match(/\bcali(?:ber|bre)\s*:\s*([A-Za-z0-9][\w .\-\/]{1,30})/i) ?? t.match(/cali(?:ber|bre)\s*[:\-]?\s*([A-Za-z0-9][\w .\-\/]{1,30})/i);
   const namedMovement = t.match(/\b((?:Miyota|Seiko|Sellita|ETA|Ronda|Soprod|La Joux[ -]Perret|Seagull)\s+[A-Z0-9][A-Z0-9.\-]{1,15})(?=\s|$)/i);
   if (cal || namedMovement) {
     // A maker + caliber token is stronger than a loose "calibre" label,
@@ -371,11 +385,11 @@ export function extractSpecs(text: string): WatchSpecs {
 
   const caseMaterial = t.match(/case material\s*[:\-]?\s*([^.;]{3,60})/i);
   if (caseMaterial) s.caseMaterial = clean(caseMaterial[1]).split(/\s+(?:case finish|case size|diameter|thickness|bezel|crystal)\b/i)[0].trim();
-  const dialColor = t.match(/dial colou?r\s*[:\-]?\s*([A-Za-z][A-Za-z /\-]{1,30})/i);
+  const dialColor = t.match(/dial colou?r\s*[:\-]\s*([A-Za-z][A-Za-z /\-]{1,30})/i);
   if (dialColor) s.dialColor = clean(dialColor[1]).split(/\s+(?:index|lens|crystal|case)\b/i)[0].trim();
   const band = t.match(/\b(?:band|bracelet|strap)\s*:\s*([^.;]{3,100})/i);
   if (band) {
-    const value = clean(band[1]).split(/\s+(?:extra band|water resistance|weight|warranty)\b/i)[0].trim();
+    const value = clean(band[1]).split(/\s+(?:extra band|water resistance|weight|warranty|lug width)\b/i)[0].trim();
     // Repeated option-picker prose is not a material/specification.
     const firstHalf = value.slice(0, Math.floor(value.length / 2)).toLowerCase();
     const secondHalf = value.slice(Math.floor(value.length / 2)).toLowerCase();
@@ -392,7 +406,7 @@ export function extractSpecs(text: string): WatchSpecs {
   if (comps.length) s.complications = comps.join(", ");
 
   for (const k of Object.keys(s) as (keyof WatchSpecs)[]) if (s[k] === undefined) delete s[k];
-  return s;
+  return sanitizeSpecs(s);
 }
 
 export function extractQualityFlags(text: string, variantTitle?: string): QualityFlags {
