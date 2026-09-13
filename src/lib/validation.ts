@@ -13,6 +13,7 @@ import {
   RetailerLink,
   ScoringCategory,
   SCORING_CATEGORIES,
+  SoldComp,
   Watch,
   WatchInput,
   WatchSpecs,
@@ -201,6 +202,53 @@ function cleanLinks(value: unknown, required: boolean, errors: string[]): Retail
     if (condition) link.condition = condition;
     if (observedAt) link.observedAt = observedAt;
     return [link];
+  });
+}
+
+/**
+ * Sold comps, all-or-nothing per entry. Unlike a retailer link — where a bare
+ * URL is still useful — a sale without price, condition, date and source
+ * cannot be read later, so an incomplete entry is an error rather than a
+ * partial record.
+ */
+function cleanSoldComps(value: unknown, errors: string[]): SoldComp[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!Array.isArray(value)) {
+    errors.push("soldComps must be an array");
+    return undefined;
+  }
+
+  return value.flatMap((item, index) => {
+    const path = `soldComps[${index}]`;
+    if (!isRecord(item)) {
+      errors.push(`${path} must be an object`);
+      return [];
+    }
+
+    const price = cleanMoney(item.price, `${path}.price`, errors);
+    if (!price) {
+      errors.push(`${path}.price is required`);
+      return [];
+    }
+    const condition = cleanCondition(item.condition, `${path}.condition`, errors);
+    if (!condition) {
+      errors.push(`${path}.condition is required`);
+      return [];
+    }
+    const soldAt = cleanDateString(item.soldAt, `${path}.soldAt`, errors);
+    if (!soldAt) {
+      errors.push(`${path}.soldAt is required`);
+      return [];
+    }
+    const source = cleanRequiredString(item.source, `${path}.source`, errors);
+    if (!source) return [];
+
+    const comp: SoldComp = { price, condition, soldAt, source };
+    const url = cleanOptionalString(item.url, `${path}.url`, errors);
+    const notes = cleanOptionalString(item.notes, `${path}.notes`, errors);
+    if (url) comp.url = url;
+    if (notes) comp.notes = notes;
+    return [comp];
   });
 }
 
@@ -467,6 +515,7 @@ function normalizeWatchShape(
   assignIfPresent(output, body, "qualityFlags", cleanQualityFlags(body.qualityFlags, errors));
   assignIfPresent(output, body, "friction", cleanFriction(body.friction, errors));
   assignIfPresent(output, body, "links", cleanLinks(body.links, !partial, errors));
+  assignIfPresent(output, body, "soldComps", cleanSoldComps(body.soldComps, errors));
   assignIfPresent(output, body, "imageUrl", cleanOptionalString(body.imageUrl, "imageUrl", errors));
   assignIfPresent(output, body, "specs", cleanSpecs(body.specs, !partial, errors));
   assignIfPresent(output, body, "tags", cleanTags(body.tags, !partial, errors));

@@ -154,6 +154,31 @@ function checkLinks(value, path, errors) {
   });
 }
 
+// Solds are hand-entered, so every field that makes one readable later is
+// required here. The app's write path applies the same rule.
+function checkSoldComps(value, path, errors) {
+  if (value === undefined || value === null) return;
+  if (!Array.isArray(value)) {
+    errors.push(`${path} must be an array`);
+    return;
+  }
+  value.forEach((comp, index) => {
+    const compPath = `${path}[${index}]`;
+    if (!isRecord(comp)) {
+      errors.push(`${compPath} must be an object`);
+      return;
+    }
+    // checkMoney tolerates an absent price; for a sold comp it is required.
+    if (comp.price === undefined || comp.price === null) errors.push(`${compPath}.price is required`);
+    checkMoney(comp.price, `${compPath}.price`, errors);
+    if (!CONDITIONS.has(comp.condition)) errors.push(`${compPath}.condition must be new or pre-owned`);
+    checkDate(comp.soldAt, `${compPath}.soldAt`, errors, { required: true });
+    checkString(comp.source, `${compPath}.source`, errors, { required: true });
+    checkString(comp.url, `${compPath}.url`, errors);
+    checkString(comp.notes, `${compPath}.notes`, errors);
+  });
+}
+
 function checkSpecs(value, path, errors, warnings) {
   if (!isRecord(value)) {
     errors.push(`${path} must be an object`);
@@ -277,6 +302,7 @@ if (!Array.isArray(watches)) {
     checkPriceHistory(watch.priceHistory, `${path}.priceHistory`, errors);
     checkMoney(watch.targetPrice, `${path}.targetPrice`, errors);
     checkLinks(watch.links, `${path}.links`, errors);
+    checkSoldComps(watch.soldComps, `${path}.soldComps`, errors);
 
     // A history whose newest entry disagrees with the tracked price means one
     // of the two was hand-edited without the other. Not fatal — the price is
