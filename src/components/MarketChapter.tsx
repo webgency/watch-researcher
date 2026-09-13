@@ -1,6 +1,6 @@
 import { formatAgeDays, formatDate, formatMoney, hostname } from "@/lib/format";
 import { dealVerdict } from "@/lib/market-copy";
-import { soldComps } from "@/lib/sold-comps";
+import { soldComps, soldCompSummary } from "@/lib/sold-comps";
 import type { Condition, Watch } from "@/lib/types";
 import {
   bestOffer,
@@ -14,6 +14,7 @@ import { IS_STATIC } from "@/lib/config";
 import AddSoldComp from "./AddSoldComp";
 import ConfidenceChip from "./ConfidenceChip";
 import FreshnessBadge from "./FreshnessBadge";
+import RemoveSoldComp from "./RemoveSoldComp";
 
 function usd(amount: number): string {
   return formatMoney({ amount, currency: "USD" });
@@ -214,6 +215,25 @@ function Asks({ watch }: { watch: Watch }) {
   );
 }
 
+/**
+ * Per condition, never pooled, for the same reason as the asks: a pre-owned
+ * sale says little about what a new one fetches. A condition with no sales
+ * gets no line rather than a permanent "0 recorded".
+ */
+function SoldSummaryLine({ watch, condition }: { watch: Watch; condition: Condition }) {
+  const summary = soldCompSummary(watch, condition);
+  if (summary.comps.length === 0) return null;
+  const label = condition === "new" ? "New" : "Pre-owned";
+  return (
+    <p className="text-xs text-cocoa-500">
+      <span className="font-medium text-cocoa-600">{label}:</span>{" "}
+      {summary.medianUsd === undefined || summary.lowUsd === undefined || summary.highUsd === undefined
+        ? "1 of 2 sales needed for a median"
+        : `median ${usd(summary.medianUsd)} · range ${usd(summary.lowUsd)}–${usd(summary.highUsd)} from ${summary.comps.length} sales`}
+    </p>
+  );
+}
+
 function Solds({ watch }: { watch: Watch }) {
   const comps = soldComps(watch);
 
@@ -231,8 +251,8 @@ function Solds({ watch }: { watch: Watch }) {
         </p>
       ) : (
         <ul className="divide-y divide-cocoa-100">
-          {comps.map((comp, i) => (
-            <li key={i} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+          {comps.map((comp) => (
+            <li key={comp.index} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
               <span className="min-w-0 truncate font-medium text-cocoa-700">
                 {comp.url ? (
                   <a href={comp.url} target="_blank" rel="noopener noreferrer" className="text-azalea-700 hover:underline">
@@ -250,18 +270,23 @@ function Solds({ watch }: { watch: Watch }) {
                   {comp.ageDays !== undefined && ` · ${formatAgeDays(comp.ageDays)}`}
                 </span>
                 <span className="font-semibold tabular-nums">{formatMoney(comp.price)}</span>
+                {!IS_STATIC && <RemoveSoldComp watchId={watch.id} existing={watch.soldComps ?? []} index={comp.index} />}
               </div>
             </li>
           ))}
         </ul>
       )}
 
-      {/* Stated on the panel, not just in the code: a reader who sees solds and
-          a deal percentage together will otherwise assume one fed the other. */}
-      <p className="mt-3 border-t border-cocoa-100 pt-3 text-xs text-cocoa-400">
-        Recorded by hand, for context. Solds do not feed the fair asking range or the deal comparison, which compare asks with
-        asks.
-      </p>
+      <div className="mt-3 space-y-1 border-t border-cocoa-100 pt-3">
+        <SoldSummaryLine watch={watch} condition="new" />
+        <SoldSummaryLine watch={watch} condition="pre-owned" />
+        {/* Stated on the panel, not just in the code: a reader who sees solds and
+            a deal percentage together will otherwise assume one fed the other. */}
+        <p className="text-xs text-cocoa-400">
+          Recorded by hand, for context. Solds do not feed the fair asking range or the deal comparison, which compare asks
+          with asks.
+        </p>
+      </div>
     </section>
   );
 }

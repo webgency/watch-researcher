@@ -42,6 +42,15 @@ describe("sold comps", () => {
     expect(result[0].freshness).toBe("fresh");
   });
 
+  it("keeps each sale's stored position through the date sort", () => {
+    // Removal targets the stored entry; pointing at the sorted row would
+    // delete a different sale.
+    const stored = [comp({ soldAt: "2026-07-01T00:00:00.000Z" }), comp({ soldAt: "2026-09-10T00:00:00.000Z" })];
+    const result = soldComps({ soldComps: stored }, NOW);
+    expect(result.map((c) => c.index)).toEqual([1, 0]);
+    expect(stored[result[0].index].soldAt).toBe(result[0].soldAt);
+  });
+
   it("withholds a median until two sales exist", () => {
     expect(soldCompSummary({ soldComps: [comp()] }, undefined, NOW).medianUsd).toBeUndefined();
     const two = soldCompSummary(
@@ -105,6 +114,15 @@ describe("sold comp validation", () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors.join(" ")).toContain(`soldComps[0].${field}`);
+  });
+
+  it("clears the field when the last comp is removed", () => {
+    // RemoveSoldComp sends null so the file carries no empty array.
+    const result = normalizeWatchPatch({ soldComps: null });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect("soldComps" in result.data).toBe(true);
+    expect(result.data.soldComps).toBeUndefined();
   });
 
   it("rejects a condition outside new and pre-owned", () => {

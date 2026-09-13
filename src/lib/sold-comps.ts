@@ -3,6 +3,9 @@ import type { Condition, SoldComp, Watch } from "./types";
 import { freshnessForAge, observationAgeDays, type FreshnessTier } from "./valuation";
 
 export interface DatedSoldComp extends SoldComp {
+  /** Position in `watch.soldComps`. The display order is by date, so a row
+   * needs this to say which stored entry it is. */
+  index: number;
   priceUsd: number;
   ageDays?: number;
   freshness?: FreshnessTier;
@@ -32,10 +35,11 @@ function median(values: number[]): number {
  */
 export function soldComps(watch: Pick<Watch, "soldComps">, now: Date = new Date()): DatedSoldComp[] {
   return [...(watch.soldComps ?? [])]
-    .map((comp) => {
+    .map((comp, index) => {
       const ageDays = observationAgeDays(comp.soldAt, now);
       return {
         ...comp,
+        index,
         priceUsd: normalizePriceToUsd(comp.price),
         ageDays,
         freshness: ageDays === undefined ? undefined : freshnessForAge(ageDays),
