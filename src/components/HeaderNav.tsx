@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useResearchUrl, useComparisonIds } from "@/hooks/useResearchSession";
 import { usePathname } from "next/navigation";
 import { IS_STATIC } from "@/lib/config";
 import { useCollectionSearch } from "./CollectionSearchContext";
 
 export default function HeaderNav() {
-  const pathname = usePathname();
+  const pathname = usePathname().replace(/\/+$/, "") || "/";
+  const comparisonIds = useComparisonIds();
+  const comparisonUrl = comparisonIds.length ? `/compare?${new URLSearchParams({ ids: comparisonIds.join(",") })}` : "/compare";
+  const collectionUrl = useResearchUrl("collection");
+  const valueUrl = useResearchUrl("value");
   const { query, setQuery } = useCollectionSearch();
   const showSearch = pathname === "/";
 
@@ -32,18 +37,18 @@ export default function HeaderNav() {
           />
         </label>
       )}
-      <Link href="/" aria-current={pathname === "/" ? "page" : undefined} className={navClass(pathname === "/")}>
+      <Link href={collectionUrl} aria-current={pathname === "/" ? "page" : undefined} className={navClass(pathname === "/")}>
         Collection
       </Link>
       <Link
-        href="/compare"
+        href={comparisonUrl}
         aria-current={pathname === "/compare" ? "page" : undefined}
         className={navClass(pathname === "/compare")}
       >
         Compare
       </Link>
       <Link
-        href="/value"
+        href={valueUrl}
         aria-current={pathname === "/value" ? "page" : undefined}
         className={navClass(pathname === "/value")}
       >

@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { formatMoney, titleCase } from "@/lib/format";
 import { caliberTier, deriveCategory, landedPriceUsd, StandingSummary, toDisplayScore } from "@/lib/scoring";
 import { SCORING_CATEGORIES, Watch, WatchStatus, WISHLIST_TIERS, WISHLIST_TIER_LABELS, WishlistTier } from "@/lib/types";
 import { bestOffer, bestOfferTargetStatus, dealScore } from "@/lib/valuation";
 import { compareValueRows, matchesValueFilters, ValueFilters, ValueRow, ValueSortKey } from "@/lib/value-list";
 import { matchesWatchSearch } from "@/lib/watch-search";
+import { useValueFilters } from "@/hooks/useResearchSession";
 import FreshnessBadge from "./FreshnessBadge";
 
 const SORTS: Array<{ value: ValueSortKey; label: string }> = [
@@ -42,16 +43,8 @@ export default function ValueList({
   summaries: Record<string, StandingSummary>;
   nowIso: string;
 }) {
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<ValueSortKey>("value");
-  const [status, setStatus] = useState<WatchStatus | "all">("wishlist");
-  const [category, setCategory] = useState<ValueFilters["category"]>("all");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [minDesign, setMinDesign] = useState("");
-  const [confidence, setConfidence] = useState<ValueFilters["confidence"]>("all");
-  const [hasDealEvidence, setHasDealEvidence] = useState(false);
-  const [wishlistTier, setWishlistTier] = useState<WishlistTier | "all">("all");
+  const { filters: session, update } = useValueFilters();
+  const { query, sort, status, category, minPrice, maxPrice, minDesign, confidence, hasDealEvidence, wishlistTier } = session;
 
   const rows = useMemo(() => {
     const now = new Date(nowIso);
@@ -84,15 +77,7 @@ export default function ValueList({
   const visible = rows.filter((row) => matchesValueFilters(row, filters) && matchesWatchSearch(row.watch, query)).sort((a, b) => compareValueRows(a, b, sort));
 
   function resetFilters() {
-    setQuery("");
-    setStatus("wishlist");
-    setCategory("all");
-    setMinPrice("");
-    setMaxPrice("");
-    setMinDesign("");
-    setConfidence("all");
-    setHasDealEvidence(false);
-    setWishlistTier("all");
+    update({ query: "", status: "wishlist", category: "all", minPrice: "", maxPrice: "", minDesign: "", confidence: "all", hasDealEvidence: false, wishlistTier: "all" });
   }
 
   return (
@@ -101,49 +86,49 @@ export default function ValueList({
         <div className="mb-4 flex items-end gap-3">
           <label className="label min-w-0 flex-1">
             Search watches
-            <input type="search" className="input mt-1" placeholder="Brand, model, reference, or caliber" value={query} onChange={event => setQuery(event.target.value)} />
+            <input type="search" className="input mt-1" placeholder="Brand, model, reference, or caliber" value={query} onChange={event => update({ query: event.target.value }, true)} />
           </label>
-          {query && <button type="button" className="btn-secondary shrink-0" onClick={() => setQuery("")}>Clear search</button>}
+          {query && <button type="button" className="btn-secondary shrink-0" onClick={() => update({ query: "" })}>Clear search</button>}
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Filter label="Sort by">
-            <select className="input" value={sort} onChange={(event) => setSort(event.target.value as ValueSortKey)}>
+            <select className="input" value={sort} onChange={(event) => update({ sort: event.target.value as ValueSortKey })}>
               {SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </Filter>
           <Filter label="Status">
-            <select className="input" value={status} onChange={(event) => setStatus(event.target.value as WatchStatus | "all")}>
+            <select className="input" value={status} onChange={(event) => update({ status: event.target.value as WatchStatus | "all" })}>
               <option value="wishlist">Wishlist</option><option value="owned">Owned</option><option value="all">Wishlist + owned</option>
             </select>
           </Filter>
           <Filter label="Category">
-            <select className="input" value={category} onChange={(event) => setCategory(event.target.value as ValueFilters["category"])}>
+            <select className="input" value={category} onChange={(event) => update({ category: event.target.value as ValueFilters["category"] })}>
               <option value="all">All categories</option>
               {SCORING_CATEGORIES.map((item) => <option key={item} value={item}>{titleCase(item)}</option>)}
             </select>
           </Filter>
           <Filter label="Wishlist priority">
-            <select className="input" value={wishlistTier} onChange={(event) => setWishlistTier(event.target.value as WishlistTier | "all")}>
+            <select className="input" value={wishlistTier} onChange={(event) => update({ wishlistTier: event.target.value as WishlistTier | "all" })}>
               <option value="all">All priorities</option>
               {WISHLIST_TIERS.map((tier) => <option key={tier} value={tier}>{WISHLIST_TIER_LABELS[tier]}</option>)}
             </select>
           </Filter>
-          <Filter label="Minimum USD price"><input className="input" inputMode="numeric" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder="No minimum" /></Filter>
-          <Filter label="Maximum USD price"><input className="input" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="No maximum" /></Filter>
+          <Filter label="Minimum USD price"><input className="input" inputMode="numeric" value={minPrice} onChange={(event) => update({ minPrice: event.target.value }, true)} placeholder="No minimum" /></Filter>
+          <Filter label="Maximum USD price"><input className="input" inputMode="numeric" value={maxPrice} onChange={(event) => update({ maxPrice: event.target.value }, true)} placeholder="No maximum" /></Filter>
           <Filter label="Minimum design rank">
-            <select className="input" value={minDesign} onChange={(event) => setMinDesign(event.target.value)}>
+            <select className="input" value={minDesign} onChange={(event) => update({ minDesign: event.target.value })}>
               <option value="">Any / unrated</option><option value="3">3+</option><option value="4">4+</option><option value="5">5</option>
             </select>
           </Filter>
           <Filter label="Scoring confidence">
-            <select className="input" value={confidence} onChange={(event) => setConfidence(event.target.value as ValueFilters["confidence"])}>
+            <select className="input" value={confidence} onChange={(event) => update({ confidence: event.target.value as ValueFilters["confidence"] })}>
               <option value="all">All confidence levels</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low / limited</option>
             </select>
           </Filter>
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <label className="flex items-center gap-2 text-sm text-cocoa-600">
-            <input type="checkbox" checked={hasDealEvidence} onChange={(event) => setHasDealEvidence(event.target.checked)} />
+            <input type="checkbox" checked={hasDealEvidence} onChange={(event) => update({ hasDealEvidence: event.target.checked })} />
             Has sufficient deal evidence
           </label>
           <button type="button" onClick={resetFilters} className="text-sm font-medium text-azalea-700 hover:underline">Reset filters</button>

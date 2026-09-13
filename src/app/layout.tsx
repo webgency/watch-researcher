@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import CollectionLink from "@/components/CollectionLink";
 import localFont from "next/font/local";
 import { ASSET_BASE_PATH } from "@/lib/config";
 import BrandLogo from "@/components/BrandLogo";
@@ -39,9 +39,9 @@ export default function RootLayout({
           <div className="min-h-screen">
             <header className="border-b border-cocoa-200 bg-white">
               <div className="relative mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-4 py-5">
-                <Link href="/" aria-label="Vitrine home" className="shrink-0 rounded-sm">
+                <CollectionLink aria-label="Vitrine home" className="shrink-0 rounded-sm">
                   <BrandLogo />
-                </Link>
+                </CollectionLink>
                 <HeaderNav />
               </div>
             </header>
