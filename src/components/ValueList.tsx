@@ -7,6 +7,7 @@ import { caliberTier, deriveCategory, landedPriceUsd, StandingSummary, toDisplay
 import { SCORING_CATEGORIES, Watch, WatchStatus, WISHLIST_TIERS, WISHLIST_TIER_LABELS, WishlistTier } from "@/lib/types";
 import { bestOffer, bestOfferTargetStatus, dealScore } from "@/lib/valuation";
 import { compareValueRows, matchesValueFilters, ValueFilters, ValueRow, ValueSortKey } from "@/lib/value-list";
+import { matchesWatchSearch } from "@/lib/watch-search";
 import FreshnessBadge from "./FreshnessBadge";
 
 const SORTS: Array<{ value: ValueSortKey; label: string }> = [
@@ -41,6 +42,7 @@ export default function ValueList({
   summaries: Record<string, StandingSummary>;
   nowIso: string;
 }) {
+  const [query, setQuery] = useState("");
   const [sort, setSort] = useState<ValueSortKey>("value");
   const [status, setStatus] = useState<WatchStatus | "all">("wishlist");
   const [category, setCategory] = useState<ValueFilters["category"]>("all");
@@ -79,9 +81,10 @@ export default function ValueList({
     hasDealEvidence,
     wishlistTier,
   };
-  const visible = rows.filter((row) => matchesValueFilters(row, filters)).sort((a, b) => compareValueRows(a, b, sort));
+  const visible = rows.filter((row) => matchesValueFilters(row, filters) && matchesWatchSearch(row.watch, query)).sort((a, b) => compareValueRows(a, b, sort));
 
   function resetFilters() {
+    setQuery("");
     setStatus("wishlist");
     setCategory("all");
     setMinPrice("");
@@ -95,6 +98,13 @@ export default function ValueList({
   return (
     <div className="space-y-4">
       <section className="card p-4 sm:p-5">
+        <div className="mb-4 flex items-end gap-3">
+          <label className="label min-w-0 flex-1">
+            Search watches
+            <input type="search" className="input mt-1" placeholder="Brand, model, reference, or caliber" value={query} onChange={event => setQuery(event.target.value)} />
+          </label>
+          {query && <button type="button" className="btn-secondary shrink-0" onClick={() => setQuery("")}>Clear search</button>}
+        </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Filter label="Sort by">
             <select className="input" value={sort} onChange={(event) => setSort(event.target.value as ValueSortKey)}>
@@ -140,11 +150,11 @@ export default function ValueList({
         </div>
       </section>
 
-      <p className="text-sm text-cocoa-500">Showing {visible.length} of {rows.length} wishlist or owned watches. Rubric value is the ranking; deal evidence and design stay separate.</p>
+      <p role="status" className="text-sm text-cocoa-500">Showing {visible.length} of {rows.length} wishlist or owned watches. Rubric value is the ranking; deal evidence and design stay separate.</p>
 
       <section className="card overflow-hidden">
         {visible.length === 0 ? (
-          <p className="p-8 text-center text-sm text-cocoa-500">No watches match these filters.</p>
+          <p className="p-8 text-center text-sm text-cocoa-500">No watches match your search and filters.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] w-full text-left text-sm">

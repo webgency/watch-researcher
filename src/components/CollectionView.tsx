@@ -15,6 +15,8 @@ import { IS_STATIC } from "@/lib/config";
 import { landedPriceUsd, type StandingSummary } from "@/lib/scoring";
 import { bestOffer, FreshnessTier } from "@/lib/valuation";
 import { useCollectionSearch } from "./CollectionSearchContext";
+import { matchesWatchSearch } from "@/lib/watch-search";
+import CollectionTable from "./CollectionTable";
 import WatchCard from "./WatchCard";
 
 type SortKey =
@@ -71,6 +73,7 @@ export default function CollectionView({
 }) {
   const router = useRouter();
   const { query, setQuery } = useCollectionSearch();
+  const [view, setView] = useState<"grid" | "table">("grid");
   const [status, setStatus] = useState<WatchStatus | "all">("all");
   const [wishlistTiers, setWishlistTiers] = useState<WishlistTier[]>([]);
   const [priorityOpen, setPriorityOpen] = useState(false);
@@ -157,7 +160,6 @@ export default function CollectionView({
   }
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
     let list = watches.filter((w) => {
       if (status !== "all" && w.status !== status) return false;
       if (selectedTierSet.size > 0 && (!w.wishlistTier || !selectedTierSet.has(w.wishlistTier))) return false;
@@ -165,19 +167,7 @@ export default function CollectionView({
         const offer = offerByWatch.get(w.id);
         if (offer?.status !== "available" || offer.offer.freshness !== "fresh") return false;
       }
-      if (!q) return true;
-      const haystack = [
-        w.brand,
-        w.model,
-        w.referenceNumber,
-        w.wishlistTier ? WISHLIST_TIER_LABELS[w.wishlistTier] : null,
-        scoreSummaries[w.id]?.standing.peerLabel,
-        ...w.tags,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
+      return matchesWatchSearch(w, query, [scoreSummaries[w.id]?.standing.peerLabel ?? ""]);
     });
 
     list = [...list].sort((a, b) => {
@@ -362,15 +352,25 @@ export default function CollectionView({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-cocoa-500" aria-live="polite">
-        <p>
-          Showing <span className="font-semibold text-cocoa-700">{filtered.length}</span> of {watches.length} watches
-        </p>
-        {hasActiveFilters && filtered.length > 0 && (
-          <button type="button" className="font-medium text-cocoa-700 underline-offset-4 hover:underline" onClick={resetFilters}>
-            Clear search and filters
-          </button>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-cocoa-500">
+          <p role="status">
+            Showing <span className="font-semibold text-cocoa-700">{filtered.length}</span> of {watches.length} watches
+          </p>
+          {hasActiveFilters && filtered.length > 0 && (
+            <button type="button" className="font-medium text-cocoa-700 underline-offset-4 hover:underline" onClick={resetFilters}>
+              Clear search and filters
+            </button>
+          )}
+        </div>
+        <div role="group" aria-label="Collection view" className="flex w-fit gap-1 rounded-lg border border-cocoa-200 bg-white p-1">
+          {(["grid", "table"] as const).map(mode => (
+            <button type="button" key={mode} aria-pressed={view === mode} onClick={() => setView(mode)}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium ${view === mode ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-cocoa-50"}`}>
+              {mode === "grid" ? "Grid" : "Compact table"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -379,6 +379,9 @@ export default function CollectionView({
           <p className="text-xs text-cocoa-500">Clear them to return to the full collection.</p>
           <button type="button" className="btn-secondary" onClick={resetFilters}>Clear search and filters</button>
         </div>
+      ) : view === "table" ? (
+        <CollectionTable watches={filtered} selected={selected} scoreSummaries={scoreSummaries}
+          onToggleSelect={toggleSelect} onChangeWishlistTier={IS_STATIC ? undefined : changeWishlistTier} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((watch) => (
