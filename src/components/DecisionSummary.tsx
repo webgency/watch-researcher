@@ -1,7 +1,7 @@
 import { computeDesignScore, toDisplayScore, type Standing } from "@/lib/scoring";
 import { dealScore } from "@/lib/valuation";
 import type { Watch } from "@/lib/types";
-import { dealVerdict } from "./MarketValuePanel";
+import { dealVerdict } from "@/lib/market-copy";
 
 /**
  * What the decision panels concluded, in one quiet row under the price. The

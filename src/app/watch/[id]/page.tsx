@@ -3,19 +3,17 @@ import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { getWatch, getWatches } from "@/lib/store";
 import { computeStanding } from "@/lib/scoring";
-import { formatMoney, formatDate, hostname } from "@/lib/format";
+import { formatMoney, formatDate } from "@/lib/format";
 import { IS_STATIC } from "@/lib/config";
 import StatusBadge from "@/components/StatusBadge";
 import WishlistTierBadge from "@/components/WishlistTierBadge";
 import WatchActions from "@/components/WatchActions";
 import StandingPanel from "@/components/StandingPanel";
 import PriceHistoryPanel from "@/components/PriceHistoryPanel";
-import MarketValuePanel from "@/components/MarketValuePanel";
-import FreshnessBadge from "@/components/FreshnessBadge";
+import MarketChapter from "@/components/MarketChapter";
 import KeySpecStrip from "@/components/KeySpecStrip";
 import SpecChapters from "@/components/SpecChapters";
 import DecisionSummary from "@/components/DecisionSummary";
-import { freshnessForAge, observationAgeDays } from "@/lib/valuation";
 
 // An empty generateStaticParams result opts into on-demand static generation.
 // Explicit dynamic rendering prevents noStore() from failing at request time;
@@ -116,34 +114,10 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
         <PriceHistoryPanel watch={watch} />
       </div>
 
-      {/* Market chapter slot (brief 04 replaces its contents, not its position). */}
-      <div id="market" className="scroll-mt-6 space-y-6">
-        <MarketValuePanel watch={watch} />
-
-        {watch.links.length > 0 && (
-          <section className="card p-5">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cocoa-500">Where to buy</h2>
-            <ul className="space-y-2">
-              {watch.links.map((l, i) => {
-                const ageDays = l.observedAt ? observationAgeDays(l.observedAt) : undefined;
-                return (
-                  <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cocoa-100 p-3">
-                    <a href={l.url} target="_blank" rel="noopener noreferrer" className="font-medium text-azalea-700 hover:underline">
-                      {l.retailer || hostname(l.url)}
-                    </a>
-                    <div className="flex flex-wrap items-center gap-3 text-sm">
-                      {l.condition && <span className="rounded bg-cocoa-100 px-2 py-0.5 text-xs capitalize text-cocoa-600">{l.condition}</span>}
-                      {l.observedAt && <span className="text-xs text-cocoa-400">Observed {formatDate(l.observedAt)}</span>}
-                      {l.price && ageDays !== undefined && <FreshnessBadge tier={freshnessForAge(ageDays)} />}
-                      {l.price && ageDays === undefined && <span className="text-xs font-medium text-cocoa-400">Freshness unknown</span>}
-                      <span className="font-semibold">{formatMoney(l.price)}</span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        )}
+      {/* Market chapter. Asks, solds and the tracked price live here together;
+          brief 05's drop trail lands inside this slot too. */}
+      <div id="market" className="scroll-mt-6">
+        <MarketChapter watch={watch} />
       </div>
 
       {/* Trade-up chapter slot (brief 07, owned watches only). Empty until then;

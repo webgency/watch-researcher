@@ -104,6 +104,25 @@ export interface QualityFlags {
   arCoated?: boolean;
 }
 
+/**
+ * One completed sale, recorded by hand from a source you actually saw.
+ *
+ * Every field but `url` and `notes` is required: a sold price with no date,
+ * condition or source cannot be judged later, and a half-recorded comp is
+ * worse than none. Solds are never scraped and never estimated — and they do
+ * not feed the deal score, which stays a comparison of asking prices.
+ */
+export interface SoldComp {
+  price: Money;
+  condition: Condition;
+  /** ISO date the sale completed. */
+  soldAt: string;
+  /** Where the sale was seen, e.g. an auction house or forum. */
+  source: string;
+  url?: string;
+  notes?: string;
+}
+
 export type Availability = "in-stock" | "pre-order" | "sold-out" | "discontinued";
 
 export const AVAILABILITY_STATES: Availability[] = [
@@ -167,6 +186,8 @@ export interface Watch {
   qualityFlags?: QualityFlags;
   friction?: Friction;
   links: RetailerLink[];
+  /** Completed sales, recorded by hand. Displayed apart from asks; never scored. */
+  soldComps?: SoldComp[];
   imageUrl?: string;
   specs: WatchSpecs;
   tags: string[];
