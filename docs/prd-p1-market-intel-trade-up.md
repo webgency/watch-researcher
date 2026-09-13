@@ -189,3 +189,4 @@ Follow-ups: `feat: alerts` · `feat: trade-up panel`
 - [ ] Trade-up panel shows exit vs candidate with labeled assumptions  
 - [ ] Tests cover insufficient evidence and no headline-as-second-source regression  
 - [ ] README or docs snippet: how to add a dated link / sold comp / alert prefs  
+
