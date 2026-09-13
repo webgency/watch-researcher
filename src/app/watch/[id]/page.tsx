@@ -2,7 +2,6 @@ import CollectionLink from "@/components/CollectionLink";
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { getWatch, getWatches } from "@/lib/store";
-import { SPEC_FIELDS, formatSpecValue } from "@/lib/specs";
 import { computeStanding } from "@/lib/scoring";
 import { formatMoney, formatDate, hostname } from "@/lib/format";
 import { IS_STATIC } from "@/lib/config";
@@ -13,6 +12,9 @@ import StandingPanel from "@/components/StandingPanel";
 import PriceHistoryPanel from "@/components/PriceHistoryPanel";
 import MarketValuePanel from "@/components/MarketValuePanel";
 import FreshnessBadge from "@/components/FreshnessBadge";
+import KeySpecStrip from "@/components/KeySpecStrip";
+import SpecChapters from "@/components/SpecChapters";
+import DecisionSummary from "@/components/DecisionSummary";
 import { freshnessForAge, observationAgeDays } from "@/lib/valuation";
 
 // An empty generateStaticParams result opts into on-demand static generation.
@@ -37,8 +39,11 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   if (!watch) notFound();
   const standing = computeStanding(watch, watches);
 
+  // Page order is the reading order: what it is, what it is made of, then what
+  // to do about it. Each chapter owns a fixed position so later chapters
+  // (market, trade-up) fill their slot without reflowing the rest.
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between gap-4">
         <CollectionLink className="btn-secondary">
           ← Collection
@@ -46,91 +51,104 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
         {!IS_STATIC && <WatchActions id={watch.id} name={`${watch.brand} ${watch.model}`} />}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[2fr_3fr]">
-        <div className="card flex h-72 items-center justify-center overflow-hidden bg-gradient-to-br from-cocoa-100 to-cocoa-200">
+      {/* Hero: name and price are the loudest things on the page. */}
+      <section className="grid gap-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-8">
+        <div className="card flex h-80 items-center justify-center overflow-hidden bg-white sm:h-[28rem]">
           {watch.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={watch.imageUrl} alt={`${watch.brand} ${watch.model}`} className="h-full w-full object-cover" />
+            <img
+              src={watch.imageUrl}
+              alt={`${watch.brand} ${watch.model}`}
+              className="h-full w-full object-contain p-4"
+            />
           ) : (
-            <span className="text-5xl font-bold text-cocoa-300">{(watch.brand[0] ?? "?").toUpperCase()}</span>
+            <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-cocoa-100 to-cocoa-200 text-6xl font-bold text-cocoa-300">
+              {(watch.brand[0] ?? "?").toUpperCase()}
+            </span>
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="flex min-w-0 flex-col gap-5 md:py-2">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cocoa-400">{watch.brand}</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">{watch.model}</h1>
-              <WishlistTierBadge tier={watch.wishlistTier} />
-              <StatusBadge status={watch.status} />
-            </div>
-            {watch.referenceNumber && <p className="text-sm text-cocoa-500">Ref. {watch.referenceNumber}</p>}
+            <p className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">{watch.brand}</p>
+            <h1 className="mt-1 text-3xl font-bold leading-tight tracking-tight text-cocoa-950 sm:text-4xl">
+              {watch.model}
+            </h1>
+            {watch.referenceNumber && <p className="mt-1 text-sm text-cocoa-500">Ref. {watch.referenceNumber}</p>}
+            {(watch.wishlistTier || watch.status !== "wishlist") && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <WishlistTierBadge tier={watch.wishlistTier} />
+                <StatusBadge status={watch.status} />
+              </div>
+            )}
           </div>
 
-          <p className="text-3xl font-bold">{formatMoney(watch.price)}</p>
-          {watch.priceUpdatedAt && (
-            <p className="text-xs text-cocoa-400">Price updated {formatDate(watch.priceUpdatedAt)}</p>
-          )}
-          {watch.personalFit && (
-            <p className="text-sm font-medium text-cocoa-600">Fit for me: {watch.personalFit}/5</p>
-          )}
+          <div>
+            <p className="text-4xl font-bold tracking-tight tabular-nums text-cocoa-950">{formatMoney(watch.price)}</p>
+            {watch.priceUpdatedAt && (
+              <p className="mt-1 text-xs text-cocoa-400">Price updated {formatDate(watch.priceUpdatedAt)}</p>
+            )}
+          </div>
 
-          {watch.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {watch.tags.map((t) => (
-                <span key={t} className="rounded-full bg-cocoa-100 px-2.5 py-1 text-xs font-medium text-cocoa-600">
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
+          <DecisionSummary watch={watch} standing={standing} />
 
-          <p className="text-xs text-cocoa-400">Added {formatDate(watch.dateAdded)}</p>
+          <div className="space-y-2">
+            {watch.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {watch.tags.map((t) => (
+                  <span key={t} className="rounded-full bg-cocoa-100 px-2.5 py-1 text-xs font-medium text-cocoa-600">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-cocoa-400">Added {formatDate(watch.dateAdded)}</p>
+          </div>
         </div>
-      </div>
-
-      <StandingPanel watch={watch} standing={standing} />
-
-      <PriceHistoryPanel watch={watch} />
-
-      <MarketValuePanel watch={watch} />
-
-      <section className="card p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cocoa-500">Specifications</h2>
-        <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-          {SPEC_FIELDS.map((f) => (
-            <div key={String(f.key)} className="flex justify-between gap-4 border-b border-cocoa-100 pb-2">
-              <dt className="text-sm text-cocoa-500">{f.label}</dt>
-              <dd className="text-sm font-medium capitalize">{formatSpecValue(f, watch.specs[f.key])}</dd>
-            </div>
-          ))}
-        </dl>
       </section>
 
-      {watch.links.length > 0 && (
-        <section className="card p-5">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cocoa-500">Where to buy</h2>
-          <ul className="space-y-2">
-            {watch.links.map((l, i) => {
-              const ageDays = l.observedAt ? observationAgeDays(l.observedAt) : undefined;
-              return (
-                <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cocoa-100 p-3">
-                  <a href={l.url} target="_blank" rel="noopener noreferrer" className="font-medium text-azalea-700 hover:underline">
-                    {l.retailer || hostname(l.url)}
-                  </a>
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    {l.condition && <span className="rounded bg-cocoa-100 px-2 py-0.5 text-xs capitalize text-cocoa-600">{l.condition}</span>}
-                    {l.observedAt && <span className="text-xs text-cocoa-400">Observed {formatDate(l.observedAt)}</span>}
-                    {l.price && ageDays !== undefined && <FreshnessBadge tier={freshnessForAge(ageDays)} />}
-                    {l.price && ageDays === undefined && <span className="text-xs font-medium text-cocoa-400">Freshness unknown</span>}
-                    <span className="font-semibold">{formatMoney(l.price)}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
+      <KeySpecStrip specs={watch.specs} />
+
+      <SpecChapters watch={watch} />
+
+      <div id="standing" className="scroll-mt-6 space-y-6">
+        <StandingPanel watch={watch} standing={standing} />
+        <PriceHistoryPanel watch={watch} />
+      </div>
+
+      {/* Market chapter slot (brief 04 replaces its contents, not its position). */}
+      <div id="market" className="scroll-mt-6 space-y-6">
+        <MarketValuePanel watch={watch} />
+
+        {watch.links.length > 0 && (
+          <section className="card p-5">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cocoa-500">Where to buy</h2>
+            <ul className="space-y-2">
+              {watch.links.map((l, i) => {
+                const ageDays = l.observedAt ? observationAgeDays(l.observedAt) : undefined;
+                return (
+                  <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cocoa-100 p-3">
+                    <a href={l.url} target="_blank" rel="noopener noreferrer" className="font-medium text-azalea-700 hover:underline">
+                      {l.retailer || hostname(l.url)}
+                    </a>
+                    <div className="flex flex-wrap items-center gap-3 text-sm">
+                      {l.condition && <span className="rounded bg-cocoa-100 px-2 py-0.5 text-xs capitalize text-cocoa-600">{l.condition}</span>}
+                      {l.observedAt && <span className="text-xs text-cocoa-400">Observed {formatDate(l.observedAt)}</span>}
+                      {l.price && ageDays !== undefined && <FreshnessBadge tier={freshnessForAge(ageDays)} />}
+                      {l.price && ageDays === undefined && <span className="text-xs font-medium text-cocoa-400">Freshness unknown</span>}
+                      <span className="font-semibold">{formatMoney(l.price)}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+      </div>
+
+      {/* Trade-up chapter slot (brief 07, owned watches only). Empty until then;
+          `empty:hidden` keeps it from taking space while it has no children. */}
+      <div id="trade-up" className="scroll-mt-6 empty:hidden" />
 
       {watch.notes && (
         <section className="card p-5">

@@ -40,7 +40,7 @@ function ConditionSummary({ summary }: { summary: MarketValueSummary }) {
         </div>
       ) : (
         <div className="mt-3">
-          <p className="text-2xl font-bold text-cocoa-900">{formatMoney({ amount: summary.medianUsd, currency: "USD" })}</p>
+          <p className="text-xl font-bold text-cocoa-900">{formatMoney({ amount: summary.medianUsd, currency: "USD" })}</p>
           <p className="text-xs text-cocoa-500">
             Median asking price · range {formatMoney({ amount: summary.lowUsd!, currency: "USD" })}–{formatMoney({ amount: summary.highUsd!, currency: "USD" })}
           </p>
@@ -89,7 +89,7 @@ function BestOfferSummary({ result, target }: { result: BestOffer; target?: Best
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Best dated offer</p>
-          <p className="mt-1 text-2xl font-bold text-cocoa-900">{formatMoney(offer.price)}</p>
+          <p className="mt-1 text-xl font-bold text-cocoa-900">{formatMoney(offer.price)}</p>
           <a href={offer.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-azalea-700 hover:underline">
             {offer.source} ↗
           </a>
@@ -121,6 +121,16 @@ function BestOfferSummary({ result, target }: { result: BestOffer; target?: Best
   );
 }
 
+/** One-line deal verdict, shared with the detail page's decision summary. */
+export function dealVerdict(deal: Exclude<DealScore, { status: "insufficient" }>): string {
+  const discount = deal.discountPct;
+  return discount > 0.5
+    ? `${Math.round(discount)}% below fair asks`
+    : discount < -0.5
+      ? `${Math.round(Math.abs(discount))}% above fair asks`
+      : "At the fair asking median";
+}
+
 function DealSummary({ deal }: { deal: DealScore }) {
   const condition = deal.evidenceCondition === "pre-owned" ? "pre-owned" : "new";
   if (deal.status === "insufficient") {
@@ -142,19 +152,14 @@ function DealSummary({ deal }: { deal: DealScore }) {
     );
   }
 
-  const discount = deal.discountPct;
-  const verdict = discount > 0.5
-    ? `${Math.round(discount)}% below fair asks`
-    : discount < -0.5
-      ? `${Math.round(Math.abs(discount))}% above fair asks`
-      : "At the fair asking median";
+  const verdict = dealVerdict(deal);
 
   return (
     <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Deal vs fair asks</p>
-          <p className="mt-1 text-2xl font-bold text-cocoa-900">{verdict}</p>
+          <p className="mt-1 text-xl font-bold text-cocoa-900">{verdict}</p>
         </div>
         <div className="flex flex-wrap gap-1">
           <span className={`rounded-full px-2 py-1 text-xs font-semibold capitalize ${CONFIDENCE_STYLE[deal.confidence]}`}>
