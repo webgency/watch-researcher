@@ -242,32 +242,34 @@ export default function CollectionView({
   return (
     <div className="space-y-6">
 
-      {/* Status and the control cluster keep their own rows until both fit
-          comfortably. A deliberate breakpoint avoids ragged intermediate wraps. */}
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-        <div role="group" aria-label="Watch status" className="flex w-full rounded-lg bg-white p-0.5 ring-1 ring-cocoa-200 sm:w-auto sm:self-start xl:self-auto">
+      {/* Two rows at every width: what to show (status), then how to narrow and
+          order it. One card, one control height, one pill radius, so the rows
+          align instead of merging into a ragged single line on wide screens. */}
+      <div className="card space-y-3 p-3">
+        <div role="group" aria-label="Watch status" className="flex flex-wrap gap-2">
           {(["all", ...WATCH_STATUSES] as const).map((s) => (
             <button
               key={s}
               onClick={() => update({ status: s })}
               aria-pressed={status === s}
-              className={`flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:flex-none sm:px-3 sm:text-sm ${
-                status === s ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-cocoa-100"
+              className={`inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-sm font-medium ring-1 ring-inset transition-colors ${
+                status === s ? "bg-azalea text-cocoa-950 ring-azalea" : "bg-white text-cocoa-600 ring-cocoa-200 hover:bg-cocoa-50"
               }`}
             >
-              {STATUS_LABELS[s]} <span className="tabular-nums">{counts[s] ?? 0}</span>
+              {STATUS_LABELS[s]}
+              <span className={`tabular-nums ${status === s ? "" : "text-cocoa-400"}`}>{counts[s] ?? 0}</span>
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-2 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.25fr)] xl:flex xl:flex-1">
-          <div ref={priorityRef} className="relative min-w-0 xl:w-48">
+        <div className="grid grid-cols-2 items-center gap-2 border-t border-cocoa-100 pt-3 sm:flex sm:flex-wrap">
+          <div ref={priorityRef} className="relative min-w-0 sm:w-52">
             <button
               type="button"
               ref={priorityTriggerRef}
               onClick={() => setPriorityOpen((current) => !current)}
               aria-expanded={priorityOpen}
               aria-haspopup="true"
-              className="input flex h-[2.375rem] cursor-pointer items-center justify-between gap-2 py-1.5 text-left"
+              className="flex h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-full bg-white px-4 text-left text-sm text-cocoa-700 ring-1 ring-inset ring-cocoa-200 transition-colors hover:bg-cocoa-50"
             >
               <span className="truncate">{priorityLabel}</span>
               <span aria-hidden className={`text-cocoa-400 transition-transform ${priorityOpen ? "rotate-180" : ""}`}>
@@ -316,9 +318,11 @@ export default function CollectionView({
             type="button"
             aria-pressed={freshOffersOnly}
             onClick={() => update({ freshOffersOnly: !freshOffersOnly })}
-            className={`h-[2.375rem] whitespace-nowrap rounded-lg px-2 text-xs sm:px-3 sm:text-sm font-medium ring-1 transition-colors ${
+            // Azalea like every other selected control. Green would read as a
+            // verdict about the offers rather than a filter that is switched on.
+            className={`h-9 whitespace-nowrap rounded-full px-4 text-sm font-medium ring-1 ring-inset transition-colors ${
               freshOffersOnly
-                ? "bg-emerald-700 text-white ring-emerald-700"
+                ? "bg-azalea text-cocoa-950 ring-azalea"
                 : "bg-white text-cocoa-600 ring-cocoa-200 hover:bg-cocoa-50"
             }`}
           >
@@ -328,7 +332,7 @@ export default function CollectionView({
             value={sort}
             onChange={(e) => update({ sort: e.target.value as SortKey })}
             aria-label="Sort collection"
-            className="input col-span-2 min-w-0 sm:col-span-1 xl:ml-auto xl:w-auto"
+            className="input col-span-2 h-9 min-w-0 rounded-full py-0 pl-4 sm:ml-auto sm:w-auto"
           >
             {SORTS.map((s) => (
               <option key={s.key} value={s.key}>
@@ -350,10 +354,10 @@ export default function CollectionView({
             </button>
           )}
         </div>
-        <div role="group" aria-label="Collection view" className="flex w-fit gap-1 rounded-lg border border-cocoa-200 bg-white p-1">
+        <div role="group" aria-label="Collection view" className="flex w-fit gap-1 rounded-full bg-cocoa-100 p-1">
           {(["grid", "table"] as const).map(mode => (
             <button type="button" key={mode} aria-pressed={view === mode} onClick={() => setView(mode)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${view === mode ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-cocoa-50"}`}>
+              className={`h-8 rounded-full px-3.5 text-sm font-medium transition-colors ${view === mode ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-white/70 hover:text-cocoa-900"}`}>
               {mode === "grid" ? "Grid" : "Compact table"}
             </button>
           ))}
