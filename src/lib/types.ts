@@ -37,6 +37,13 @@ export interface RetailerLink {
   condition?: Condition;
   /** Date this asking price was observed. Required for market comparisons. */
   observedAt?: string;
+  /**
+   * This listing's ask moves, oldest first, newest equal to `price`. Moves
+   * only, like Watch.priceHistory, so each date means "at this ask since" —
+   * unlike observedAt, which advances every time the ask is confirmed. Absent
+   * until the ask first changes. Written by `recordAskMove()`.
+   */
+  askHistory?: PriceSnapshot[];
 }
 
 /**

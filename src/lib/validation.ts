@@ -196,11 +196,13 @@ function cleanLinks(value: unknown, required: boolean, errors: string[]): Retail
     const price = cleanMoney(item.price, `${path}.price`, errors);
     const condition = cleanCondition(item.condition, `${path}.condition`, errors);
     const observedAt = cleanDateString(item.observedAt, `${path}.observedAt`, errors);
+    const askHistory = cleanPriceHistory(item.askHistory, errors, `${path}.askHistory`);
 
     if (retailer) link.retailer = retailer;
     if (price) link.price = price;
     if (condition) link.condition = condition;
     if (observedAt) link.observedAt = observedAt;
+    if (askHistory?.length) link.askHistory = askHistory;
     return [link];
   });
 }
@@ -252,15 +254,16 @@ function cleanSoldComps(value: unknown, errors: string[]): SoldComp[] | undefine
   });
 }
 
-function cleanPriceHistory(value: unknown, errors: string[]): PriceSnapshot[] | undefined {
+// Also validates a link's askHistory, which follows the same moves-only rule.
+function cleanPriceHistory(value: unknown, errors: string[], field = "priceHistory"): PriceSnapshot[] | undefined {
   if (value === undefined || value === null) return undefined;
   if (!Array.isArray(value)) {
-    errors.push("priceHistory must be an array");
+    errors.push(`${field} must be an array`);
     return undefined;
   }
 
   const history = value.flatMap((item, index) => {
-    const path = `priceHistory[${index}]`;
+    const path = `${field}[${index}]`;
     if (!isRecord(item)) {
       errors.push(`${path} must be an object`);
       return [];
@@ -288,13 +291,13 @@ function cleanPriceHistory(value: unknown, errors: string[]): PriceSnapshot[] | 
   // the last element as "current" without re-sorting or de-duplicating.
   for (let i = 1; i < history.length; i++) {
     if (new Date(history[i].date).getTime() < new Date(history[i - 1].date).getTime()) {
-      errors.push(`priceHistory[${i}].date is earlier than the entry before it`);
+      errors.push(`${field}[${i}].date is earlier than the entry before it`);
     }
     if (
       history[i].price.amount === history[i - 1].price.amount &&
       history[i].price.currency === history[i - 1].price.currency
     ) {
-      errors.push(`priceHistory[${i}] repeats the previous price; the series records moves only`);
+      errors.push(`${field}[${i}] repeats the previous price; the series records moves only`);
     }
   }
 

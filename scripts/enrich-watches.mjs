@@ -19,9 +19,12 @@
 // Price history accumulates only from runs that actually re-read a price, so
 // use --refresh on a schedule if you want a series to build up. Refresh also
 // checks every retailer link and dates only asks actually read from that link;
-// the default run fills headline gaps and will never observe a move.
+// the default run fills headline gaps and will never observe a move. When a
+// link's ask has changed, refresh also appends it to that link's askHistory;
+// an unchanged ask only advances observedAt.
 
 import { readFile, writeFile } from "node:fs/promises";
+import { recordAskMove } from "../src/lib/listing-history.mjs";
 import { recordOfferObservation } from "../src/lib/offer-observation.mjs";
 import {
   extractRetailOffer,
@@ -278,7 +281,7 @@ async function main() {
   const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
   const targets = ONLY.length ? watches.filter((w) => ONLY.includes(w.id)) : watches;
 
-  let priceN = 0, offerN = 0, imageN = 0, changed = 0;
+  let priceN = 0, offerN = 0, askMoveN = 0, imageN = 0, changed = 0;
   const misses = [];
   const currencySkips = [];
   const offerCurrencyChanges = [];
@@ -293,6 +296,7 @@ async function main() {
     let gotImage = null;
     const observedAt = new Date().toISOString();
     let watchOfferN = 0;
+    let watchMoveN = 0;
     const refreshedConditions = new Set();
     const linkFailures = [];
     const links = w.links || [];
@@ -311,9 +315,15 @@ async function main() {
             brand: w.brand,
             explicitCondition: r.condition,
           });
+          const before = { price: link.price, observedAt: link.observedAt, askHistory: link.askHistory };
           const result = recordOfferObservation(link, r.price, observedAt, {
             condition,
           });
+          const priorMoves = before.askHistory?.length ?? 0;
+          if ((recordAskMove(before, link, observedAt, "scrape").askHistory?.length ?? 0) > priorMoves) {
+            askMoveN++;
+            watchMoveN++;
+          }
           if (result === "currency-updated") {
             offerCurrencyChanges.push(
               `${name} (${short(link.url, 36)}): retailer ask stored as ${r.price.amount} ${r.price.currency}`,
@@ -363,6 +373,7 @@ async function main() {
     if (watchOfferN) {
       did.push(`${watchOfferN} dated offer${watchOfferN === 1 ? "" : "s"} (${Array.from(refreshedConditions).join("/")})`);
     }
+    if (watchMoveN) did.push(`${watchMoveN} ask move${watchMoveN === 1 ? "" : "s"}`);
     if (did.length) {
       changed++;
       const source = gotPrice?.source || gotImage?.source || "?";
@@ -375,7 +386,7 @@ async function main() {
     }
   }
 
-  console.log(`\nPrices: ${priceN}  ·  Dated offers: ${offerN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
+  console.log(`\nPrices: ${priceN}  ·  Dated offers: ${offerN}  ·  Ask moves: ${askMoveN}  ·  Images: ${imageN}  ·  Watches changed: ${changed}/${targets.length}`);
   if (misses.length) console.log(`Missing (${misses.length}): ${misses.map((m) => short(m, 22)).join("; ")}`);
   if (currencySkips.length) {
     console.log(`\nHeadline prices preserved — site quotes a different currency (${currencySkips.length}).`);

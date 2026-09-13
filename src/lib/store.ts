@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { Watch, WatchInput } from "./types";
+import { carryAskHistories } from "./listing-history.mjs";
 import { appendSnapshot, sameMoney } from "./price-history";
 import { DESIGN_ELO_BASE, DesignComparisonOutcome, updateDesignElo } from "./scoring";
 import { validateWatchCollection } from "./validation";
@@ -75,6 +76,13 @@ export async function updateWatch(
     // id and dateAdded are immutable.
     const existing = watches[idx];
     const next: Watch = { ...existing, ...patch, id: existing.id, dateAdded: existing.dateAdded };
+
+    // Listing trails get the same treatment for the same reason: the form
+    // rebuilds links without askHistory, so the store is the one place that
+    // can both keep existing trails and record a changed ask for every caller.
+    if (patch.links) {
+      next.links = carryAskHistories(existing.links, patch.links, new Date().toISOString(), "manual");
+    }
 
     // Record a move whenever an edit changes the tracked price. Doing it here
     // rather than in the form means hand-written API calls and future callers
