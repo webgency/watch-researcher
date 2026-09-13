@@ -1,7 +1,8 @@
 import { formatAgeDays, formatDate, formatMoney, hostname } from "@/lib/format";
 import { dealVerdict } from "@/lib/market-copy";
+import { changeSinceFirst } from "@/lib/price-history";
 import { soldComps, soldCompSummary } from "@/lib/sold-comps";
-import type { Condition, Watch } from "@/lib/types";
+import type { Condition, RetailerLink, Watch } from "@/lib/types";
 import {
   bestOffer,
   bestOfferTargetStatus,
@@ -146,6 +147,44 @@ function ConditionEvidenceLine({ watch, condition }: { watch: Watch; condition: 
 }
 
 /**
+ * How one listing's ask has moved since it was first recorded. The change line
+ * appears after one move; the step trail only after two, because a single move
+ * is already fully described by the line.
+ */
+function AskTrail({ link }: { link: RetailerLink }) {
+  const change = changeSinceFirst(link.askHistory);
+  if (!change || !link.askHistory) return null;
+  const { amount, currency } = change.delta;
+  const size = formatMoney({ amount: Math.abs(amount), currency });
+
+  return (
+    <div className="mt-1 text-xs">
+      <p className={amount < 0 ? "font-medium text-emerald-800" : "text-cocoa-500"}>
+        {amount === 0 ? "Back to its first recorded ask" : `${amount < 0 ? "↓" : "↑"} ${size} since first recorded`} ·{" "}
+        {formatDate(change.first.date)}
+      </p>
+      {change.moves > 1 && (
+        <ol aria-label="Ask history" className="mt-1 flex flex-wrap items-start gap-x-2 gap-y-1">
+          {link.askHistory.map((snapshot, i) => (
+            <li key={i} className="flex items-start gap-2">
+              {i > 0 && (
+                <span aria-hidden="true" className="text-cocoa-300">
+                  →
+                </span>
+              )}
+              <span className="flex flex-col">
+                <span className="font-medium tabular-nums text-cocoa-700">{formatMoney(snapshot.price)}</span>
+                <span className="text-cocoa-400">{formatDate(snapshot.date)}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+/**
  * Every recorded ask, dated first. Undated prices stay visible but are marked,
  * because they are real links the reader may want even though no estimate can
  * use them.
@@ -176,29 +215,32 @@ function Asks({ watch }: { watch: Watch }) {
       ) : (
         <ul className="divide-y divide-cocoa-100">
           {sorted.map(({ link, ageDays }, i) => (
-            <li key={i} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="min-w-0 truncate font-medium text-azalea-700 hover:underline"
-              >
-                {link.retailer || hostname(link.url)}
-              </a>
-              <div className="flex flex-wrap items-center gap-3 text-sm">
-                {link.condition ? (
-                  <span className="rounded bg-cocoa-100 px-2 py-0.5 text-xs capitalize text-cocoa-600">{link.condition}</span>
-                ) : (
-                  <span className="text-xs text-cocoa-400">condition unknown</span>
-                )}
-                {link.observedAt ? (
-                  <span className="text-xs text-cocoa-400">{formatDate(link.observedAt)}</span>
-                ) : (
-                  <span className="text-xs text-amber-800">no date · excluded from estimates</span>
-                )}
-                {ageDays !== undefined && <FreshnessBadge tier={freshnessForAge(ageDays)} />}
-                <span className="font-semibold tabular-nums">{formatMoney(link.price)}</span>
+            <li key={i} className="py-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-w-0 truncate font-medium text-azalea-700 hover:underline"
+                >
+                  {link.retailer || hostname(link.url)}
+                </a>
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  {link.condition ? (
+                    <span className="rounded bg-cocoa-100 px-2 py-0.5 text-xs capitalize text-cocoa-600">{link.condition}</span>
+                  ) : (
+                    <span className="text-xs text-cocoa-400">condition unknown</span>
+                  )}
+                  {link.observedAt ? (
+                    <span className="text-xs text-cocoa-400">{formatDate(link.observedAt)}</span>
+                  ) : (
+                    <span className="text-xs text-amber-800">no date · excluded from estimates</span>
+                  )}
+                  {ageDays !== undefined && <FreshnessBadge tier={freshnessForAge(ageDays)} />}
+                  <span className="font-semibold tabular-nums">{formatMoney(link.price)}</span>
+                </div>
               </div>
+              <AskTrail link={link} />
             </li>
           ))}
         </ul>

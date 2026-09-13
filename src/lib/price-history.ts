@@ -65,6 +65,31 @@ export function priceMovement(history: PriceSnapshot[] | undefined): PriceMoveme
   };
 }
 
+export interface ChangeSinceFirst {
+  first: PriceSnapshot;
+  latest: PriceSnapshot;
+  /** latest − first. Negative means it dropped. */
+  delta: Money;
+  /** Recorded moves: entries after the first. */
+  moves: number;
+}
+
+/**
+ * Net change from the first recorded price to the latest, or undefined with
+ * fewer than two snapshots. Stated in the series' own currency when both ends
+ * share one, so a EUR listing reads in EUR rather than through a rate snapshot.
+ */
+export function changeSinceFirst(history: PriceSnapshot[] | undefined): ChangeSinceFirst | undefined {
+  if (!history || history.length < 2) return undefined;
+  const first = history[0];
+  const latest = history[history.length - 1];
+  const native = first.price.currency.trim().toUpperCase() === latest.price.currency.trim().toUpperCase();
+  const delta: Money = native
+    ? { amount: latest.price.amount - first.price.amount, currency: first.price.currency }
+    : { amount: normalizePriceToUsd(latest.price) - normalizePriceToUsd(first.price), currency: "USD" };
+  return { first, latest, delta, moves: history.length - 1 };
+}
+
 /** Lowest price ever recorded, by USD-normalized amount. */
 export function lowestSnapshot(history: PriceSnapshot[] | undefined): PriceSnapshot | undefined {
   if (!history?.length) return undefined;

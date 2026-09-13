@@ -133,7 +133,7 @@ function checkPriceHistory(value, path, errors) {
   });
 }
 
-function checkLinks(value, path, errors) {
+function checkLinks(value, path, errors, warnings = []) {
   if (!Array.isArray(value)) {
     errors.push(`${path} must be an array`);
     return;
@@ -151,6 +151,20 @@ function checkLinks(value, path, errors) {
       errors.push(`${linkPath}.condition must be new or pre-owned`);
     }
     checkDate(link.observedAt, `${linkPath}.observedAt`, errors);
+    checkPriceHistory(link.askHistory, `${linkPath}.askHistory`, errors);
+
+    // Same gap check as the watch-level priceHistory below: a trail that ends
+    // somewhere other than the current ask was hand-edited on one side only.
+    const newest = Array.isArray(link.askHistory) && link.askHistory.length
+      ? link.askHistory[link.askHistory.length - 1]
+      : undefined;
+    if (newest && isRecord(newest.price) && isRecord(link.price)) {
+      if (newest.price.amount !== link.price.amount || newest.price.currency !== link.price.currency) {
+        warnings.push(
+          `${linkPath}.askHistory ends at ${newest.price.amount} ${newest.price.currency} but price is ${link.price.amount} ${link.price.currency}; the latest move was not recorded.`
+        );
+      }
+    }
   });
 }
 
@@ -301,7 +315,7 @@ if (!Array.isArray(watches)) {
     checkDate(watch.priceUpdatedAt, `${path}.priceUpdatedAt`, errors);
     checkPriceHistory(watch.priceHistory, `${path}.priceHistory`, errors);
     checkMoney(watch.targetPrice, `${path}.targetPrice`, errors);
-    checkLinks(watch.links, `${path}.links`, errors);
+    checkLinks(watch.links, `${path}.links`, errors, warnings);
     checkSoldComps(watch.soldComps, `${path}.soldComps`, errors);
 
     // A history whose newest entry disagrees with the tracked price means one

@@ -30,6 +30,8 @@ npm run build:static   # GitHub Pages export, into out/
 
 **`priceHistory` records moves, not polls.** `appendSnapshot()` in `src/lib/price-history.ts` is a no-op when the price is unchanged, so consecutive entries always differ and each `date` means "unchanged since". Consumers rely on the series being oldest-first with the newest entry equal to `price`; both validators enforce that. Don't add a snapshot per scrape run — it would add a line per watch per run to `watches.json` and destroy the meaning of the dates. `updateWatch()` appends automatically on a price change, so callers should not build the series by hand unless they are importing one (passing `priceHistory` explicitly suppresses the automatic append).
 
+**A link's `askHistory` follows the same moves-only rule, per listing URL.** `recordAskMove()` in `src/lib/listing-history.mjs` (shared with `enrich-watches.mjs`) appends only when that link's ask changes; `observedAt` still advances on every confirmation, so the two dates mean different things. The form never sends `askHistory`, so `updateWatch()` carries trails across edits by URL. A currency change restarts the trail rather than comparing through a rate snapshot.
+
 **`CALIBER_TIER_PATTERNS`** in `scoring.ts` is a hand-maintained substring table, ordered most-specific-first. Unknown calibers return `undefined` (unrated), never a fallback tier. Adding watches from new movement families means adding entries here.
 
 **`src/lib/spec-ranges.mjs` is `.mjs` on purpose** — it's imported by both the TypeScript app and `scripts/validate-data.mjs`, which runs under bare Node with no build step. Don't convert it to `.ts`.
