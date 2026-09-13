@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useCollectionView, useComparisonSelection } from "@/hooks/useResearchSession";
+import type { CollectionSort } from "@/lib/research-state";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -19,16 +21,7 @@ import { matchesWatchSearch } from "@/lib/watch-search";
 import CollectionTable from "./CollectionTable";
 import WatchCard from "./WatchCard";
 
-type SortKey =
-  | "wishlistTier"
-  | "valueScore"
-  | "qualityScore"
-  | "offerFreshness"
-  | "dateAdded"
-  | "priceAsc"
-  | "priceDesc"
-  | "brand"
-  | "caseSize";
+type SortKey = CollectionSort;
 
 const STATUS_LABELS: Record<WatchStatus | "all", string> = { all: "All", wishlist: "Wishlist", owned: "Owned", sold: "Sold" };
 
@@ -72,14 +65,11 @@ export default function CollectionView({
   scoreSummaries?: Record<string, StandingSummary>;
 }) {
   const router = useRouter();
-  const { query, setQuery } = useCollectionSearch();
-  const [view, setView] = useState<"grid" | "table">("grid");
-  const [status, setStatus] = useState<WatchStatus | "all">("all");
-  const [wishlistTiers, setWishlistTiers] = useState<WishlistTier[]>([]);
+  const { query, filters, update } = useCollectionSearch();
+  const { status, wishlistTiers, freshOffersOnly, sort } = filters;
+  const [view, setView] = useCollectionView();
   const [priorityOpen, setPriorityOpen] = useState(false);
-  const [freshOffersOnly, setFreshOffersOnly] = useState(false);
-  const [sort, setSort] = useState<SortKey>("wishlistTier");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useComparisonSelection(watches.map(watch => watch.id));
   const [selectionMessage, setSelectionMessage] = useState<string | null>(null);
   const selectedTierSet = useMemo(() => new Set(wishlistTiers), [wishlistTiers]);
   const offerByWatch = useMemo(() => {
@@ -134,10 +124,7 @@ export default function CollectionView({
   }
 
   function resetFilters() {
-    setStatus("all");
-    setWishlistTiers([]);
-    setFreshOffersOnly(false);
-    setQuery("");
+    update({ status: "all", wishlistTiers: [], freshOffersOnly: false, query: "" });
   }
 
   async function changeWishlistTier(id: string, next: WishlistTier | "") {
@@ -156,7 +143,7 @@ export default function CollectionView({
   }
 
   function toggleWishlistTier(tier: WishlistTier) {
-    setWishlistTiers((current) => (current.includes(tier) ? current.filter((item) => item !== tier) : [...current, tier]));
+    update({ wishlistTiers: wishlistTiers.includes(tier) ? wishlistTiers.filter(item => item !== tier) : [...wishlistTiers, tier] });
   }
 
   const filtered = useMemo(() => {
@@ -262,7 +249,7 @@ export default function CollectionView({
           {(["all", ...WATCH_STATUSES] as const).map((s) => (
             <button
               key={s}
-              onClick={() => setStatus(s)}
+              onClick={() => update({ status: s })}
               aria-pressed={status === s}
               className={`flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:flex-none sm:px-3 sm:text-sm ${
                 status === s ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-cocoa-100"
@@ -298,7 +285,7 @@ export default function CollectionView({
                   <button
                     type="button"
                     className="text-xs font-medium text-cocoa-500 hover:text-cocoa-900"
-                    onClick={() => setWishlistTiers([])}
+                    onClick={() => update({ wishlistTiers: [] })}
                   >
                     Clear
                   </button>
@@ -328,7 +315,7 @@ export default function CollectionView({
           <button
             type="button"
             aria-pressed={freshOffersOnly}
-            onClick={() => setFreshOffersOnly((current) => !current)}
+            onClick={() => update({ freshOffersOnly: !freshOffersOnly })}
             className={`h-[2.375rem] whitespace-nowrap rounded-lg px-2 text-xs sm:px-3 sm:text-sm font-medium ring-1 transition-colors ${
               freshOffersOnly
                 ? "bg-emerald-700 text-white ring-emerald-700"
@@ -339,7 +326,7 @@ export default function CollectionView({
           </button>
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
+            onChange={(e) => update({ sort: e.target.value as SortKey })}
             aria-label="Sort collection"
             className="input col-span-2 min-w-0 sm:col-span-1 xl:ml-auto xl:w-auto"
           >

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import CollectionLink from "@/components/CollectionLink";
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { getWatch, getWatches } from "@/lib/store";
@@ -40,9 +40,9 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <Link href="/" className="btn-secondary">
+        <CollectionLink className="btn-secondary">
           ← Collection
-        </Link>
+        </CollectionLink>
         {!IS_STATIC && <WatchActions id={watch.id} name={`${watch.brand} ${watch.model}`} />}
       </div>
 

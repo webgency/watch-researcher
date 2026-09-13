@@ -1,25 +1,20 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
+import { useCollectionFilters } from "@/hooks/useResearchSession";
 
-interface CollectionSearchValue {
-  query: string;
-  setQuery: (query: string) => void;
-}
-
-const CollectionSearchContext = createContext<CollectionSearchValue | null>(null);
+const CollectionSearchContext = createContext<ReturnType<typeof useCollectionFilters> | null>(null);
 
 export function CollectionSearchProvider({ children }: { children: React.ReactNode }) {
-  const [query, setQuery] = useState("");
-  return (
-    <CollectionSearchContext.Provider value={{ query, setQuery }}>
-      {children}
-    </CollectionSearchContext.Provider>
-  );
+  const value = useCollectionFilters();
+  return <CollectionSearchContext.Provider value={value}>{children}</CollectionSearchContext.Provider>;
 }
 
 export function useCollectionSearch() {
   const context = useContext(CollectionSearchContext);
   if (!context) throw new Error("useCollectionSearch must be used inside CollectionSearchProvider");
-  return context;
+  return {
+    ...context, query: context.filters.query,
+    setQuery: (query: string) => context.update({ query }, true),
+  };
 }

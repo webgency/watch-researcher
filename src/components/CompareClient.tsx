@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "next/link";
+import CollectionLink from "./CollectionLink";
 import { useSearchParams } from "next/navigation";
 import { Watch } from "@/lib/types";
 import CompareTable from "./CompareTable";
@@ -27,18 +27,18 @@ function CompareInner({ allWatches }: { allWatches: Watch[] }) {
             {watches.length} watch{watches.length === 1 ? "" : "es"} side by side · best value in each row highlighted.
           </p>
         </div>
-        <Link href="/" className="btn-secondary">
+        <CollectionLink className="btn-secondary">
           ← Back
-        </Link>
+        </CollectionLink>
       </div>
 
       {watches.length < 2 ? (
         <div className="card p-8 text-center text-sm text-cocoa-500">
           Select at least two watches from your collection to compare them.
           <div className="mt-4">
-            <Link href="/" className="btn-primary">
+            <CollectionLink className="btn-primary">
               Go to collection
-            </Link>
+            </CollectionLink>
           </div>
         </div>
       ) : (
