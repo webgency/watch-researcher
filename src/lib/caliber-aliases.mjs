@@ -36,6 +36,7 @@ export const CANONICAL_CALIBERS = [
   "mt5450",
   "m100",
   "duw 3202",
+  "duw 4001",
   "alb01 a",
   "mu 9419",
   "sw510",

@@ -9,6 +9,7 @@ import { bestOffer, bestOfferTargetStatus, dealScore } from "@/lib/valuation";
 import { compareValueRows, matchesValueFilters, ValueFilters, ValueRow, ValueSortKey } from "@/lib/value-list";
 import { matchesWatchSearch } from "@/lib/watch-search";
 import { useValueFilters } from "@/hooks/useResearchSession";
+import EvidenceCoverage from "./EvidenceCoverage";
 import FreshnessBadge from "./FreshnessBadge";
 
 const SORTS: Array<{ value: ValueSortKey; label: string }> = [
@@ -21,12 +22,6 @@ const SORTS: Array<{ value: ValueSortKey; label: string }> = [
   { value: "recent", label: "Recently added" },
   { value: "name", label: "Brand / model" },
 ];
-
-const CONFIDENCE_STYLE = {
-  low: "bg-amber-50 text-amber-800",
-  medium: "bg-blue-50 text-blue-700",
-  high: "bg-emerald-50 text-emerald-700",
-};
 
 function numberOrUndefined(value: string): number | undefined {
   if (value.trim() === "") return undefined;
@@ -120,9 +115,9 @@ export default function ValueList({
               <option value="">Any / unrated</option><option value="3">3+</option><option value="4">4+</option><option value="5">5</option>
             </select>
           </Filter>
-          <Filter label="Scoring confidence">
+          <Filter label="Evidence coverage">
             <select className="input" value={confidence} onChange={(event) => update({ confidence: event.target.value as ValueFilters["confidence"] })}>
-              <option value="all">All confidence levels</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low / limited</option>
+              <option value="all">All coverage levels</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low / limited</option>
             </select>
           </Filter>
         </div>
@@ -165,7 +160,6 @@ function ValueTableRow({ row, rank }: { row: ValueRow; rank?: number }) {
   const { watch, summary, deal, offer } = row;
   const standing = summary.standing;
   const movementTier = caliberTier(watch.specs.caliber, watch.specs.movement);
-  const limited = standing.confidence === "low" || standing.valueScore === undefined;
   return (
     <tr className="align-top">
       <td className="px-4 py-4">
@@ -175,9 +169,7 @@ function ValueTableRow({ row, rank }: { row: ValueRow; rank?: number }) {
       </td>
       <td className="px-3 py-4">
         {standing.valueScore === undefined ? <p className="font-semibold text-cocoa-500">Not scored</p> : <p className="text-lg font-bold text-cocoa-900">{Math.round(toDisplayScore(standing.valueScore))}</p>}
-        <span title={`${Math.round(standing.evidenceCoverage * 100)}% of applicable scoring inputs recorded`} className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${CONFIDENCE_STYLE[standing.confidence]}`}>
-          {limited ? "Limited evidence" : `${titleCase(standing.confidence)} confidence`} · {Math.round(standing.evidenceCoverage * 100)}%
-        </span>
+        <EvidenceCoverage watch={watch} standing={standing} />
       </td>
       <td className="px-3 py-4">
         {deal.status === "available" ? <><p className="font-semibold">{formatDiscount(deal.discountPct)}</p><p className="text-xs text-cocoa-500">Fair {formatMoney({ amount: deal.fairLowUsd, currency: "USD" })}–{formatMoney({ amount: deal.fairHighUsd, currency: "USD" })}</p></> : <><p className="font-semibold text-cocoa-500">Insufficient</p><p className="text-xs text-cocoa-400">No discount calculated</p></>}

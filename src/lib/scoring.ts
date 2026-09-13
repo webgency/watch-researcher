@@ -156,6 +156,11 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   // power-reserve bonus, and regulatedPositions), so docking the base tier for
   // either would count them twice — the same reasoning as the Rolex/Omega pair.
   ["duw 3202", 0.80],
+  // DUW 4001: manufacture hand-wound caliber with NOMOS swing system and
+  // DUW regulation (nomos-glashuette.com/en-us/club/club-campus-night-sky-719).
+  // Same architecture tier as DUW 3202; manual winding is not a quality deficit.
+  // Reserve and regulation positions are credited separately below.
+  ["duw 4001", 0.80],
   // Proprietary automatic monopusher chronograph with a patented retrograde
   // regatta module and 64h reserve; kept below the METAS anchor above.
   ["alb01 a", 0.80],

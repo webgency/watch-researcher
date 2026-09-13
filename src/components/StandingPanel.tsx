@@ -1,3 +1,4 @@
+import EvidenceCoverage from "./EvidenceCoverage";
 import { MIN_REFERENCE_COVERAGE, RUBRIC_TOLERANCE, Standing, unratedReason } from "@/lib/scoring";
 import { DIMENSIONS, DIMENSION_BLURBS, DIMENSION_LABELS, type Dimension } from "@/lib/rubrics";
 import type { Watch } from "@/lib/types";
@@ -184,16 +185,12 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
                   : "Value vs continuous price expectation"
               }
             />
-            <ScoreTile
-              label="Evidence"
-              value={standing.evidenceCoverage}
-              caption={`${standing.confidence[0].toUpperCase()}${standing.confidence.slice(1)} confidence`}
-            />
+            <EvidenceCoverage watch={watch} standing={standing} />
           </div>
 
           {standing.confidence === "low" && (
             <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-              Low confidence: only {pct(standing.evidenceCoverage)}% of applicable scoring evidence is recorded. Treat
+              Limited evidence: only {pct(standing.evidenceCoverage)}% of applicable scoring evidence is recorded. Treat
               the composite as provisional.
             </p>
           )}

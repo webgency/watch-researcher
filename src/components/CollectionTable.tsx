@@ -1,5 +1,6 @@
 "use client";
 
+import EvidenceCoverage from "./EvidenceCoverage";
 import Link from "next/link";
 import type { Watch, WishlistTier } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
@@ -72,7 +73,7 @@ export default function CollectionTable({ watches, selected, scoreSummaries, onT
                 <td className="px-3 py-3">
                   {standing?.valueScore !== undefined ? <>
                     <p className="font-semibold">{Math.round(toDisplayScore(standing.valueScore))}</p>
-                    <p className="text-xs text-cocoa-500">Evidence {Math.round(standing.evidenceCoverage * 100)}%</p>
+                    <EvidenceCoverage watch={watch} standing={standing} />
                   </> : <span className="text-xs text-cocoa-500">Unrated</span>}
                 </td>
               </tr>
