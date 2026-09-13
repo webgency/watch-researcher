@@ -28,7 +28,7 @@ npm run check
 
 ### Browsing and editing
 
-- **Collection view** — every watch as a card, with search, status/priority filters, and sorting by wishlist priority, rubric value, quality score, recently added, price, brand, or case size.
+- **Collection view** — switch between cards and a compact research table without losing search, filters, sorting, or comparison selections, with search, status/priority filters, and sorting by wishlist priority, rubric value, quality score, recently added, price, brand, or case size.
 - **Wishlist tiers** — Next purchase, Must have, Love it, Interested, Maybe later, or Pass.
 - **Add / edit watches** — one form covering basics, URL autofill, specs, image, multiple retailer links, tags, and notes.
 - **Side-by-side comparison** — select 2+ watches and compare them in a spec/price table, with the best value in each row highlighted.
@@ -44,7 +44,7 @@ The app's opinionated half. It answers "is this watch good *for its money*?" whi
 - **Deal vs fair asks** (`/watch/[id]`) — compares the tracked or landed ask with the median of at least two dated, independent, condition-matched retailer asks. It reports the fair range, source ages, and confidence. Thin evidence is explicitly insufficient and never produces a discount percentage. If only the other condition has enough evidence, the UI identifies that fallback instead of pooling conditions.
 - **Best dated offer** — selects the lowest USD-normalized dated retailer ask after preferring the tracked/deal condition. Detail, collection cards, and comparisons show the source, condition, age, and freshness. Undated prices never win; a fallback or unknown condition is labeled rather than assumed.
 - **Design rank** (`/design`) — your own 1–5 read on how a watch looks. Deliberately the one judgement in the app that is yours rather than calculated.
-- **Value-for-money ranking** (`/value`) — a sortable, filterable list led by rubric value. Confidence shows how much applicable scoring evidence is recorded; low coverage reads as limited evidence, never bad value. Deal score and design remain separate columns and filters rather than inputs to the ranking.
+- **Value-for-money ranking** (`/value`) — a searchable, sortable, filterable list led by rubric value. Search brand, model, reference, or caliber within the current filters. Confidence shows how much applicable scoring evidence is recorded; low coverage reads as limited evidence, never bad value. Deal score and design remain separate columns and filters rather than inputs to the ranking.
 
 The former design × value quadrants were removed from `/value`: they let a subjective design axis create headline purchase labels even when rubric evidence was thin. Design still has its own ranker and remains visible and sortable, but it does not change rubric value, deal percentage, or the value-for-money call. Wishlist priority is likewise context and a filter only.
 

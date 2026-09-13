@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { WISHLIST_TIERS, WISHLIST_TIER_LABELS, type WishlistTier } from "@/lib/types";
 import WishlistTierBadge from "./WishlistTierBadge";
 
@@ -16,6 +17,8 @@ export default function PriorityMenu({ tier, watchName, onChange }: {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
+  const [position, setPosition] = useState<CSSProperties>({});
+  const panel = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const items = useRef<(HTMLButtonElement | null)[]>([]);
@@ -31,19 +34,42 @@ export default function PriorityMenu({ tier, watchName, onChange }: {
     if (!open) return;
     items.current[focusIndex.current]?.focus();
     function outside(event: PointerEvent) {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
+      if (!root.current?.contains(event.target as Node) && !panel.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function reposition(event: Event) {
+      // Scrolling the menu itself must not dismiss it; scrolling its anchor does.
+      if (!(event.target instanceof Node) || !panel.current?.contains(event.target)) setOpen(false);
     }
     document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
+    window.addEventListener("resize", reposition);
+    document.addEventListener("scroll", reposition, true);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      window.removeEventListener("resize", reposition);
+      document.removeEventListener("scroll", reposition, true);
+    };
   }, [open]);
 
   function show(index = OPTIONS.indexOf(tier ?? "")) {
+    const rect = trigger.current?.getBoundingClientRect();
+    if (!rect) return;
+    const above = window.innerHeight - rect.bottom < 340 && rect.top > 340;
+    setPosition({
+      left: Math.max(8, Math.min(rect.right - 208, window.innerWidth - 216)),
+      ...(above ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 }),
+      maxHeight: Math.max(120, above ? rect.top - 12 : window.innerHeight - rect.bottom - 12),
+    });
     focusIndex.current = index;
     setError(false);
     setOpen(true);
   }
 
   function navigate(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Tab") {
+      // Resume the card/table tab order rather than the portal's document position.
+      close(true);
+      return;
+    }
     if (event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation();
@@ -81,7 +107,7 @@ export default function PriorityMenu({ tier, watchName, onChange }: {
 
   return (
     <div ref={root} className="relative" onBlur={event => {
-      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) close();
+      if (!event.currentTarget.contains(event.relatedTarget as Node | null) && !panel.current?.contains(event.relatedTarget as Node | null)) close();
     }}>
       <button
         ref={trigger}
@@ -102,8 +128,9 @@ export default function PriorityMenu({ tier, watchName, onChange }: {
         {tier ? <WishlistTierBadge tier={tier} /> : <span className="px-2">Set priority</span>}
         <span aria-hidden="true" className="pr-2">▾</span>
       </button>
-      {open && (
-        <div className="absolute right-0 top-full z-40 mt-1 w-52 rounded-xl border border-cocoa-200 bg-white p-1.5 shadow-lg">
+      {/* A portal keeps the menu outside the compact table's scroll clipping. */}
+      {open && createPortal(
+        <div ref={panel} style={position} className="fixed z-50 w-52 overflow-y-auto rounded-xl border border-cocoa-200 bg-white p-1.5 shadow-lg">
           <div id={id} role="menu" aria-label={`Priority for ${watchName}`} aria-busy={saving} onKeyDown={navigate}>
             {OPTIONS.map((option, index) => (
               <button
@@ -123,7 +150,7 @@ export default function PriorityMenu({ tier, watchName, onChange }: {
           </div>
           {saving && <p role="status" className="px-3 py-2 text-xs text-cocoa-500">Saving priority…</p>}
           {error && <p role="alert" className="px-3 py-2 text-xs text-red-700">Couldn’t save priority. Please try again.</p>}
-        </div>
+        </div>, document.body
       )}
     </div>
   );
