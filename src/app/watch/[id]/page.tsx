@@ -15,6 +15,11 @@ import MarketValuePanel from "@/components/MarketValuePanel";
 import FreshnessBadge from "@/components/FreshnessBadge";
 import { freshnessForAge, observationAgeDays } from "@/lib/valuation";
 
+// An empty generateStaticParams result opts into on-demand static generation.
+// Explicit dynamic rendering prevents noStore() from failing at request time;
+// prepare-pages switches this to force-static for the read-only export.
+export const dynamic = "force-dynamic";
+
 // Pre-render a detail page for every watch in the static export. In dynamic
 // mode return nothing so pages render on demand and reflect edits immediately.
 export async function generateStaticParams() {
