@@ -7,6 +7,7 @@ import { Watch, WishlistTier } from "@/lib/types";
 import { formatMoney, formatOrdinal } from "@/lib/format";
 import { targetStatus } from "@/lib/price-history";
 import { bestOffer, bestOfferTargetStatus } from "@/lib/valuation";
+import EvidenceCoverage from "./EvidenceCoverage";
 import FreshnessBadge from "./FreshnessBadge";
 import StatusBadge from "./StatusBadge";
 import WishlistTierBadge from "./WishlistTierBadge";
@@ -193,12 +194,6 @@ function StandingBlock({ summary, watch }: { summary: StandingSummary; watch: Wa
       title: "Your design-appeal score",
     });
   }
-  context.push({
-    key: "evidence",
-    text: `Evidence ${Math.round(standing.evidenceCoverage * 100)}%`,
-    title: `${standing.confidence} confidence from recorded scoring inputs`,
-    warn: standing.confidence === "low",
-  });
   if (watch.personalFit) {
     context.push({ key: "fit", text: `Fit ${watch.personalFit}/5`, title: "Your personal-fit rating" });
   }
@@ -239,6 +234,8 @@ function StandingBlock({ summary, watch }: { summary: StandingSummary; watch: Wa
           </p>
         )}
       </div>
+
+      <EvidenceCoverage watch={watch} standing={standing} />
 
       {/* Frictions are text, never a score, and they are rare — a card that has
           one is saying something the price and score cannot. Keep them visible. */}
