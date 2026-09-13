@@ -101,7 +101,7 @@ function DimensionMeter({
           // Par marker. Sits above the fill so it stays visible when the fill
           // runs past it.
           <div
-            className="absolute inset-y-0 w-0.5 -trancocoa-x-1/2 bg-cocoa-900/70"
+            className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-cocoa-900/70"
             style={{ left: `${pct(reference)}%` }}
           />
         )}
@@ -137,7 +137,7 @@ function ScoreTile({ label, value, caption }: { label: string; value?: number; c
   return (
     <div className="rounded-lg border border-cocoa-200 bg-cocoa-50 px-4 py-3">
       <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-500">{label}</p>
-      <p className="mt-0.5 text-2xl font-bold text-cocoa-900">{value === undefined ? "—" : pct(value)}</p>
+      <p className="mt-0.5 text-xl font-bold text-cocoa-900">{value === undefined ? "—" : pct(value)}</p>
       <p className="mt-0.5 text-xs text-cocoa-500">{caption}</p>
     </div>
   );
