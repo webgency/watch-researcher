@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   readCollectionFilters, readValueFilters, writeCollectionFilters, writeValueFilters,
   readSelection, safeResearchUrl, type CollectionFilters, type ValueSearchFilters,
+  readTradeUpSelection, writeTradeUpSelection, type TradeUpSelection,
 } from "@/lib/research-state";
 
 const CHANGE = "vitrine:session-change";
@@ -92,4 +93,24 @@ export function useComparisonSelection(validIds: string[]) {
     store(key, JSON.stringify([...result].filter(id => validIds.includes(id)).slice(0, 4)));
   }
   return [selected, setSelected] as const;
+}
+
+export function useTradeUpSelection(watchId: string, validIds: string[]) {
+  const key = `vitrine:trade-up:${watchId}:v1`;
+  const search = useSyncExternalStore(subscribe, () => window.location.search, () => "");
+  const remembered = useSyncExternalStore(subscribe, () => readStored(key, ""), () => "");
+  const params = new URLSearchParams(search);
+  // An explicit shared comparison wins over a remembered one. A bare detail
+  // link restores the last choice for this owned watch, including after edit.
+  const selection = readTradeUpSelection(params.has("tradeUp") ? params : new URLSearchParams(remembered), validIds);
+  useEffect(() => {
+    if (!new URLSearchParams(search).has("tradeUp")) return;
+    const saved = writeTradeUpSelection(new URLSearchParams(), { candidateId: selection.candidateId, basis: selection.basis }).toString();
+    if (readStored(key, "") !== saved) store(key, saved);
+  }, [key, search, selection.candidateId, selection.basis]);
+  function update(selection: TradeUpSelection) {
+    store(key, writeTradeUpSelection(new URLSearchParams(), selection).toString());
+    updateUrl(writeTradeUpSelection(new URLSearchParams(window.location.search), selection), false);
+  }
+  return { ...selection, update };
 }

@@ -67,3 +67,14 @@ export function safeResearchUrl(raw: string, route: "/" | "/value"): string {
   if (raw.split("?")[0] !== route) return route;
   return raw;
 }
+
+export interface TradeUpSelection { candidateId: string; basis: "ask" | "target" }
+export function readTradeUpSelection(params: URLSearchParams, validIds: string[]): TradeUpSelection {
+  const candidateId = params.get("tradeUp") ?? "";
+  return { candidateId: validIds.includes(candidateId) ? candidateId : "", basis: params.get("tradeUpBasis") === "target" ? "target" : "ask" };
+}
+export function writeTradeUpSelection(params: URLSearchParams, selection: TradeUpSelection) {
+  put(params, "tradeUp", selection.candidateId);
+  put(params, "tradeUpBasis", selection.candidateId ? selection.basis : "", "");
+  return params;
+}

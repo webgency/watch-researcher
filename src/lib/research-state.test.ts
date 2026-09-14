@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readCollectionFilters, readValueFilters, writeCollectionFilters, writeValueFilters, readSelection, safeResearchUrl } from "./research-state";
+import { readCollectionFilters, readValueFilters, writeCollectionFilters, writeValueFilters, readSelection, safeResearchUrl, readTradeUpSelection, writeTradeUpSelection } from "./research-state";
 
 describe("research URLs", () => {
   it("round-trips collection filters with encoded text and multiple priorities", () => {
@@ -24,6 +24,13 @@ describe("research URLs", () => {
   });
 });
 describe("stored research state", () => {
+  it("round-trips trade-up context and rejects removed or non-wishlist candidates", () => {
+    const params = writeTradeUpSelection(new URLSearchParams("other=keep"), { candidateId: "next", basis: "target" });
+    expect(readTradeUpSelection(params, ["next"])).toEqual({ candidateId: "next", basis: "target" });
+    expect(params.get("other")).toBe("keep");
+    expect(readTradeUpSelection(params, [])).toMatchObject({ candidateId: "" });
+    expect(writeTradeUpSelection(params, { candidateId: "", basis: "ask" }).toString()).toBe("other=keep");
+  });
   it("bounds and validates the shortlist", () => {
     expect(readSelection('["w1","w1",null,{},"w2","w3","w4","w5"]')).toEqual(["w1", "w2", "w3", "w4"]);
     expect(readSelection('{"id":"w1"}')).toEqual([]);

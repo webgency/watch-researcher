@@ -1,13 +1,17 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import Link from "next/link";
-import { candidateCost, tradeUpBridge, type TradeUpBasis, type TradeUpModel } from "@/lib/trade-up";
+import { candidateCost, tradeUpBridge, type TradeUpModel } from "@/lib/trade-up";
 import { formatDate, formatMoney } from "@/lib/format";
 import { RATES_AS_OF } from "@/lib/currency-rates.mjs";
 import { IS_STATIC } from "@/lib/config";
 import ConfidenceChip from "./ConfidenceChip";
 import FreshnessBadge from "./FreshnessBadge";
+import ListingEditor from "./ListingEditor";
+import { listingEligibility } from "@/lib/listing-entry";
+import { useTradeUpSelection } from "@/hooks/useResearchSession";
+import { hostname } from "@/lib/format";
 
 function usd(amount: number) {
   return formatMoney({ amount, currency: "USD" });
@@ -19,10 +23,11 @@ function signedUsd(amount: number) {
 
 export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
   const selectId = useId();
-  const [candidateId, setCandidateId] = useState("");
-  const [basis, setBasis] = useState<TradeUpBasis>("ask");
+  const selection = useTradeUpSelection(model.watchId, model.candidates.map(item => item.id));
   const { exit } = model;
-  const candidate = model.candidates.find((item) => item.id === candidateId);
+  const candidate = model.candidates.find((item) => item.id === selection.candidateId);
+  const basis = candidate?.target && (selection.basis === "target" || candidate.best.status !== "available") ? "target" : "ask";
+  const evidence = listingEligibility(model.links, "pre-owned", new Date(model.asOf));
   const cost = candidate ? candidateCost(candidate, basis) : undefined;
   const bridge = tradeUpBridge(exit, cost);
   const hasExit = exit.medianUsd !== undefined && exit.lowUsd !== undefined && exit.highUsd !== undefined;
@@ -48,22 +53,27 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
             </div>
           ) : (
             <div className="mt-4 space-y-2">
-              <p className="text-sm font-semibold text-cocoa-800">Insufficient pre-owned evidence</p>
-              <p className="text-sm text-cocoa-500">{exit.observations.length} of 2 independent dated sources. Add pre-owned asks from different sellers to estimate an exit range.</p>
+              <p className="text-sm font-semibold text-cocoa-800">{exit.observations.length} of 2 qualifying sources</p>
+              <p className="text-sm text-cocoa-500">Add {2 - exit.observations.length} {exit.observations.length ? "more pre-owned listing from another source" : "pre-owned listings"} to estimate your watch&apos;s asking range.</p>
               <p className="text-xs text-cocoa-500">New retail prices and your purchase price do not fill this gap.</p>
             </div>
           )}
           {(exit.freshness === "stale" || exit.freshness === "expired") && (
             <p className="mt-3 text-sm text-amber-800">These asks are old. Refresh the evidence before relying on this comparison.</p>
           )}
-          {exit.observations.length > 0 && (
+          {!IS_STATIC ? (
+            <ListingEditor watchId={model.watchId} watchLabel={model.watchLabel} links={model.links} condition="pre-owned" label="Add pre-owned listing" primary />
+          ) : <p className="mt-3 text-sm text-cocoa-500">This published view is read-only. Add or update listings in your local Vitrine app, then republish to update this estimate.</p>}
+          {evidence.length > 0 && (
             <details className="mt-4 text-sm">
-              <summary className="min-h-11 cursor-pointer rounded py-3 font-medium text-cocoa-700">Sources and dates</summary>
+              <summary className="min-h-11 cursor-pointer rounded py-3 font-medium text-cocoa-700">Listings used and excluded</summary>
               <ul className="divide-y divide-cocoa-100">
-                {exit.observations.map((item, i) => (
-                  <li key={`${item.source}-${i}`} className="flex flex-wrap justify-between gap-2 py-2 text-xs text-cocoa-500">
-                    <span className="break-words">{item.source} · {formatDate(item.observedAt)}</span>
-                    <span className="font-semibold text-cocoa-700">{usd(item.priceUsd)}</span>
+                {evidence.map(({ link, reasons }, i) => (
+                  <li key={`${link.url}-${i}`} className="py-3 text-xs text-cocoa-500">
+                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center break-all font-medium text-azalea-700 hover:underline">{link.retailer || hostname(link.url)} ↗</a>
+                    <p>{formatMoney(link.price)} · {formatDate(link.observedAt)}</p>
+                    <p className="mt-1">{reasons.length ? `Not used: ${reasons.join(". ")}.` : "Counts toward the pre-owned estimate."}</p>
+                    {!IS_STATIC && <ListingEditor watchId={model.watchId} watchLabel={model.watchLabel} links={model.links} condition="pre-owned" initial={link} label="Edit listing" />}
                   </li>
                 ))}
               </ul>
@@ -71,7 +81,6 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
           )}
           <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium text-azalea-700">
             <a href="#market" className="inline-flex min-h-11 items-center hover:underline">Review market evidence</a>
-            {!IS_STATIC && <Link href={`/watch/${model.watchId}/edit`} className="inline-flex min-h-11 items-center hover:underline">Add dated asks</Link>}
           </div>
         </div>
 
@@ -83,13 +92,12 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
             <select
               id={selectId}
               className="input mt-3 min-h-11"
-              value={candidateId}
+              value={selection.candidateId}
               onChange={(event) => {
                 const next = model.candidates.find((item) => item.id === event.target.value);
-                setCandidateId(event.target.value);
                 // Prefer a dated ask. A target-only candidate is an explicitly
                 // labelled planning scenario, never a claim of availability.
-                setBasis(next?.best.status === "available" ? "ask" : next?.target ? "target" : "ask");
+                selection.update({ candidateId: event.target.value, basis: next?.best.status === "available" ? "ask" : next?.target ? "target" : "ask" });
               }}
             >
               <option value="">Choose a wishlist watch</option>
@@ -105,7 +113,7 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
                   <div className="flex flex-wrap gap-x-4">
                     {(["ask", "target"] as const).map((value) => (
                       <label key={value} className="flex min-h-11 cursor-pointer items-center gap-2 text-sm text-cocoa-700">
-                        <input type="radio" name={`${selectId}-basis`} checked={basis === value} onChange={() => setBasis(value)} className="accent-cocoa-900" />
+                        <input type="radio" name={`${selectId}-basis`} checked={basis === value} onChange={() => selection.update({ candidateId: selection.candidateId, basis: value })} className="accent-cocoa-900" />
                         {value === "ask" ? "Best dated ask" : "Your target"}
                       </label>
                     ))}

@@ -10,12 +10,15 @@ import {
   marketValueSummary,
   observationAgeDays,
   freshnessForAge,
+  trackedAskCondition,
 } from "@/lib/valuation";
 import { IS_STATIC } from "@/lib/config";
 import AddSoldComp from "./AddSoldComp";
 import ConfidenceChip from "./ConfidenceChip";
 import FreshnessBadge from "./FreshnessBadge";
 import RemoveSoldComp from "./RemoveSoldComp";
+import ListingEditor from "./ListingEditor";
+import { listingEligibility } from "@/lib/listing-entry";
 
 function usd(amount: number): string {
   return formatMoney({ amount, currency: "USD" });
@@ -190,9 +193,11 @@ function AskTrail({ link }: { link: RetailerLink }) {
  * use them.
  */
 function Asks({ watch }: { watch: Watch }) {
-  const rows = watch.links.map((link) => {
+  const condition = trackedAskCondition(watch);
+  const eligibility = listingEligibility(watch.links, condition);
+  const rows = watch.links.map((link, index) => {
     const ageDays = link.observedAt ? observationAgeDays(link.observedAt) : undefined;
-    return { link, ageDays };
+    return { link, ageDays, index };
   });
   const sorted = [...rows].sort((a, b) => {
     if (a.ageDays === undefined) return b.ageDays === undefined ? 0 : 1;
@@ -210,12 +215,14 @@ function Asks({ watch }: { watch: Watch }) {
         </p>
       </div>
 
+      {!IS_STATIC ? <ListingEditor watchId={watch.id} watchLabel={`${watch.brand} ${watch.model}`} links={watch.links} condition={condition} /> : <p className="mb-3 text-xs text-cocoa-500">Published view · read-only. Manage listings in your local Vitrine app.</p>}
+
       {rows.length === 0 ? (
         <p className="text-sm text-cocoa-500">No retailer links recorded yet.</p>
       ) : (
         <ul className="divide-y divide-cocoa-100">
-          {sorted.map(({ link, ageDays }, i) => (
-            <li key={i} className="py-2.5">
+          {sorted.map(({ link, ageDays, index }) => (
+            <li key={`${link.url}-${index}`} className="py-2.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <a
                   href={link.url}
@@ -241,6 +248,8 @@ function Asks({ watch }: { watch: Watch }) {
                 </div>
               </div>
               <AskTrail link={link} />
+              {eligibility[index].reasons.length > 0 && <p className="mt-2 text-xs text-cocoa-500">For the {condition} estimate: {eligibility[index].reasons.join(". ")}.</p>}
+              {!IS_STATIC && <ListingEditor watchId={watch.id} watchLabel={`${watch.brand} ${watch.model}`} links={watch.links} condition={condition} initial={link} label="Edit listing" />}
             </li>
           ))}
         </ul>

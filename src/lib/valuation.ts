@@ -131,7 +131,7 @@ export interface BestOfferTargetStatus {
   basis: "listed";
 }
 
-function sourceKey(link: RetailerLink): string {
+export function marketSourceKey(link: RetailerLink): string {
   try {
     return new URL(link.url).hostname.replace(/^www\./, "").toLowerCase();
   } catch {
@@ -200,7 +200,7 @@ export function marketValueSummary(
     if (link.condition !== condition || !link.price || !link.observedAt) continue;
     const ageDays = observationAgeDays(link.observedAt, now);
     if (ageDays === undefined) continue;
-    const key = sourceKey(link);
+    const key = marketSourceKey(link);
     const observation: MarketObservation = {
       source: link.retailer?.trim() || key,
       priceUsd: normalizePriceToUsd(link.price),
