@@ -140,9 +140,11 @@ Adding a watch never fires an alert. There's at most one alert per watch and typ
 
 ### Trade-up on owned watches
 
-Open an owned watch and use **Trade-up** to choose a wishlist candidate. The exit range uses at least two independent, dated pre-owned asks from the watch's retailer links. Add each ask's price, condition, and observation date in the edit form; new retail and purchase prices cannot fill missing exit evidence.
+Open an owned watch and use **Trade-up** to choose a wishlist candidate. The exit range uses at least two independent, dated pre-owned asks. Use **Add pre-owned listing** right in the panel: enter the URL, asking price/currency, condition, and the date you saw the price. Before saving, the form shows whether the listing counts and how many qualifying sources will remain. **Listings used and excluded** explains gaps and provides **Edit listing** actions. New retail and purchase prices cannot fill missing exit evidence.
 
-Compare the candidate's best dated ask or, when recorded, your target. The bridge subtracts the exit median from that amount; a negative result means the candidate costs less. The range, confidence, freshness, and source dates remain visible. Targets are planning amounts, asks are not confirmed sale proceeds, and fees, shipping, tax, and duty are excluded. Choosing a candidate does not change priorities or scores. The panel also works on the read-only published site.
+The same inline editor is available in **Market → Asks**. It changes only the selected listing, preserves other links and price history, and keeps your draft on failure. Another listing on the same site does not add another independent source. A changed price requires you to supply its observation date again; use **I checked it today** only when you actually did. Candidate and ask/target selections stay in the URL and are remembered per owned watch in the browser session, so saving, reloading, or visiting another page does not restart the comparison.
+
+Compare the candidate's best dated ask or, when recorded, your target. The bridge subtracts the exit median from that amount; a negative result means the candidate costs less. The range, confidence, freshness, and source dates remain visible. Targets are planning amounts, asks are not confirmed sale proceeds, and fees, shipping, tax, and duty are excluded. Choosing a candidate does not change priorities or scores. On the read-only published site, comparisons still work; listing changes are made in the local app and appear after republishing.
 
 ### Target-price notifications
 

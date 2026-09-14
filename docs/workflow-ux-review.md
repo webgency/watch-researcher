@@ -1,6 +1,6 @@
 # Workflow review: completing decisions in context
 
-Reviewed September 14, 2026 against main `5994a10`. This is a proposal, not a shipped workflow change. The mobile Value presentation is separate in PR #68.
+Reviewed September 14, 2026 against main `5994a10`. The first delivery slice below is now implemented on this branch for review; the remaining recommendations are proposals. The mobile Value presentation is separate in PR #68.
 
 ## Finding
 

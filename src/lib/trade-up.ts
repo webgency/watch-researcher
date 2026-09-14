@@ -1,4 +1,4 @@
-import type { Money, Watch } from "./types";
+import type { Money, RetailerLink, Watch } from "./types";
 import { bestOffer, marketValueSummary, type BestOffer, type MarketValueSummary } from "./valuation";
 import { normalizeMoneyToUsd } from "./offer-signals.mjs";
 
@@ -13,6 +13,8 @@ export interface TradeUpCandidate {
 
 export interface TradeUpModel {
   watchId: string;
+  watchLabel: string;
+  links: RetailerLink[];
   exit: MarketValueSummary;
   candidates: TradeUpCandidate[];
   asOf: string;
@@ -35,6 +37,8 @@ export function tradeUpModel(watch: Watch, watches: Watch[], now: Date = new Dat
   const validLinks = watch.links.filter((link) => usableMoney(link.price));
   return {
     watchId: watch.id,
+    watchLabel: `${watch.brand} ${watch.model}`,
+    links: watch.links,
     exit: marketValueSummary({ ...watch, links: validLinks }, "pre-owned", now),
     asOf: now.toISOString(),
     candidates: watches

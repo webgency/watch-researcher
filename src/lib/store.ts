@@ -1,11 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { Watch, WatchInput } from "./types";
+import { RetailerLink, Watch, WatchInput } from "./types";
 import { recordWatchAlerts } from "./alert-store";
 import { carryAskHistories } from "./listing-history.mjs";
 import { appendSnapshot, sameMoney } from "./price-history";
 import { DESIGN_ELO_BASE, DesignComparisonOutcome, updateDesignElo } from "./scoring";
 import { validateWatchCollection } from "./validation";
+import { listingIdentity, listingRevision } from "./listing-entry";
 
 // The collection lives in a single JSON file at the repo root so it can be
 // version-controlled and backed up alongside the app. When you later want to
@@ -70,12 +71,39 @@ export async function updateWatch(
   id: string,
   patch: Partial<WatchInput>
 ): Promise<Watch | undefined> {
+  return changeWatch(id, () => patch);
+}
+
+export class ListingConflictError extends Error {}
+
+/** Read the current links inside the same lock as the write. A client sends
+ * one listing, never a stale array that could erase an intervening addition. */
+export async function saveWatchListing(id: string, listing: RetailerLink, expectedRevision?: string) {
+  return changeWatch(id, (existing) => {
+    const index = existing.links.findIndex(link => listingIdentity(link.url) === listingIdentity(listing.url));
+    if (expectedRevision === undefined) {
+      if (index !== -1) throw new ListingConflictError("This listing is already recorded. Use Edit listing to update it.");
+      return { links: [...existing.links, listing] };
+    }
+    if (index === -1 || listingRevision(existing.links[index]) !== expectedRevision) {
+      throw new ListingConflictError("This listing changed elsewhere. Your draft is still here. Cancel and reopen it to review the latest version.");
+    }
+    const current = existing.links[index];
+    // Keep the exact stored URL so the shared history matcher can carry its
+    // trail. Do not send askHistory: that would suppress recording a move.
+    const replacement = { ...listing, url: current.url, retailer: current.retailer || listing.retailer };
+    return { links: existing.links.map((link, i) => i === index ? replacement : link) };
+  });
+}
+
+async function changeWatch(id: string, makePatch: (watch: Watch) => Partial<WatchInput>): Promise<Watch | undefined> {
   return withWriteLock(async () => {
     const watches = await getWatches();
     const idx = watches.findIndex((w) => w.id === id);
     if (idx === -1) return undefined;
     // id and dateAdded are immutable.
     const existing = watches[idx];
+    const patch = makePatch(existing);
     const next: Watch = { ...existing, ...patch, id: existing.id, dateAdded: existing.dateAdded };
 
     // Listing trails get the same treatment for the same reason: the form
