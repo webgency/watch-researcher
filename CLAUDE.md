@@ -32,6 +32,8 @@ npm run build:static   # GitHub Pages export, into out/
 
 **A link's `askHistory` follows the same moves-only rule, per listing URL.** `recordAskMove()` in `src/lib/listing-history.mjs` (shared with `enrich-watches.mjs`) appends only when that link's ask changes; `observedAt` still advances on every confirmation, so the two dates mean different things. The form never sends `askHistory`, so `updateWatch()` carries trails across edits by URL. A currency change restarts the trail rather than comparing through a rate snapshot.
 
+**Alerts fire on change, never on read.** `detectAlerts(before, after)` in `src/lib/alerts.mjs` compares a watch before and after a write; `updateWatch()` and `enrich-watches.mjs --refresh` are the two callers, and both go through `appendAlerts()` for the 24h dedupe, mutes and type switches. Don't compute alerts from current data at page load: every refresh re-dates every link, so a read-time feed can't tell a new offer from a re-checked one. The log is `data/alerts.json` (committed, read-only on Pages). Adding a watch or editing its target never fires an alert.
+
 **`CALIBER_TIER_PATTERNS`** in `scoring.ts` is a hand-maintained substring table, ordered most-specific-first. Unknown calibers return `undefined` (unrated), never a fallback tier. Adding watches from new movement families means adding entries here.
 
 **`src/lib/spec-ranges.mjs` is `.mjs` on purpose** — it's imported by both the TypeScript app and `scripts/validate-data.mjs`, which runs under bare Node with no build step. Don't convert it to `.ts`.

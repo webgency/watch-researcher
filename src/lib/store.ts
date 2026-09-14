@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { Watch, WatchInput } from "./types";
+import { recordWatchAlerts } from "./alert-store";
 import { carryAskHistories } from "./listing-history.mjs";
 import { appendSnapshot, sameMoney } from "./price-history";
 import { DESIGN_ELO_BASE, DesignComparisonOutcome, updateDesignElo } from "./scoring";
@@ -106,6 +107,14 @@ export async function updateWatch(
 
     watches[idx] = next;
     await saveAll(watches);
+
+    // After the save, and unable to undo it: an alert is a side effect of the
+    // edit, so a problem writing alerts.json is logged rather than thrown.
+    try {
+      await recordWatchAlerts(existing, next);
+    } catch (error) {
+      console.error("Could not record alerts:", error);
+    }
     return watches[idx];
   });
 }

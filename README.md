@@ -128,6 +128,16 @@ Use repeatable `--id=` arguments for a shortlist dry run. A failed targeted extr
 node scripts/enrich-watches.mjs --refresh --dry --id=watch-id --verbose
 ```
 
+### In-app alerts
+
+The **Alerts** page lists targets met, listing price drops, and fresh offers. Each alert cites its source, condition, and the date the price was seen. Alerts fire when something changes: an edit in the app, or `node scripts/enrich-watches.mjs --refresh`. Opening the page never creates one.
+
+- **Target met:** a dated ask, or your tracked or all-in price, reaches `targetPrice`. Setting or changing the target doesn't fire one.
+- **Price drop:** a listing's ask falls 5% or more below its highest recorded ask since the last drop alert for that listing. This needs the link's `askHistory`, which builds up as asks change.
+- **Fresh offer:** a new dated ask, or one confirmed again after going stale (over 30 days), on a wishlist watch rated *interested* or above.
+
+Adding a watch never fires an alert. There's at most one alert per watch and type per 24 hours, unless the price is lower than the last one announced. On the page you can mute a watch, switch a type off, and mark alerts read. Those settings and the log live in `data/alerts.json`, which is committed so the published site shows the same feed read-only. The **Alerts** tab appears in the nav once the first alert exists. `enrich-watches.mjs --refresh --dry` lists the alerts a refresh would record without writing anything.
+
 ### Target-price notifications
 
 Set `targetPrice` in the add/edit form, refresh the dated evidence, then preview exactly what would be sent:

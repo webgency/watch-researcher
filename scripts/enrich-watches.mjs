@@ -24,6 +24,8 @@
 // an unchanged ask only advances observedAt.
 
 import { readFile, writeFile } from "node:fs/promises";
+import { readAlertState, writeAlertState } from "../src/lib/alert-file.mjs";
+import { appendAlerts, detectAlerts } from "../src/lib/alerts.mjs";
 import { recordAskMove } from "../src/lib/listing-history.mjs";
 import { recordOfferObservation } from "../src/lib/offer-observation.mjs";
 import {
@@ -33,6 +35,7 @@ import {
 } from "../src/lib/retailer-offer.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
+const ALERTS_URL = new URL("../data/alerts.json", import.meta.url);
 
 const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
@@ -280,6 +283,8 @@ const short = (s, n = 40) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 async function main() {
   const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
   const targets = ONLY.length ? watches.filter((w) => ONLY.includes(w.id)) : watches;
+  // Alerts fire on change, so keep each watch as it stood before this run.
+  const before = new Map(watches.map((w) => [w.id, structuredClone(w)]));
 
   let priceN = 0, offerN = 0, askMoveN = 0, imageN = 0, changed = 0;
   const misses = [];
@@ -398,10 +403,27 @@ async function main() {
     for (const change of offerCurrencyChanges) console.log(`  · ${change}`);
   }
 
+  // Same rules as an edit in the app. A dry run lists what would fire and
+  // records nothing.
+  const alertState = await readAlertState(ALERTS_URL);
+  const alertNow = new Date();
+  const candidates = targets.flatMap((w) => detectAlerts(before.get(w.id), w, { now: alertNow, events: alertState.events }));
+  const { state: nextAlertState, added: newAlerts } = appendAlerts(alertState, candidates, alertNow);
+  if (newAlerts.length) {
+    console.log(`\n${DRY ? "Would record" : "Alerts"} (${newAlerts.length}):`);
+    for (const alert of newAlerts) {
+      console.log(`  · ${alert.type} ${alert.payload.watch}: ${alert.payload.price.amount} ${alert.payload.price.currency}${alert.payload.source ? ` from ${alert.payload.source}` : ""}`);
+    }
+  }
+
   if (DRY) return console.log("\n--dry: nothing written.");
   if (changed) {
     await writeFile(DATA_URL, JSON.stringify(watches, null, 2) + "\n");
     console.log("\nWrote data/watches.json — review with: git diff data/watches.json");
+    if (newAlerts.length) {
+      await writeAlertState(ALERTS_URL, nextAlertState);
+      console.log("Wrote data/alerts.json");
+    }
   } else {
     console.log("\nNo changes; file untouched.");
   }
