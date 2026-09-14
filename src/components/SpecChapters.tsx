@@ -1,26 +1,26 @@
-import { specChapters } from "@/lib/specs";
+import { specChapters, type SpecChapterId } from "@/lib/specs";
 import type { Watch } from "@/lib/types";
 
-export default function SpecChapters({ watch }: { watch: Watch }) {
-  const chapters = specChapters(watch);
+export default function SpecChapters({ watch, chapterId }: { watch: Pick<Watch, "specs" | "qualityFlags">; chapterId?: SpecChapterId }) {
+  const chapters = specChapters(watch).filter((chapter) => !chapterId || chapter.id === chapterId);
 
   return (
     <section aria-labelledby="specifications-heading" className="space-y-3">
       <h2 id="specifications-heading" className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">
         Specifications
       </h2>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4">
         {chapters.map((chapter) => (
-          <section key={chapter.id} aria-labelledby={`chapter-${chapter.id}`} className="card p-5">
+          <section key={chapter.id} aria-labelledby={`chapter-${chapter.id}`} className="rounded-2xl bg-white/70 p-4">
             <h3 id={`chapter-${chapter.id}`} className="text-base font-semibold text-cocoa-900">
               {chapter.title}
             </h3>
             {chapter.rows.length > 0 ? (
               <dl className="mt-2 divide-y divide-cocoa-100">
                 {chapter.rows.map((row) => (
-                  <div key={row.key} className="flex justify-between gap-4 py-2">
+                  <div key={row.key} className="grid grid-cols-2 gap-4 py-2">
                     <dt className="shrink-0 text-sm text-cocoa-500">{row.label}</dt>
-                    <dd className="min-w-0 text-right text-sm font-medium tabular-nums text-cocoa-900 first-letter:uppercase">
+                    <dd className="min-w-0 break-words text-right text-sm font-medium tabular-nums text-cocoa-900 first-letter:uppercase">
                       {row.value}
                     </dd>
                   </div>

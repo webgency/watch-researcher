@@ -80,13 +80,13 @@ function DimensionMeter({
   const style = VERDICT[verdict];
 
   return (
-    <div className="grid grid-cols-[9rem_1fr_auto] items-center gap-x-3 py-2 sm:grid-cols-[11rem_1fr_auto]">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2 sm:grid-cols-[11rem_minmax(0,1fr)_auto]">
       <p className="truncate text-sm font-medium capitalize text-cocoa-700" title={DIMENSION_BLURBS[dimension]}>
         {DIMENSION_LABELS[dimension]}
       </p>
 
       <div
-        className={`relative h-2.5 overflow-hidden rounded-full ${style.track}`}
+        className={`col-span-2 row-start-2 sm:col-span-1 sm:row-auto relative h-2.5 overflow-hidden rounded-full ${style.track}`}
         role="img"
         aria-label={
           reference === undefined
@@ -107,12 +107,12 @@ function DimensionMeter({
         )}
       </div>
 
-      <div className="flex items-baseline justify-end gap-2 whitespace-nowrap">
+      <div className="col-start-2 row-start-1 flex items-baseline justify-end gap-2 sm:col-start-3">
         <span className="text-sm font-semibold tabular-nums text-cocoa-800">{pct(raw)}</span>
-        <span className={`w-20 text-right text-xs font-medium ${style.text}`}>{style.label}</span>
+        <span className={`w-24 text-right text-xs font-medium ${style.text}`}>{style.label}</span>
       </div>
       {coverage < 1 && (
-        <p className="col-span-3 mt-1 text-xs text-cocoa-400">
+        <p className="col-span-2 sm:col-span-3 mt-1 text-xs text-cocoa-400">
           Based on {knownInputs} of {totalInputs} recorded inputs; missing inputs are excluded.
         </p>
       )}
@@ -122,13 +122,13 @@ function DimensionMeter({
 
 function UnratedRow({ dimension, watch }: { dimension: Dimension; watch: Watch }) {
   return (
-    <div className="grid grid-cols-[9rem_1fr_auto] items-center gap-x-3 py-2 sm:grid-cols-[11rem_1fr_auto]">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2 sm:grid-cols-[11rem_minmax(0,1fr)_auto]">
       <p className="truncate text-sm font-medium capitalize text-cocoa-400" title={DIMENSION_BLURBS[dimension]}>
         {DIMENSION_LABELS[dimension]}
       </p>
-      <div className="h-2.5 rounded-full bg-[repeating-linear-gradient(45deg,#F3EAE5_0_6px,#E6DAD5_6px_12px)]" />
-      <span className="w-20 text-right text-xs font-medium text-cocoa-400">Unrated</span>
-      <p className="col-span-3 text-xs text-cocoa-400">{unratedReason(watch, dimension)}</p>
+      <div className="col-span-2 row-start-2 sm:col-span-1 sm:row-auto h-2.5 rounded-full bg-[repeating-linear-gradient(45deg,#F3EAE5_0_6px,#E6DAD5_6px_12px)]" />
+      <span className="col-start-2 row-start-1 sm:col-start-3 w-24 text-right text-xs font-medium text-cocoa-400">Unrated</span>
+      <p className="col-span-2 sm:col-span-3 text-xs text-cocoa-400">{unratedReason(watch, dimension)}</p>
     </div>
   );
 }
@@ -168,7 +168,7 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
         </p>
       ) : (
         <>
-          <div className="mb-4 grid grid-cols-3 gap-3 sm:max-w-2xl">
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:max-w-2xl">
             <ScoreTile
               label="Quality"
               value={standing.qualityScore}
@@ -185,7 +185,9 @@ export default function StandingPanel({ watch, standing }: { watch: Watch; stand
                   : "Value vs continuous price expectation"
               }
             />
-            <EvidenceCoverage watch={watch} standing={standing} />
+            <div className="col-span-2 min-w-0 sm:col-span-1">
+              <EvidenceCoverage watch={watch} standing={standing} />
+            </div>
           </div>
 
           {standing.confidence === "low" && (

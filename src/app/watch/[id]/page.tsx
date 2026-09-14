@@ -12,7 +12,6 @@ import StandingPanel from "@/components/StandingPanel";
 import PriceHistoryPanel from "@/components/PriceHistoryPanel";
 import MarketChapter from "@/components/MarketChapter";
 import KeySpecStrip from "@/components/KeySpecStrip";
-import SpecChapters from "@/components/SpecChapters";
 import DecisionSummary from "@/components/DecisionSummary";
 
 // An empty generateStaticParams result opts into on-demand static generation.
@@ -49,18 +48,19 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
         {!IS_STATIC && <WatchActions id={watch.id} name={`${watch.brand} ${watch.model}`} />}
       </div>
 
-      {/* Hero: name and price are the loudest things on the page. */}
-      <section className="grid gap-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-8">
-        <div className="card flex h-80 items-center justify-center overflow-hidden bg-white sm:h-[28rem]">
+      {/* An open image stage lets the object lead; nearby measurements answer
+          fit questions before the deeper decision and market evidence. */}
+      <section className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-10">
+        <div className="flex h-80 items-center justify-center sm:h-[30rem] md:sticky md:top-6 md:h-[36rem]">
           {watch.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={watch.imageUrl}
               alt={`${watch.brand} ${watch.model}`}
-              className="h-full w-full object-contain p-4"
+              className="h-full w-full object-contain"
             />
           ) : (
-            <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-cocoa-100 to-cocoa-200 text-6xl font-bold text-cocoa-300">
+            <span className="flex h-full w-full items-center justify-center text-6xl font-bold text-cocoa-300">
               {(watch.brand[0] ?? "?").toUpperCase()}
             </span>
           )}
@@ -88,6 +88,8 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
             )}
           </div>
 
+          <KeySpecStrip watch={{ specs: watch.specs, qualityFlags: watch.qualityFlags }} />
+
           <DecisionSummary watch={watch} standing={standing} />
 
           <div className="space-y-2">
@@ -104,10 +106,6 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
           </div>
         </div>
       </section>
-
-      <KeySpecStrip specs={watch.specs} />
-
-      <SpecChapters watch={watch} />
 
       <div id="standing" className="scroll-mt-6 space-y-6">
         <StandingPanel watch={watch} standing={standing} />
