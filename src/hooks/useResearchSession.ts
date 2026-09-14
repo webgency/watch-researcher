@@ -82,10 +82,6 @@ export function useCollectionView() {
   const raw = useSyncExternalStore(subscribe, () => readStored(key, "grid", true), () => "grid");
   return [raw === "table" ? "table" : "grid", (view: "grid" | "table") => store(key, view, true)] as const;
 }
-export function useComparisonIds() {
-  const raw = useSyncExternalStore(subscribe, () => readStored("vitrine:comparison:v1", "[]"), () => "[]");
-  return useMemo(() => readSelection(raw), [raw]);
-}
 export function useComparisonSelection(validIds: string[]) {
   const key = "vitrine:comparison:v1";
   const raw = useSyncExternalStore(subscribe, () => readStored(key, "[]"), () => "[]");
