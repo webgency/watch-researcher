@@ -68,6 +68,20 @@ describe("updateWatch alerts", () => {
     expect(alerts?.events).toHaveLength(1);
   });
 
+  it("cites a form-edited ask as seen at the edit, not on the old ask's date", async () => {
+    const { updateWatch } = await import("./store");
+    await seed([{ ...baseWatch, targetPrice: { amount: 5000, currency: "USD" } }]);
+    const editedAt = Date.now();
+
+    // An untouched date field comes back from the form as YYYY-MM-DD.
+    await updateWatch("w1", { links: [{ ...formLink(4950), observedAt: observedAt.slice(0, 10) }] });
+    const events = (await readAlerts())?.events ?? [];
+    expect(events.map((e) => e.type).sort()).toEqual(["price_drop", "target_met"]);
+    for (const event of events) {
+      expect(new Date(event.payload.asOf).getTime()).toBeGreaterThanOrEqual(editedAt);
+    }
+  });
+
   it("leaves alerts.json absent when an edit announces nothing", async () => {
     const { updateWatch } = await import("./store");
     await seed([baseWatch]);
