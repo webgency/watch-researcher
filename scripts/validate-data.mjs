@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
+import { alertStateErrors } from "../src/lib/alerts.mjs";
 import { SPEC_RANGES, inSpecRange } from "../src/lib/spec-ranges.mjs";
 import { plausibilityIssues } from "../src/lib/spec-plausibility.mjs";
 import {
@@ -372,6 +373,15 @@ if (foreignCurrencies.size && ratesAreStale()) {
       `${foreignCurrencies.size} non-USD currenc${foreignCurrencies.size === 1 ? "y is" : "ies are"} in use (${[...foreignCurrencies].sort().join(", ")}), ` +
       `so scoring converts at rates that have had time to drift across a price band. Refresh with: curl -s "https://api.frankfurter.dev/v1/latest?base=USD"`
   );
+}
+
+// The alert log is optional until the first alert fires. When present, it gets
+// the same shape check the app applies before reading or writing it.
+try {
+  const alerts = JSON.parse(await readFile(new URL("../data/alerts.json", import.meta.url), "utf8"));
+  errors.push(...alertStateErrors(alerts));
+} catch (error) {
+  if (error?.code !== "ENOENT") errors.push(`data/alerts.json could not be read: ${error.message}`);
 }
 
 if (warnings.length) {

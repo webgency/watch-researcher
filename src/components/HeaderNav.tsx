@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { IS_STATIC } from "@/lib/config";
 import { useCollectionSearch } from "./CollectionSearchContext";
 
-export default function HeaderNav() {
+export default function HeaderNav({ alerts }: { alerts?: { total: number; unread: number } }) {
   const pathname = usePathname().replace(/\/+$/, "") || "/";
   const comparisonIds = useComparisonIds();
   const comparisonUrl = comparisonIds.length ? `/compare?${new URLSearchParams({ ids: comparisonIds.join(",") })}` : "/compare";
@@ -17,9 +17,10 @@ export default function HeaderNav() {
 
   // Pills inside one tray read as a single control, so the destinations group
   // together and apart from the Add action. Azalea marks the selected page,
-  // which is the one job branding gives pink.
+  // which is the one job branding gives pink. Phone pills size around their
+  // labels (flex-auto): equal widths crowded Collection and Compare at 320px.
   function navClass(active: boolean) {
-    return `flex h-8 min-w-0 flex-1 items-center justify-center rounded-full px-2 text-xs font-semibold transition-colors sm:flex-none sm:px-4 sm:text-sm ${
+    return `flex h-8 min-w-0 flex-auto items-center justify-center rounded-full px-1 text-xs font-semibold transition-colors sm:flex-none sm:px-4 sm:text-sm ${
       active ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-white/70 hover:text-cocoa-900"
     }`;
   }
@@ -63,6 +64,31 @@ export default function HeaderNav() {
             className={navClass(pathname === "/design")}
           >
             Design
+          </Link>
+        )}
+        {/* Only once an alert exists: a permanent pill for an empty feed would
+            take a slot in a tray that is already tight on narrow screens. */}
+        {alerts && alerts.total > 0 && (
+          <Link
+            href="/alerts"
+            aria-current={pathname === "/alerts" ? "page" : undefined}
+            className={navClass(pathname === "/alerts")}
+          >
+            Alerts
+            {alerts.unread > 0 && (
+              <>
+                {/* A dot on phones: five pills leave no room for a number
+                    beside the label below sm, and it clipped the labels. */}
+                <span aria-hidden="true" className="ml-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-cocoa-900 sm:hidden" />
+                <span
+                  aria-hidden="true"
+                  className="ml-1.5 hidden rounded-full bg-cocoa-900 px-1.5 text-[10px] font-bold leading-4 tabular-nums text-white sm:inline-block"
+                >
+                  {alerts.unread}
+                </span>
+                <span className="sr-only"> ({alerts.unread} unread)</span>
+              </>
+            )}
           </Link>
         )}
       </div>

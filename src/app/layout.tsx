@@ -5,6 +5,7 @@ import { ASSET_BASE_PATH } from "@/lib/config";
 import BrandLogo from "@/components/BrandLogo";
 import { CollectionSearchProvider } from "@/components/CollectionSearchContext";
 import HeaderNav from "@/components/HeaderNav";
+import { getAlertSummary } from "@/lib/alert-store";
 import "./globals.css";
 
 const manrope = localFont({
@@ -27,11 +28,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const alerts = await getAlertSummary();
   return (
     <html lang="en" className={manrope.variable}>
       <body>
@@ -42,7 +44,7 @@ export default function RootLayout({
                 <CollectionLink aria-label="Vitrine home" className="shrink-0 rounded-sm">
                   <BrandLogo />
                 </CollectionLink>
-                <HeaderNav />
+                <HeaderNav alerts={alerts} />
               </div>
             </header>
             <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
