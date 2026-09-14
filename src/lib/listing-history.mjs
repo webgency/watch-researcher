@@ -22,6 +22,14 @@ function sameMoney(a, b) {
   return a.amount === b.amount && sameCurrency(a, b);
 }
 
+// Whether `next` still carries `previous`'s observation date. The form edits
+// dates as YYYY-MM-DD, so an untouched row sends back the day of a stored
+// timestamp rather than the timestamp itself.
+function keptObservedAt(previous, next) {
+  if (!next.observedAt || !previous.observedAt) return false;
+  return next.observedAt === previous.observedAt || next.observedAt === previous.observedAt.slice(0, 10);
+}
+
 /**
  * Record `next`'s ask on its history when it moved from `previous`, the same
  * link as it stood before this update. Mutates and returns `next`.
@@ -32,6 +40,7 @@ function sameMoney(a, b) {
  *   starting at an invented date would be worse than no trail yet.
  * - Currency change: the trail restarts. Amounts in two currencies can only be
  *   compared through a rate snapshot, which would show a move nobody made.
+ * - Changed ask with the old date kept: observedAt moves to `now`.
  *
  * @template {Link} T
  * @param {Link | undefined} previous
@@ -47,6 +56,12 @@ export function recordAskMove(previous, next, now, source) {
     if (prior) next.askHistory = prior;
     return next;
   }
+
+  // A form edit that changes the price without touching the date keeps the
+  // old observedAt. That date belongs to the old ask; left in place, alerts and
+  // the market panel would cite the new price as seen before anyone saw it.
+  if (keptObservedAt(previous, next)) next.observedAt = now;
+
   if (!sameCurrency(previous.price, next.price)) {
     delete next.askHistory;
     return next;
@@ -58,11 +73,10 @@ export function recordAskMove(previous, next, now, source) {
     history = [{ price: previous.price, date: previous.observedAt }];
   }
 
-  // A form edit that changes the price without touching the date keeps the
-  // old observedAt; that date belongs to the old ask, so the move is dated now.
-  // Never date a move before the entry it follows.
+  // A kept date was re-dated to now above. Never date a move before the entry
+  // it follows.
   const last = history[history.length - 1];
-  let date = next.observedAt && next.observedAt !== previous.observedAt ? next.observedAt : now;
+  let date = next.observedAt || now;
   if (new Date(date).getTime() < new Date(last.date).getTime()) date = now;
 
   /** @type {AskSnapshot} */

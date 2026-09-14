@@ -43,6 +43,28 @@ describe("recordAskMove", () => {
   it("dates a form edit that kept the old observedAt to now, not to the old ask's date", () => {
     const next = recordAskMove(link(), link({ price: usd(4950) }), NOW);
     expect(next.askHistory?.[1].date).toBe(NOW);
+    // The kept date belonged to the old ask; citing it for the new one would
+    // claim a price was seen before anyone saw it.
+    expect(next.observedAt).toBe(NOW);
+  });
+
+  it("treats the form's day-only copy of the old timestamp as the same kept date", () => {
+    // The form edits dates as YYYY-MM-DD, so an untouched row sends "2026-07-30"
+    // back for a stored "2026-07-30T21:30:00.000Z".
+    const previous = link({
+      price: usd(5000),
+      observedAt: "2026-07-30T21:30:00.000Z",
+      askHistory: [{ price: usd(5250), date: "2026-06-01T00:00:00.000Z" }, { price: usd(5000), date: "2026-07-01T00:00:00.000Z" }],
+    });
+    const next = recordAskMove(previous, link({ price: usd(4950), observedAt: "2026-07-30" }), NOW);
+    expect(next.askHistory?.[2].date).toBe(NOW);
+    expect(next.observedAt).toBe(NOW);
+  });
+
+  it("keeps a date the editor changed along with the price", () => {
+    const next = recordAskMove(link(), link({ price: usd(4950), observedAt: "2026-09-12" }), NOW);
+    expect(next.askHistory?.[1].date).toBe("2026-09-12");
+    expect(next.observedAt).toBe("2026-09-12");
   });
 
   it("never dates a move before the entry it follows", () => {
@@ -54,6 +76,11 @@ describe("recordAskMove", () => {
     const withTrail = link({ price: usd(4950), askHistory: [{ price: usd(5250), date: "2026-07-30" }, { price: usd(4950), date: "2026-09-12" }] });
     const next = recordAskMove(withTrail, { url: URL, price: { amount: 4600, currency: "EUR" }, observedAt: NOW, askHistory: withTrail.askHistory }, NOW);
     expect(next.askHistory).toBeUndefined();
+  });
+
+  it("re-dates a currency change that kept the old date, even though the trail restarts", () => {
+    const next = recordAskMove(link(), link({ price: { amount: 4600, currency: "EUR" } }), NOW);
+    expect(next.observedAt).toBe(NOW);
   });
 });
 
