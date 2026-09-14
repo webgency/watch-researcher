@@ -13,6 +13,8 @@ import PriceHistoryPanel from "@/components/PriceHistoryPanel";
 import MarketChapter from "@/components/MarketChapter";
 import KeySpecStrip from "@/components/KeySpecStrip";
 import DecisionSummary from "@/components/DecisionSummary";
+import TradeUpPanel from "@/components/TradeUpPanel";
+import { tradeUpModel } from "@/lib/trade-up";
 
 // An empty generateStaticParams result opts into on-demand static generation.
 // Explicit dynamic rendering prevents noStore() from failing at request time;
@@ -35,6 +37,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   const [watch, watches] = await Promise.all([getWatch(id), getWatches()]);
   if (!watch) notFound();
   const standing = computeStanding(watch, watches);
+  const tradeUp = tradeUpModel(watch, watches);
 
   // Page order is the reading order: what it is, what it is made of, then what
   // to do about it. Each chapter owns a fixed position so later chapters
@@ -118,9 +121,11 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
         <MarketChapter watch={watch} />
       </div>
 
-      {/* Trade-up chapter slot (brief 07, owned watches only). Empty until then;
-          `empty:hidden` keeps it from taking space while it has no children. */}
-      <div id="trade-up" className="scroll-mt-6 empty:hidden" />
+      {tradeUp && (
+        <div id="trade-up" className="scroll-mt-6">
+          <TradeUpPanel model={tradeUp} />
+        </div>
+      )}
 
       {watch.notes && (
         <section className="card p-5">

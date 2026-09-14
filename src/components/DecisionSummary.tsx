@@ -69,6 +69,12 @@ export default function DecisionSummary({ watch, standing }: { watch: Watch; sta
         <a href="#market" className="font-medium text-azalea-700 hover:underline">
           Market evidence
         </a>
+        {watch.status === "owned" && (
+          <>
+            <span className="text-cocoa-300"> · </span>
+            <a href="#trade-up" className="font-medium text-azalea-700 hover:underline">Trade-up</a>
+          </>
+        )}
       </p>
     </div>
   );
