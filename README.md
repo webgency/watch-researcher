@@ -138,6 +138,12 @@ The **Alerts** page lists targets met, listing price drops, and fresh offers. Ea
 
 Adding a watch never fires an alert. There's at most one alert per watch and type per 24 hours, unless the price is lower than the last one announced. On the page you can mute a watch, switch a type off, and mark alerts read. Those settings and the log live in `data/alerts.json`, which is committed so the published site shows the same feed read-only. The **Alerts** tab stays in the nav even with an empty or fully muted feed, so settings and unmute controls remain reachable. `enrich-watches.mjs --refresh --dry` lists the alerts a refresh would record without writing anything.
 
+### Trade-up on owned watches
+
+Open an owned watch and use **Trade-up** to choose a wishlist candidate. The exit range uses at least two independent, dated pre-owned asks from the watch's retailer links. Add each ask's price, condition, and observation date in the edit form; new retail and purchase prices cannot fill missing exit evidence.
+
+Compare the candidate's best dated ask or, when recorded, your target. The bridge subtracts the exit median from that amount; a negative result means the candidate costs less. The range, confidence, freshness, and source dates remain visible. Targets are planning amounts, asks are not confirmed sale proceeds, and fees, shipping, tax, and duty are excluded. Choosing a candidate does not change priorities or scores. The panel also works on the read-only published site.
+
 ### Target-price notifications
 
 Set `targetPrice` in the add/edit form, refresh the dated evidence, then preview exactly what would be sent:
