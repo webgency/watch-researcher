@@ -61,31 +61,29 @@ export default function HeaderNav({ alerts }: { alerts?: { total: number; unread
             Design
           </Link>
         )}
-        {/* Only once an alert exists: a permanent pill for an empty feed would
-            take a slot in a tray that is already tight on narrow screens. */}
-        {alerts && alerts.total > 0 && (
-          <Link
-            href="/alerts"
-            aria-current={pathname === "/alerts" ? "page" : undefined}
-            className={navClass(pathname === "/alerts")}
-          >
-            Alerts
-            {alerts.unread > 0 && (
-              <>
-                {/* A dot on phones: five pills leave no room for a number
-                    beside the label below sm, and it clipped the labels. */}
-                <span aria-hidden="true" className="ml-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-cocoa-900 sm:hidden" />
-                <span
-                  aria-hidden="true"
-                  className="ml-1.5 hidden rounded-full bg-cocoa-900 px-1.5 text-[10px] font-bold leading-4 tabular-nums text-white sm:inline-block"
-                >
-                  {alerts.unread}
-                </span>
-                <span className="sr-only"> ({alerts.unread} unread)</span>
-              </>
-            )}
-          </Link>
-        )}
+        {/* Settings and unmute controls must remain reachable with an empty
+            feed, including when every watch or alert type has been muted. */}
+        <Link
+          href="/alerts"
+          aria-current={pathname === "/alerts" ? "page" : undefined}
+          className={navClass(pathname === "/alerts")}
+        >
+          Alerts
+          {alerts && alerts.unread > 0 && (
+            <>
+              {/* A dot on phones: the pills leave no room for a number
+                  beside the label below sm, and it clipped the labels. */}
+              <span aria-hidden="true" className="ml-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-cocoa-900 sm:hidden" />
+              <span
+                aria-hidden="true"
+                className="ml-1.5 hidden rounded-full bg-cocoa-900 px-1.5 text-[10px] font-bold leading-4 tabular-nums text-white sm:inline-block"
+              >
+                {alerts.unread}
+              </span>
+              <span className="sr-only"> ({alerts.unread} unread)</span>
+            </>
+          )}
+        </Link>
       </div>
       {!IS_STATIC && (
         <Link href="/watch/new" className="btn-primary absolute right-4 top-5 h-9 whitespace-nowrap rounded-full px-3 lg:static sm:px-4">
