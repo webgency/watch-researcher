@@ -20,8 +20,8 @@ The grid/table preference lives in local storage (`vitrine:collection-view:v1`)
 and is shared by tabs on the same origin. Comparison IDs and last research URLs
 live in session storage and survive navigation/reload within the tab. A new tab
 has its own shortlist. Selection is deduplicated and capped at four; IDs absent
-from the collection do not count toward its limit. The Compare navigation link
-includes the current shortlist.
+from the collection do not count toward its limit. The shortlist is reopened from
+the collection's selection tray; there is no Compare navigation link.
 
 Storage failures fall back to memory for the current page session; filters still
 work through the URL. Server snapshots use safe defaults, then restore browser

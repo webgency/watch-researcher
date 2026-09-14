@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useResearchUrl, useComparisonIds } from "@/hooks/useResearchSession";
+import { useResearchUrl } from "@/hooks/useResearchSession";
 import { usePathname } from "next/navigation";
 import { IS_STATIC } from "@/lib/config";
 import { useCollectionSearch } from "./CollectionSearchContext";
 
 export default function HeaderNav({ alerts }: { alerts?: { total: number; unread: number } }) {
   const pathname = usePathname().replace(/\/+$/, "") || "/";
-  const comparisonIds = useComparisonIds();
-  const comparisonUrl = comparisonIds.length ? `/compare?${new URLSearchParams({ ids: comparisonIds.join(",") })}` : "/compare";
   const collectionUrl = useResearchUrl("collection");
   const valueUrl = useResearchUrl("value");
   const { query, setQuery } = useCollectionSearch();
@@ -18,7 +16,11 @@ export default function HeaderNav({ alerts }: { alerts?: { total: number; unread
   // Pills inside one tray read as a single control, so the destinations group
   // together and apart from the Add action. Azalea marks the selected page,
   // which is the one job branding gives pink. Phone pills size around their
-  // labels (flex-auto): equal widths crowded Collection and Compare at 320px.
+  // labels (flex-auto): equal widths crowded the longer labels at 320px.
+  //
+  // Compare is deliberately not here. It acts on a selection rather than being
+  // a place: with nothing picked, the link only reached an empty "select two
+  // watches" page. Comparisons start from the collection's selection tray.
   function navClass(active: boolean) {
     return `flex h-8 min-w-0 flex-auto items-center justify-center rounded-full px-1 text-xs font-semibold transition-colors sm:flex-none sm:px-4 sm:text-sm ${
       active ? "bg-azalea text-cocoa-950" : "text-cocoa-600 hover:bg-white/70 hover:text-cocoa-900"
@@ -42,13 +44,6 @@ export default function HeaderNav({ alerts }: { alerts?: { total: number; unread
       <div className="flex w-full min-w-0 gap-1 rounded-full bg-cocoa-100 p-1 sm:w-auto">
         <Link href={collectionUrl} aria-current={pathname === "/" ? "page" : undefined} className={navClass(pathname === "/")}>
           Collection
-        </Link>
-        <Link
-          href={comparisonUrl}
-          aria-current={pathname === "/compare" ? "page" : undefined}
-          className={navClass(pathname === "/compare")}
-        >
-          Compare
         </Link>
         <Link
           href={valueUrl}
