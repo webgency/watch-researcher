@@ -21,6 +21,7 @@ Paste **one brief at a time** into Cursor / Claude / ChatGPT. Do not merge multi
 | 5 | [05-p1b-listing-drops.md](./05-p1b-listing-drops.md) | Listing price-drop trail (P1b) |
 | 6 | [06-p1c-alerts.md](./06-p1c-alerts.md) | In-app alerts (P1c) |
 | 7 | [07-p1d-trade-up.md](./07-p1d-trade-up.md) | Trade-up panel (P1d) |
+| 8 | [08-demote-wishlist-tiers.md](./08-demote-wishlist-tiers.md) | Value-first views; tiers → shortlist / watching / pass |
 
 ## Related docs (not briefs)
 

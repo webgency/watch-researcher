@@ -15,7 +15,9 @@ const DATA_URL = new URL("../data/watches.json", import.meta.url);
 const BRANDS_URL = new URL("../data/brands.json", import.meta.url);
 
 const STATUSES = new Set(["wishlist", "owned", "sold"]);
-const WISHLIST_TIERS = new Set(["next-purchase", "must-have", "love-it", "interested", "maybe-later", "pass"]);
+// Matches WISHLIST_TIERS in src/lib/types.ts. The six older tiers were migrated
+// to these three; an old value is an error, not something to accept quietly.
+const WISHLIST_TIERS = new Set(["shortlist", "watching", "pass"]);
 const MOVEMENTS = new Set(["automatic", "manual", "quartz", "spring-drive", "solar", "kinetic", "other"]);
 const CONDITIONS = new Set(["new", "pre-owned"]);
 const SCORING_CATEGORIES = new Set(["diver", "chronograph", "gmt", "dress", "sports"]);

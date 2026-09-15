@@ -9,6 +9,8 @@
 - Never invent prices, sold comps, or provenance.
 - Deal / market rules stay honest: ≥2 independent **dated** retailer sources for fair bands; headline `price` is **not** a second observation (`src/lib/valuation.ts`).
 - Overlap / similar-dial notes are FYI only — never change wishlist tiers or scores.
+- Wishlist / shortlist labels are personal priority only; they never feed scoring.
+- Value views hide tier chips; collection may show simplified `watching` | `shortlist` | `pass`.
 - Prefer small PRs; match existing Tailwind / `.card` / `.btn-*` / `.input` patterns in `src/app/globals.css`.
 - Preserve static GitHub Pages mode (`IS_STATIC`) and local editable mode.
 

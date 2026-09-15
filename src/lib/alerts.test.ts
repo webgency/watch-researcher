@@ -27,7 +27,7 @@ function watch(overrides: Partial<Watch> = {}): Watch {
     brand: "Tudor",
     model: "Black Bay 58",
     status: "wishlist",
-    wishlistTier: "love-it",
+    wishlistTier: "shortlist",
     price: usd(5250),
     priceUpdatedAt: daysAgo(40),
     links: [],
@@ -116,7 +116,7 @@ describe("price_drop", () => {
 });
 
 describe("fresh_offer", () => {
-  it("fires for a new dated ask on a watch rated interested or above", () => {
+  it("fires for a new dated ask on a watch you are watching or have shortlisted", () => {
     const before = watch({ links: [link({ price: undefined, observedAt: undefined })] });
     const after = watch({ links: [link({ observedAt: daysAgo(0) })] });
     const [alert] = ofType(detectAlerts(before, after, { now: NOW }), "fresh_offer");
@@ -131,10 +131,10 @@ describe("fresh_offer", () => {
     expect(ofType(detectAlerts(aging, after, { now: NOW }), "fresh_offer")).toHaveLength(0);
   });
 
-  it("skips lower tiers and owned watches", () => {
+  it("skips Pass and owned watches", () => {
     const before = (o: Partial<Watch>) => watch({ ...o, links: [link({ observedAt: daysAgo(40) })] });
     const after = (o: Partial<Watch>) => watch({ ...o, links: [link({ observedAt: daysAgo(0) })] });
-    for (const overrides of [{ wishlistTier: "maybe-later" }, { status: "owned", wishlistTier: undefined }] as Partial<Watch>[]) {
+    for (const overrides of [{ wishlistTier: "pass" }, { status: "owned", wishlistTier: undefined }] as Partial<Watch>[]) {
       expect(ofType(detectAlerts(before(overrides), after(overrides), { now: NOW }), "fresh_offer")).toHaveLength(0);
     }
   });

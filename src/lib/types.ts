@@ -2,13 +2,12 @@
 
 export type WatchStatus = "wishlist" | "owned" | "sold";
 
-export type WishlistTier =
-  | "next-purchase"
-  | "must-have"
-  | "love-it"
-  | "interested"
-  | "maybe-later"
-  | "pass";
+/**
+ * Personal priority, for filtering the collection only. Deliberately coarse:
+ * six emotional tiers read as a second verdict beside rubric value, and the
+ * next buy shifts as new pieces appear. Never an input to any score.
+ */
+export type WishlistTier = "shortlist" | "watching" | "pass";
 
 export type MovementType =
   | "automatic"
@@ -220,21 +219,11 @@ export const WATCH_STATUSES: WatchStatus[] = ["wishlist", "owned", "sold"];
 
 export const SCORING_CATEGORIES: ScoringCategory[] = ["diver", "chronograph", "gmt", "dress", "sports"];
 
-export const WISHLIST_TIERS: WishlistTier[] = [
-  "next-purchase",
-  "must-have",
-  "love-it",
-  "interested",
-  "maybe-later",
-  "pass",
-];
+export const WISHLIST_TIERS: WishlistTier[] = ["shortlist", "watching", "pass"];
 
 export const WISHLIST_TIER_LABELS: Record<WishlistTier, string> = {
-  "next-purchase": "Next purchase",
-  "must-have": "Must have",
-  "love-it": "Love it",
-  interested: "Interested",
-  "maybe-later": "Maybe later",
+  shortlist: "Shortlist",
+  watching: "Watching",
   pass: "Pass",
 };
 

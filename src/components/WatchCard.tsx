@@ -77,7 +77,7 @@ export default function WatchCard({
             <p className="min-w-0 text-xs font-semibold uppercase tracking-wide text-cocoa-500">{watch.brand}</p>
             <div className="flex shrink-0 items-center gap-1">
               {onChangeWishlistTier ? (
-                <PriorityMenu tier={watch.wishlistTier} watchName={`${watch.brand} ${watch.model}`} onChange={next => onChangeWishlistTier(watch.id, next)} />
+                <PriorityMenu tier={watch.wishlistTier} watchName={`${watch.brand} ${watch.model}`} onChange={next => onChangeWishlistTier(watch.id, next)} allowNone={watch.status !== "wishlist"} />
               ) : <WishlistTierBadge tier={watch.wishlistTier} />}
               <StatusBadge status={watch.status} />
             </div>

@@ -63,7 +63,6 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
                   {w.model}
                 </Link>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  <WishlistTierBadge tier={w.wishlistTier} />
                   <StatusBadge status={w.status} />
                 </div>
               </th>
@@ -104,7 +103,9 @@ export default function CompareTable({ watches }: { watches: Watch[] }) {
               </Cell>
             ))}
           </Row>
-          <Row label="Wishlist priority" sticky>
+          {/* Kept as a labelled row, not a chip beside each name: priority is a
+              personal filter, not a verdict on the comparison. */}
+          <Row label="Priority · personal, not scored" sticky>
             {watches.map((w) => (
               <Cell key={w.id}>
                 <WishlistTierBadge tier={w.wishlistTier} />

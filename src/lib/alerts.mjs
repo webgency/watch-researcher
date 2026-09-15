@@ -38,8 +38,18 @@ export const ALERT_TYPES = ["target_met", "price_drop", "fresh_offer"];
 /** PRD default. Measured from the highest ask since the last drop alert. */
 export const PRICE_DROP_THRESHOLD = 0.05;
 
-/** PRD story 6: fresh offers only for watches rated interested or above. */
-export const FRESH_OFFER_TIERS = ["next-purchase", "must-have", "love-it", "interested"];
+/**
+ * Fresh offers for every wishlist watch not marked pass. With priority reduced
+ * to shortlist / watching / pass, "watching" means exactly the watches whose
+ * new offers are worth hearing about. An unset tier counts as watching, as the
+ * migration and the add form treat it.
+ */
+export const FRESH_OFFER_TIERS = ["shortlist", "watching"];
+
+/** @param {{ status?: string, wishlistTier?: string }} watch */
+export function watchesForFreshOffers(watch) {
+  return watch.status === "wishlist" && FRESH_OFFER_TIERS.includes(watch.wishlistTier ?? "watching");
+}
 
 export const DEDUPE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -186,7 +196,7 @@ function priceDrops(before, after, events) {
 }
 
 function freshOffers(before, after, now) {
-  if (after.status !== "wishlist" || !FRESH_OFFER_TIERS.includes(after.wishlistTier)) return [];
+  if (!watchesForFreshOffers(after)) return [];
   const beforeLinks = linksByUrl(before);
   const found = [];
 

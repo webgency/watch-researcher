@@ -502,7 +502,7 @@ describe("design score", () => {
   });
 
   it("ignores the wishlist tier, which the matrix exists to inform", () => {
-    const mustHave = makeWatch({ wishlistTier: "must-have" });
+    const mustHave = makeWatch({ wishlistTier: "shortlist" });
     const pass = makeWatch({ wishlistTier: "pass" });
     expect(computeDesignScore(mustHave)).toBe(computeDesignScore(pass));
   });

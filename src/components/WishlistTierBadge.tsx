@@ -1,12 +1,11 @@
 import { WishlistTier, WISHLIST_TIER_LABELS } from "@/lib/types";
 
+// Neutral on purpose. Green or pink priority chips read as a verdict beside
+// rubric value and deal evidence; a personal filter label should not.
 const STYLES: Record<WishlistTier, string> = {
-  "next-purchase": "bg-emerald-100 text-emerald-800 ring-emerald-200",
-  "must-have": "bg-indigo-100 text-indigo-800 ring-indigo-200",
-  "love-it": "bg-rose-100 text-rose-800 ring-rose-200",
-  interested: "bg-sky-100 text-sky-800 ring-sky-200",
-  "maybe-later": "bg-amber-100 text-amber-800 ring-amber-200",
-  pass: "bg-cocoa-100 text-cocoa-600 ring-cocoa-200",
+  shortlist: "bg-cocoa-100 text-cocoa-800 ring-cocoa-300",
+  watching: "bg-white text-cocoa-600 ring-cocoa-200",
+  pass: "bg-cocoa-50 text-cocoa-400 ring-cocoa-200",
 };
 
 export default function WishlistTierBadge({ tier }: { tier?: WishlistTier }) {

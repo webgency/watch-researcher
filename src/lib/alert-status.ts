@@ -1,8 +1,8 @@
 import {
   ALERT_TYPES,
-  FRESH_OFFER_TIERS,
   PRICE_DROP_THRESHOLD,
   isTypeEnabled,
+  watchesForFreshOffers,
   type AlertEvent,
   type AlertState,
   type AlertType,
@@ -69,9 +69,8 @@ function typeGate(watch: Watch, type: AlertType): AlertTypeStatus {
   }
 
   if (watch.status !== "wishlist") return { type, watching: false, detail: "Only for wishlist watches" };
-  if (!watch.wishlistTier || !FRESH_OFFER_TIERS.includes(watch.wishlistTier)) {
-    const rating = watch.wishlistTier ? `rated ${WISHLIST_TIER_LABELS[watch.wishlistTier]}` : "no wishlist rating";
-    return { type, watching: false, detail: `Not for this watch · ${rating} (needs Interested or above)` };
+  if (!watchesForFreshOffers(watch)) {
+    return { type, watching: false, detail: `Not for this watch · marked ${WISHLIST_TIER_LABELS[watch.wishlistTier ?? "watching"]}` };
   }
   return { type, watching: true, detail: "Watching · new dated asks, or stale ones confirmed again" };
 }
