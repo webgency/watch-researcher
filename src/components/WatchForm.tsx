@@ -98,6 +98,9 @@ interface AutofillResult {
   qualityFlags?: QualityFlags;
   retailer?: string;
   condition?: Condition;
+  specsFound?: number;
+  specsPossible?: number;
+  coverageNote?: string;
 }
 
 export default function WatchForm({
@@ -209,7 +212,7 @@ export default function WatchForm({
           for (const [key, value] of Object.entries(data.specs ?? {})) next[key] = String(value);
           return next;
         });
-        filled.push(`${specCount} spec${specCount > 1 ? "s" : ""}`);
+        filled.push(data.specsPossible ? `${specCount} of ${data.specsPossible} specs` : `${specCount} spec${specCount > 1 ? "s" : ""}`);
       }
       if (data.tags?.length) {
         setTags((current) => Array.from(new Set([
@@ -248,9 +251,14 @@ export default function WatchForm({
       });
       setLinksOpen(true);
 
+      // Say when autofill is partial. A few filled fields beside many blank
+      // ones must not read as a complete scrape.
+      const partial = data.coverageNote && data.specsPossible
+        ? ` Partial autofill: only ${data.specsFound ?? 0} of ${data.specsPossible} spec fields could be read from this page's language or layout, so check the empty ones.`
+        : "";
       setFetchMsg(
         filled.length
-          ? `Filled ${filled.join(", ")}. Review everything below, then save.`
+          ? `Filled ${filled.join(", ")}. Review everything below, then save.${partial}`
           : "Couldn't find much on that page. Fill it in manually."
       );
     } catch (err) {

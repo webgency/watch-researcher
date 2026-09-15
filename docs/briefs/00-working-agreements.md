@@ -11,6 +11,8 @@
 - Overlap / similar-dial notes are FYI only — never change wishlist tiers or scores.
 - Wishlist / shortlist labels are personal priority only; they never feed scoring.
 - Value views hide tier chips; collection may show simplified `watching` | `shortlist` | `pass`.
+- Scrape / autofill must not invent specs: prefer an incomplete result with a coverage note over guessed numbers.
+- Multilingual product pages (DE / FR / ES / IT / EN) are in scope for spec extraction.
 - Prefer small PRs; match existing Tailwind / `.card` / `.btn-*` / `.input` patterns in `src/app/globals.css`.
 - Preserve static GitHub Pages mode (`IS_STATIC`) and local editable mode.
 
