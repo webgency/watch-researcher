@@ -8,7 +8,7 @@ function row(id: string, valueScore?: number, discountPct?: number): ValueRow {
     brand: "Test",
     model: id,
     status: "wishlist",
-    wishlistTier: "must-have",
+    wishlistTier: "shortlist",
     scoringCategory: "diver",
     designUniqueness: 4,
     price: { amount: 1000, currency: "USD" },
@@ -91,12 +91,24 @@ describe("value list ranking", () => {
     expect("discountPct" in rows[1].deal).toBe(false);
   });
 
+  it("breaks a value tie by the freshest dated offer, never by priority", () => {
+    const withOffer = (id: string, freshness?: string, wishlistTier: Watch["wishlistTier"] = "shortlist") => {
+      const item = row(id, 0.7);
+      item.watch.wishlistTier = wishlistTier;
+      if (freshness) item.offer = { status: "available", offer: { freshness } } as unknown as ValueRow["offer"];
+      return item;
+    };
+    const rows = [withOffer("a-none", undefined), withOffer("b-stale", "stale"), withOffer("c-fresh", "fresh", "pass")]
+      .sort((a, b) => compareValueRows(a, b, "value"));
+    expect(rows.map((item) => item.watch.id)).toEqual(["c-fresh", "b-stale", "a-none"]);
+  });
+
   it("uses wishlist tier only as a filter", () => {
-    const mustHave = row("must-have", 0.4);
-    const interested = row("interested", 0.9);
-    interested.watch.wishlistTier = "interested";
-    expect(matchesValueFilters(mustHave, { ...filters, wishlistTier: "must-have" })).toBe(true);
-    expect(matchesValueFilters(interested, { ...filters, wishlistTier: "must-have" })).toBe(false);
+    const mustHave = row("shortlist", 0.4);
+    const interested = row("watching", 0.9);
+    interested.watch.wishlistTier = "watching";
+    expect(matchesValueFilters(mustHave, { ...filters, wishlistTier: "shortlist" })).toBe(true);
+    expect(matchesValueFilters(interested, { ...filters, wishlistTier: "shortlist" })).toBe(false);
     expect(compareValueRows(interested, mustHave, "value")).toBeLessThan(0);
   });
 

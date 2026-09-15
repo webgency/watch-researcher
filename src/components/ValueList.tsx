@@ -117,7 +117,7 @@ export default function ValueList({
                 {SCORING_CATEGORIES.map((item) => <option key={item} value={item}>{titleCase(item)}</option>)}
               </select>
             </Filter>
-            <Filter label="Wishlist priority">
+            <Filter label="Priority">
               <select className="input" value={wishlistTier} onChange={(event) => update({ wishlistTier: event.target.value as WishlistTier | "all" })}>
                 <option value="all">All priorities</option>
                 {WISHLIST_TIERS.map((tier) => <option key={tier} value={tier}>{WISHLIST_TIER_LABELS[tier]}</option>)}
@@ -192,7 +192,9 @@ function ValueCard({ row, rank }: { row: ValueRow; rank?: number }) {
     <article className="card h-full min-w-0 p-4">
       <p className="break-words text-xs font-semibold uppercase tracking-wide text-cocoa-500">{rank ? `#${rank} · ` : ""}{watch.brand}</p>
       <h2><Link href={`/watch/${watch.id}`} className="mt-1 block min-h-11 break-words text-base font-semibold leading-snug text-cocoa-900 hover:underline">{watch.model}</Link></h2>
-      <p className="mt-1 text-xs text-cocoa-500">{watch.status === "wishlist" && watch.wishlistTier ? WISHLIST_TIER_LABELS[watch.wishlistTier] : titleCase(watch.status)}</p>
+      {/* Status only: a priority label here would read as a second verdict
+          beside rubric value. Priority stays available as a filter. */}
+      <p className="mt-1 text-xs text-cocoa-500">{titleCase(watch.status)}</p>
       <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-cocoa-100 pt-3">
         <div className="min-w-0">
           <dt className="text-xs text-cocoa-500">Rubric value</dt>
@@ -239,7 +241,7 @@ function ValueTableRow({ row, rank }: { row: ValueRow; rank?: number }) {
       <td className="px-4 py-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-400">{rank ? `#${rank} · ` : ""}{watch.brand}</p>
         <Link href={`/watch/${watch.id}`} className="font-semibold text-cocoa-900 hover:underline">{watch.model}</Link>
-        <p className="mt-1 text-xs text-cocoa-500">{watch.status === "wishlist" && watch.wishlistTier ? WISHLIST_TIER_LABELS[watch.wishlistTier] : titleCase(watch.status)}</p>
+        <p className="mt-1 text-xs text-cocoa-500">{titleCase(watch.status)}</p>
       </td>
       <td className="px-3 py-4">
         {standing.valueScore === undefined ? <p className="font-semibold text-cocoa-500">Not scored</p> : <p className="text-lg font-bold text-cocoa-900">{Math.round(toDisplayScore(standing.valueScore))}</p>}

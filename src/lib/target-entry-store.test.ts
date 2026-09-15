@@ -8,7 +8,7 @@ import { targetRevision } from "./target-entry";
 let tempDir: string;
 let cwdSpy: ReturnType<typeof vi.spyOn>;
 const base: Watch = {
-  id: "wish", brand: "Fixture", model: "Wish", status: "wishlist", wishlistTier: "love-it",
+  id: "wish", brand: "Fixture", model: "Wish", status: "wishlist", wishlistTier: "shortlist",
   price: { amount: 500, currency: "USD" }, specs: {}, tags: [], notes: "Keep this", dateAdded: "2026-01-01T00:00:00.000Z",
   links: [{ url: "https://shop.example/w", retailer: "shop.example", price: { amount: 500, currency: "USD" }, condition: "new", observedAt: new Date().toISOString() }],
 };

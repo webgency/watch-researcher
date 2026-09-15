@@ -18,7 +18,7 @@ const baseWatch: Watch = {
   brand: "Tudor",
   model: "Black Bay 58",
   status: "wishlist",
-  wishlistTier: "love-it",
+  wishlistTier: "shortlist",
   price: { amount: 5250, currency: "USD" },
   links: [{ url: URL, retailer: "Shop", condition: "new", price: { amount: 5250, currency: "USD" }, observedAt }],
   specs: {},

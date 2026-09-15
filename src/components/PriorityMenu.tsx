@@ -5,15 +5,18 @@ import { createPortal } from "react-dom";
 import { WISHLIST_TIERS, WISHLIST_TIER_LABELS, type WishlistTier } from "@/lib/types";
 import WishlistTierBadge from "./WishlistTierBadge";
 
-const OPTIONS = [...WISHLIST_TIERS, ""] as const;
 const labelFor = (tier: WishlistTier | "") => tier ? WISHLIST_TIER_LABELS[tier] : "No priority";
 
-/** One control for reading and editing priority, with keyboard menu navigation. */
-export default function PriorityMenu({ tier, watchName, onChange }: {
+/** One control for reading and editing priority, with keyboard menu navigation.
+ * A wishlist watch always has a priority (unset means watching), so "No
+ * priority" is offered only where a tier doesn't apply, such as owned watches. */
+export default function PriorityMenu({ tier, watchName, onChange, allowNone = false }: {
   tier?: WishlistTier;
   watchName: string;
   onChange: (tier: WishlistTier | "") => Promise<boolean>;
+  allowNone?: boolean;
 }) {
+  const OPTIONS: (WishlistTier | "")[] = allowNone ? [...WISHLIST_TIERS, ""] : WISHLIST_TIERS;
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);

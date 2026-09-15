@@ -114,7 +114,9 @@ export default function WatchForm({
   const [model, setModel] = useState(initial?.model ?? "");
   const [referenceNumber, setReferenceNumber] = useState(initial?.referenceNumber ?? "");
   const [status, setStatus] = useState<WatchStatus>(initial?.status ?? "wishlist");
-  const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial?.wishlistTier ?? "");
+  // A new wishlist watch starts as watching, matching the tier migration that
+  // moved unset wishlist watches there.
+  const [wishlistTier, setWishlistTier] = useState<WishlistTier | "">(initial ? initial.wishlistTier ?? "" : "watching");
   const [scoringCategory, setScoringCategory] = useState<ScoringCategory | "">(initial?.scoringCategory ?? "");
   const [designUniqueness, setDesignUniqueness] = useState(initial?.designUniqueness != null ? String(initial.designUniqueness) : "");
   const [personalFit, setPersonalFit] = useState(initial?.personalFit != null ? String(initial.personalFit) : "");
@@ -427,9 +429,9 @@ export default function WatchForm({
             </select>
           </div>
           <div>
-            <label className="label">Wishlist priority</label>
+            <label className="label">Priority · personal, never scored</label>
             <select className="input" value={wishlistTier} onChange={(e) => setWishlistTier(e.target.value as WishlistTier | "")}>
-              <option value="">No tier</option>
+              {(status !== "wishlist" || wishlistTier === "") && <option value="">No priority</option>}
               {WISHLIST_TIERS.map((tier) => (
                 <option key={tier} value={tier}>
                   {WISHLIST_TIER_LABELS[tier]}

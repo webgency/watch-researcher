@@ -54,7 +54,7 @@ export default function CollectionTable({ watches, selected, scoreSummaries, onT
                 </th>
                 <td className="whitespace-nowrap px-3 py-3">
                   {onChangeWishlistTier ? (
-                    <PriorityMenu tier={watch.wishlistTier} watchName={`${watch.brand} ${watch.model}`} onChange={next => onChangeWishlistTier(watch.id, next)} />
+                    <PriorityMenu tier={watch.wishlistTier} watchName={`${watch.brand} ${watch.model}`} onChange={next => onChangeWishlistTier(watch.id, next)} allowNone={watch.status !== "wishlist"} />
                   ) : watch.wishlistTier ? <WishlistTierBadge tier={watch.wishlistTier} /> : <span className="text-cocoa-500">Not set</span>}
                 </td>
                 <td className="px-3 py-3">

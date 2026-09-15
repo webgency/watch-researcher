@@ -3,15 +3,15 @@ import { readCollectionFilters, readValueFilters, writeCollectionFilters, writeV
 
 describe("research URLs", () => {
   it("round-trips collection filters with encoded text and multiple priorities", () => {
-    const state = { ...readCollectionFilters(new URLSearchParams()), query: "Brew & café", wishlistTiers: ["must-have", "love-it"] as const, freshOffersOnly: true, sort: "priceAsc" as const };
+    const state = { ...readCollectionFilters(new URLSearchParams()), query: "Brew & café", wishlistTiers: ["shortlist", "watching"] as const, freshOffersOnly: true, sort: "priceAsc" as const };
     const params = writeCollectionFilters(new URLSearchParams("campaign=shared"), { ...state, wishlistTiers: [...state.wishlistTiers] });
     expect(readCollectionFilters(new URLSearchParams(params.toString()))).toEqual({ ...state, wishlistTiers: [...state.wishlistTiers] });
     expect(params.get("campaign")).toBe("shared");
     expect(params.has("status")).toBe(false);
   });
   it("ignores invalid collection enums and deduplicates priorities", () => {
-    const state = readCollectionFilters(new URLSearchParams("status=oops&sort=bad&fresh=true&priority=must-have,bad,must-have"));
-    expect(state).toMatchObject({ status: "all", sort: "wishlistTier", freshOffersOnly: false, wishlistTiers: ["must-have"] });
+    const state = readCollectionFilters(new URLSearchParams("status=oops&sort=bad&fresh=true&priority=shortlist,bad,shortlist"));
+    expect(state).toMatchObject({ status: "all", sort: "wishlistTier", freshOffersOnly: false, wishlistTiers: ["shortlist"] });
   });
   it("round-trips all Value filters and removes defaults on reset", () => {
     const params = new URLSearchParams("q=9039&status=owned&sort=price-asc&category=dress&min=100.50&max=2000&design=4&confidence=high&deal=1&priority=love-it");

@@ -35,6 +35,11 @@ export interface ValueFilters {
 
 const optionalDescending = (value?: number | null): number => value ?? -1;
 
+const FRESHNESS_ORDER = ["fresh", "aging", "stale", "expired"];
+/** A fresher dated offer sorts first; no dated offer sorts last. */
+const offerRank = (row: ValueRow): number =>
+  row.offer.status === "available" ? FRESHNESS_ORDER.indexOf(row.offer.offer.freshness) : FRESHNESS_ORDER.length;
+
 /**
  * Sorts missing evidence last. In particular, an unavailable deal never
  * becomes a made-up 0% discount and an unrated value never becomes a zero.
@@ -61,9 +66,12 @@ export function compareValueRows(a: ValueRow, b: ValueRow, sort: ValueSortKey): 
       return name;
     case "value":
     default:
+      // Value for money first, then how well it is evidenced, then the
+      // freshest dated offer. Wishlist priority is never a sort key here.
       return (
         optionalDescending(b.summary.standing.valueScore) - optionalDescending(a.summary.standing.valueScore) ||
         b.summary.standing.evidenceCoverage - a.summary.standing.evidenceCoverage ||
+        offerRank(a) - offerRank(b) ||
         name
       );
   }

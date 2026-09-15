@@ -24,7 +24,7 @@ const TYPE_LABEL = ALERT_TYPE_LABELS;
 const TYPE_RULE: Record<AlertType, string> = {
   target_met: "A dated ask or your tracked price reaches your target. Setting a target doesn't fire one.",
   price_drop: `A listing's ask falls ${PRICE_DROP_THRESHOLD * 100}% or more below its highest recorded ask since the last drop alert.`,
-  fresh_offer: "A new dated ask, or one confirmed again after going stale, on wishlist watches rated interested or above.",
+  fresh_offer: "A new dated ask, or one confirmed again after going stale, on wishlist watches not marked Pass.",
 };
 
 // A listed price is what the retailer shows, so it is never called landed.
@@ -151,7 +151,7 @@ export default async function AlertsPage() {
       {events.length === 0 ? (
         <section className="card p-5 text-sm text-cocoa-500">
           No alerts yet. They appear when an edit or a price refresh moves something: a target met, an ask down{" "}
-          {PRICE_DROP_THRESHOLD * 100}% or more, or a fresh offer on a watch you rate interested or above.
+          {PRICE_DROP_THRESHOLD * 100}% or more, or a fresh offer on a wishlist watch you haven&apos;t marked Pass.
         </section>
       ) : (
         <ul className="space-y-3">

@@ -7,7 +7,7 @@ import { listingRevision } from "./listing-entry";
 
 let tempDir: string;
 let cwdSpy: ReturnType<typeof vi.spyOn>;
-const base: Watch = { id: "owned", brand: "Fixture", model: "Owned", status: "owned", price: { amount: 500, currency: "USD" }, targetPrice: { amount: 450, currency: "USD" }, wishlistTier: "love-it", specs: {}, links: [], tags: [], notes: "Keep this", dateAdded: "2026-01-01T00:00:00.000Z" };
+const base: Watch = { id: "owned", brand: "Fixture", model: "Owned", status: "owned", price: { amount: 500, currency: "USD" }, targetPrice: { amount: 450, currency: "USD" }, wishlistTier: "shortlist", specs: {}, links: [], tags: [], notes: "Keep this", dateAdded: "2026-01-01T00:00:00.000Z" };
 const listing = (source: string, amount = 100): RetailerLink => ({ url: `https://${source}.example/watch`, retailer: source, price: { amount, currency: "USD" }, condition: "pre-owned", observedAt: "2026-09-13T12:00:00.000Z" });
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "watch-inline-listing-test-"));

@@ -78,7 +78,7 @@ describe("trade-up evidence and candidates", () => {
   });
 
   it("does not mutate collection prices, priorities, scores or link order", () => {
-    const watches = [evidence, { ...wishlist, wishlistTier: "must-have" as const, designAppeal: 4 }];
+    const watches = [evidence, { ...wishlist, wishlistTier: "shortlist" as const, designAppeal: 4 }];
     const before = structuredClone(watches);
     tradeUpModel(evidence, watches, now);
     expect(watches).toEqual(before);

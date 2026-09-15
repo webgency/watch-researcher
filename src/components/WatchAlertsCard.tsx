@@ -8,7 +8,7 @@ import MuteToggle from "./MuteToggle";
 /**
  * This watch's alert coverage, with the reason for every type that can't
  * fire. The alerts page lists rules globally; only here can it say that a
- * watch rated Maybe later will never announce a fresh offer.
+ * watch marked Pass will never announce a fresh offer.
  */
 export default function WatchAlertsCard({ watch, state }: { watch: Watch; state?: AlertState }) {
   const status = state && watchAlertStatus(watch, state);
