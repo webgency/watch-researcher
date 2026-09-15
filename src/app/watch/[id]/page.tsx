@@ -2,6 +2,7 @@ import CollectionLink from "@/components/CollectionLink";
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { getWatch, getWatches } from "@/lib/store";
+import { getAlertState } from "@/lib/alert-store";
 import { computeStanding } from "@/lib/scoring";
 import { formatMoney, formatDate } from "@/lib/format";
 import { IS_STATIC } from "@/lib/config";
@@ -36,7 +37,16 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   const { id } = await params;
   // The whole collection is the peer pool, matching the collection and value
   // pages, so a watch's band and percentile read the same everywhere.
-  const [watch, watches] = await Promise.all([getWatch(id), getWatches()]);
+  const [watch, watches, alertState] = await Promise.all([
+    getWatch(id),
+    getWatches(),
+    // A broken alerts file is logged and shown as unknown status rather than
+    // failing the whole detail page, as the nav badge does.
+    getAlertState().catch((error) => {
+      console.error(error);
+      return undefined;
+    }),
+  ]);
   if (!watch) notFound();
   const standing = computeStanding(watch, watches);
   const tradeUp = tradeUpModel(watch, watches);
@@ -139,7 +149,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
       {/* Market chapter. Asks, solds and the tracked price live here together;
           brief 05's drop trail lands inside this slot too. */}
       <div id="market" className="scroll-mt-6">
-        <MarketChapter watch={watch} />
+        <MarketChapter watch={watch} alertState={alertState} />
       </div>
 
       {tradeUp && (

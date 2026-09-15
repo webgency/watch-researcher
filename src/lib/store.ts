@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { Money, RetailerLink, Watch, WatchInput } from "./types";
+import { Money, RetailerLink, SoldComp, Watch, WatchInput } from "./types";
 import { recordWatchAlerts } from "./alert-store";
 import { carryAskHistories } from "./listing-history.mjs";
 import { appendSnapshot, sameMoney } from "./price-history";
@@ -8,6 +8,7 @@ import { DESIGN_ELO_BASE, DesignComparisonOutcome, updateDesignElo } from "./sco
 import { validateWatchCollection } from "./validation";
 import { listingIdentity, listingRevision } from "./listing-entry";
 import { targetRevision } from "./target-entry";
+import { soldCompRevision } from "./sold-comp-entry";
 
 // The collection lives in a single JSON file at the repo root so it can be
 // version-controlled and backed up alongside the app. When you later want to
@@ -94,6 +95,27 @@ export async function saveWatchListing(id: string, listing: RetailerLink, expect
     // trail. Do not send askHistory: that would suppress recording a move.
     const replacement = { ...listing, url: current.url, retailer: current.retailer || listing.retailer };
     return { links: existing.links.map((link, i) => i === index ? replacement : link) };
+  });
+}
+
+export class SoldCompConflictError extends Error {}
+
+/** Append one sale inside the write lock. The form used to send the whole
+ * soldComps array, which a stale page could use to erase a newer sale. */
+export async function addSoldComp(id: string, comp: SoldComp) {
+  return changeWatch(id, (existing) => ({ soldComps: [...(existing.soldComps ?? []), comp] }));
+}
+
+/** Remove the stored sale matching the one the page showed, by content rather
+ * than position, so a reordered or changed list can't lose a different sale. */
+export async function removeSoldComp(id: string, revision: string) {
+  return changeWatch(id, (existing) => {
+    const comps = existing.soldComps ?? [];
+    const index = comps.findIndex((comp) => soldCompRevision(comp) === revision);
+    if (index === -1) throw new SoldCompConflictError("This sale changed or was already removed. The list has been refreshed.");
+    const remaining = comps.filter((_, i) => i !== index);
+    // No empty `soldComps: []` left behind in watches.json.
+    return { soldComps: remaining.length ? remaining : undefined };
   });
 }
 

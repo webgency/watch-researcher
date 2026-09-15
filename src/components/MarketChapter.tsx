@@ -19,6 +19,8 @@ import FreshnessBadge from "./FreshnessBadge";
 import RemoveSoldComp from "./RemoveSoldComp";
 import ListingEditor from "./ListingEditor";
 import ListingCheck from "./ListingCheck";
+import WatchAlertsCard from "./WatchAlertsCard";
+import type { AlertState } from "@/lib/alerts.mjs";
 import { listingEligibility } from "@/lib/listing-entry";
 
 function usd(amount: number): string {
@@ -206,6 +208,15 @@ function Asks({ watch }: { watch: Watch }) {
     return a.ageDays - b.ageDays;
   });
   const dated = rows.filter((row) => row.ageDays !== undefined && row.link.price).length;
+  // Stale asks and undated ones both drop out of estimates, so both count as
+  // needing attention; each row already carries its own Check price action.
+  const attention = sorted.filter(({ ageDays }) => {
+    if (ageDays === undefined) return true;
+    const tier = freshnessForAge(ageDays);
+    return tier === "stale" || tier === "expired";
+  });
+  const undatedAttention = attention.filter((row) => row.ageDays === undefined).length;
+  const staleAttention = attention.length - undatedAttention;
 
   return (
     <section className="card p-5">
@@ -216,6 +227,18 @@ function Asks({ watch }: { watch: Watch }) {
         </p>
       </div>
 
+      {attention.length > 0 && (
+        <p className="mb-3 text-sm text-amber-800">
+          {attention.length} {attention.length === 1 ? "needs" : "need"} attention:{" "}
+          {[
+            staleAttention > 0 && `${staleAttention} over 30 days old`,
+            undatedAttention > 0 && `${undatedAttention} with no date`,
+          ].filter(Boolean).join(", ")}
+          .{!IS_STATIC && " Check each price below."}{" "}
+          <a href={`#ask-${attention[0].index}`} className="font-medium text-azalea-700 hover:underline">Go to first</a>
+        </p>
+      )}
+
       {!IS_STATIC ? <ListingEditor watchId={watch.id} watchLabel={`${watch.brand} ${watch.model}`} links={watch.links} condition={condition} /> : <p className="mb-3 text-xs text-cocoa-500">Published view · read-only. Manage listings in your local Vitrine app.</p>}
 
       {rows.length === 0 ? (
@@ -223,7 +246,7 @@ function Asks({ watch }: { watch: Watch }) {
       ) : (
         <ul className="divide-y divide-cocoa-100">
           {sorted.map(({ link, ageDays, index }) => (
-            <li key={`${link.url}-${index}`} className="py-2.5">
+            <li key={`${link.url}-${index}`} id={`ask-${index}`} className="scroll-mt-6 py-2.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <a
                   href={link.url}
@@ -298,7 +321,7 @@ function Solds({ watch }: { watch: Watch }) {
     <section className="card p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-base font-semibold text-cocoa-900">Solds</h3>
-        {!IS_STATIC && <AddSoldComp watchId={watch.id} existing={watch.soldComps ?? []} />}
+        {!IS_STATIC && <AddSoldComp watchId={watch.id} watchLabel={`${watch.brand} ${watch.model}`} />}
       </div>
 
       {comps.length === 0 ? (
@@ -327,7 +350,7 @@ function Solds({ watch }: { watch: Watch }) {
                   {comp.ageDays !== undefined && ` · ${formatAgeDays(comp.ageDays)}`}
                 </span>
                 <span className="font-semibold tabular-nums">{formatMoney(comp.price)}</span>
-                {!IS_STATIC && <RemoveSoldComp watchId={watch.id} existing={watch.soldComps ?? []} index={comp.index} />}
+                {!IS_STATIC && watch.soldComps?.[comp.index] && <RemoveSoldComp watchId={watch.id} comp={watch.soldComps[comp.index]} />}
               </div>
             </li>
           ))}
@@ -348,7 +371,7 @@ function Solds({ watch }: { watch: Watch }) {
   );
 }
 
-export default function MarketChapter({ watch }: { watch: Watch }) {
+export default function MarketChapter({ watch, alertState }: { watch: Watch; alertState?: AlertState }) {
   return (
     <section aria-labelledby="market-heading" className="space-y-4">
       <div>
@@ -368,6 +391,7 @@ export default function MarketChapter({ watch }: { watch: Watch }) {
 
       <Asks watch={watch} />
       <Solds watch={watch} />
+      <WatchAlertsCard watch={watch} state={alertState} />
     </section>
   );
 }

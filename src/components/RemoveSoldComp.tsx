@@ -1,46 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SoldComp } from "@/lib/types";
+import { soldCompRevision } from "@/lib/sold-comp-entry";
+import { IS_STATIC } from "@/lib/config";
 
 /**
  * Removes one recorded sale. Local only, like AddSoldComp.
  *
  * Asks for confirmation inline: a sold comp is hand-entered and can't be
- * re-scraped, so a stray click would lose it for good.
+ * re-scraped, so a stray click would lose it for good. The request names the
+ * sale by content, not position, so a stale page can't remove a different one.
  */
-export default function RemoveSoldComp({
-  watchId,
-  existing,
-  index,
-}: {
-  watchId: string;
-  existing: SoldComp[];
-  /** Position in `existing`, not in the date-sorted list on screen. */
-  index: number;
-}) {
+export default function RemoveSoldComp({ watchId, comp }: { watchId: string; comp: SoldComp }) {
   const router = useRouter();
+  const trigger = useRef<HTMLButtonElement>(null);
+  const keep = useRef<HTMLButtonElement>(null);
   const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  // Keep is the safe default, so focus lands there when asked to confirm.
+  useEffect(() => { if (confirming) keep.current?.focus(); }, [confirming]);
 
+  if (IS_STATIC) return null;
+
+  function cancel() {
+    setConfirming(false);
+    setError("");
+    requestAnimationFrame(() => trigger.current?.focus());
+  }
   async function remove() {
-    const remaining = existing.filter((_, i) => i !== index);
     setSaving(true);
+    setError("");
     try {
-      const res = await fetch(`/api/watches/${watchId}`, {
-        method: "PUT",
+      const response = await fetch(`/api/watches/${encodeURIComponent(watchId)}/sold-comps`, {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        // null clears the field, so removing the last sale leaves no empty
-        // `soldComps: []` behind in watches.json.
-        body: JSON.stringify({ soldComps: remaining.length ? remaining : null }),
+        body: JSON.stringify({ revision: soldCompRevision(comp) }),
       });
-      if (!res.ok) throw new Error();
+      const result = await response.json();
+      if (!response.ok) {
+        if (response.status === 409) router.refresh();
+        throw new Error(result.error || "Couldn't remove that sale. Try again.");
+      }
       setConfirming(false);
       router.refresh();
-    } catch {
-      setError("Could not remove that sale.");
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Couldn't remove that sale. Try again.");
     } finally {
       setSaving(false);
     }
@@ -48,42 +55,22 @@ export default function RemoveSoldComp({
 
   if (!confirming) {
     return (
-      <button
-        type="button"
-        className="text-xs font-medium text-cocoa-400 hover:text-red-600 hover:underline"
-        onClick={() => setConfirming(true)}
-      >
+      <button ref={trigger} type="button" className="inline-flex min-h-11 items-center text-xs font-medium text-cocoa-500 hover:text-red-700 hover:underline" onClick={() => setConfirming(true)}>
         Remove
       </button>
     );
   }
 
   return (
-    <span className="flex items-center gap-2 text-xs">
+    <span role="group" aria-label="Confirm removing this sale" className="flex flex-wrap items-center gap-3 text-xs">
       <span className="text-cocoa-600">Remove this sale?</span>
-      <button
-        type="button"
-        className="font-semibold text-red-600 hover:underline disabled:opacity-50"
-        onClick={remove}
-        disabled={saving}
-      >
+      <button type="button" className="min-h-11 font-semibold text-red-700 hover:underline disabled:opacity-50" onClick={remove} disabled={saving}>
         {saving ? "Removing…" : "Remove"}
       </button>
-      <button
-        type="button"
-        className="font-medium text-cocoa-500 hover:underline"
-        onClick={() => {
-          setConfirming(false);
-          setError(null);
-        }}
-      >
+      <button ref={keep} type="button" className="min-h-11 font-medium text-cocoa-600 hover:underline" onClick={cancel} disabled={saving}>
         Keep
       </button>
-      {error && (
-        <span role="alert" className="font-medium text-red-600">
-          {error}
-        </span>
-      )}
+      {error && <span role="alert" className="font-medium text-red-700">{error}</span>}
     </span>
   );
 }
