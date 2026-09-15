@@ -87,7 +87,7 @@ export default function PriceHistoryPanel({ watch }: { watch: Watch }) {
           )}
           {history.length === 1 && (
             <p className="mt-3 text-xs text-cocoa-400">
-              One observation so far — run the enrich script with <code>--refresh</code> to track moves.
+              One observation so far. Each later change to the tracked price adds a dated entry here.
             </p>
           )}
         </>

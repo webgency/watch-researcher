@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
 import AlertAction from "@/components/AlertAction";
+import { ALERT_TYPE_LABELS } from "@/lib/alert-status";
 import { getAlertState } from "@/lib/alert-store";
 import {
   ALERT_TYPES,
@@ -18,11 +19,7 @@ import type { Watch } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Alerts" };
 
-const TYPE_LABEL: Record<AlertType, string> = {
-  target_met: "Target met",
-  price_drop: "Price drop",
-  fresh_offer: "Fresh offer",
-};
+const TYPE_LABEL = ALERT_TYPE_LABELS;
 
 const TYPE_RULE: Record<AlertType, string> = {
   target_met: "A dated ask or your tracked price reaches your target. Setting a target doesn't fire one.",
@@ -168,7 +165,7 @@ export default async function AlertsPage() {
         Alerts compare asking prices. They never report a sale price that hasn&apos;t been recorded.
       </p>
 
-      <section aria-labelledby="alert-settings-heading" className="card p-5">
+      <section id="alert-settings" aria-labelledby="alert-settings-heading" className="card scroll-mt-6 p-5">
         <h2 id="alert-settings-heading" className="text-base font-semibold text-cocoa-900">
           Alert settings
         </h2>

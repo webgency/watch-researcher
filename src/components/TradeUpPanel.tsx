@@ -61,13 +61,15 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
             </div>
           )}
           {(exit.freshness === "stale" || exit.freshness === "expired") && (
-            <p className="mt-3 text-sm text-amber-800">These asks are old. Refresh the evidence before relying on this comparison.</p>
+            <p className="mt-3 text-sm text-amber-800">{IS_STATIC ? "These asks are old, so this comparison may be out of date." : "These asks are old. Check each listing's price below before relying on this comparison."}</p>
           )}
           {!IS_STATIC ? (
             <ListingEditor watchId={model.watchId} watchLabel={model.watchLabel} links={model.links} condition="pre-owned" label="Add pre-owned listing" primary />
           ) : <p className="mt-3 text-sm text-cocoa-500">This published view is read-only. Add or update listings in your local Vitrine app, then republish to update this estimate.</p>}
           {evidence.length > 0 && (
-            <details className="mt-4 text-sm">
+            // Open when the asks are old, so the Check price actions the
+            // warning points to are visible rather than folded away.
+            <details open={exit.freshness === "stale" || exit.freshness === "expired"} className="mt-4 text-sm">
               <summary className="min-h-11 cursor-pointer rounded py-3 font-medium text-cocoa-700">Listings used and excluded</summary>
               <ul className="divide-y divide-cocoa-100">
                 {evidence.map(({ link, reasons }, i) => (
