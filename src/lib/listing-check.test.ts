@@ -18,8 +18,7 @@ describe("listing price check", () => {
     expect(listingCheckOutcome(link, { price: { amount: 700 } })).toEqual({ kind: "no-price" });
   });
   it("flags a listing with no recorded condition instead of taking one from the page", () => {
-    const { condition: _omit, ...bare } = link;
-    expect(listingCheckOutcome(bare, { price: { amount: 800, currency: "USD" } })).toMatchObject({ kind: "unchanged", missingCondition: true });
+    expect(listingCheckOutcome({ ...link, condition: undefined },{ price: { amount: 800, currency: "USD" } })).toMatchObject({ kind: "unchanged", missingCondition: true });
   });
   it("formats today as the local calendar day a date input expects", () => {
     expect(todayInputDate(new Date(2026, 0, 5, 23, 30))).toBe("2026-01-05");
