@@ -1,4 +1,4 @@
-import { CURRENCIES, type Condition, type RetailerLink } from "./types";
+import { CURRENCIES, type Condition, type Money, type RetailerLink } from "./types";
 import { normalizeMoneyToUsd } from "./offer-signals.mjs";
 import { marketSourceKey, observationAgeDays } from "./valuation";
 
@@ -51,6 +51,36 @@ export function listingIdentity(url: string): string {
  * stable field order is independent of JSON key order in the collection. */
 export function listingRevision(link: RetailerLink): string {
   return JSON.stringify([link.url, link.retailer ?? "", link.price?.amount ?? null, link.price?.currency ?? "", link.condition ?? "", link.observedAt ?? "", link.askHistory ?? []]);
+}
+
+/** The browser's own calendar day, the value a date input shows for "today". */
+export function todayInputDate(now = new Date()): string {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+export type ListingCheckOutcome =
+  | { kind: "no-price" }
+  | { kind: "unchanged"; price: Money; missingCondition: boolean }
+  | { kind: "changed"; price: Money; currencyChanged: boolean; missingCondition: boolean };
+
+/**
+ * Compare a re-fetched retailer page with one recorded listing. Only the price
+ * is read from the page: brand, image and specs belong to "Refresh watch
+ * details", and a scraped condition is not trusted to overwrite a recorded one.
+ * Nothing is saved here; the caller shows the outcome for review first.
+ */
+export function listingCheckOutcome(link: RetailerLink, scraped: { price?: Partial<Money> } | undefined): ListingCheckOutcome {
+  const amount = scraped?.price?.amount;
+  const currency = scraped?.price?.currency?.toUpperCase();
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0 || !currency) return { kind: "no-price" };
+  const price = { amount, currency };
+  const missingCondition = !link.condition;
+  if (link.price && link.price.currency.toUpperCase() === currency && link.price.amount === amount) {
+    return { kind: "unchanged", price, missingCondition };
+  }
+  // A currency switch restarts the ask trail in the store rather than
+  // comparing through a rate snapshot, so the reviewer is told as much.
+  return { kind: "changed", price, currencyChanged: Boolean(link.price) && link.price!.currency.toUpperCase() !== currency, missingCondition };
 }
 
 export function listingEligibility(links: RetailerLink[], condition: Condition, now = new Date()) {

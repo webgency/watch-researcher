@@ -9,6 +9,10 @@ export interface TradeUpCandidate {
   label: string;
   best: BestOffer;
   target?: { price: Money; priceUsd: number };
+  /** The candidate's own records, for editing them in place. `targetPrice` is
+   * the stored value even when unconvertible, so an edit's revision matches. */
+  links: RetailerLink[];
+  targetPrice?: Money;
 }
 
 export interface TradeUpModel {
@@ -50,6 +54,8 @@ export function tradeUpModel(watch: Watch, watches: Watch[], now: Date = new Dat
         target: usableMoney(candidate.targetPrice)
           ? { price: candidate.targetPrice!, priceUsd: normalizeMoneyToUsd(candidate.targetPrice)! }
           : undefined,
+        links: candidate.links,
+        targetPrice: candidate.targetPrice,
       }))
       .sort((a, b) => a.label.localeCompare(b.label)),
   };

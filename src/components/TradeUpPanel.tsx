@@ -9,6 +9,8 @@ import { IS_STATIC } from "@/lib/config";
 import ConfidenceChip from "./ConfidenceChip";
 import FreshnessBadge from "./FreshnessBadge";
 import ListingEditor from "./ListingEditor";
+import ListingCheck from "./ListingCheck";
+import TargetEditor from "./TargetEditor";
 import { listingEligibility } from "@/lib/listing-entry";
 import { useTradeUpSelection } from "@/hooks/useResearchSession";
 import { hostname } from "@/lib/format";
@@ -73,7 +75,12 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
                     <a href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center break-all font-medium text-azalea-700 hover:underline">{link.retailer || hostname(link.url)} ↗</a>
                     <p>{formatMoney(link.price)} · {formatDate(link.observedAt)}</p>
                     <p className="mt-1">{reasons.length ? `Not used: ${reasons.join(". ")}.` : "Counts toward the pre-owned estimate."}</p>
-                    {!IS_STATIC && <ListingEditor watchId={model.watchId} watchLabel={model.watchLabel} links={model.links} condition="pre-owned" initial={link} label="Edit listing" />}
+                    {!IS_STATIC && (
+                      <div className="flex flex-wrap items-start gap-x-4">
+                        <ListingCheck watchId={model.watchId} watchLabel={model.watchLabel} links={model.links} link={link} condition="pre-owned" />
+                        <ListingEditor watchId={model.watchId} watchLabel={model.watchLabel} links={model.links} condition="pre-owned" initial={link} label="Edit listing" />
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -135,7 +142,18 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
                   <p className="text-xl font-bold text-cocoa-900">{formatMoney(candidate.target.price)}</p>
                   <p className="mt-1 text-xs text-cocoa-500">Your target · a planning amount, not an available listing.</p>
                 </div>
-              ) : <p className="text-sm text-cocoa-500">No dated ask or usable target recorded. Open this watch to add one.</p>}
+              ) : <p className="text-sm text-cocoa-500">No dated ask or usable target recorded for this watch yet.</p>}
+              {!IS_STATIC && (
+                // Keyed by candidate so a half-filled form never carries over to
+                // a different watch after the selection changes.
+                <div key={candidate.id} className="rounded-lg border border-cocoa-100 px-3 py-1">
+                  <p className="pt-2 text-xs text-cocoa-500">Changes here update {candidate.label}. Your selection stays.</p>
+                  <div className="flex flex-wrap items-start gap-x-4">
+                    <ListingEditor watchId={candidate.id} watchLabel={candidate.label} links={candidate.links} condition={candidate.best.preferredCondition} label="Add candidate listing" />
+                    <TargetEditor watchId={candidate.id} watchLabel={candidate.label} target={candidate.targetPrice} label={candidate.targetPrice ? "Edit candidate target" : "Set candidate target"} />
+                  </div>
+                </div>
+              )}
               <div role="status" className="border-t border-cocoa-200 pt-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-cocoa-500">Bridge · candidate cost minus exit</h3>
                 {bridge.status === "available" ? (
