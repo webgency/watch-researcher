@@ -5,13 +5,25 @@ import {
   extractSpecs,
   extractQualityFlags,
   isShopifyCollectionUrl,
+  labeledBrand,
   primaryProductText,
   productExtractionText,
+  resolveBrand,
   selectShopifyVariant,
   shopifyProductJsonUrl,
+  specCoverage,
+  strongSpecSignals,
+  variantNamesStrap,
 } from "./scrape";
 
 const nomosPage = readFileSync(new URL("./fixtures/nomos-club-campus.html", import.meta.url), "utf8");
+const viisPage = readFileSync(new URL("./fixtures/viis-flieger-gmt-42-de.html", import.meta.url), "utf8");
+// Viis's real Shopify body_html: marketing only, with no calibre or dimensions table.
+const VIIS_BODY_HTML =
+  "<p>The Flieger GMT 42 Adriatic is like the sea: deep blue, clear and full of vastness. It masterfully combines " +
+  "traditional craftsmanship with modern elegance. Inspired by the glistening waters along&nbsp;the Croatian coast, " +
+  "the versatile automatic watch symbolises freedom and connection to nature. With a case diameter of 42 mm, it is " +
+  "perfect for daily wear&nbsp;and stands out with its GMT function.</p>";
 
 const SPINNAKER_STYLE_PAGE = `
   <header>
@@ -212,5 +224,135 @@ describe("NOMOS definition-list specifications", () => {
 
   it("does not treat dial-color marketing prose as a labeled color", () => {
     expect(extractSpecs("This dial color coordinates with all other tones.").dialColor).toBeUndefined();
+  });
+});
+
+describe("Viis Flieger GMT 42 Adriatic (German page, thin Shopify body)", () => {
+  it("uses the SPEZIFIKATIONEN block instead of the marketing-only description", () => {
+    const text = productExtractionText(VIIS_BODY_HTML, viisPage);
+    expect(text).toContain("Miyota 9075");
+    expect(text).not.toContain("9039");
+    expect(text).not.toContain("Pilot 38");
+
+    expect(extractSpecs(text)).toMatchObject({
+      caseDiameterMm: 42,
+      lugToLugMm: 49,
+      // Including the crystal: the height brands usually quote.
+      caseThicknessMm: 13.4,
+      lugWidthMm: 20,
+      caseMaterial: "316L Edelstahl",
+      movement: "automatic",
+      caliber: "Miyota 9075",
+      powerReserveHours: 42,
+      waterResistanceM: 100,
+      crystal: "Sapphire",
+      braceletStrap: "Kalbsleder",
+      complications: "GMT",
+    });
+    // Quick-release is not stated on this page, so it is not claimed.
+    expect(extractQualityFlags(text)).toEqual({ arCoated: true });
+  });
+
+  it("reads panel-only pages through the dense-label fallback, skipping an ex-crystal height", () => {
+    const panelsOnly = viisPage.replace(/<section><ul>[\s\S]*?<\/ul><\/section>/, "");
+    const text = productExtractionText(VIIS_BODY_HTML, panelsOnly);
+    expect(text).not.toContain("9039");
+
+    const specs = extractSpecs(text);
+    expect(specs).toMatchObject({
+      caseDiameterMm: 42,
+      lugToLugMm: 49,
+      lugWidthMm: 20,
+      caseMaterial: "316L Edelstahl",
+      movement: "automatic",
+      caliber: "Miyota 9075",
+      powerReserveHours: 42,
+      waterResistanceM: 100,
+      crystal: "Sapphire",
+      braceletStrap: "Kalbsleder",
+    });
+    expect(specs.caseThicknessMm).toBeUndefined();
+  });
+
+  it("keeps a marketing description thin and a real spec panel dense", () => {
+    expect(strongSpecSignals(VIIS_BODY_HTML)).toBe(0);
+    expect(strongSpecSignals("Kaliber: Miyota 9075; Wasserdichtigkeit: 100 m; Abstand der Bandanstöße: 49 mm; Gehäusehöhe (inkl. Glas): 13,4 mm")).toBe(4);
+  });
+});
+
+describe("locale-aware spec labels", () => {
+  it("parses French, Spanish and Italian labels with comma decimals", () => {
+    expect(extractSpecs(
+      "Diamètre du boîtier : 40 mm; Épaisseur : 11,5 mm; Entre-cornes : 20 mm; Longueur corne à corne : 47 mm; " +
+      "Étanchéité : 100 m; Calibre : Sellita SW200-1; Mouvement : automatique; Réserve de marche : 41 heures; Verre saphir"
+    )).toMatchObject({
+      caseDiameterMm: 40, caseThicknessMm: 11.5, lugWidthMm: 20, lugToLugMm: 47, waterResistanceM: 100,
+      caliber: "Sellita SW200-1", movement: "automatic", powerReserveHours: 41, crystal: "Sapphire",
+    });
+    expect(extractSpecs(
+      "Diámetro: 41 mm; Espesor: 12,2 mm; Distancia entre asas: 48 mm; Ancho de correa: 20 mm; " +
+      "Resistencia al agua: 200 m; Movimiento: automático; Reserva de marcha: 70 horas; Cristal de zafiro"
+    )).toMatchObject({
+      caseDiameterMm: 41, caseThicknessMm: 12.2, lugToLugMm: 48, lugWidthMm: 20, waterResistanceM: 200,
+      movement: "automatic", powerReserveHours: 70, crystal: "Sapphire",
+    });
+    expect(extractSpecs(
+      "Diametro: 40 mm; Spessore: 12 mm; Larghezza anse: 20 mm; Impermeabilità: 300 m; " +
+      "Calibro: Sellita SW300-1; Movimento: automatico; Riserva di carica: 56 ore; Vetro zaffiro"
+    )).toMatchObject({
+      caseDiameterMm: 40, caseThicknessMm: 12, lugWidthMm: 20, waterResistanceM: 300,
+      caliber: "Sellita SW300-1", movement: "automatic", powerReserveHours: 56, crystal: "Sapphire",
+    });
+  });
+
+  it("treats hand-winding as a capability of an automatic, not a manual movement", () => {
+    expect(extractSpecs("Automatik, Handaufzug möglich").movement).toBe("automatic");
+    expect(extractSpecs("Automatic with hand-winding and hacking").movement).toBe("automatic");
+    expect(extractSpecs(
+      "Type: Automatic winding; Calibre: Miyota 9075; Functions: date, second time zone, manual winding capability; Power reserve: 42 hours"
+    )).toMatchObject({ movement: "automatic", caliber: "Miyota 9075", powerReserveHours: 42 });
+    expect(extractSpecs("Movement: Hand-wound calibre DUW 4001").movement).toBe("manual");
+  });
+
+  it("never reads a buckle width or an ex-crystal height as a case spec", () => {
+    expect(extractSpecs("Gehäusehöhe (exkl. Glas): 11,3 mm; Schließenbreite: 18 mm")).toEqual({});
+    expect(extractSpecs("Case height (excluding crystal): 11.3 mm; Case height (including crystal): 13.4 mm").caseThicknessMm).toBe(13.4);
+  });
+
+  it("decodes accented entities before matching labels", () => {
+    const html = "<main><p>Geh&auml;usedurchmesser: 39 mm</p><p>&Eacute;tanch&eacute;it&eacute; : 100 m</p></main>";
+    expect(extractSpecs(productExtractionText(undefined, html))).toMatchObject({ caseDiameterMm: 39, waterResistanceM: 100 });
+  });
+
+  it("recognizes German and French quality evidence only when stated", () => {
+    expect(extractQualityFlags("Saphirglas mit Antireflexbeschichtung; Schnellwechsel-Federstege")).toEqual({ arCoated: true, quickRelease: true });
+    expect(extractQualityFlags("Verre saphir avec traitement anti-reflet")).toEqual({ arCoated: true });
+    expect(extractQualityFlags("Saphirglas")).toEqual({});
+  });
+});
+
+describe("brand identity and scrape coverage", () => {
+  it("never uses a placeholder Shopify vendor as the brand", () => {
+    expect(resolveBrand({ host: "viiswatch.com", vendor: "Mein Shop" })).toBe("VIIS");
+    expect(resolveBrand({ host: "example.de", vendor: "Mein Shop", ldBrand: "Laco" })).toBe("Laco");
+    expect(resolveBrand({ host: "example.de", vendor: "Mein Shop", pageText: "Marke: Nordlicht; Modell: Pilot" })).toBe("Nordlicht");
+    expect(resolveBrand({ host: "example.com", vendor: "Baltic", ldBrand: "Other" })).toBe("Baltic");
+    expect(labeledBrand("Material: Steel; Brand : Seiko")).toBe("Seiko");
+  });
+
+  it("lets a strap-naming variant replace the stated strap, but not a colourway", () => {
+    expect(variantNamesStrap("Granite Black")).toBe(false);
+    expect(variantNamesStrap("Stainless Steel")).toBe(true);
+    expect(variantNamesStrap("Lederarmband Cognac")).toBe(true);
+  });
+
+  it("reports coverage and labels a thin scrape as partial", () => {
+    expect(specCoverage({ caseDiameterMm: 42, complications: "GMT" })).toEqual({
+      specsFound: 2,
+      specsPossible: 13,
+      coverageNote: "partial — page locale or layout limited extraction",
+    });
+    expect(specCoverage(extractSpecs(productExtractionText(VIIS_BODY_HTML, viisPage)))).toEqual({ specsFound: 12, specsPossible: 13 });
+    expect(specCoverage(undefined).specsFound).toBe(0);
   });
 });
