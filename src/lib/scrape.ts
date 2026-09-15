@@ -453,9 +453,12 @@ export function extractSpecs(text: string): WatchSpecs {
   const low = t.toLowerCase();
   const s: WatchSpecs = {};
 
+  // Gaps between a label and its value never cross ". ; ,": in "40 mm
+  // diameter. 20 mm lug width." the label is followed by the next field's
+  // number, and reading it as the diameter also voids lug-to-lug in sanitizing.
   s.caseDiameterMm =
     num(t, /(?:case\s*)?(?:diameter|case size|case width)\s*\(\s*mm\s*\)\s*[:\-]?\s*(\d{2}(?:\.\d{1,2})?)/i) ??
-    num(t, /(?:case\s*)?(?:diameter|case size|case width|(?<![A-Za-zÀ-ÿ])(?:Gehäuse)?durchmesser|diamètre(?: du boîtier)?|diámetro(?: de la caja)?|diametro(?: della cassa)?)[^0-9]{0,12}(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
+    num(t, /(?:case\s*)?(?:diameter|case size|case width|(?<![A-Za-zÀ-ÿ])(?:Gehäuse)?durchmesser|diamètre(?: du boîtier)?|diámetro(?: de la caja)?|diametro(?: della cassa)?)[^0-9.;,]{0,12}(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
     num(t, /Ø\s?(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
     num(t, /\b(\d{2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,18}(?:case|diameter))/i);
 
@@ -475,17 +478,18 @@ export function extractSpecs(text: string): WatchSpecs {
   s.caseThicknessMm =
     num(th, withCrystal) ??
     num(th, /(?:thickness|case height|case depth|depth|thick(?:ness)?)\s*\(\s*mm\s*\)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i) ??
-    num(th, /(?:thickness|case height|case depth|depth|thick)[^0-9]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
-    num(th, /(?:Gehäusehöhe|Gehäusedicke|(?<![A-Za-zÀ-ÿ])Höhe|(?<![A-Za-zÀ-ÿ])Dicke|épaisseur|hauteur du boîtier|espesor|grosor|spessore|altezza della cassa)[^0-9]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
+    num(th, /(?:thickness|case height|case depth|depth|thick)[^0-9.;,]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
+    num(th, /(?:Gehäusehöhe|Gehäusedicke|(?<![A-Za-zÀ-ÿ])Höhe|(?<![A-Za-zÀ-ÿ])Dicke|épaisseur|hauteur du boîtier|espesor|grosor|spessore|altezza della cassa)[^0-9.;,]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
     num(th, /\b(\d{1,2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,14}(?:thick|height|depth))/i);
 
   s.lugToLugMm =
-    num(t, new RegExp(`${L2L_LABEL}[^0-9]{0,16}(\\d{2}(?:\\.\\d{1,2})?)(?:\\s?mm)?`, "i")) ?? // "lug to lug (mm): 47"
+    num(t, new RegExp(`${L2L_LABEL}[^0-9.;,]{0,16}(\\d{2}(?:\\.\\d{1,2})?)(?:\\s?mm)?`, "i")) ?? // "lug to lug (mm): 47"
     num(t, /(\d{2}(?:\.\d{1,2})?)\s?mm[^.]{0,12}(?:from\s+)?lug[\s-]*to[\s-]*lug/i); // "measures 46mm from lug to lug"
   // Buckle width ("Schließenbreite") is not lug width and is never matched.
   s.lugWidthMm =
-    num(t, /(?:lug[\s-]*width|Anstoßbreite|Bandanstoßbreite|Bandbreite|Stegbreite|largeur (?:des |entre )?cornes|entre-?cornes|ancho (?:de )?(?:las )?asas|ancho (?:de )?(?:la )?correa|larghezza (?:delle )?anse|larghezza (?:del )?cinturino)[^0-9]{0,14}(\d{2})\s?mm/i) ??
-    num(t, /strap[\s-]*width[^0-9]{0,12}(\d{2})\s?mm/i) ??
+    num(t, /(?:lug[\s-]*width|Anstoßbreite|Bandanstoßbreite|Bandbreite|Stegbreite|largeur (?:des |entre )?cornes|entre-?cornes|ancho (?:de )?(?:las )?asas|ancho (?:de )?(?:la )?correa|larghezza (?:delle )?anse|larghezza (?:del )?cinturino)[^0-9.;,]{0,14}(\d{2})\s?mm/i) ??
+    num(t, /strap[\s-]*width[^0-9.;,]{0,12}(\d{2})\s?mm/i) ??
+    num(t, /\b(\d{2})\s?mm\s+(?:lug|strap)[\s-]*width\b/i) ?? // "20 mm lug width"
     num(t, /\bband\b[^0-9]{0,8}(\d{2})\s?mm/i);
   s.powerReserveHours =
     num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s?h\b/i) ??

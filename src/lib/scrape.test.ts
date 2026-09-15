@@ -314,6 +314,16 @@ describe("locale-aware spec labels", () => {
     expect(extractSpecs("Movement: Hand-wound calibre DUW 4001").movement).toBe("manual");
   });
 
+  it("reads values written before their labels without taking the next sentence's number", () => {
+    // Henry Archer's wording; the diameter used to come back as 20.
+    expect(extractSpecs("Specifications • Size; 40 mm diameter. 20 mm lug width. 47 mm lug-to-lug, 10,65 mm thickness.")).toMatchObject({
+      caseDiameterMm: 40,
+      lugWidthMm: 20,
+      lugToLugMm: 47,
+      caseThicknessMm: 10.65,
+    });
+  });
+
   it("never reads a buckle width or an ex-crystal height as a case spec", () => {
     expect(extractSpecs("Gehäusehöhe (exkl. Glas): 11,3 mm; Schließenbreite: 18 mm")).toEqual({});
     expect(extractSpecs("Case height (excluding crystal): 11.3 mm; Case height (including crystal): 13.4 mm").caseThicknessMm).toBe(13.4);
