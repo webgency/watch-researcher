@@ -18,6 +18,7 @@ import ConfidenceChip from "./ConfidenceChip";
 import FreshnessBadge from "./FreshnessBadge";
 import RemoveSoldComp from "./RemoveSoldComp";
 import ListingEditor from "./ListingEditor";
+import ListingCheck from "./ListingCheck";
 import { listingEligibility } from "@/lib/listing-entry";
 
 function usd(amount: number): string {
@@ -249,7 +250,12 @@ function Asks({ watch }: { watch: Watch }) {
               </div>
               <AskTrail link={link} />
               {eligibility[index].reasons.length > 0 && <p className="mt-2 text-xs text-cocoa-500">For the {condition} estimate: {eligibility[index].reasons.join(". ")}.</p>}
-              {!IS_STATIC && <ListingEditor watchId={watch.id} watchLabel={`${watch.brand} ${watch.model}`} links={watch.links} condition={condition} initial={link} label="Edit listing" />}
+              {!IS_STATIC && (
+                <div className="flex flex-wrap items-start gap-x-4">
+                  <ListingCheck watchId={watch.id} watchLabel={`${watch.brand} ${watch.model}`} links={watch.links} link={link} condition={condition} />
+                  <ListingEditor watchId={watch.id} watchLabel={`${watch.brand} ${watch.model}`} links={watch.links} condition={condition} initial={link} label="Edit listing" />
+                </div>
+              )}
             </li>
           ))}
         </ul>

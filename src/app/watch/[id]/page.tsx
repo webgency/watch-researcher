@@ -15,6 +15,8 @@ import KeySpecStrip from "@/components/KeySpecStrip";
 import DecisionSummary from "@/components/DecisionSummary";
 import TradeUpPanel from "@/components/TradeUpPanel";
 import { tradeUpModel } from "@/lib/trade-up";
+import TargetEditor from "@/components/TargetEditor";
+import { targetStatus } from "@/lib/price-history";
 
 // An empty generateStaticParams result opts into on-demand static generation.
 // Explicit dynamic rendering prevents noStore() from failing at request time;
@@ -38,6 +40,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   if (!watch) notFound();
   const standing = computeStanding(watch, watches);
   const tradeUp = tradeUpModel(watch, watches);
+  const target = targetStatus(watch);
 
   // Page order is the reading order: what it is, what it is made of, then what
   // to do about it. Each chapter owns a fixed position so later chapters
@@ -88,6 +91,24 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
             <p className="text-4xl font-bold tracking-tight tabular-nums text-cocoa-950">{formatMoney(watch.price)}</p>
             {watch.priceUpdatedAt && (
               <p className="mt-1 text-xs text-cocoa-400">Price updated {formatDate(watch.priceUpdatedAt)}</p>
+            )}
+            {/* A target is a buying decision, so an owned watch without one gets
+                no prompt; one that already has a target can still edit it. */}
+            {(watch.targetPrice || (watch.status === "wishlist" && !IS_STATIC)) && (
+              <div className="mt-2">
+                <TargetEditor
+                  watchId={watch.id}
+                  watchLabel={`${watch.brand} ${watch.model}`}
+                  target={watch.targetPrice}
+                  label={watch.targetPrice ? "Edit target" : "Set target"}
+                  summary={watch.targetPrice && (
+                    <>
+                      Target {formatMoney(watch.targetPrice)}
+                      {target && (target.met ? " · met, all-in" : ` · ${formatMoney({ amount: Math.round(target.gapUsd), currency: "USD" })} above, all-in`)}
+                    </>
+                  )}
+                />
+              </div>
             )}
           </div>
 

@@ -379,9 +379,10 @@ export default function WatchForm({
       {isEdit && links.some((link) => link.url.trim()) && (
         <section className="card space-y-3 p-5">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">Refresh from retailer</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-cocoa-500">Refresh watch details</h2>
             <p className="mt-1 text-xs text-cocoa-500">
-              Re-fetch a saved product page to check its current price and specifications. Review the changes below before saving.
+              Re-fetch a saved product page to update this form&apos;s brand, model, image, tracked price, and specifications. Review
+              the changes below before saving. To check only a listing&apos;s asking price, use Check price in the Market section.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

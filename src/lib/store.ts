@@ -1,12 +1,13 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { RetailerLink, Watch, WatchInput } from "./types";
+import { Money, RetailerLink, Watch, WatchInput } from "./types";
 import { recordWatchAlerts } from "./alert-store";
 import { carryAskHistories } from "./listing-history.mjs";
 import { appendSnapshot, sameMoney } from "./price-history";
 import { DESIGN_ELO_BASE, DesignComparisonOutcome, updateDesignElo } from "./scoring";
 import { validateWatchCollection } from "./validation";
 import { listingIdentity, listingRevision } from "./listing-entry";
+import { targetRevision } from "./target-entry";
 
 // The collection lives in a single JSON file at the repo root so it can be
 // version-controlled and backed up alongside the app. When you later want to
@@ -93,6 +94,19 @@ export async function saveWatchListing(id: string, listing: RetailerLink, expect
     // trail. Do not send askHistory: that would suppress recording a move.
     const replacement = { ...listing, url: current.url, retailer: current.retailer || listing.retailer };
     return { links: existing.links.map((link, i) => i === index ? replacement : link) };
+  });
+}
+
+export class TargetConflictError extends Error {}
+
+/** Set or clear only the target. Changing a target is the collector's own act,
+ * so detectAlerts never fires target_met for it; a later price move does. */
+export async function saveWatchTarget(id: string, target: Money | undefined, expectedRevision: string) {
+  return changeWatch(id, (existing) => {
+    if (targetRevision(existing.targetPrice) !== expectedRevision) {
+      throw new TargetConflictError("This target changed elsewhere. Cancel and reopen it to review the latest value.");
+    }
+    return { targetPrice: target };
   });
 }
 

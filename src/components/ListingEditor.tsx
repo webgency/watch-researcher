@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CURRENCIES, type Condition, type RetailerLink } from "@/lib/types";
-import { listingEligibility, listingRevision, parseListingFields, type ListingErrors, type ListingFields } from "@/lib/listing-entry";
+import { listingEligibility, listingRevision, parseListingFields, todayInputDate, type ListingErrors, type ListingFields } from "@/lib/listing-entry";
 import { IS_STATIC } from "@/lib/config";
 
 function fieldsFor(link?: RetailerLink, condition?: Condition): ListingFields {
@@ -12,7 +12,7 @@ function fieldsFor(link?: RetailerLink, condition?: Condition): ListingFields {
 
 /** One task-sized editor in Market and Trade-up. Its request cannot change
  * headline price/specs or replace the collection's whole links array. */
-export default function ListingEditor({ watchId, watchLabel, links, condition, initial, label = "Add listing", primary = false }: {
+export default function ListingEditor({ watchId, watchLabel, links, condition, initial, label = "Add listing", primary = false, prefill, startOpen = false, onClose, onSaved }: {
   watchId: string;
   watchLabel: string;
   links: RetailerLink[];
@@ -20,14 +20,20 @@ export default function ListingEditor({ watchId, watchLabel, links, condition, i
   initial?: RetailerLink;
   label?: string;
   primary?: boolean;
+  /** Draft values over the recorded listing, e.g. a price check's result. */
+  prefill?: Partial<ListingFields>;
+  startOpen?: boolean;
+  onClose?: () => void;
+  onSaved?: (message: string) => void;
 }) {
   const router = useRouter();
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const urlInput = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false);
-  const [fields, setFields] = useState(() => fieldsFor(initial, condition));
-  const [revision, setRevision] = useState<string>();
+  const [open, setOpen] = useState(startOpen);
+  const [fields, setFields] = useState(() => ({ ...fieldsFor(initial, condition), ...prefill }));
+  // Opened by a caller rather than the trigger, so capture the revision now.
+  const [revision, setRevision] = useState<string | undefined>(() => startOpen && initial ? listingRevision(initial) : undefined);
   const [errors, setErrors] = useState<ListingErrors>({});
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
@@ -38,7 +44,8 @@ export default function ListingEditor({ watchId, watchLabel, links, condition, i
 
   function close() {
     setOpen(false);
-    requestAnimationFrame(() => trigger.current?.focus());
+    if (onClose) onClose();
+    else requestAnimationFrame(() => trigger.current?.focus());
   }
   function change(key: keyof ListingFields, value: string) {
     setFields(current => ({ ...current, [key]: value, ...(key === "amount" && initial && value !== current.amount ? { observedAt: "" } : {}) }));
@@ -80,7 +87,9 @@ export default function ListingEditor({ watchId, watchLabel, links, condition, i
         throw new Error(result.error || "Couldn't save the listing. Your draft is still here; try again.");
       }
       const qualifying = listingEligibility(result.links, condition).filter(row => !row.reasons.length).length;
-      setSaved(`Listing saved. ${qualifying >= 2 ? `${qualifying} qualifying sources now support the asking range.` : `${2 - qualifying} more ${condition} ${qualifying === 1 ? "source" : "sources"} needed for an estimate.`}`);
+      const message = `Listing saved. ${qualifying >= 2 ? `${qualifying} qualifying sources now support the asking range.` : `${2 - qualifying} more ${condition} ${qualifying === 1 ? "source" : "sources"} needed for an estimate.`}`;
+      setSaved(message);
+      onSaved?.(message);
       close();
       router.refresh();
     } catch (failure) {
@@ -123,7 +132,7 @@ export default function ListingEditor({ watchId, watchLabel, links, condition, i
             <div>
               <label htmlFor={`${id}-observedAt`} className="label">Price seen on</label>
               <input {...fieldProps("observedAt")} className="input min-h-11" type="date" value={fields.observedAt} onChange={e => change("observedAt", e.target.value)} />
-              <button type="button" className="min-h-11 text-sm text-azalea-700 hover:underline" onClick={() => { const today = new Date(); change("observedAt", `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`); }}>I checked it today</button>
+              <button type="button" className="min-h-11 text-sm text-azalea-700 hover:underline" onClick={() => change("observedAt", todayInputDate())}>I checked it today</button>
               {fieldError("observedAt")}
             </div>
             <p className="text-xs text-cocoa-600" role="status">{preview ? `${reason ? `${reason}. ` : ""}After saving: ${count} qualifying ${condition} ${count === 1 ? "source" : "sources"}. ${count! < 2 ? "Two are needed for an estimate." : "This supports an asking range."}` : `A ${condition} listing with a price and date can count toward this estimate. Listings from the same site count once.`}</p>
