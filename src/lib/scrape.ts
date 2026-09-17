@@ -349,9 +349,11 @@ const TECHNICAL_SECTION_ANCHORS = [
 // Where the product ends and the storefront resumes. Letter lookarounds
 // rather than \b, which treats accented letters as word boundaries. A review
 // heading split over two elements ("PRESS & CUSTOMER / REVIEWS") still ends
-// the product: a customer's "the micro adjust helps" is not a spec.
+// the product: a customer's "the micro adjust helps" is not a spec. So does a
+// "Testimonials" block, which on Henry Archer precedes feature panels for other
+// models ("Dacnis: Sapphire bezel") and reviews of other watches.
 const PRODUCT_END =
-  /(?<![A-Za-zÀ-ÿ])(?:You may also like|Customers? Also Love|Recently viewed|(?:Press\s*(?:&|and)\s*)?Customers?[\s;]+reviews|FAQs?|Our Collections|Discover next|Kundenbewertungen|Das könnte (?:dir|Ihnen) auch gefallen|Ähnliche Produkte|Zuletzt angesehen|Vous aimerez aussi|Avis clients|Récemment consultés|También te puede gustar|Opiniones de clientes|Vistos recientemente|Potrebbe piacerti anche|Recensioni dei clienti|Visti di recente)(?![A-Za-zÀ-ÿ])/i;
+  /(?<![A-Za-zÀ-ÿ])(?:You may also like|Customers? Also Love|Recently viewed|(?:Press\s*(?:&|and)\s*)?Customers?[\s;]+reviews|FAQs?|Our Collections|Discover next|Testimonials|Kundenstimmen|Témoignages|Testimonios|Testimonianze|Kundenbewertungen|Das könnte (?:dir|Ihnen) auch gefallen|Ähnliche Produkte|Zuletzt angesehen|Vous aimerez aussi|Avis clients|Récemment consultés|También te puede gustar|Opiniones de clientes|Vistos recientemente|Potrebbe piacerti anche|Recensioni dei clienti|Visti di recente)(?![A-Za-zÀ-ÿ])/i;
 
 function technicalSectionStart(text: string): number {
   for (const anchor of TECHNICAL_SECTION_ANCHORS) {
@@ -494,9 +496,9 @@ export function extractSpecs(text: string): WatchSpecs {
     num(t, /\b(\d{2})\s?mm\s+(?:lug|strap)[\s-]*width\b/i) ?? // "20 mm lug width"
     num(t, /\bband\b[^0-9]{0,8}(\d{2})\s?mm/i);
   s.powerReserveHours =
-    num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s?h\b/i) ??
-    num(t, /(\d{2,3})\s?h(?:ours?)?\s*(?:of\s*)?power\s*reserve/i) ??
-    num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s*hours?\b/i) ??
+    num(t, /power[\s-]*reserve[^0-9]{0,28}(\d{2,3})\s?h\b/i) ??
+    num(t, /(\d{2,3})\s?h(?:ours?|rs?)?\s*(?:of\s*)?power[\s-]*reserve/i) ?? // "42 hrs power-reserve"
+    num(t, /power[\s-]*reserve[^0-9]{0,28}(\d{2,3})\s*(?:hours?|hrs?)\b/i) ??
     num(t, /(?:Gangreserve|réserve de marche|reserva de marcha|riserva di carica)[^0-9]{0,28}(\d{2,3})\s*(?:h\b|Std\.?|Stunden|heures|horas|ore\b)/i) ??
     num(t, /(\d{2,3})\s*(?:Stunden|Std\.?|heures|horas|ore)\s*(?:de\s+|di\s+)?(?:Gangreserve|réserve de marche|reserva de marcha|riserva di carica)/i);
 
@@ -568,9 +570,12 @@ export function extractSpecs(text: string): WatchSpecs {
     const secondHalf = value.slice(Math.floor(value.length / 2)).toLowerCase();
     if (value.length < 90 && !secondHalf.includes(firstHalf.slice(0, 20))) s.braceletStrap = value;
   } else {
-    // Heading-style panels put the value on the line below the section name.
-    const underHeading = t.match(/(?:^|;\s*)(?:Armband|Strap|Bracelet|Correa|Cinturino)\s*;\s*([A-Za-zÀ-ÿ][^;]{2,59})/i);
-    if (underHeading) s.braceletStrap = clean(underHeading[1]);
+    // Heading-style panels put the value on the line below the section name,
+    // sometimes behind a bullet ("• Bracelet / 316L stainless steel BoR
+    // bracelet. 20 mm width."). The value ends at its first sentence, and a
+    // bare width ("20 mm") is a measurement, not a strap.
+    const underHeading = t.match(/(?:^|;\s*)(?:[•·▪–-]\s*)?(?:Armband|Strap|Bracelet|Correa|Cinturino)\s*;\s*([A-Za-zÀ-ÿ0-9][^;.]{2,80})/i);
+    if (underHeading && !/^\d+(?:\.\d+)?\s*mm\b/i.test(underHeading[1])) s.braceletStrap = clean(underHeading[1]);
   }
 
   const comps: string[] = [];
@@ -605,7 +610,19 @@ export function extractQualityFlags(text: string, variantTitle?: string): Qualit
     flags.sapphireBezelInsert = true;
   }
   if (/\bdrilled\s+lugs?\b|\blug holes?\b|\bdurchbohrte?\s+(?:Band)?anst/i.test(t)) flags.drilledLugs = true;
-  if (/\banti[- ]reflective\s+(?:coating|coated)\b|\bAR coating\b|\bantireflex|\bentspiegelt|\banti-?reflets?\b|\bantirreflej|\bantirifless/i.test(t)) {
+  // A stated layer count ("6-layer AR coating", "AR coating (6 layers)",
+  // "6-fach entspiegelt") is recorded as arLayers, which scores above a plain
+  // arCoated; reducing it to a boolean would discard what the brand published.
+  // "AR" is expanded case-sensitively first, so ordinary words never count.
+  const arText = t.replace(/\bAR\b/g, "anti-reflective");
+  const arTerm = "(?:anti[- ]?reflect|antireflex|entspiegel|anti-?reflet|antirreflej|antirifless)";
+  const layerCount =
+    arText.match(new RegExp(`\\b(\\d{1,2})[\\s-]*(?:layers?|fach(?:e[nrs]?)?|couches?|capas|strati)\\b[^.;]{0,24}?${arTerm}`, "i")) ??
+    arText.match(new RegExp(`${arTerm}[a-zé]*[^.;]{0,30}?\\(?\\s*(\\d{1,2})\\s*(?:layers?|couches?|capas|strati)\\b`, "i"));
+  const layers = Number(layerCount?.[1]);
+  if (layers >= 1 && layers <= 20) {
+    flags.arLayers = layers;
+  } else if (/\banti[- ]reflective\s+(?:coating|coated)\b|\bantireflex|\bentspiegelt|\banti-?reflets?\b|\bantirreflej|\bantirifless/i.test(arText)) {
     flags.arCoated = true;
   }
   if (/\bmicro[- ]?adjust(?:ment)?\b|\bon[- ]the[- ]fly adjustment clasp\b|\bquick[- ]adjust clasp\b|\bFeinverstellung|\bMikroverstellung|\bmicro-?réglage/i.test(t)) {
@@ -631,6 +648,14 @@ export function extractQualityFlags(text: string, variantTitle?: string): Qualit
  * overwrite a stated "Kalbsleder". */
 export function variantNamesStrap(variantTitle: string): boolean {
   return /\b(?:bracelet|strap|leather|steel|rubber|nato|mesh|canvas|fkm|silicone|titanium)\b|armband|leder|edelstahl|kautschuk|cuir|acier|caoutchouc|cuero|acero|caucho|pelle|acciaio|gomma/i.test(variantTitle);
+}
+
+/** The strap to record, given the Shopify variant title and the strap the page
+ * states. Shopify names a product with no options "Default Title", which
+ * describes nothing and must never become the strap. */
+export function strapFromVariant(variantTitle: string | undefined, statedStrap: string | undefined): string | undefined {
+  if (!variantTitle || /^default title$/i.test(variantTitle.trim())) return statedStrap;
+  return variantNamesStrap(variantTitle) || !statedStrap ? variantTitle : statedStrap;
 }
 
 /** Below this share of SPEC_FIELDS, autofill is labelled partial. */
@@ -719,9 +744,8 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
     if (extracted.friction) out.friction = extracted.friction;
   } else {
     const specs = extractSpecs(specText);
-    if (shop?.variantTitle && (variantNamesStrap(shop.variantTitle) || !specs.braceletStrap)) {
-      specs.braceletStrap = shop.variantTitle;
-    }
+    const strap = strapFromVariant(shop?.variantTitle, specs.braceletStrap);
+    if (strap) specs.braceletStrap = strap;
     if (Object.keys(specs).length) out.specs = specs;
     const tags = fallbackTags(specText, specs);
     if (tags.length) out.tags = tags;

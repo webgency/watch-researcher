@@ -12,12 +12,14 @@ import {
   selectShopifyVariant,
   shopifyProductJsonUrl,
   specCoverage,
+  strapFromVariant,
   strongSpecSignals,
   variantNamesStrap,
 } from "./scrape";
 
 const nomosPage = readFileSync(new URL("./fixtures/nomos-club-campus.html", import.meta.url), "utf8");
 const viisPage = readFileSync(new URL("./fixtures/viis-flieger-gmt-42-de.html", import.meta.url), "utf8");
+const henryArcherPage = readFileSync(new URL("./fixtures/henry-archer-tidevand-kosmos.html", import.meta.url), "utf8");
 // Viis's real Shopify body_html: marketing only, with no calibre or dimensions table.
 const VIIS_BODY_HTML =
   "<p>The Flieger GMT 42 Adriatic is like the sea: deep blue, clear and full of vastness. It masterfully combines " +
@@ -341,6 +343,45 @@ describe("locale-aware spec labels", () => {
   });
 });
 
+describe("Henry Archer Tidevand Meteorite (testimonials and other models below the specs)", () => {
+  it("stops at Testimonials, so reviews and other models' panels add no specs or flags", () => {
+    const text = productExtractionText(undefined, henryArcherPage);
+    expect(text).not.toMatch(/Vesterhav|Verden|Dacnis|micro adjust|Trinity Grey EVO/i);
+
+    const specs = extractSpecs(text);
+    expect(specs).toMatchObject({
+      caseDiameterMm: 40,
+      lugWidthMm: 20,
+      lugToLugMm: 47,
+      caseThicknessMm: 10.65,
+      caliber: "Miyota 9015",
+      movement: "automatic",
+      powerReserveHours: 42,
+      waterResistanceM: 200,
+      crystal: "Sapphire",
+      braceletStrap: "316L stainless steel BoR (Beads-of-Rice) bracelet",
+    });
+    // The Tidevand has a ceramic bezel and no GMT; both came from below the specs.
+    expect(specs.complications).toBeUndefined();
+    expect(extractQualityFlags(text)).toEqual({ arLayers: 6 });
+  });
+
+  it("records a stated AR layer count instead of a plain coating flag", () => {
+    expect(extractQualityFlags("6-layer AR coating.")).toEqual({ arLayers: 6 });
+    expect(extractQualityFlags("Sapphire with 5 layers of anti-reflective coating")).toEqual({ arLayers: 5 });
+    expect(extractQualityFlags("Internal AR coating (7 layers)")).toEqual({ arLayers: 7 });
+    expect(extractQualityFlags("Saphirglas, 6-fach entspiegelt")).toEqual({ arLayers: 6 });
+    expect(extractQualityFlags("Internal anti-reflective coating")).toEqual({ arCoated: true });
+    expect(extractQualityFlags("A clear 3 layer lacquer; AR coating")).toEqual({ arCoated: true });
+  });
+
+  it("reads a bulleted strap heading without taking a bare width", () => {
+    expect(extractSpecs("• Bracelet; 316L stainless steel BoR (Beads-of-Rice) bracelet. 20 mm width.").braceletStrap)
+      .toBe("316L stainless steel BoR (Beads-of-Rice) bracelet");
+    expect(extractSpecs("• Strap; 20 mm; quick release").braceletStrap).toBeUndefined();
+  });
+});
+
 describe("brand identity and scrape coverage", () => {
   it("never uses a placeholder Shopify vendor as the brand", () => {
     expect(resolveBrand({ host: "viiswatch.com", vendor: "Mein Shop" })).toBe("VIIS");
@@ -354,6 +395,14 @@ describe("brand identity and scrape coverage", () => {
     expect(variantNamesStrap("Granite Black")).toBe(false);
     expect(variantNamesStrap("Stainless Steel")).toBe(true);
     expect(variantNamesStrap("Lederarmband Cognac")).toBe(true);
+  });
+
+  it("never records Shopify's placeholder variant title as a strap", () => {
+    expect(strapFromVariant("Default Title", undefined)).toBeUndefined();
+    expect(strapFromVariant("Default Title", "Kalbsleder")).toBe("Kalbsleder");
+    expect(strapFromVariant("Granite Black", "Kalbsleder")).toBe("Kalbsleder");
+    expect(strapFromVariant("Stainless Steel", "Kalbsleder")).toBe("Stainless Steel");
+    expect(strapFromVariant("Granite Black", undefined)).toBe("Granite Black");
   });
 
   it("reports coverage and labels a thin scrape as partial", () => {
