@@ -13,6 +13,7 @@
 - Value views hide tier chips; collection may show simplified `watching` | `shortlist` | `pass`.
 - Scrape / autofill must not invent specs: prefer an incomplete result with a coverage note over guessed numbers.
 - Multilingual product pages (DE / FR / ES / IT / EN) are in scope for spec extraction.
+- Quality flags are tri-state; **omitted ≠ false**. Rubric must not punish incomplete autofill.
 - Prefer small PRs; match existing Tailwind / `.card` / `.btn-*` / `.input` patterns in `src/app/globals.css`.
 - Preserve static GitHub Pages mode (`IS_STATIC`) and local editable mode.
 

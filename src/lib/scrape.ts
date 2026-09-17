@@ -347,9 +347,11 @@ const TECHNICAL_SECTION_ANCHORS = [
 ];
 
 // Where the product ends and the storefront resumes. Letter lookarounds
-// rather than \b, which treats accented letters as word boundaries.
+// rather than \b, which treats accented letters as word boundaries. A review
+// heading split over two elements ("PRESS & CUSTOMER / REVIEWS") still ends
+// the product: a customer's "the micro adjust helps" is not a spec.
 const PRODUCT_END =
-  /(?<![A-Za-zÀ-ÿ])(?:You may also like|Customers? Also Love|Recently viewed|Customer reviews|FAQs?|Our Collections|Discover next|Kundenbewertungen|Das könnte (?:dir|Ihnen) auch gefallen|Ähnliche Produkte|Zuletzt angesehen|Vous aimerez aussi|Avis clients|Récemment consultés|También te puede gustar|Opiniones de clientes|Vistos recientemente|Potrebbe piacerti anche|Recensioni dei clienti|Visti di recente)(?![A-Za-zÀ-ÿ])/i;
+  /(?<![A-Za-zÀ-ÿ])(?:You may also like|Customers? Also Love|Recently viewed|(?:Press\s*(?:&|and)\s*)?Customers?[\s;]+reviews|FAQs?|Our Collections|Discover next|Kundenbewertungen|Das könnte (?:dir|Ihnen) auch gefallen|Ähnliche Produkte|Zuletzt angesehen|Vous aimerez aussi|Avis clients|Récemment consultés|También te puede gustar|Opiniones de clientes|Vistos recientemente|Potrebbe piacerti anche|Recensioni dei clienti|Visti di recente)(?![A-Za-zÀ-ÿ])/i;
 
 function technicalSectionStart(text: string): number {
   for (const anchor of TECHNICAL_SECTION_ANCHORS) {

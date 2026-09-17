@@ -183,6 +183,20 @@ function Filter({ label, children }: { label: string; children: React.ReactNode 
   return <label className="label min-w-0 [&_.input]:mt-1 [&_.input]:min-h-11">{label}{children}</label>;
 }
 
+/**
+ * A quiet note beside a value score built on thin evidence. Worded so it
+ * claims no direction: unrecorded features could lift the score or lower it,
+ * and neither is a verdict on the watch.
+ */
+function LowEvidenceHint({ standing }: { standing: ValueRow["summary"]["standing"] }) {
+  if (standing.valueScore === undefined || standing.confidence !== "low") return null;
+  return (
+    <p className="mt-2 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-800">
+      Low evidence — value may shift as specs are added
+    </p>
+  );
+}
+
 function ValueCard({ row, rank }: { row: ValueRow; rank?: number }) {
   const { watch, summary, deal, offer } = row;
   const standing = summary.standing;
@@ -205,6 +219,7 @@ function ValueCard({ row, rank }: { row: ValueRow; rank?: number }) {
           <dd className="mt-1 break-words text-lg font-semibold text-cocoa-900">{formatMoney(watch.landedPrice ?? watch.price)}</dd>
         </div>
       </dl>
+      <LowEvidenceHint standing={standing} />
       <div className="[&_summary]:min-h-11 [&_summary]:py-3"><EvidenceCoverage watch={watch} standing={standing} /></div>
       <div className="border-t border-cocoa-100 pt-3 text-sm">
         <p className="mb-1 text-xs text-cocoa-500">Deal vs fair asks</p>
@@ -245,6 +260,7 @@ function ValueTableRow({ row, rank }: { row: ValueRow; rank?: number }) {
       </td>
       <td className="px-3 py-4">
         {standing.valueScore === undefined ? <p className="font-semibold text-cocoa-500">Not scored</p> : <p className="text-lg font-bold text-cocoa-900">{Math.round(toDisplayScore(standing.valueScore))}</p>}
+        <LowEvidenceHint standing={standing} />
         <EvidenceCoverage watch={watch} standing={standing} />
       </td>
       <td className="px-3 py-4">

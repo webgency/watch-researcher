@@ -9,6 +9,7 @@ import { validateWatchCollection } from "./validation";
 import { listingIdentity, listingRevision } from "./listing-entry";
 import { targetRevision } from "./target-entry";
 import { soldCompRevision } from "./sold-comp-entry";
+import { withCrystalArInference } from "./quality-flags";
 
 // The collection lives in a single JSON file at the repo root so it can be
 // version-controlled and backed up alongside the app. When you later want to
@@ -53,11 +54,11 @@ export async function addWatch(input: WatchInput): Promise<Watch> {
   return withWriteLock(async () => {
     const watches = await getWatches();
     const now = new Date().toISOString();
-    const watch: Watch = {
+    const watch: Watch = withCrystalArInference({
       ...input,
       id: generateId(),
       dateAdded: now,
-    };
+    });
     // Seed the series so a watch added with a price starts with one data point
     // rather than needing a later change to acquire any history at all.
     if (watch.price && !watch.priceHistory?.length) {
@@ -140,7 +141,7 @@ async function changeWatch(id: string, makePatch: (watch: Watch) => Partial<Watc
     // id and dateAdded are immutable.
     const existing = watches[idx];
     const patch = makePatch(existing);
-    const next: Watch = { ...existing, ...patch, id: existing.id, dateAdded: existing.dateAdded };
+    const next: Watch = withCrystalArInference({ ...existing, ...patch, id: existing.id, dateAdded: existing.dateAdded });
 
     // Listing trails get the same treatment for the same reason: the form
     // rebuilds links without askHistory, so the store is the one place that
