@@ -216,7 +216,6 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["nh38", 0.35],
   ["nh34", 0.32],
   ["nh35", 0.30],
-  ["fc-206", 0.25],
   // No quartz rows. normalizeCaliber() never lets a quartz movement reach this
   // table, so a quartz row could only fire on a watch whose movement was
   // missing or mislabelled — scoring the mistake instead of surfacing it.

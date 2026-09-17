@@ -34,9 +34,11 @@ export const QUARTZ_MOVEMENTS = new Set(["quartz", "solar", "kinetic", "meca-qua
  * Those rows are gone; this list lets audit:calibers name the mislabel instead.
  * Kept to families that are quartz without exception: every Seiko VK is a
  * meca-quartz chronograph, while Ronda also makes automatics, so only the
- * specific Ronda caliber is listed.
+ * specific Ronda caliber is listed. FC-206 is Frederique Constant's quartz
+ * moonphase caliber (Ronda 706 base); their FC-3xx and up are automatics, so
+ * it is matched as a whole caliber name, not as an FC- prefix.
  */
-export const QUARTZ_CALIBER_PATTERN = /mech?a[\s-]?quartz|\bvk\d{2}\b|\bvh31\b|\bronda 1032\b/i;
+export const QUARTZ_CALIBER_PATTERN = /mech?a[\s-]?quartz|\bvk\d{2}\b|\bvh31\b|\bronda 1032\b|\bfc-206\b/i;
 
 /**
  * Canonical caliber keys, most-specific-first — the same strings and the same
@@ -83,7 +85,6 @@ export const CANONICAL_CALIBERS = [
   "nh38",
   "nh34",
   "nh35",
-  "fc-206",
 ];
 
 /**

@@ -103,7 +103,7 @@ describe("scoreDimensions", () => {
   it("never tiers a quartz caliber, even when the movement is mislabelled", () => {
     // A quartz row could only fire when `movement` is missing or wrong, which
     // would score the data error (meca-quartz used to land level with an NH35).
-    for (const caliber of ["Meca-quartz Seiko Japan cal. VK63", "Seiko VK64", "hybrid VK68", "Ronda 1032"]) {
+    for (const caliber of ["Meca-quartz Seiko Japan cal. VK63", "Seiko VK64", "hybrid VK68", "Ronda 1032", "FC-206"]) {
       expect(isQuartzCaliber(caliber)).toBe(true);
       expect(caliberTier(caliber)).toBeUndefined();
       expect(caliberTier(caliber, "automatic")).toBeUndefined();
@@ -120,7 +120,6 @@ describe("scoreDimensions", () => {
       "OT.G102",
       "Seiko Instruments (SII/TMI) NE88",
       "Miyota 9100",
-      "FC-206",
       "Miyota 8215",
     ];
     expect(currentAliases.filter((caliber) => caliberTier(caliber) === undefined)).toEqual([]);

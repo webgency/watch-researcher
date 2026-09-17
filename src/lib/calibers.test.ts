@@ -77,11 +77,11 @@ describe("normalizeCaliber", () => {
   });
 
   it("names quartz calibers without catching mechanical ones", () => {
-    for (const caliber of ["TMI VK64 Meca-Quartz", "Mechaquartz VK61", "Seiko VH31", "Ronda 1032 (dual movement)"]) {
+    for (const caliber of ["TMI VK64 Meca-Quartz", "Mechaquartz VK61", "Seiko VH31", "Ronda 1032 (dual movement)", "FC-206"]) {
       expect(isQuartzCaliber(caliber)).toBe(true);
     }
     // Ronda also builds automatics; only the listed quartz caliber counts.
-    for (const caliber of ["Ronda R150", "Seiko NH35", "Sellita SW200-1", "Seiko VK", undefined]) {
+    for (const caliber of ["Ronda R150", "Seiko NH35", "Sellita SW200-1", "Seiko VK", "FC-303", undefined]) {
       expect(isQuartzCaliber(caliber)).toBe(false);
     }
   });
