@@ -209,12 +209,6 @@ export interface Watch {
 /** Shape accepted when creating a watch (id + dateAdded are assigned by the store). */
 export type WatchInput = Omit<Watch, "id" | "dateAdded">;
 
-export interface BrandInfo {
-  reputationTier: number;
-}
-
-export type BrandCatalog = Record<string, BrandInfo>;
-
 export const WATCH_STATUSES: WatchStatus[] = ["wishlist", "owned", "sold"];
 
 export const SCORING_CATEGORIES: ScoringCategory[] = ["diver", "chronograph", "gmt", "dress", "sports"];

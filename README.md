@@ -262,13 +262,11 @@ src/
     validation.ts            # runtime input/data validation
     specs.ts                 # spec field definitions
     spec-ranges.mjs          # plausibility bounds, shared with validate-data
-    brands.ts                # brand catalog lookup
     scrape.ts / extract.ts   # retailer page fetching + field extraction
     config.ts                # IS_STATIC flag
     format.ts                # currency / date helpers
 data/
   watches.json               # your collection (version-controlled)
-  brands.json                # brand reputation tiers
 scripts/                     # enrich, backfill, validate, static-build helpers
 ```
 

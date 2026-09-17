@@ -12,7 +12,6 @@ import {
 } from "../src/lib/currency-rates.mjs";
 
 const DATA_URL = new URL("../data/watches.json", import.meta.url);
-const BRANDS_URL = new URL("../data/brands.json", import.meta.url);
 
 const STATUSES = new Set(["wishlist", "owned", "sold"]);
 // Matches WISHLIST_TIERS in src/lib/types.ts. The six older tiers were migrated
@@ -262,23 +261,6 @@ const errors = [];
 const warnings = [];
 const ids = new Set();
 const watches = JSON.parse(await readFile(DATA_URL, "utf8"));
-const brands = JSON.parse(await readFile(BRANDS_URL, "utf8"));
-const normalizedBrandNames = new Set();
-
-if (!isRecord(brands)) {
-  errors.push("data/brands.json must contain an object");
-} else {
-  for (const [brand, info] of Object.entries(brands)) {
-    const path = `brands.${brand}`;
-    if (!brand.trim()) errors.push(`${path} brand name is required`);
-    normalizedBrandNames.add(brand.trim().toLowerCase());
-    if (!isRecord(info)) {
-      errors.push(`${path} must be an object`);
-      continue;
-    }
-    checkIntegerRange(info.reputationTier, `${path}.reputationTier`, errors, { required: true });
-  }
-}
 
 if (!Array.isArray(watches)) {
   errors.push("data/watches.json must contain an array");
@@ -341,11 +323,6 @@ if (!Array.isArray(watches)) {
     checkDate(watch.dateAdded, `${path}.dateAdded`, errors, { required: true });
     checkTransaction(watch.purchase, `${path}.purchase`, errors);
     checkTransaction(watch.sale, `${path}.sale`, errors);
-
-    const normalizedBrand = typeof watch.brand === "string" ? watch.brand.trim().toLowerCase() : "";
-    if (normalizedBrand && !normalizedBrandNames.has(normalizedBrand)) {
-      warnings.push(`${path}.brand ${watch.brand} is not present in data/brands.json; desirability scoring will use neutral reputation.`);
-    }
   });
 }
 
