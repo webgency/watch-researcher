@@ -1,4 +1,4 @@
-import type { Money, RetailerLink, Watch } from "./types";
+import type { Money, RetailerLink, Watch, WishlistTier } from "./types";
 import { bestOffer, marketValueSummary, type BestOffer, type MarketValueSummary } from "./valuation";
 import { normalizeMoneyToUsd } from "./offer-signals.mjs";
 
@@ -13,6 +13,19 @@ export interface TradeUpCandidate {
    * the stored value even when unconvertible, so an edit's revision matches. */
   links: RetailerLink[];
   targetPrice?: Money;
+  /** Personal priority, used only to order the picker. Never enters the bridge. */
+  wishlistTier?: WishlistTier;
+}
+
+/**
+ * Candidate order in the picker: the watches you'd buy next first. Unset counts
+ * as watching, as the add form and the tier migration treat it. Priority orders
+ * the list only; it never changes a cost or the bridge.
+ */
+export const CANDIDATE_TIER_ORDER: WishlistTier[] = ["shortlist", "watching", "pass"];
+
+export function candidateTier(candidate: Pick<TradeUpCandidate, "wishlistTier">): WishlistTier {
+  return candidate.wishlistTier ?? "watching";
 }
 
 export interface TradeUpModel {
@@ -56,8 +69,12 @@ export function tradeUpModel(watch: Watch, watches: Watch[], now: Date = new Dat
           : undefined,
         links: candidate.links,
         targetPrice: candidate.targetPrice,
+        wishlistTier: candidate.wishlistTier,
       }))
-      .sort((a, b) => a.label.localeCompare(b.label)),
+      .sort((a, b) =>
+        CANDIDATE_TIER_ORDER.indexOf(candidateTier(a)) - CANDIDATE_TIER_ORDER.indexOf(candidateTier(b)) ||
+        a.label.localeCompare(b.label)
+      ),
   };
 }
 
