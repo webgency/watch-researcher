@@ -650,6 +650,14 @@ export function variantNamesStrap(variantTitle: string): boolean {
   return /\b(?:bracelet|strap|leather|steel|rubber|nato|mesh|canvas|fkm|silicone|titanium)\b|armband|leder|edelstahl|kautschuk|cuir|acier|caoutchouc|cuero|acero|caucho|pelle|acciaio|gomma/i.test(variantTitle);
 }
 
+/** The strap to record, given the Shopify variant title and the strap the page
+ * states. Shopify names a product with no options "Default Title", which
+ * describes nothing and must never become the strap. */
+export function strapFromVariant(variantTitle: string | undefined, statedStrap: string | undefined): string | undefined {
+  if (!variantTitle || /^default title$/i.test(variantTitle.trim())) return statedStrap;
+  return variantNamesStrap(variantTitle) || !statedStrap ? variantTitle : statedStrap;
+}
+
 /** Below this share of SPEC_FIELDS, autofill is labelled partial. */
 const PARTIAL_COVERAGE = 0.6;
 
@@ -736,9 +744,8 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
     if (extracted.friction) out.friction = extracted.friction;
   } else {
     const specs = extractSpecs(specText);
-    if (shop?.variantTitle && (variantNamesStrap(shop.variantTitle) || !specs.braceletStrap)) {
-      specs.braceletStrap = shop.variantTitle;
-    }
+    const strap = strapFromVariant(shop?.variantTitle, specs.braceletStrap);
+    if (strap) specs.braceletStrap = strap;
     if (Object.keys(specs).length) out.specs = specs;
     const tags = fallbackTags(specText, specs);
     if (tags.length) out.tags = tags;

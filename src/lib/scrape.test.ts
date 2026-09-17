@@ -12,6 +12,7 @@ import {
   selectShopifyVariant,
   shopifyProductJsonUrl,
   specCoverage,
+  strapFromVariant,
   strongSpecSignals,
   variantNamesStrap,
 } from "./scrape";
@@ -394,6 +395,14 @@ describe("brand identity and scrape coverage", () => {
     expect(variantNamesStrap("Granite Black")).toBe(false);
     expect(variantNamesStrap("Stainless Steel")).toBe(true);
     expect(variantNamesStrap("Lederarmband Cognac")).toBe(true);
+  });
+
+  it("never records Shopify's placeholder variant title as a strap", () => {
+    expect(strapFromVariant("Default Title", undefined)).toBeUndefined();
+    expect(strapFromVariant("Default Title", "Kalbsleder")).toBe("Kalbsleder");
+    expect(strapFromVariant("Granite Black", "Kalbsleder")).toBe("Kalbsleder");
+    expect(strapFromVariant("Stainless Steel", "Kalbsleder")).toBe("Stainless Steel");
+    expect(strapFromVariant("Granite Black", undefined)).toBe("Granite Black");
   });
 
   it("reports coverage and labels a thin scrape as partial", () => {
