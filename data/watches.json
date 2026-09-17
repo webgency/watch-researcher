@@ -2460,7 +2460,7 @@
     },
     "links": [
       {
-        "url": "https://www.truenorthcollections.com/heritage-chronograph/heritage-chrono/heritage-chrono-red-blue-bezel-sold-out",
+        "url": "https://www.truenorthcollections.com/heritage-chronograph/heritage-chrono/heritage-chrono-red-blue-bezel",
         "retailer": "truenorthcollections.com",
         "price": {
           "amount": 299,
@@ -2670,6 +2670,7 @@
     "model": "Tidevand Meteorite - Kosmos",
     "referenceNumber": "HAC-TDV-KOS-BOR",
     "status": "wishlist",
+    "wishlistTier": "watching",
     "scoringCategory": "diver",
     "designUniqueness": 5,
     "designPreferenceElo": 986.38,
@@ -2690,6 +2691,7 @@
       }
     ],
     "qualityFlags": {
+      "sapphireBezelInsert": true,
       "arLayers": 6
     },
     "links": [
@@ -2701,10 +2703,10 @@
           "currency": "USD"
         },
         "condition": "new",
-        "observedAt": "2026-09-10T21:30:15.566Z"
+        "observedAt": "2026-09-15"
       }
     ],
-    "imageUrl": "https://henryarcher.com/cdn/shop/files/Tidevand-Kosmos_00003.jpg?v=1748961942&width=1080",
+    "imageUrl": "https://henryarcher.com/cdn/shop/files/Tidevand-Kosmos_00004_1024x1024.jpg?v=1748961942",
     "specs": {
       "caseDiameterMm": 40,
       "caseThicknessMm": 10.65,
@@ -2712,20 +2714,22 @@
       "lugWidthMm": 20,
       "caseMaterial": "316L surgical-grade stainless steel with Sunset Rose Gold PVD coating",
       "movement": "automatic",
-      "caliber": "Premium Miyota 9015",
+      "caliber": "Miyota 9015",
+      "powerReserveHours": 42,
       "waterResistanceM": 200,
       "crystal": "Sapphire",
       "dialColor": "Meteorite stone dial",
-      "braceletStrap": "316L stainless steel BoR (Beads-of-Rice) bracelet. 20 mm width.",
+      "braceletStrap": "Trinity Grey EVO or Moon Grey BoR",
       "complications": "GMT"
     },
     "tags": [
-      "dive"
+      "dive",
+      "diver",
+      "GMT"
     ],
     "notes": "4 BILLION YEARS IN THE MAKING\nThe meteorite stone used on TIDEVAND METEORITE comes from the Swedish “Muonionalusta” meteorite.\n\nThe Muonionalusta meteorite was found in 1906 at the Swedish/Finnish border, near the village of “Kitkiöjärvi.”\n\nIsotope readings show that the Muonionalusta meteorite is more than 4 billion years old, and hit earth around 1 million years ago.",
     "id": "mssi4ugd8wfp1r",
-    "dateAdded": "2026-08-14T05:23:47.627Z",
-    "wishlistTier": "watching"
+    "dateAdded": "2026-08-14T05:23:47.627Z"
   },
   {
     "brand": "BOLDR Supply Co",
@@ -3143,6 +3147,7 @@
     "brand": "Zelos Watches",
     "model": "Thresher 44mm 'Azure'",
     "status": "wishlist",
+    "wishlistTier": "watching",
     "designUniqueness": 3,
     "designPreferenceElo": 1033.89,
     "designComparisonCount": 12,
@@ -3191,8 +3196,7 @@
       "diver"
     ],
     "id": "mtonjpnke21ikb",
-    "dateAdded": "2026-09-05T17:23:56.958Z",
-    "wishlistTier": "watching"
+    "dateAdded": "2026-09-05T17:23:56.958Z"
   },
   {
     "brand": "Rolex",
@@ -3311,12 +3315,17 @@
       "diver"
     ],
     "id": "mtorvl6lg0fc15",
-    "dateAdded": "2026-09-05T19:25:09.498Z"
+    "dateAdded": "2026-09-05T19:25:09.498Z",
+    "qualityFlags": {
+      "sapphireBezelInsert": true,
+      "arCoated": true
+    }
   },
   {
     "brand": "Maen",
     "model": "HUDSON 38 MK5",
     "status": "wishlist",
+    "wishlistTier": "watching",
     "designUniqueness": 3,
     "designPreferenceElo": 1015.84,
     "designComparisonCount": 11,
@@ -3364,8 +3373,7 @@
       "diver"
     ],
     "id": "mtrtsn3qwsgwws",
-    "dateAdded": "2026-09-07T22:42:09.778Z",
-    "wishlistTier": "watching"
+    "dateAdded": "2026-09-07T22:42:09.778Z"
   },
   {
     "brand": "Vaer Watches",
@@ -3373,6 +3381,7 @@
     "referenceNumber": "D5-POLVG39-TRP20BLK-SPNY20KHA",
     "status": "wishlist",
     "wishlistTier": "shortlist",
+    "scoringCategory": "diver",
     "designUniqueness": 4,
     "designPreferenceElo": 996.72,
     "designComparisonCount": 12,
@@ -3400,14 +3409,19 @@
           "currency": "USD"
         },
         "condition": "new",
-        "observedAt": "2026-09-10T21:30:24.654Z"
+        "observedAt": "2026-09-10"
       }
     ],
     "imageUrl": "https://www.vaerwatches.com/cdn/shop/files/D5-2025-QR-BR-39_45e9bd0b-8d20-4d27-bbd4-d7c082cb5b9d.jpg?v=1756402295&width=480",
     "specs": {
       "caseDiameterMm": 39,
+      "caseThicknessMm": 12.5,
+      "lugToLugMm": 46,
+      "lugWidthMm": 20,
+      "caseMaterial": "steel",
       "movement": "automatic",
       "caliber": "Miyota 9015",
+      "powerReserveHours": 42,
       "waterResistanceM": 200,
       "crystal": "Sapphire"
     },
@@ -3552,6 +3566,7 @@
     "model": "Nevada Pine - 40mm",
     "referenceNumber": "W-NEV-40-ASV",
     "status": "wishlist",
+    "wishlistTier": "watching",
     "scoringCategory": "gmt",
     "designUniqueness": 4,
     "designPreferenceElo": 1100.05,
@@ -3609,8 +3624,7 @@
       "GMT"
     ],
     "id": "mttf1yphipi49w",
-    "dateAdded": "2026-09-09T01:25:02.837Z",
-    "wishlistTier": "watching"
+    "dateAdded": "2026-09-09T01:25:02.837Z"
   },
   {
     "brand": "Mr Jones Watches",
@@ -4032,5 +4046,155 @@
     "notes": "Verified 2026-09-13: NOMOS ref. 719 product page states regulation in six positions; the listed configuration includes a vegan velour strap, with metal bracelets offered at an additional price. Source: https://nomos-glashuette.com/en-us/club/club-campus-night-sky-719",
     "id": "mtz7n87ukjuhv5",
     "dateAdded": "2026-09-13T02:44:15.066Z"
+  },
+  {
+    "brand": "Viis",
+    "model": "Flieger GMT 42 Adriatic",
+    "status": "wishlist",
+    "wishlistTier": "watching",
+    "scoringCategory": "gmt",
+    "designUniqueness": 4,
+    "price": {
+      "amount": 683,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 683,
+          "currency": "USD"
+        },
+        "date": "2026-09-15T02:33:15.882Z",
+        "source": "manual"
+      }
+    ],
+    "links": [
+      {
+        "url": "https://viiswatch.com/en/products/flieger-gmt-42-adriatic?variant=56067814490460",
+        "retailer": "viiswatch.com",
+        "price": {
+          "amount": 683,
+          "currency": "USD"
+        },
+        "observedAt": "2026-09-15"
+      }
+    ],
+    "imageUrl": "https://viiswatch.com/cdn/shop/files/VIIS_Adriatic_Orange_Strap_1.jpg?v=1783884283&width=2400",
+    "specs": {
+      "caseDiameterMm": 42,
+      "movement": "automatic",
+      "braceletStrap": "Orange Peel",
+      "complications": "GMT"
+    },
+    "tags": [
+      "GMT"
+    ],
+    "id": "mu224sxacwsdrj",
+    "dateAdded": "2026-09-15T02:33:15.882Z"
+  },
+  {
+    "brand": "UBIQ Watches",
+    "model": "TREK - AQUALIGHT",
+    "referenceNumber": "TREKAL9039",
+    "status": "wishlist",
+    "wishlistTier": "watching",
+    "scoringCategory": "diver",
+    "designUniqueness": 4,
+    "price": {
+      "amount": 299,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 299,
+          "currency": "USD"
+        },
+        "date": "2026-09-15T02:40:43.814Z",
+        "source": "manual"
+      }
+    ],
+    "qualityFlags": {
+      "microAdjustClasp": true,
+      "quickRelease": true,
+      "arCoated": true
+    },
+    "links": [
+      {
+        "url": "https://ubiqwatches.com/products/trek-aqualight?variant=50439837974807",
+        "retailer": "ubiqwatches.com",
+        "price": {
+          "amount": 299,
+          "currency": "USD"
+        },
+        "condition": "new",
+        "observedAt": "2026-09-15"
+      }
+    ],
+    "imageUrl": "https://ubiqwatches.com/cdn/shop/files/AQUALIGHTFRONTStrap.png?v=1746606834",
+    "specs": {
+      "caseDiameterMm": 44,
+      "caseThicknessMm": 11.1,
+      "movement": "automatic",
+      "caliber": "Miyota 9039",
+      "powerReserveHours": 42,
+      "waterResistanceM": 100,
+      "crystal": "Sapphire",
+      "braceletStrap": "Miyota 9039 Automatic"
+    },
+    "tags": [],
+    "id": "mu22eejt4cj85b",
+    "dateAdded": "2026-09-15T02:40:43.814Z"
+  },
+  {
+    "brand": "Humism",
+    "model": "Rhizome / HELIOS 39mm",
+    "referenceNumber": "WA-RHZ-YLW",
+    "status": "wishlist",
+    "wishlistTier": "watching",
+    "price": {
+      "amount": 428,
+      "currency": "USD"
+    },
+    "priceHistory": [
+      {
+        "price": {
+          "amount": 428,
+          "currency": "USD"
+        },
+        "date": "2026-09-15T03:32:39.703Z",
+        "source": "manual"
+      }
+    ],
+    "qualityFlags": {
+      "quickRelease": true,
+      "arCoated": true
+    },
+    "links": [
+      {
+        "url": "https://humism.com/collections/philosophies-s/products/rhizome-helios",
+        "retailer": "humism.com",
+        "price": {
+          "amount": 428,
+          "currency": "USD"
+        },
+        "condition": "new",
+        "observedAt": "2026-09-15"
+      }
+    ],
+    "imageUrl": "https://humism.com/cdn/shop/products/Yellow-Rhizome-adjusted_1200x1200.gif?v=1667068177",
+    "specs": {
+      "caseDiameterMm": 39,
+      "caseThicknessMm": 11.9,
+      "caseMaterial": "316L Surgical Steel",
+      "movement": "automatic",
+      "caliber": "Seiko (SII) NH35A",
+      "waterResistanceM": 50,
+      "crystal": "Sapphire",
+      "braceletStrap": "Default Title"
+    },
+    "tags": [],
+    "id": "mu2496sapr6jp3",
+    "dateAdded": "2026-09-15T03:32:39.703Z"
   }
 ]
