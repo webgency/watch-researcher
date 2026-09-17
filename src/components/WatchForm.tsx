@@ -76,13 +76,6 @@ function parseNum(value: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-function resolveBrandReputation(brand: string, brandReputations: Record<string, number>): number | undefined {
-  const normalized = brand.trim().toLowerCase();
-  if (!normalized) return undefined;
-  const match = Object.entries(brandReputations).find(([name]) => name.trim().toLowerCase() === normalized);
-  return match?.[1];
-}
-
 function payloadJson(payload: WatchInput): string {
   return JSON.stringify(payload, (_key, value) => (value === undefined ? null : value));
 }
@@ -103,13 +96,7 @@ interface AutofillResult {
   coverageNote?: string;
 }
 
-export default function WatchForm({
-  initial,
-  brandReputations = {},
-}: {
-  initial?: Watch;
-  brandReputations?: Record<string, number>;
-}) {
+export default function WatchForm({ initial }: { initial?: Watch }) {
   const router = useRouter();
   const isEdit = Boolean(initial);
 
@@ -156,7 +143,6 @@ export default function WatchForm({
   const [qualityOpen, setQualityOpen] = useState(Boolean(initial?.qualityFlags));
   const [linksOpen, setLinksOpen] = useState(Boolean(initial?.links?.length));
   const [notesOpen, setNotesOpen] = useState(Boolean(initial?.notes));
-  const resolvedBrandReputation = resolveBrandReputation(brand, brandReputations);
 
   function setLink(i: number, patch: Partial<LinkRow>) {
     setLinks((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
@@ -484,12 +470,6 @@ export default function WatchForm({
             <p className="mt-1 text-xs text-cocoa-400">
               Choose explicitly for hybrid watches. Ambiguous tags leave value unrated.
             </p>
-          </div>
-          <div>
-            <label className="label">Brand reputation</label>
-            <div className="input flex h-[2.625rem] items-center bg-cocoa-50 text-cocoa-600">
-              {brand.trim() ? `${resolvedBrandReputation ?? 3} / 5${resolvedBrandReputation === undefined ? " neutral" : ""}` : "—"}
-            </div>
           </div>
           <div>
             <label className="label">Tracked price</label>

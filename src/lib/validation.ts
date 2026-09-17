@@ -3,7 +3,6 @@ import { plausibilityIssues } from "./spec-plausibility.mjs";
 import {
   Availability,
   AVAILABILITY_STATES,
-  BrandCatalog,
   Condition,
   Friction,
   Money,
@@ -583,31 +582,3 @@ export function validateWatchCollection(value: unknown): Watch[] {
   return watches;
 }
 
-export function validateBrandCatalog(value: unknown): BrandCatalog {
-  if (!isRecord(value)) {
-    throw new DataValidationError("Brand data must be an object.", ["data/brands.json must contain an object"]);
-  }
-
-  const errors: string[] = [];
-  const brands: BrandCatalog = {};
-
-  for (const [brand, info] of Object.entries(value)) {
-    const path = `brands.${brand}`;
-    if (!brand.trim()) {
-      errors.push(`${path} brand name is required`);
-      continue;
-    }
-    if (!isRecord(info)) {
-      errors.push(`${path} must be an object`);
-      continue;
-    }
-    const reputationTier = cleanIntegerRange(info.reputationTier, `${path}.reputationTier`, errors, 1, 5);
-    if (reputationTier !== undefined) brands[brand] = { reputationTier };
-  }
-
-  if (errors.length) {
-    throw new DataValidationError("Brand data is invalid.", errors);
-  }
-
-  return brands;
-}

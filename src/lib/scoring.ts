@@ -79,8 +79,9 @@ export function normalizePriceToUsd(money: Money, onWarning?: (message: string) 
  * selected 20-point band, so a refined 3 can never outrank a 4.
  *
  * This replaces a weighted desirability score whose three inputs did not hold
- * up. Brand reputation was a constant — every brand in data/brands.json sits at
- * reputationTier 3 — so its 35% contributed no variance. Wishlist tier is the
+ * up. Brand reputation was a constant — every brand in the since-removed
+ * data/brands.json sat at reputationTier 3 — so its 35% contributed no
+ * variance. Wishlist tier is the
  * judgement the matrix exists to inform, so feeding it back in at 25% made the
  * chart partly restate its own input. Design was the only live term, and for
  * the watches without a design rating the score collapsed to exactly five
