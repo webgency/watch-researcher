@@ -10,6 +10,7 @@
 
 import { extractWatchDetails, sanitizeSpecs } from "./extract";
 import { extractRetailOffer, inferRetailCondition } from "./retailer-offer.mjs";
+import { SPEC_FIELDS } from "./specs";
 import { Condition, Friction, Money, MovementType, QualityFlags, WatchInput, WatchSpecs } from "./types";
 
 const UA =
@@ -30,6 +31,11 @@ export type ScrapeResult = Partial<
   qualityFlags?: QualityFlags;
   /** brandLiquidity is a user judgment call, so scraped friction is partial. */
   friction?: Partial<Friction>;
+  /** How many SPEC_FIELDS the scrape filled, so a thin autofill reads as
+   * partial instead of silently looking complete. */
+  specsFound?: number;
+  specsPossible?: number;
+  coverageNote?: string;
 };
 
 async function fetchText(url: string, json = false) {
@@ -87,24 +93,57 @@ function hostnameOf(url: string): string {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; }
 }
 
+// European product pages often encode accented letters as entities. Turning
+// them into spaces splits "Geh&auml;use" into two words no label can match.
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&", quot: '"', apos: "'", nbsp: " ", deg: "°", plusmn: "±", reg: "®", times: "×",
+  auml: "ä", ouml: "ö", uuml: "ü", Auml: "Ä", Ouml: "Ö", Uuml: "Ü", szlig: "ß",
+  aacute: "á", eacute: "é", iacute: "í", oacute: "ó", uacute: "ú", Eacute: "É",
+  agrave: "à", egrave: "è", igrave: "ì", ograve: "ò", ugrave: "ù",
+  acirc: "â", ecirc: "ê", icirc: "î", ocirc: "ô", ucirc: "û",
+  ccedil: "ç", ntilde: "ñ", oslash: "ø", Oslash: "Ø",
+};
+
+function codePoint(n: number): string | undefined {
+  return Number.isInteger(n) && n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : undefined;
+}
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&#(\d+);/g, (match, n: string) => codePoint(Number(n)) ?? match)
+    .replace(/&#x([0-9a-f]+);/gi, (match, n: string) => codePoint(parseInt(n, 16)) ?? match)
+    .replace(/&([a-z]+);/gi, (match, name: string) => NAMED_ENTITIES[name] ?? match);
+}
+
 function stripText(html: string): string {
-  return html
-    // Keep definition-list labels and boundaries: flattening them loses the
-    // difference between a specification and surrounding marketing prose.
-    .replace(/<dt\b[^>]*>([\s\S]*?)<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/gi, (_, label: string, value: string) => {
-      const key = stripText(label);
-      const names: Record<string, string> = { case: "Case material", dial: "Dial color", winding: "Movement" };
-      const body = key.toLowerCase() === "dimensions"
-        ? value.replace(/\bheight\b/gi, "case height") : value;
-      return ` ${names[key.toLowerCase()] ?? key}: ${stripText(body)}; `;
-    })
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
+  return decodeEntities(
+    html
+      // Keep definition-list labels and boundaries: flattening them loses the
+      // difference between a specification and surrounding marketing prose.
+      .replace(/<dt\b[^>]*>([\s\S]*?)<\/dt>\s*<dd\b[^>]*>([\s\S]*?)<\/dd>/gi, (_, label: string, value: string) => {
+        const key = stripText(label);
+        const names: Record<string, string> = { case: "Case material", dial: "Dial color", winding: "Movement" };
+        // Inside one definition a line break continues the same value
+        // ("stainless steel, screwed / stainless steel back"), so it stays a
+        // space here rather than the field boundary it is elsewhere.
+        const joined = value.replace(/<br\s*\/?>/gi, " ");
+        const body = key.toLowerCase() === "dimensions"
+          ? joined.replace(/\bheight\b/gi, "case height") : joined;
+        return ` ${names[key.toLowerCase()] ?? key}: ${stripText(body)}; `;
+      })
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      // Paragraph, line and heading boundaries become "; ". Without them a
+      // value runs into the next panel's label, and a heading-style spec
+      // ("ARMBAND" over "Kalbsleder") can't be told from one long sentence.
+      .replace(/<br\s*\/?>/gi, "; ")
+      .replace(/<\/(?:p|li|h[1-6]|summary|td|th|tr)>/gi, "; ")
+      .replace(/<[^>]+>/g, " ")
+  )
     .replace(/&[a-z#0-9]+;/gi, " ")
     .replace(/\s+/g, " ")
+    .replace(/\s*;\s*(?:;\s*)+/g, "; ")
+    .replace(/^[\s;]+|[\s;]+$/g, "")
     .trim();
 }
 
@@ -116,7 +155,29 @@ type Extracted = { brand?: string; name?: string; ref?: string; price?: Money; i
 const DOMAIN_BRANDS: Record<string, string> = {
   "maenwatches.com": "Maen",
   "spinnaker-watches.com": "Spinnaker",
+  "viiswatch.com": "VIIS",
 };
+
+// Shopify's default vendor is the store's placeholder name in the admin
+// language. It names no manufacturer, so it must never become the brand.
+const PLACEHOLDER_VENDORS = /^(?:my store|mein shop|ma boutique|mi tienda|il mio negozio|minha loja|mijn winkel|default vendor)$/i;
+
+/** A brand stated as a labeled spec ("Marke: VIIS"), in any supported locale. */
+export function labeledBrand(text: string): string | undefined {
+  return text.match(/(?:^|;\s*)(?:Marke|Brand|Marque|Marca)\s*:\s*([^;]{2,40}?)\s*(?=;|$)/i)?.[1].trim();
+}
+
+/** Verified domain mapping first, then a real Shopify vendor, then JSON-LD,
+ * then a labeled brand on the page. A placeholder vendor is skipped. */
+export function resolveBrand({ host, vendor, ldBrand, pageText = "" }: {
+  host: string;
+  vendor?: string;
+  ldBrand?: string;
+  pageText?: string;
+}): string | undefined {
+  const usableVendor = vendor && !PLACEHOLDER_VENDORS.test(vendor.trim()) ? vendor : undefined;
+  return DOMAIN_BRANDS[host] || usableVendor || ldBrand || labeledBrand(pageText);
+}
 
 function fromJsonLd(html: string, base: string): Extracted {
   const out: Extracted = {};
@@ -260,13 +321,35 @@ function firstHeading(html: string): string | undefined {
  * Prefer the product's main/specification content over the entire storefront.
  * Header navigation, size guides, cross-sells and footer copy routinely contain
  * other diameters, movements and complications that look like product specs.
+ *
+ * Section names are matched in EN, DE, FR, ES and IT. "Abmessungen" (and
+ * "Dimensions") is deliberately not an anchor: it is usually one sub-panel
+ * among several, and starting there would cut the movement and case panels
+ * above it. Pages built only from such panels reach the dense-label fallback
+ * in productExtractionText instead.
  */
+const TECHNICAL_HEADINGS =
+  /^(?:Specifications?|Technical Details|Tech Specs|Spezifikationen|Technische (?:Daten|Details)|Spécifications?|Caractéristiques techniques|Especificaciones|Ficha técnica|Specifiche(?: tecniche)?|Scheda tecnica)$/i;
+
 const TECHNICAL_SECTION_ANCHORS = [
   /\bSpecifications?\b/i,
   /\bTechnical Details\b/i,
   /\bDetails\s+Price\b/i,
   /\bTech Specs\b/i,
+  /\bSpezifikationen\b/i,
+  /\bTechnische (?:Daten|Details)\b/i,
+  /\bSpécifications?\b/i,
+  /\bCaractéristiques techniques\b/i,
+  /\bEspecificaciones\b/i,
+  /\bFicha técnica\b/i,
+  /\bSpecifiche(?: tecniche)?\b/i,
+  /\bScheda tecnica\b/i,
 ];
+
+// Where the product ends and the storefront resumes. Letter lookarounds
+// rather than \b, which treats accented letters as word boundaries.
+const PRODUCT_END =
+  /(?<![A-Za-zÀ-ÿ])(?:You may also like|Customers? Also Love|Recently viewed|Customer reviews|FAQs?|Our Collections|Discover next|Kundenbewertungen|Das könnte (?:dir|Ihnen) auch gefallen|Ähnliche Produkte|Zuletzt angesehen|Vous aimerez aussi|Avis clients|Récemment consultés|También te puede gustar|Opiniones de clientes|Vistos recientemente|Potrebbe piacerti anche|Recensioni dei clienti|Visti di recente)(?![A-Za-zÀ-ÿ])/i;
 
 function technicalSectionStart(text: string): number {
   for (const anchor of TECHNICAL_SECTION_ANCHORS) {
@@ -276,21 +359,54 @@ function technicalSectionStart(text: string): number {
   return -1;
 }
 
+function cutAtProductEnd(text: string): string {
+  const end = text.search(PRODUCT_END);
+  return (end > 0 ? text.slice(0, end) : text).replace(/[\s;]+$/, "").trim();
+}
+
 export function primaryProductText(html: string): string {
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? html;
   // Prefer a real section heading to anchor-navigation text. A nav link named
   // "Specifications" may precede a FAQ link that would truncate the entire page.
   const heading = Array.from(main.matchAll(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi))
-    .find(match => /^(?:Specifications?|Technical Details|Tech Specs)$/i.test(stripText(match[1])));
+    .find(match => TECHNICAL_HEADINGS.test(stripText(match[1])));
   const text = stripText(heading ? main.slice(heading.index) : main);
   const specStart = technicalSectionStart(text);
   if (specStart === -1) return text;
   // Keep later product feature panels: brands often state the caliber and
   // power reserve below shipping accordions rather than in the spec table.
-  const productTail = text.slice(specStart);
-  const end = productTail.search(/\b(?:You may also like|Customers? Also Love|Recently viewed|Customer reviews|FAQs?|Our Collections|Discover next)\b/i);
-  return (end > 0 ? productTail.slice(0, end) : productTail).trim();
+  return cutAtProductEnd(text.slice(specStart));
 }
+
+/** "11,3 mm" → "11.3 mm". Only a comma followed by one or two digits, so a
+ * thousands separator ("28,800 bph") is left alone. */
+function normalizeDecimals(text: string): string {
+  return text.replace(/(\d),(\d{1,2})(?!\d)/g, "$1.$2");
+}
+
+const L2L_LABEL =
+  "(?:lug[\\s-]*to[\\s-]*lug|Abstand der Bandanstöße|Bandanstöße|Horn[\\s-]*zu[\\s-]*Horn|Anstoß[\\s-]*zu[\\s-]*Anstoß|(?:longueur\\s+)?(?:de\\s+)?corne\\s+à\\s+corne|distancia entre asas|de asa a asa|da ansa ad ansa)";
+const THICKNESS_LABEL =
+  "(?:thickness|case height|case depth|depth|thick|Gehäusehöhe|Gehäusedicke|(?<![A-Za-zÀ-ÿ])Höhe|(?<![A-Za-zÀ-ÿ])Dicke|épaisseur|hauteur|espesor|grosor|spessore|altezza)";
+
+/**
+ * How many independent spec facts a text states outright: a caliber, a water
+ * rating, a lug-to-lug and a case height. Marketing copy ("a case diameter of
+ * 42 mm") rarely carries more than one; a real spec panel carries several.
+ */
+export function strongSpecSignals(text: string): number {
+  const t = normalizeDecimals(text);
+  return [
+    /\b(?:Miyota|Seiko|Sellita|ETA|Ronda|Soprod|La Joux[ -]Perret|Seagull)\s+[A-Z0-9]*\d|\b(?:cali(?:ber|bre|bro)|Kaliber)\s*:/i,
+    /(?:water[\s-]*resist|wasserdicht|étanch|resistencia al agua|impermeabil)[^0-9]{0,20}\d{2,4}\s?m\b|\b\d{1,3}\s?(?:atm|bar)\b/i,
+    new RegExp(`${L2L_LABEL}[^0-9]{0,16}\\d{2}`, "i"),
+    new RegExp(`${THICKNESS_LABEL}[^0-9]{0,24}\\d{1,2}(?:\\.\\d{1,2})?\\s?mm`, "i"),
+  ].filter((pattern) => pattern.test(t)).length;
+}
+
+/** Below this, or with fewer than two spec facts, a Shopify description is
+ * treated as marketing rather than a specification. */
+const THIN_DESCRIPTION_CHARS = 1200;
 
 /**
  * Shopify's product description is already scoped to the requested product.
@@ -311,8 +427,15 @@ export function productExtractionText(
   // inseparable and returning no specs is more honest than mixing models.
   if (collectionPage) return hasTechnicalSection ? primaryProductText(html) : "";
   if (hasTechnicalSection) return primaryProductText(html);
-  if (shopifyBodyHtml) return stripText(shopifyBodyHtml);
-  return mainText;
+  if (!shopifyBodyHtml) return mainText;
+
+  const body = stripText(shopifyBodyHtml);
+  // A marketing-only description must not hide a spec panel the page does
+  // render. Use the page only when it states several spec facts itself, so a
+  // lone cross-sell mention can't qualify, and stop where the product ends.
+  const thinBody = body.length < THIN_DESCRIPTION_CHARS || strongSpecSignals(body) < 2;
+  if (thinBody && strongSpecSignals(mainText) >= 3) return cutAtProductEnd(mainText);
+  return body;
 }
 
 function num(text: string, re: RegExp): number | undefined {
@@ -320,33 +443,65 @@ function num(text: string, re: RegExp): number | undefined {
   return m ? Number(m[1]) : undefined;
 }
 
+// "Automatic, hand-winding possible" describes an automatic. Secondary
+// hand-winding is dropped before classifying, or the manual pattern wins.
+const HAND_WINDING_CAPABILITY =
+  /(?:hand[\s-]?(?:wound|wind(?:ing)?)|manual[\s-]?wind(?:ing)?|handaufzug|remontage manuel|carica manuale|cuerda manual)\s*(?:möglich|possible|capability|capable|function|funktion)|\b(?:with|mit|avec|con|and|und|et|y|e)\s+(?:(?:hand|manual)[\s-]?wind(?:ing)?|handaufzug|remontage manuel|carica manuale|cuerda manual)/gi;
+
 export function extractSpecs(text: string): WatchSpecs {
-  const t = text.replace(/\s+/g, " ");
+  const t = normalizeDecimals(text.replace(/\s+/g, " "));
   const low = t.toLowerCase();
   const s: WatchSpecs = {};
 
+  // Gaps between a label and its value never cross ". ; ,": in "40 mm
+  // diameter. 20 mm lug width." the label is followed by the next field's
+  // number, and reading it as the diameter also voids lug-to-lug in sanitizing.
   s.caseDiameterMm =
     num(t, /(?:case\s*)?(?:diameter|case size|case width)\s*\(\s*mm\s*\)\s*[:\-]?\s*(\d{2}(?:\.\d{1,2})?)/i) ??
-    num(t, /(?:case\s*)?(?:diameter|case size|case width)[^0-9]{0,12}(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
+    num(t, /(?:case\s*)?(?:diameter|case size|case width|(?<![A-Za-zÀ-ÿ])(?:Gehäuse)?durchmesser|diamètre(?: du boîtier)?|diámetro(?: de la caja)?|diametro(?: della cassa)?)[^0-9.;,]{0,12}(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
     num(t, /Ø\s?(\d{2}(?:\.\d{1,2})?)\s?mm/i) ??
     num(t, /\b(\d{2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,18}(?:case|diameter))/i);
+
+  // Total height including the crystal is what most brands quote, and the
+  // score compares it across brands (lower is better). A figure stated as
+  // excluding the crystal would flatter one page against the rest, so it is
+  // removed before matching; a page giving only that height leaves this blank.
+  const withoutCrystal = new RegExp(
+    `${THICKNESS_LABEL}\\s*\\(\\s*(?:exkl\\.?|excl\\.?|excluding|without|ohne|sans|sin|senza)[^)]*\\)[^0-9]{0,6}\\d{1,2}(?:\\.\\d{1,2})?\\s?mm`,
+    "gi"
+  );
+  const withCrystal = new RegExp(
+    `${THICKNESS_LABEL}\\s*\\(\\s*(?:inkl\\.?|incl\\.?|including|with|avec|con|incluso|incluido)\\s*(?:Glas|crystal|glass|verre|cristal|vetro)\\s*\\)[^0-9]{0,6}(\\d{1,2}(?:\\.\\d{1,2})?)\\s?mm`,
+    "i"
+  );
+  const th = t.replace(withoutCrystal, " ");
   s.caseThicknessMm =
-    num(t, /(?:thickness|case height|case depth|depth|thick(?:ness)?)\s*\(\s*mm\s*\)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i) ??
-    num(t, /(?:thickness|case height|case depth|depth|thick)[^0-9]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
-    num(t, /\b(\d{1,2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,14}(?:thick|height|depth))/i);
+    num(th, withCrystal) ??
+    num(th, /(?:thickness|case height|case depth|depth|thick(?:ness)?)\s*\(\s*mm\s*\)\s*[:\-]?\s*(\d{1,2}(?:\.\d{1,2})?)/i) ??
+    num(th, /(?:thickness|case height|case depth|depth|thick)[^0-9.;,]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
+    num(th, /(?:Gehäusehöhe|Gehäusedicke|(?<![A-Za-zÀ-ÿ])Höhe|(?<![A-Za-zÀ-ÿ])Dicke|épaisseur|hauteur du boîtier|espesor|grosor|spessore|altezza della cassa)[^0-9.;,]{0,12}(\d{1,2}(?:\.\d{1,2})?)\s?mm/i) ??
+    num(th, /\b(\d{1,2}(?:\.\d{1,2})?)\s?mm\b(?=[^.]{0,14}(?:thick|height|depth))/i);
+
   s.lugToLugMm =
-    num(t, /lug[\s-]*to[\s-]*lug[^0-9]{0,16}(\d{2}(?:\.\d{1,2})?)(?:\s?mm)?/i) ?? // "lug to lug (mm): 47"
+    num(t, new RegExp(`${L2L_LABEL}[^0-9.;,]{0,16}(\\d{2}(?:\\.\\d{1,2})?)(?:\\s?mm)?`, "i")) ?? // "lug to lug (mm): 47"
     num(t, /(\d{2}(?:\.\d{1,2})?)\s?mm[^.]{0,12}(?:from\s+)?lug[\s-]*to[\s-]*lug/i); // "measures 46mm from lug to lug"
+  // Buckle width ("Schließenbreite") is not lug width and is never matched.
   s.lugWidthMm =
-    num(t, /lug[\s-]*width[^0-9]{0,14}(\d{2})\s?mm/i) ??
-    num(t, /strap[\s-]*width[^0-9]{0,12}(\d{2})\s?mm/i) ??
+    num(t, /(?:lug[\s-]*width|Anstoßbreite|Bandanstoßbreite|Bandbreite|Stegbreite|largeur (?:des |entre )?cornes|entre-?cornes|ancho (?:de )?(?:las )?asas|ancho (?:de )?(?:la )?correa|larghezza (?:delle )?anse|larghezza (?:del )?cinturino)[^0-9.;,]{0,14}(\d{2})\s?mm/i) ??
+    num(t, /strap[\s-]*width[^0-9.;,]{0,12}(\d{2})\s?mm/i) ??
+    num(t, /\b(\d{2})\s?mm\s+(?:lug|strap)[\s-]*width\b/i) ?? // "20 mm lug width"
     num(t, /\bband\b[^0-9]{0,8}(\d{2})\s?mm/i);
   s.powerReserveHours =
     num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s?h\b/i) ??
     num(t, /(\d{2,3})\s?h(?:ours?)?\s*(?:of\s*)?power\s*reserve/i) ??
-    num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s*hours?\b/i);
+    num(t, /power\s*reserve[^0-9]{0,28}(\d{2,3})\s*hours?\b/i) ??
+    num(t, /(?:Gangreserve|réserve de marche|reserva de marcha|riserva di carica)[^0-9]{0,28}(\d{2,3})\s*(?:h\b|Std\.?|Stunden|heures|horas|ore\b)/i) ??
+    num(t, /(\d{2,3})\s*(?:Stunden|Std\.?|heures|horas|ore)\s*(?:de\s+|di\s+)?(?:Gangreserve|réserve de marche|reserva de marcha|riserva di carica)/i);
 
-  const wm = t.match(/water[\s-]*resist[a-z]*[^0-9]{0,16}(\d{2,4})\s?m\b/i) || t.match(/(\d{2,4})\s?m(?:eters)?\s*(?:of\s*)?water/i);
+  const wm =
+    t.match(/water[\s-]*resist[a-z]*[^0-9]{0,16}(\d{2,4})\s?m\b/i) ||
+    t.match(/(?:Wasserdichtigkeit|wasserdicht(?:\s+bis)?|étanchéité|étanche|resistencia al agua|hermeticidad|impermeabilità|impermeabile)[^0-9]{0,16}(\d{2,4})\s?m\b/i) ||
+    t.match(/(\d{2,4})\s?m(?:eters)?\s*(?:of\s*)?water/i);
   const atm = t.match(/(\d{1,3})\s?(?:atm|bar)\b/i);
   if (wm) s.waterResistanceM = Number(wm[1]);
   else if (atm) s.waterResistanceM = Number(atm[1]) * 10;
@@ -354,46 +509,66 @@ export function extractSpecs(text: string): WatchSpecs {
   const moves: [RegExp, MovementType][] = [
     [/spring[\s-]?drive/, "spring-drive"],
     [/meca[\s-]?quartz|mecaquartz/, "quartz"],
-    [/quartz/, "quartz"],
-    [/hand[\s-]?wound|hand[\s-]?wind(?:ing)?|manual[\s-]?wind(?:ing)?|manual winding/, "manual"],
-    [/self[\s-]?winding|automatic/, "automatic"],
+    [/quartz|quarz|cuarzo|quarzo/, "quartz"],
+    [/hand[\s-]?wound|hand[\s-]?wind(?:ing)?|manual[\s-]?wind(?:ing)?|manual winding|handaufzug|remontage manuel|carica manuale|cuerda manual/, "manual"],
+    [/self[\s-]?winding|autom[aá]ti(?:c|k|que|co)/, "automatic"],
     [/solar/, "solar"],
     [/kinetic/, "kinetic"],
   ];
   // A labeled spec wins over later page copy such as "instruction manual" or
-  // generic collection descriptions mentioning other movement types.
-  const labeledMovement = t.match(/\bmovement\s*:\s*([^.;]{2,100})/i)?.[1]?.toLowerCase();
-  const movementSource = labeledMovement || low;
-  if (/^manual\b/i.test(labeledMovement ?? "")) s.movement = "manual";
-  for (const [re, val] of moves) if (!s.movement && re.test(movementSource)) { s.movement = val; break; }
+  // generic collection descriptions mentioning other movement types. A label
+  // that names no movement ("Type: Diver") falls through to the page text.
+  const classify = (source: string | undefined, labeled: boolean): MovementType | undefined => {
+    if (!source) return undefined;
+    if (labeled && /^manual\b/i.test(source)) return "manual";
+    return moves.find(([re]) => re.test(source))?.[1];
+  };
+  const labeledMovement = t
+    .match(/\b(?:movement|Typ|Type|mouvement|movimiento|movimento)\s*:\s*([^.;]{2,100})/i)?.[1]
+    ?.toLowerCase()
+    .replace(HAND_WINDING_CAPABILITY, " ")
+    .trim();
+  s.movement = classify(labeledMovement, true) ?? classify(low.replace(HAND_WINDING_CAPABILITY, " "), false);
 
-  const cal = t.match(/\bcali(?:ber|bre)\s*:\s*([A-Za-z0-9][\w .\-\/]{1,30})/i) ?? t.match(/cali(?:ber|bre)\s*[:\-]?\s*([A-Za-z0-9][\w .\-\/]{1,30})/i);
-  const namedMovement = t.match(/\b((?:Miyota|Seiko|Sellita|ETA|Ronda|Soprod|La Joux[ -]Perret|Seagull)\s+[A-Z0-9][A-Z0-9.\-]{1,15})(?=\s|$)/i);
+  const cal =
+    t.match(/\b(?:cali(?:ber|bre|bro)|Kaliber)\s*:\s*([A-Za-z0-9][\w .\-\/]{1,30})/i) ??
+    t.match(/(?:cali(?:ber|bre|bro)|kaliber)\s*[:\-]?\s*([A-Za-z0-9][\w .\-\/]{1,30})/i);
+  const namedMovement = t.match(/\b((?:Miyota|Seiko|Sellita|ETA|Ronda|Soprod|La Joux[ -]Perret|Seagull)\s+[A-Z0-9][A-Z0-9.\-]{1,15})(?=[\s;,)]|$)/i);
   if (cal || namedMovement) {
     // A maker + caliber token is stronger than a loose "calibre" label,
     // which marketing prose sometimes follows with "beats at 28,800...".
     const match = namedMovement ?? cal!;
-    let c = match[1].split(/\s+(?:automatic|manual|self|swiss|cosc|movement|winding|finishe?s?|with|hand|\d+\s?jewel)/i)[0].trim();
+    let c = match[1].split(/\s+(?:automatic|automatik|automatique|autom[aá]tico|manual|self|swiss|cosc|movement|mouvement|movimiento|movimento|uhrwerk|handaufzug|winding|finishe?s?|with|hand|\d+\s?jewel)/i)[0].trim();
     c = c.replace(/[.,;:]+$/, "").trim();
     if (c.length >= 2 && /\d/.test(c)) s.caliber = c; // require a digit to avoid grabbing prose
   }
 
-  if (/sapphire/.test(low)) s.crystal = "Sapphire";
-  else if (/acrylic|hesalite|plexi/.test(low)) s.crystal = "Acrylic";
-  else if (/mineral/.test(low)) s.crystal = "Mineral";
+  if (/sapphire|saphir|zafiro|zaffiro/.test(low)) s.crystal = "Sapphire";
+  else if (/acrylic|acryl|hesalite|hesalit|plexi/.test(low)) s.crystal = "Acrylic";
+  else if (/mineral|minéral/.test(low)) s.crystal = "Mineral";
   else if (/hardlex/.test(low)) s.crystal = "Hardlex";
 
-  const caseMaterial = t.match(/case material\s*[:\-]?\s*([^.;]{3,60})/i);
+  const caseMaterial =
+    t.match(/case material\s*[:\-]?\s*([^.;]{3,60})/i) ??
+    t.match(/(?:Gehäusematerial|matériau du boîtier|material de la caja|materiale della cassa)\s*[:\-]?\s*([^.;]{3,60})/i) ??
+    // Directly under a case heading or panel, a bare "Material:" is the case's.
+    t.match(/(?<![A-Za-zÀ-ÿ])(?:Gehäuse|Case|Boîtier|Caja|Cassa)\s*;\s*Material\s*:\s*([^.;]{3,60})/i);
   if (caseMaterial) s.caseMaterial = clean(caseMaterial[1]).split(/\s+(?:case finish|case size|diameter|thickness|bezel|crystal)\b/i)[0].trim();
   const dialColor = t.match(/dial colou?r\s*[:\-]\s*([A-Za-z][A-Za-z /\-]{1,30})/i);
   if (dialColor) s.dialColor = clean(dialColor[1]).split(/\s+(?:index|lens|crystal|case)\b/i)[0].trim();
-  const band = t.match(/\b(?:band|bracelet|strap)\s*:\s*([^.;]{3,100})/i);
+  const band =
+    t.match(/\b(?:band|bracelet|strap)\s*:\s*([^.;]{3,100})/i) ??
+    t.match(/(?<![A-Za-zÀ-ÿ])(?:Armband(?:material)?|Bandmaterial|Correa|Cinturino|Bracelete)\s*:\s*([^.;]{3,100})/i);
   if (band) {
     const value = clean(band[1]).split(/\s+(?:extra band|water resistance|weight|warranty|lug width)\b/i)[0].trim();
     // Repeated option-picker prose is not a material/specification.
     const firstHalf = value.slice(0, Math.floor(value.length / 2)).toLowerCase();
     const secondHalf = value.slice(Math.floor(value.length / 2)).toLowerCase();
     if (value.length < 90 && !secondHalf.includes(firstHalf.slice(0, 20))) s.braceletStrap = value;
+  } else {
+    // Heading-style panels put the value on the line below the section name.
+    const underHeading = t.match(/(?:^|;\s*)(?:Armband|Strap|Bracelet|Correa|Cinturino)\s*;\s*([A-Za-zÀ-ÿ][^;]{2,59})/i);
+    if (underHeading) s.braceletStrap = clean(underHeading[1]);
   }
 
   const comps: string[] = [];
@@ -427,12 +602,16 @@ export function extractQualityFlags(text: string, variantTitle?: string): Qualit
   if (/\bsapphire\s+(?:crystal\s+)?(?:bezel|insert)\b|\bbezel[^.;]{0,50}\bsapphire\s+insert\b/i.test(t)) {
     flags.sapphireBezelInsert = true;
   }
-  if (/\bdrilled\s+lugs?\b|\blug holes?\b/i.test(t)) flags.drilledLugs = true;
-  if (/\banti[- ]reflective\s+(?:coating|coated)\b|\bAR coating\b/i.test(t)) flags.arCoated = true;
-  if (/\bmicro[- ]?adjust(?:ment)?\b|\bon[- ]the[- ]fly adjustment clasp\b|\bquick[- ]adjust clasp\b/i.test(t)) {
+  if (/\bdrilled\s+lugs?\b|\blug holes?\b|\bdurchbohrte?\s+(?:Band)?anst/i.test(t)) flags.drilledLugs = true;
+  if (/\banti[- ]reflective\s+(?:coating|coated)\b|\bAR coating\b|\bantireflex|\bentspiegelt|\banti-?reflets?\b|\bantirreflej|\bantirifless/i.test(t)) {
+    flags.arCoated = true;
+  }
+  if (/\bmicro[- ]?adjust(?:ment)?\b|\bon[- ]the[- ]fly adjustment clasp\b|\bquick[- ]adjust clasp\b|\bFeinverstellung|\bMikroverstellung|\bmicro-?réglage/i.test(t)) {
     flags.microAdjustClasp = true;
   }
-  if (/\bquick[- ]release\b|\bquick[- ]change strap/i.test(t)) flags.quickRelease = true;
+  if (/\bquick[- ]release\b|\bquick[- ]change strap|\bSchnellwechsel|\bdégagement rapide\b|\bliberación rápida\b|\bsgancio rapido\b/i.test(t)) {
+    flags.quickRelease = true;
+  }
 
   if (variantTitle) {
     if (/\bbracelet\b/i.test(variantTitle)) flags.braceletIncluded = true;
@@ -443,6 +622,29 @@ export function extractQualityFlags(text: string, variantTitle?: string): Qualit
   }
 
   return flags;
+}
+
+/** A Shopify variant title replaces the page's strap only when it names a
+ * strap or bracelet itself; a colourway such as "Granite Black" must not
+ * overwrite a stated "Kalbsleder". */
+export function variantNamesStrap(variantTitle: string): boolean {
+  return /\b(?:bracelet|strap|leather|steel|rubber|nato|mesh|canvas|fkm|silicone|titanium)\b|armband|leder|edelstahl|kautschuk|cuir|acier|caoutchouc|cuero|acero|caucho|pelle|acciaio|gomma/i.test(variantTitle);
+}
+
+/** Below this share of SPEC_FIELDS, autofill is labelled partial. */
+const PARTIAL_COVERAGE = 0.6;
+
+/** How much of the spec form a scrape filled. A thin result says so rather
+ * than presenting blank fields as a complete autofill. */
+export function specCoverage(specs: WatchSpecs | undefined): Pick<ScrapeResult, "specsFound" | "specsPossible" | "coverageNote"> {
+  const specsPossible = SPEC_FIELDS.length;
+  const specsFound = SPEC_FIELDS.filter(({ key }) => {
+    const value = specs?.[key];
+    return value !== undefined && value !== "";
+  }).length;
+  return specsFound / specsPossible < PARTIAL_COVERAGE
+    ? { specsFound, specsPossible, coverageNote: "partial — page locale or layout limited extraction" }
+    : { specsFound, specsPossible };
 }
 
 function fallbackTags(text: string, specs: WatchSpecs): string[] {
@@ -469,9 +671,13 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
 
   const out: ScrapeResult = { retailer: hostnameOf(base) };
 
-  const domainBrand = DOMAIN_BRANDS[hostnameOf(base)];
+  // A collection landing page contains many product cards and often similarly
+  // named families (for example a three-hand Hudson beside a Hudson GMT).
+  // Returning fewer fields is safer than attaching one sibling's specs to another.
+  const specText = productExtractionText(shop?.bodyHtml, html, isShopifyCollectionUrl(url)).trim();
+
   const heading = html ? firstHeading(html) : undefined;
-  const brand = domainBrand || shop?.vendor || ld.brand;
+  const brand = resolveBrand({ host: hostnameOf(base), vendor: shop?.vendor, ldBrand: ld.brand, pageText: specText });
   const headingIdentifiesProduct = hostnameOf(base) === "spinnaker-watches.com";
   let model =
     headingIdentifiesProduct && heading
@@ -498,10 +704,6 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
   const image = ld.image || og.image || shop?.image;
   if (image) out.imageUrl = image;
 
-  // A collection landing page contains many product cards and often similarly
-  // named families (for example a three-hand Hudson beside a Hudson GMT).
-  // Returning fewer fields is safer than attaching one sibling's specs to another.
-  const specText = productExtractionText(shop?.bodyHtml, html, isShopifyCollectionUrl(url)).trim();
   const extracted = await extractWatchDetails(specText);
   if (extracted) {
     // Structured data (JSON-LD/Shopify/OG) wins for identity fields; the model
@@ -515,7 +717,9 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
     if (extracted.friction) out.friction = extracted.friction;
   } else {
     const specs = extractSpecs(specText);
-    if (shop?.variantTitle) specs.braceletStrap = shop.variantTitle;
+    if (shop?.variantTitle && (variantNamesStrap(shop.variantTitle) || !specs.braceletStrap)) {
+      specs.braceletStrap = shop.variantTitle;
+    }
     if (Object.keys(specs).length) out.specs = specs;
     const tags = fallbackTags(specText, specs);
     if (tags.length) out.tags = tags;
@@ -523,6 +727,7 @@ export async function scrapeWatch(url: string): Promise<ScrapeResult> {
     if (Object.keys(qualityFlags).length) out.qualityFlags = qualityFlags;
   }
 
+  if (html || shop) Object.assign(out, specCoverage(out.specs));
   out.foundNothing =
     !out.brand && !out.model && !out.price && !out.imageUrl && !out.specs && !out.tags;
   return out;

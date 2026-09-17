@@ -22,6 +22,7 @@ Paste **one brief at a time** into Cursor / Claude / ChatGPT. Do not merge multi
 | 6 | [06-p1c-alerts.md](./06-p1c-alerts.md) | In-app alerts (P1c) |
 | 7 | [07-p1d-trade-up.md](./07-p1d-trade-up.md) | Trade-up panel (P1d) |
 | 8 | [08-demote-wishlist-tiers.md](./08-demote-wishlist-tiers.md) | Value-first views; tiers → shortlist / watching / pass |
+| 9 | [09-scrape-spec-coverage.md](./09-scrape-spec-coverage.md) | Multilingual spec scrape, thin Shopify body fallback, coverage note |
 
 ## Related docs (not briefs)
 
