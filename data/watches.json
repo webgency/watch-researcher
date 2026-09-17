@@ -2692,8 +2692,7 @@
     ],
     "qualityFlags": {
       "sapphireBezelInsert": true,
-      "microAdjustClasp": true,
-      "arCoated": true
+      "arLayers": 6
     },
     "links": [
       {
