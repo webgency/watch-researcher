@@ -2670,7 +2670,7 @@
     "model": "Tidevand Meteorite - Kosmos",
     "referenceNumber": "HAC-TDV-KOS-BOR",
     "status": "wishlist",
-    "wishlistTier": "watching",
+    "wishlistTier": "shortlist",
     "scoringCategory": "diver",
     "designUniqueness": 5,
     "designPreferenceElo": 986.38,
@@ -2691,7 +2691,6 @@
       }
     ],
     "qualityFlags": {
-      "sapphireBezelInsert": true,
       "arLayers": 6
     },
     "links": [
@@ -2719,13 +2718,11 @@
       "waterResistanceM": 200,
       "crystal": "Sapphire",
       "dialColor": "Meteorite stone dial",
-      "braceletStrap": "Trinity Grey EVO or Moon Grey BoR",
-      "complications": "GMT"
+      "braceletStrap": "316L stainless steel BoR (Beads-of-Rice) bracelet"
     },
     "tags": [
       "dive",
-      "diver",
-      "GMT"
+      "diver"
     ],
     "notes": "4 BILLION YEARS IN THE MAKING\nThe meteorite stone used on TIDEVAND METEORITE comes from the Swedish “Muonionalusta” meteorite.\n\nThe Muonionalusta meteorite was found in 1906 at the Swedish/Finnish border, near the village of “Kitkiöjärvi.”\n\nIsotope readings show that the Muonionalusta meteorite is more than 4 billion years old, and hit earth around 1 million years ago.",
     "id": "mssi4ugd8wfp1r",
@@ -3283,6 +3280,10 @@
       "amount": 630,
       "currency": "EUR"
     },
+    "qualityFlags": {
+      "sapphireBezelInsert": true,
+      "arCoated": true
+    },
     "links": [
       {
         "url": "https://baltic-watches.com/en/products/aquascaphe-mk2-blue?variant=58510363722112",
@@ -3315,11 +3316,7 @@
       "diver"
     ],
     "id": "mtorvl6lg0fc15",
-    "dateAdded": "2026-09-05T19:25:09.498Z",
-    "qualityFlags": {
-      "sapphireBezelInsert": true,
-      "arCoated": true
-    }
+    "dateAdded": "2026-09-05T19:25:09.498Z"
   },
   {
     "brand": "Maen",
@@ -3566,7 +3563,7 @@
     "model": "Nevada Pine - 40mm",
     "referenceNumber": "W-NEV-40-ASV",
     "status": "wishlist",
-    "wishlistTier": "watching",
+    "wishlistTier": "shortlist",
     "scoringCategory": "gmt",
     "designUniqueness": 4,
     "designPreferenceElo": 1100.05,
@@ -4190,11 +4187,11 @@
       "movement": "automatic",
       "caliber": "Seiko (SII) NH35A",
       "waterResistanceM": 50,
-      "crystal": "Sapphire",
-      "braceletStrap": "Default Title"
+      "crystal": "Sapphire"
     },
     "tags": [],
     "id": "mu2496sapr6jp3",
-    "dateAdded": "2026-09-15T03:32:39.703Z"
+    "dateAdded": "2026-09-15T03:32:39.703Z",
+    "scoringCategory": "dress"
   }
 ]
