@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import {
   CANONICAL_CALIBERS,
   isKnownCaliber,
+  isQuartzCaliber,
   isQuartzMovement,
   normalizeCaliber,
 } from "./calibers";
@@ -73,6 +74,16 @@ describe("normalizeCaliber", () => {
     expect(isQuartzMovement("solar")).toBe(true);
     expect(isQuartzMovement("automatic")).toBe(false);
     expect(isQuartzMovement(undefined)).toBe(false);
+  });
+
+  it("names quartz calibers without catching mechanical ones", () => {
+    for (const caliber of ["TMI VK64 Meca-Quartz", "Mechaquartz VK61", "Seiko VH31", "Ronda 1032 (dual movement)", "FC-206"]) {
+      expect(isQuartzCaliber(caliber)).toBe(true);
+    }
+    // Ronda also builds automatics; only the listed quartz caliber counts.
+    for (const caliber of ["Ronda R150", "Seiko NH35", "Sellita SW200-1", "Seiko VK", "FC-303", undefined]) {
+      expect(isQuartzCaliber(caliber)).toBe(false);
+    }
   });
 
   it("still resolves the same caliber when the movement is mechanical", () => {
