@@ -26,6 +26,19 @@
 export const QUARTZ_MOVEMENTS = new Set(["quartz", "solar", "kinetic", "meca-quartz"]);
 
 /**
+ * Caliber strings that name a quartz movement, whatever `movement` says.
+ *
+ * The tier table used to carry meca-quartz and Ronda 1032 rows, reachable only
+ * when a quartz watch was saved with no movement or a mechanical one — so the
+ * mistake scored quietly (meca-quartz level with an NH35) instead of showing.
+ * Those rows are gone; this list lets audit:calibers name the mislabel instead.
+ * Kept to families that are quartz without exception: every Seiko VK is a
+ * meca-quartz chronograph, while Ronda also makes automatics, so only the
+ * specific Ronda caliber is listed.
+ */
+export const QUARTZ_CALIBER_PATTERN = /mech?a[\s-]?quartz|\bvk\d{2}\b|\bvh31\b|\bronda 1032\b/i;
+
+/**
  * Canonical caliber keys, most-specific-first — the same strings and the same
  * ordering as CALIBER_TIER_PATTERNS in scoring.ts. Order matters: "sw200-1"
  * must be tested before "sw200", or every SW200-1 resolves to the plain SW200.
@@ -70,9 +83,7 @@ export const CANONICAL_CALIBERS = [
   "nh38",
   "nh34",
   "nh35",
-  "meca-quartz",
   "fc-206",
-  "ronda 1032",
 ];
 
 /**
@@ -147,4 +158,9 @@ export function isKnownCaliber(raw, movement) {
 /** True when the movement is one the tier scale deliberately does not rate. */
 export function isQuartzMovement(movement) {
   return Boolean(movement) && QUARTZ_MOVEMENTS.has(String(movement).toLowerCase().trim());
+}
+
+/** True when the caliber string itself names a quartz movement (see QUARTZ_CALIBER_PATTERN). */
+export function isQuartzCaliber(raw) {
+  return Boolean(raw) && QUARTZ_CALIBER_PATTERN.test(String(raw));
 }

@@ -9,6 +9,7 @@ import {
   CANONICAL_CALIBERS as CANONICAL,
   QUARTZ_MOVEMENTS as QUARTZ,
   isKnownCaliber as isKnownCaliberJs,
+  isQuartzCaliber as isQuartzCaliberJs,
   isQuartzMovement as isQuartzMovementJs,
   normalizeCaliber as normalizeCaliberJs,
 } from "./caliber-aliases.mjs";
@@ -45,4 +46,9 @@ export function isKnownCaliber(raw?: string, movement?: MovementType | string): 
 /** True when the movement is one the tier scale deliberately does not rate. */
 export function isQuartzMovement(movement?: MovementType | string): boolean {
   return isQuartzMovementJs(movement);
+}
+
+/** True when the caliber string itself names a quartz movement, whatever `movement` says. */
+export function isQuartzCaliber(raw?: string): boolean {
+  return isQuartzCaliberJs(raw);
 }

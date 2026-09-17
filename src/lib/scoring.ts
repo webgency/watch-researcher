@@ -1,5 +1,5 @@
 import { TAG_TO_CATEGORY } from "./categories";
-import { normalizeCaliber } from "./calibers";
+import { isQuartzMovement, normalizeCaliber } from "./calibers";
 import { Money, MovementType, QualityFlags, Watch } from "./types";
 import {
   CATEGORY_EXPECTATION,
@@ -216,9 +216,11 @@ const CALIBER_TIER_PATTERNS: Array<[pattern: string, tier: number]> = [
   ["nh38", 0.35],
   ["nh34", 0.32],
   ["nh35", 0.30],
-  ["meca-quartz", 0.30],
   ["fc-206", 0.25],
-  ["ronda 1032", 0.20],
+  // No quartz rows. normalizeCaliber() never lets a quartz movement reach this
+  // table, so a quartz row could only fire on a watch whose movement was
+  // missing or mislabelled — scoring the mistake instead of surfacing it.
+  // audit:calibers flags that case through QUARTZ_CALIBER_PATTERN.
 ];
 
 /** Base movement tier for a caliber string, or undefined when unrecognized. */
@@ -679,6 +681,8 @@ export function computeStanding(watch: Watch, allWatches: Watch[]): Standing {
   };
 }
 
+export const QUARTZ_UNRATED_REASON = "Quartz movement: not rated on the mechanical tier scale";
+
 /**
  * Why a dimension came back unrated, phrased for display. Keeps the UI honest
  * about which input is missing instead of showing a bare dash. Mirrors the
@@ -689,6 +693,9 @@ export function unratedReason(watch: Watch, dimension: Dimension): string {
   const f = watch.qualityFlags ?? {};
   switch (dimension) {
     case "movement":
+      // Checked first, mirroring normalizeCaliber(): a quartz watch is left off
+      // the scale on purpose, and "not in the tier table" would read as a gap.
+      if (isQuartzMovement(s.movement)) return QUARTZ_UNRATED_REASON;
       return s.caliber ? `Caliber "${s.caliber}" is not in the tier table` : "No caliber recorded";
     case "wearability":
       if (s.caseDiameterMm === undefined && s.caseThicknessMm === undefined)

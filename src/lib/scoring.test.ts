@@ -9,14 +9,17 @@ import {
   deriveCategory,
   derivePeerGroup,
   percentile,
+  QUARTZ_UNRATED_REASON,
   scoreDimensions,
   scoreDimensionEvidence,
   confidenceFor,
   CURRENCY_TO_USD,
   landedPriceUsd,
   normalizePriceToUsd,
+  unratedReason,
   updateDesignElo,
 } from "./scoring";
+import { CANONICAL_CALIBERS, isQuartzCaliber, isQuartzMovement, QUARTZ_MOVEMENTS } from "./calibers";
 import { DIMENSIONS } from "./rubrics";
 import { CURRENCIES } from "./types";
 import {
@@ -79,6 +82,33 @@ describe("scoreDimensions", () => {
     expect(caliberTier("Ronda 1032", "quartz")).toBeUndefined();
     expect(scoreDimensions(makeWatch({ specs: { movement: "quartz", caliber: "Ronda 1032" } })).movement)
       .toBeUndefined();
+  });
+
+  it("keeps unratedReason's quartz copy in step with the quartz gate", () => {
+    // unratedReason mirrors normalizeCaliber's quartz gate. Every movement the
+    // gate excludes must get the quartz copy, and only those — the old message
+    // told a deliberately unrated VK63 it was missing from the tier table.
+    const movements = [...QUARTZ_MOVEMENTS, "automatic", "manual", "spring-drive", "other", undefined];
+    for (const movement of movements) {
+      const watch = makeWatch({ specs: { movement: movement as Watch["specs"]["movement"], caliber: "Seiko VK63" } });
+      const quartz = isQuartzMovement(movement);
+      if (quartz) expect(scoreDimensions(watch).movement).toBeUndefined();
+      expect(unratedReason(watch, "movement") === QUARTZ_UNRATED_REASON).toBe(quartz);
+    }
+    expect(unratedReason(makeWatch({ specs: { movement: "quartz" } }), "movement")).toBe(QUARTZ_UNRATED_REASON);
+    expect(unratedReason(makeWatch({ specs: { movement: "automatic", caliber: "Acme 1" } }), "movement"))
+      .toBe('Caliber "Acme 1" is not in the tier table');
+  });
+
+  it("never tiers a quartz caliber, even when the movement is mislabelled", () => {
+    // A quartz row could only fire when `movement` is missing or wrong, which
+    // would score the data error (meca-quartz used to land level with an NH35).
+    for (const caliber of ["Meca-quartz Seiko Japan cal. VK63", "Seiko VK64", "hybrid VK68", "Ronda 1032"]) {
+      expect(isQuartzCaliber(caliber)).toBe(true);
+      expect(caliberTier(caliber)).toBeUndefined();
+      expect(caliberTier(caliber, "automatic")).toBeUndefined();
+    }
+    expect(CANONICAL_CALIBERS.filter((key) => isQuartzCaliber(key))).toEqual([]);
   });
 
   it("recognizes every caliber family currently represented in the collection", () => {
