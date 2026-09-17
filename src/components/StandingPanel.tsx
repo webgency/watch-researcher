@@ -1,6 +1,7 @@
 import EvidenceCoverage from "./EvidenceCoverage";
 import { MIN_REFERENCE_COVERAGE, RUBRIC_TOLERANCE, Standing, unratedReason } from "@/lib/scoring";
 import { DIMENSIONS, DIMENSION_BLURBS, DIMENSION_LABELS, type Dimension } from "@/lib/rubrics";
+import { movementNote } from "@/lib/movement-notes";
 import type { Watch } from "@/lib/types";
 
 type Verdict = "beats" | "par" | "trails" | "limited" | "unbanded";
@@ -121,6 +122,7 @@ function DimensionMeter({
 }
 
 function UnratedRow({ dimension, watch }: { dimension: Dimension; watch: Watch }) {
+  const note = movementNote(watch);
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2 sm:grid-cols-[11rem_minmax(0,1fr)_auto]">
       <p className="truncate text-sm font-medium capitalize text-cocoa-400" title={DIMENSION_BLURBS[dimension]}>
@@ -129,6 +131,15 @@ function UnratedRow({ dimension, watch }: { dimension: Dimension; watch: Watch }
       <div className="col-span-2 row-start-2 sm:col-span-1 sm:row-auto h-2.5 rounded-full bg-[repeating-linear-gradient(45deg,#F3EAE5_0_6px,#E6DAD5_6px_12px)]" />
       <span className="col-start-2 row-start-1 sm:col-start-3 w-24 text-right text-xs font-medium text-cocoa-400">Unrated</span>
       <p className="col-span-2 sm:col-span-3 text-xs text-cocoa-400">{unratedReason(watch, dimension)}</p>
+      {/* Unrated is not the same as nothing to say. A meca-quartz chronograph is
+          off the mechanical scale on purpose, and the reason to own one is the
+          chronograph feel this line describes. It stays text, like frictions. */}
+      {dimension === "movement" && note && (
+        <p className="col-span-2 sm:col-span-3 text-xs text-cocoa-500">
+          <span className="mr-1.5 rounded bg-cocoa-100 px-1.5 py-0.5 font-medium text-cocoa-600">{note.label}</span>
+          {note.detail}
+        </p>
+      )}
     </div>
   );
 }

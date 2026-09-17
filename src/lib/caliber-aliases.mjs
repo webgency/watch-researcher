@@ -41,6 +41,14 @@ export const QUARTZ_MOVEMENTS = new Set(["quartz", "solar", "kinetic", "meca-qua
 export const QUARTZ_CALIBER_PATTERN = /mech?a[\s-]?quartz|\bvk\d{2}\b|\bvh31\b|\bronda 1032\b|\bfc-206\b/i;
 
 /**
+ * The meca-quartz subset of QUARTZ_CALIBER_PATTERN: quartz timekeeping driving
+ * a mechanical chronograph module. Every Seiko VK is one; VH31 (a sweeping
+ * quartz) is not. Read by movement-notes.ts for its FYI chip, never by scoring.
+ * calibers.test.ts asserts every match is also a QUARTZ_CALIBER_PATTERN match.
+ */
+export const MECA_QUARTZ_CALIBER_PATTERN = /mech?a[\s-]?quartz|\bvk\d{2}\b/i;
+
+/**
  * Canonical caliber keys, most-specific-first — the same strings and the same
  * ordering as CALIBER_TIER_PATTERNS in scoring.ts. Order matters: "sw200-1"
  * must be tested before "sw200", or every SW200-1 resolves to the plain SW200.

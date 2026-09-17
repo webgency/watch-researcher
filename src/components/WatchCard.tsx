@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { toDisplayScore, type StandingSummary } from "@/lib/scoring";
 import { DIMENSION_LABELS } from "@/lib/rubrics";
+import { movementNote } from "@/lib/movement-notes";
 import { Watch, WishlistTier } from "@/lib/types";
 import { formatMoney, formatOrdinal } from "@/lib/format";
 import { targetStatus } from "@/lib/price-history";
@@ -176,6 +177,7 @@ function heroScore(summary: StandingSummary): HeroScore | null {
 function StandingBlock({ summary, watch }: { summary: StandingSummary; watch: Watch }) {
   const { standing } = summary;
   const hero = heroScore(summary);
+  const note = movementNote(watch);
   const dimensionList = (dimensions: typeof standing.beats) =>
     dimensions.map((dimension) => DIMENSION_LABELS[dimension]).join(", ");
 
@@ -238,9 +240,16 @@ function StandingBlock({ summary, watch }: { summary: StandingSummary; watch: Wa
       <EvidenceCoverage watch={watch} standing={standing} />
 
       {/* Frictions are text, never a score, and they are rare — a card that has
-          one is saying something the price and score cannot. Keep them visible. */}
-      {standing.frictions.length > 0 && (
+          one is saying something the price and score cannot. Keep them visible.
+          A movement note shares the row but not the amber: it describes the
+          watch rather than warning about buying it. */}
+      {(standing.frictions.length > 0 || note) && (
         <div className="flex flex-wrap gap-1">
+          {note && (
+            <span title={note.detail} className="rounded bg-cocoa-100 px-1.5 py-0.5 font-medium text-cocoa-600">
+              {note.label}
+            </span>
+          )}
           {standing.frictions.map((friction) => (
             <span key={friction} className="rounded bg-amber-50 px-1.5 py-0.5 font-medium text-amber-800">
               {friction}
