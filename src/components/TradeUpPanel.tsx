@@ -11,6 +11,7 @@ import FreshnessBadge from "./FreshnessBadge";
 import ListingEditor from "./ListingEditor";
 import ListingCheck from "./ListingCheck";
 import TargetEditor from "./TargetEditor";
+import CandidatePicker from "./CandidatePicker";
 import { listingEligibility } from "@/lib/listing-entry";
 import { useTradeUpSelection } from "@/hooks/useResearchSession";
 import { hostname } from "@/lib/format";
@@ -98,20 +99,17 @@ export default function TradeUpPanel({ model }: { model: TradeUpModel }) {
           {model.candidates.length === 0 ? (
             <p className="mt-3 text-sm text-cocoa-500">No wishlist watches yet. Add one to compare the next move.</p>
           ) : (
-            <select
+            <CandidatePicker
               id={selectId}
-              className="input mt-3 min-h-11"
-              value={selection.candidateId}
-              onChange={(event) => {
-                const next = model.candidates.find((item) => item.id === event.target.value);
+              candidates={model.candidates}
+              selectedId={selection.candidateId}
+              onSelect={(candidateId) => {
+                const next = model.candidates.find((item) => item.id === candidateId);
                 // Prefer a dated ask. A target-only candidate is an explicitly
                 // labelled planning scenario, never a claim of availability.
-                selection.update({ candidateId: event.target.value, basis: next?.best.status === "available" ? "ask" : next?.target ? "target" : "ask" });
+                selection.update({ candidateId, basis: next?.best.status === "available" ? "ask" : next?.target ? "target" : "ask" });
               }}
-            >
-              <option value="">Choose a wishlist watch</option>
-              {model.candidates.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </select>
+            />
           )}
           {candidate && (
             <div className="mt-4 space-y-3">
