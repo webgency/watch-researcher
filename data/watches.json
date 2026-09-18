@@ -2641,7 +2641,7 @@
           "currency": "USD"
         },
         "condition": "new",
-        "observedAt": "2026-09-10T21:30:14.958Z"
+        "observedAt": "2026-09-10"
       }
     ],
     "imageUrl": "https://danhenrywatches.com/cdn/shop/files/Dan_Henry_1962_Racing_Chronograph_Blue_No_Date.png?v=1614301267&width=1946",
@@ -2652,7 +2652,7 @@
       "lugWidthMm": 20,
       "caseMaterial": "stainless steel 316L",
       "movement": "quartz",
-      "caliber": "Meca-quartz Seiko Japan cal. VK63",
+      "caliber": "Meca-quartz Seiko VK63",
       "waterResistanceM": 50,
       "crystal": "Mineral",
       "dialColor": "Matte blue with 60-min chronograph, 24-hour indicator, and orange LumiNova® lume",
@@ -2663,7 +2663,8 @@
       "chronograph"
     ],
     "id": "msshvavwg41qiq",
-    "dateAdded": "2026-08-14T05:16:22.362Z"
+    "dateAdded": "2026-08-14T05:16:22.362Z",
+    "scoringCategory": "chronograph"
   },
   {
     "brand": "Henry Archer",
@@ -4149,6 +4150,7 @@
     "referenceNumber": "WA-RHZ-YLW",
     "status": "wishlist",
     "wishlistTier": "watching",
+    "scoringCategory": "dress",
     "price": {
       "amount": 428,
       "currency": "USD"
@@ -4191,7 +4193,6 @@
     },
     "tags": [],
     "id": "mu2496sapr6jp3",
-    "dateAdded": "2026-09-15T03:32:39.703Z",
-    "scoringCategory": "dress"
+    "dateAdded": "2026-09-15T03:32:39.703Z"
   }
 ]
